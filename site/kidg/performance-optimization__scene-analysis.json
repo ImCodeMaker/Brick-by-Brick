@@ -1,0 +1,33 @@
+{
+  "path": "content/en-us/performance-optimization/scene-analysis.md",
+  "simple": "Scene Analysis is a Studio window that shows what is using up your game's memory and drawing power while you playtest. It draws boxes sized by how much each thing uses, so the biggest problems jump out. It has different modes for script memory, leftover objects, instance counts, audio, animations, and triangles. It is a great way to spot surprises, like 25,000 particle emitters you did not mean to add.",
+  "analogy": "It is like dumping out your backpack and sorting everything into piles by size. The biggest piles show you right away what is making the bag so heavy.",
+  "keyPoints": [
+    "Open it from Window > Performance Summary > Scene Analysis.",
+    "Use it during a play or test session. It can look at both the client and the server.",
+    "Each mode shows a treemap of boxes (bigger box = more usage) and a list below it. You can search by name.",
+    "Right-click an item to jump to it in the Explorer or select all instances using it.",
+    "Script memory shows how much memory each script's tables and data use.",
+    "Unparented instances shows scripts still holding on to objects that were removed from the game. Handy for finding memory leaks.",
+    "Instance composition counts objects by type, audio and animation memory show loaded sounds and animations, and triangle composition breaks down what is being drawn.",
+    "Scripts and AI tools can get the same data through `SceneAnalysisService`."
+  ],
+  "terms": {
+    "scene": "Everything currently in your game world, on the client or the server.",
+    "treemap": "A chart made of boxes inside a big box. Each box's size shows how much it uses, so a box twice as big uses about twice as much.",
+    "Luau VM": "The part of Roblox that runs your Luau scripts and holds their tables and variables in memory.",
+    "unparented instance": "An object whose `Parent` is `nil`, so it is no longer in the game, but a script still has a variable pointing to it, so it cannot be cleaned up.",
+    "reference": "A variable that points to an object. As long as a reference exists, the object stays in memory.",
+    "memory leak": "Memory that keeps growing because things that should be cleaned up are still being held on to.",
+    "instance": "Any object in your game, like a Part, Script, or Sound.",
+    "draw call": "One request to the graphics chip to draw something. Fewer draw calls usually means smoother frames.",
+    "triangle": "The tiny flat shapes all 3D models are built from.",
+    "deduplicated": "Counted only once even if used many times. If 10 NPCs use the same animation, its memory is counted once."
+  },
+  "watchOut": [
+    "Opening Scene Analysis while not playtesting. It is designed for play and test sessions.",
+    "Treating every script reference as a bug. Holding references is normal; it only matters if objects pile up when they should be gone.",
+    "Keeping animations alive after their model is destroyed. Delete all instances that use an animation or sound so its memory can unload.",
+    "Trusting triangle numbers as what phones see. A phone may scale things very differently from your PC."
+  ]
+}

@@ -1,0 +1,496 @@
+{
+  "name": "BasePart",
+  "simple": "BasePart is the family of all the solid 3D blocks you build with: Part, MeshPart, WedgePart, SpawnLocation, and more. Anything in this family can be seen, can bump into things, and can fall with gravity when it is inside Workspace. It gives every part its position, rotation, size, color, material, and physics settings, plus the Touched event.",
+  "analogy": "BasePart is like the word \"vehicle\". Cars, bikes, and buses are all vehicles and all have wheels and a speed. In the same way, Part and MeshPart are both BaseParts, and both have Position, Size, Color, Anchored, and so on.",
+  "whenToUse": [
+    "Move or turn a part with `Position`, `Orientation`, or `CFrame`.",
+    "Change how a part looks with `Color`, `Material`, `Transparency`, and `Size`.",
+    "Freeze a part in place with `Anchored`, or let things walk through it with `CanCollide = false`.",
+    "Make something happen when a player steps on a part with the `Touched` event.",
+    "Push or launch a part with physics using `ApplyImpulse` or `AssemblyLinearVelocity`."
+  ],
+  "where": "Parts only show up and do physics when they are inside Workspace. You get BasePart members on any Part, MeshPart, etc. You cannot create a plain BasePart; use `Instance.new(\"Part\")` instead. Works in both Scripts and LocalScripts, but changes made in a LocalScript are only seen by that one player.",
+  "terms": {
+    "stud": "Roblox's unit of distance. A default Part is 4 studs long, 1 stud tall, and 2 studs wide.",
+    "Vector3": "Three numbers (X, Y, Z) in one value. Used for positions, sizes, and directions. X is left/right, Y is up/down, Z is forward/back.",
+    "Position": "WHERE the center of the part is, as a Vector3 measured from the center of the map (0, 0, 0). (0, 5, 0) means 5 studs straight up from the center.",
+    "Orientation": "WHICH WAY the part is turned, as three angles in degrees: (turn around X, turn around Y, turn around Z). (0, 90, 0) means spun 90 degrees around the up-and-down axis, like turning to face a different wall.",
+    "CFrame": "Short for coordinate frame. One value that holds BOTH Position and rotation together. Setting CFrame moves and turns the part in one step.",
+    "pivot": "The handle point you move the part by with `PivotTo`. By default it is the part's center, so the pivot equals the CFrame. `PivotOffset` can move the handle, for example to the bottom of the part.",
+    "world space": "Measuring from the center of the map. World X always points the same way no matter how the part is turned.",
+    "local space (object space)": "Measuring from the part itself, using the part's own front, up, and right directions. 5 studs forward in local space depends on which way the part faces.",
+    "offset": "An amount you add to shift something. A part at (0, 5, 0) moved by an offset of (2, 0, 0) ends up at (2, 5, 0).",
+    "degrees / radians": "Two ways to measure turning. A full turn is 360 degrees or about 6.28 radians. Orientation uses degrees; `CFrame.Angles` uses radians, so convert with `math.rad(90)`.",
+    "physics": "The game's built-in rules for gravity, falling, bouncing, and pushing.",
+    "anchored": "Frozen in place. Physics will not move it, but scripts still can.",
+    "collide": "To bump into something instead of passing through it.",
+    "assembly": "A group of parts stuck together (for example by welds) that physics moves as one piece. A single loose part is an assembly of one.",
+    "velocity": "Speed plus direction. (0, 50, 0) means moving straight up at 50 studs per second.",
+    "angular velocity": "How fast something is spinning, and around which axis, measured in radians per second.",
+    "impulse": "A sudden one-time push, like a kick. Bigger impulse means a harder push; heavier things need a bigger push to go the same speed.",
+    "torque": "A twisting push that makes something spin.",
+    "mass": "How heavy a part is. It equals its volume times its density (how packed the material is).",
+    "center of mass": "The balance point of a part or assembly.",
+    "network owner": "Which computer runs the physics for a part: the server, or one player's device. Roblox usually picks this automatically.",
+    "server / client": "The server is Roblox's computer running the game for everyone. A client is one player's own device.",
+    "replicate": "To copy a change from the server to every player's device so everyone sees it.",
+    "spatial query": "A search for parts in an area, like a raycast (shooting an invisible laser) or checking what is inside a box.",
+    "collision group": "A named team of parts. You can set rules like \"parts in Ghosts never collide with parts in Walls\".",
+    "joint / weld": "Something that connects two parts so they move together.",
+    "yield": "To pause the script and wait. Methods ending in Async yield until they finish.",
+    "deprecated": "Old and replaced by something newer. Use the new version instead.",
+    "event": "Something that announces \"this just happened!\". Use `:Connect(function)` to run code each time."
+  },
+  "examples": [
+    {
+      "title": "Position vs Orientation vs CFrame vs Pivot (with numbers)",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.Anchored = true\npart.Size = Vector3.new(4, 4, 4)\npart.Parent = Workspace\n\n-- 1) POSITION = where the CENTER is (in studs from the map center)\npart.Position = Vector3.new(0, 5, 0)\n-- Move it by an offset of (2, 0, 0): it ends at (2, 5, 0)\npart.Position = part.Position + Vector3.new(2, 0, 0)\nprint(part.Position)        --> 2, 5, 0\n\n-- 2) ORIENTATION = which way it is turned, in DEGREES (X, Y, Z)\npart.Orientation = Vector3.new(0, 90, 0) -- spun 90 degrees around the up axis\nprint(part.Orientation)     --> 0, 90, 0\nprint(part.Position)        --> 2, 5, 0 (turning did not move it)\n\n-- 3) CFRAME = position AND rotation together in one value\n-- Put it at (10, 5, 0) and face it 90 degrees to the left, in one step\npart.CFrame = CFrame.new(10, 5, 0) * CFrame.Angles(0, math.rad(90), 0)\nprint(part.Position)        --> 10, 5, 0  (Position always matches CFrame.Position)\n\n-- Move 5 studs FORWARD in the direction the part is facing (local space)\n-- It faces -X now, so (10, 5, 0) becomes (5, 5, 0)\npart.CFrame = part.CFrame * CFrame.new(0, 0, -5)\nprint(part.Position)        --> 5, 5, 0\n\n-- 4) PIVOT = the handle used by GetPivot/PivotTo (default: the center)\nprint(part:GetPivot() == part.CFrame) --> true\n-- Move the handle to the BOTTOM of the 4-stud-tall part (2 studs down)\npart.PivotOffset = CFrame.new(0, -2, 0)\n-- Put the bottom on the floor at (20, 0, 0); the center ends up at (20, 2, 0)\npart:PivotTo(CFrame.new(20, 0, 0))\nprint(part.Position)        --> 20, 2, 0",
+      "explain": [
+        "Position is just WHERE the center is. Adding (2, 0, 0) slides it 2 studs along the world X axis, from (0, 5, 0) to (2, 5, 0).",
+        "Orientation is just WHICH WAY it is turned, in degrees. Changing it spins the part in place; the Position stays the same.",
+        "CFrame is both at once. `CFrame.new(10, 5, 0)` is the spot, and `* CFrame.Angles(0, math.rad(90), 0)` turns it 90 degrees. Reading `part.Position` afterward always gives the CFrame's position.",
+        "`part.CFrame * CFrame.new(0, 0, -5)` means \"5 studs in front of where the part is facing\". Forward for a part is its -Z direction. Because the part was turned to face -X, forward is toward smaller X, so it goes from (10, 5, 0) to (5, 5, 0).",
+        "The pivot is the handle. At first it is the center, so `GetPivot()` equals CFrame. After setting `PivotOffset` 2 studs down, the handle is at the bottom face. `PivotTo(CFrame.new(20, 0, 0))` puts that bottom at (20, 0, 0), so the center sits at (20, 2, 0)."
+      ]
+    },
+    {
+      "title": "Lava floor that hurts players",
+      "place": "Script inside a Part in Workspace",
+      "code": "local lava = script.Parent\nlava.Anchored = true\nlava.Color = Color3.fromRGB(255, 80, 0)\nlava.Material = Enum.Material.Neon\n\nlava.Touched:Connect(function(otherPart)\n\t-- otherPart is the thing that touched the lava (like a foot)\n\tlocal character = otherPart.Parent\n\tlocal humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n\tif humanoid then\n\t\thumanoid.Health = 0\n\tend\nend)",
+      "explain": [
+        "We make the part anchored (frozen), orange, and glowing.",
+        "`Touched` fires whenever something bumps into it, and gives us that part.",
+        "A body part's Parent is the character model. If it has a Humanoid, it is a player or NPC, so we set its Health to 0."
+      ]
+    },
+    {
+      "title": "Launch pad",
+      "place": "Script inside an anchored Part in Workspace",
+      "code": "local pad = script.Parent\nlocal cooldown = {} -- remember who was just launched\n\npad.Touched:Connect(function(otherPart)\n\tlocal character = otherPart.Parent\n\tlocal humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n\tlocal root = character:FindFirstChild(\"HumanoidRootPart\")\n\tif humanoid and root and not cooldown[character] then\n\t\tcooldown[character] = true\n\t\t-- Set the speed straight up to 100 studs per second\n\t\troot.AssemblyLinearVelocity = Vector3.new(0, 100, 0)\n\t\ttask.wait(1)\n\t\tcooldown[character] = nil\n\tend\nend)",
+      "explain": [
+        "Touched can fire many times per step, so a cooldown table stops it from launching the same character over and over.",
+        "HumanoidRootPart is the main part of a character. Setting its `AssemblyLinearVelocity` to (0, 100, 0) shoots the whole character upward at 100 studs per second.",
+        "After 1 second the character can be launched again."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Parts fall unless `Anchored` is true. If your new part vanishes, it probably fell through the map or out of the world.",
+    "`CFrame.Angles` uses radians, but `Orientation` uses degrees. Use `math.rad(degrees)` when building a CFrame.",
+    "To move a whole Model, use `model:PivotTo(...)`, not each part's Position.",
+    "`Touched` only fires from physics movement. If you teleport a part into another by setting CFrame, Touched does not fire. Also, two anchored parts never touch each other.",
+    "`Touched` fires a lot (every body part, many times). Use a cooldown (debounce) so your code runs once.",
+    "`CanCollide = false` on an unanchored part makes it fall through the floor.",
+    "Changes made in a LocalScript (like color) are only seen by that player. Use a server Script for changes everyone should see."
+  ],
+  "members": {
+    "BasePart.Anchored": {
+      "simple": "If true, the part is frozen in place: gravity, bumps, and pushes cannot move it. Scripts can still move it by setting Position or CFrame. Use it for floors, walls, and anything that should not fall.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.Anchored = true -- stays floating in the air\npart.Position = Vector3.new(0, 20, 0)\npart.Parent = Workspace",
+      "gotcha": "An unanchored part welded to an anchored part acts anchored too."
+    },
+    "BasePart.AssemblyAngularVelocity": {
+      "simple": "How fast the part's assembly (it and everything welded to it) is spinning, and around which axis, in radians per second. You can set it, but a Torque or AngularVelocity constraint gives smoother results.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Anchored = false\n-- spin around the up (Y) axis at about one full turn per second\npart.AssemblyAngularVelocity = Vector3.new(0, 2 * math.pi, 0)"
+    },
+    "BasePart.AssemblyCenterOfMass": {
+      "simple": "Read-only. The balance point of the whole assembly, as a position in the world. If the assembly has an anchored part, that part's center is used.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.AssemblyCenterOfMass)"
+    },
+    "BasePart.AssemblyLinearVelocity": {
+      "simple": "How fast and in which direction the assembly is moving, in studs per second. Setting it makes the part suddenly move at that speed, which is handy for launch pads.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Anchored = false\n-- move 30 studs per second along X and 50 per second upward\npart.AssemblyLinearVelocity = Vector3.new(30, 50, 0)",
+      "gotcha": "For forces that last, use a constraint like LinearVelocity; for a single shove, `ApplyImpulse` respects weight better."
+    },
+    "BasePart.AssemblyMass": {
+      "simple": "Read-only. The total weight of all the parts in this assembly. If any part in it is anchored, the mass counts as infinite.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(\"Total mass:\", part.AssemblyMass)"
+    },
+    "BasePart.AssemblyRootPart": {
+      "simple": "Read-only. The part chosen as the main part of this assembly. Parts that share the same root part are in the same assembly. It is nil if the part is not in Workspace.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.AssemblyRootPart.Name)"
+    },
+    "BasePart.AudioCanCollide": {
+      "simple": "If true, the part blocks and bounces sound in the audio system, a bit like how CastShadow blocks light. If false, sound passes right through it.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.AudioCanCollide = false -- sound goes through this curtain"
+    },
+    "BasePart.BackParamA": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.BackParamB": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.BackSurface": {
+      "simple": "The surface style of the part's back face (the +Z side), like Smooth or Studs. Some old surface types could join touching parts together; today most builders leave it Smooth.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.BackSurface = Enum.SurfaceType.Studs"
+    },
+    "BasePart.BackSurfaceInput": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.BottomParamA": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.BottomParamB": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.BottomSurface": {
+      "simple": "The surface style of the part's bottom face (the -Y side), like Smooth or Studs. Some old surface types could join touching parts together; today most builders leave it Smooth.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.BottomSurface = Enum.SurfaceType.Studs"
+    },
+    "BasePart.BottomSurfaceInput": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.BrickColor": {
+      "simple": "The part's color picked from Roblox's list of named colors, like \"Bright red\". For any color you want, use `Color` instead.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.BrickColor = BrickColor.new(\"Bright blue\")"
+    },
+    "BasePart.brickColor": {
+      "simple": "Old — use `BrickColor` instead."
+    },
+    "BasePart.CanCollide": {
+      "simple": "If true, other parts and players bump into this part. If false, they walk right through it, like a ghost wall or a decoration.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.CanCollide = false\npart.Transparency = 0.5 -- see-through ghost wall",
+      "gotcha": "An unanchored part with CanCollide false will fall through the floor and out of the world."
+    },
+    "BasePart.CanQuery": {
+      "simple": "If false, searches like raycasts and \"what parts are in this box\" skip this part. It only matters when CanCollide is false (colliding parts are always found).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.CanCollide = false\npart.CanQuery = false -- raycasts ignore this invisible trigger zone"
+    },
+    "BasePart.CanTouch": {
+      "simple": "If false, the Touched and TouchEnded events do not fire for this part. Both parts must have CanTouch on for a touch to count.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.CanTouch = false -- this part ignores touches"
+    },
+    "BasePart.CastShadow": {
+      "simple": "If true (the default), the part makes a shadow. Turning it off can help speed in huge scenes but can look odd, so usually leave it on.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.CastShadow = false"
+    },
+    "BasePart.CenterOfMass": {
+      "simple": "Read-only. The part's balance point measured from the part's own center (local space). For a simple block it is (0, 0, 0), the exact center; a wedge's balance point is off-center.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.CenterOfMass) --> 0, 0, 0 for a block"
+    },
+    "BasePart.CFrame": {
+      "simple": "The part's position AND rotation together in one value. Setting it moves and turns the part in one step, to exactly the spot you say. Multiplying by another CFrame moves the part relative to the way it is facing.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\n-- Place at (0, 10, 0), tilted 45 degrees around X\npart.CFrame = CFrame.new(0, 10, 0) * CFrame.Angles(math.rad(45), 0, 0)\n-- Move 3 studs UP from the part's own point of view (local space)\npart.CFrame = part.CFrame * CFrame.new(0, 3, 0)",
+      "gotcha": "Setting CFrame does not check for overlap; the part goes exactly there even if it is inside another part. To move a model, use `PivotTo`."
+    },
+    "BasePart.CollisionGroup": {
+      "simple": "The name of the collision group this part belongs to (\"Default\" at first). With PhysicsService you can make some groups not bump into others, like letting players walk through team doors.",
+      "example": "local PhysicsService = game:GetService(\"PhysicsService\")\nlocal Workspace = game:GetService(\"Workspace\")\nPhysicsService:RegisterCollisionGroup(\"Ghosts\")\nPhysicsService:CollisionGroupSetCollidable(\"Ghosts\", \"Ghosts\", false)\nlocal part = Workspace:WaitForChild(\"Part\")\npart.CollisionGroup = \"Ghosts\""
+    },
+    "BasePart.CollisionGroupId": {
+      "simple": "Old — use `CollisionGroup` instead."
+    },
+    "BasePart.Color": {
+      "simple": "The part's exact color as a Color3 (red, green, blue). Use `Color3.fromRGB` with numbers from 0 to 255.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Color = Color3.fromRGB(255, 0, 255) -- bright pink"
+    },
+    "BasePart.CurrentPhysicalProperties": {
+      "simple": "Read-only. The physical settings (density, friction, bounciness) the part is actually using right now, after checking its custom settings and material.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.CurrentPhysicalProperties.Friction)"
+    },
+    "BasePart.CustomPhysicalProperties": {
+      "simple": "Lets you set your own density (how heavy for its size), friction (how grippy), and elasticity (how bouncy) instead of using the material's normal values. Set it to nil to go back to the material's values.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\n-- density 0.7, friction 0.3, elasticity 1 (super bouncy)\npart.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 1)"
+    },
+    "BasePart.Elasticity": {
+      "simple": "Old — use `CustomPhysicalProperties` instead."
+    },
+    "BasePart.EnableFluidForces": {
+      "simple": "If true, and the experimental `Workspace.FluidForces` setting is on, air pushes on this part, like wind on a paper plane.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.EnableFluidForces = true"
+    },
+    "BasePart.ExtentsCFrame": {
+      "simple": "Read-only. The CFrame of the part's real physical center. For most simple parts it matches CFrame, but for some meshes the CFrame point is not the true middle.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.ExtentsCFrame.Position)"
+    },
+    "BasePart.ExtentsSize": {
+      "simple": "Read-only. The size physics actually uses for bumping, which can differ slightly from the visible `Size` for very small or odd-shaped parts.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.ExtentsSize)"
+    },
+    "BasePart.Friction": {
+      "simple": "Old — use `CustomPhysicalProperties` instead."
+    },
+    "BasePart.FrontParamA": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.FrontParamB": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.FrontSurface": {
+      "simple": "The surface style of the part's front face (the -Z side), like Smooth or Studs. Some old surface types could join touching parts together; today most builders leave it Smooth.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.FrontSurface = Enum.SurfaceType.Studs"
+    },
+    "BasePart.FrontSurfaceInput": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.LeftParamA": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.LeftParamB": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.LeftSurface": {
+      "simple": "The surface style of the part's left face (the -X side), like Smooth or Studs. Some old surface types could join touching parts together; today most builders leave it Smooth.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.LeftSurface = Enum.SurfaceType.Studs"
+    },
+    "BasePart.LeftSurfaceInput": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.LocalTransparencyModifier": {
+      "simple": "Extra see-through-ness that only the local player sees. Roblox uses it to hide your own body when you zoom into first person. Changes are not shared with the server or other players.",
+      "example": "-- LocalScript in StarterCharacterScripts\nlocal character = script.Parent\nlocal head = character:WaitForChild(\"Head\")\nhead.LocalTransparencyModifier = 1 -- only YOU stop seeing your head"
+    },
+    "BasePart.Locked": {
+      "simple": "If true, you cannot select the part by clicking it in Studio. Great for stopping yourself from accidentally moving the map while building. It does nothing during play.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Locked = true"
+    },
+    "BasePart.Mass": {
+      "simple": "Read-only. How heavy the part is: its volume times its density. Bigger parts and denser materials weigh more.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(\"This part weighs\", part.Mass)"
+    },
+    "BasePart.Massless": {
+      "simple": "If true, the part adds no weight to the assembly it is welded to. Useful for decorations on a car or a hat on a character, so they do not slow it down.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Massless = true",
+      "gotcha": "It is ignored if this part is the assembly's root part or is not welded to anything with mass."
+    },
+    "BasePart.Material": {
+      "simple": "What the part looks like it is made of (Plastic, Wood, Neon, Glass, Ice, and more). It also sets default physics, like how slippery Ice is.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Material = Enum.Material.Neon -- glowing look"
+    },
+    "BasePart.MaterialVariant": {
+      "simple": "The name of a custom material look (a MaterialVariant you made in MaterialService) to use instead of the built-in one.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Material = Enum.Material.Brick\npart.MaterialVariant = \"MossyBrick\" -- name of your MaterialVariant"
+    },
+    "BasePart.Orientation": {
+      "simple": "Which way the part is turned, as three angles in degrees: around X (tip forward/back), around Y (spin left/right), around Z (roll sideways). (0, 0, 0) is not turned at all; (0, 90, 0) is spun a quarter turn around the up axis. Changing it turns the part in place without moving its center.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Orientation = Vector3.new(0, 45, 0) -- spin 45 degrees\n-- spin a little more every frame\nwhile true do\n\tpart.Orientation += Vector3.new(0, 2, 0)\n\ttask.wait()\nend",
+      "gotcha": "Orientation uses degrees but `CFrame.Angles` uses radians, and they apply the three turns in a different order. For exact control, use CFrame."
+    },
+    "BasePart.PivotOffset": {
+      "simple": "Where the part's pivot (its handle for `PivotTo`) sits, measured from the part's own center. Default is no offset, so the pivot is the center. GetPivot equals CFrame times PivotOffset.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal door = Workspace:WaitForChild(\"Door\") -- 4 wide (X), 7 tall, 1 thick\n-- Put the pivot on the door's left edge, 2 studs from the center, like a hinge\ndoor.PivotOffset = CFrame.new(-2, 0, 0)\n-- Now turning the pivot swings the door around its hinge\ndoor:PivotTo(door:GetPivot() * CFrame.Angles(0, math.rad(90), 0))"
+    },
+    "BasePart.Position": {
+      "simple": "Where the center of the part is, as (X, Y, Z) in studs from the center of the map. (0, 5, 0) is 5 studs straight up. Setting it moves the part without turning it.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Position = Vector3.new(0, 5, 0)\n-- move by an offset of (2, 0, 0): now at (2, 5, 0)\npart.Position += Vector3.new(2, 0, 0)\nprint(part.Position) --> 2, 5, 0",
+      "gotcha": "Position always matches `CFrame.Position`. Changing one changes the other."
+    },
+    "BasePart.ReceiveAge": {
+      "simple": "Read-only. How many seconds since this part's physics was last updated on this computer. It is 0 for anchored parts.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.ReceiveAge)"
+    },
+    "BasePart.Reflectance": {
+      "simple": "How shiny and mirror-like the part is, from 0 (not shiny) to 1 (fully reflects the sky).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Reflectance = 0.8 -- very shiny"
+    },
+    "BasePart.ResizeableFaces": {
+      "simple": "Read-only. Which faces of the part can be resized. Most parts allow all six; TrussPart only allows two.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.ResizeableFaces)"
+    },
+    "BasePart.ResizeIncrement": {
+      "simple": "Read-only. The smallest step `Resize` can change the part by. It is 1 stud for a Part and 2 for a TrussPart.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part.ResizeIncrement) --> 1"
+    },
+    "BasePart.RightParamA": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.RightParamB": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.RightSurface": {
+      "simple": "The surface style of the part's right face (the +X side), like Smooth or Studs. Some old surface types could join touching parts together; today most builders leave it Smooth.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.RightSurface = Enum.SurfaceType.Studs"
+    },
+    "BasePart.RightSurfaceInput": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.RootPriority": {
+      "simple": "A number from -127 to 127. In a group of welded parts, the one with the highest RootPriority is picked as the root (main) part. Most games leave it at 0.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.RootPriority = 10"
+    },
+    "BasePart.Rotation": {
+      "simple": "Another way to read or set the part's turn in degrees for the X, Y, and Z axes. It applies the three turns in a different order than Orientation, so the numbers can differ. Most people use Orientation or CFrame instead.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Rotation = Vector3.new(0, 90, 0)\nprint(part.Orientation)"
+    },
+    "BasePart.RotVelocity": {
+      "simple": "Old — use `AssemblyAngularVelocity` instead."
+    },
+    "BasePart.Size": {
+      "simple": "How big the part is: (width X, height Y, depth Z) in studs. A default Part is (4, 1, 2). Each side can be from 0.001 up to 2048 studs.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Size = Vector3.new(10, 1, 10) -- a flat 10 by 10 platform",
+      "gotcha": "Changing Size keeps the center in the same place, so a part grows in both directions. Grow its height by 4 and its bottom moves down 2."
+    },
+    "BasePart.SpecificGravity": {
+      "simple": "Old — use `CurrentPhysicalProperties` (density) instead."
+    },
+    "BasePart.TopParamA": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.TopParamB": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.TopSurface": {
+      "simple": "The surface style of the part's top face (the +Y side), like Smooth or Studs. Some old surface types could join touching parts together; today most builders leave it Smooth.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.TopSurface = Enum.SurfaceType.Studs"
+    },
+    "BasePart.TopSurfaceInput": {
+      "simple": "Old — old surface settings that no longer do anything. You do not need it."
+    },
+    "BasePart.Transparency": {
+      "simple": "How see-through the part is, from 0 (solid) to 1 (completely invisible). 0.5 is half see-through.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\n-- fade out over 1 second\nfor t = 0, 1, 0.1 do\n\tpart.Transparency = t\n\ttask.wait(0.1)\nend",
+      "gotcha": "An invisible part can still be bumped into. Also set CanCollide to false for a fully ghostly part."
+    },
+    "BasePart.Velocity": {
+      "simple": "Old — use `AssemblyLinearVelocity` instead."
+    },
+    "BasePart:AngularAccelerationToTorque": {
+      "simple": "Advanced physics. Tells you how much twisting force (torque) you need to make the assembly speed up its spin by the amount you want.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nlocal torque = part:AngularAccelerationToTorque(Vector3.new(0, 5, 0))\nprint(\"Torque needed:\", torque)"
+    },
+    "BasePart:ApplyAngularImpulse": {
+      "simple": "Gives the assembly a sudden twist, making it start spinning. Heavier things spin less from the same twist.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Anchored = false\npart:ApplyAngularImpulse(Vector3.new(0, 500, 0)) -- spin around the up axis",
+      "gotcha": "Only works where the part's physics is run (its network owner). For parts owned by the server, call it from a server Script."
+    },
+    "BasePart:ApplyImpulse": {
+      "simple": "Gives the assembly a sudden shove, like a kick, through its balance point, so it moves without spinning. Heavier things move slower from the same shove. Multiply by AssemblyMass to get the same speed for any weight.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Anchored = false\n-- add about 50 studs/second of upward speed, whatever it weighs\npart:ApplyImpulse(Vector3.new(0, 50 * part.AssemblyMass, 0))",
+      "gotcha": "Only works where the part's physics is run (its network owner). For a player's character, the player's device owns it, so call it from a LocalScript."
+    },
+    "BasePart:ApplyImpulseAtPosition": {
+      "simple": "Gives the assembly a sudden shove at a specific world position. Hitting off-center makes it both move AND spin, like kicking the edge of a box.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Anchored = false\n-- push sideways at the top edge so it tips over\nlocal topEdge = part.Position + Vector3.new(0, part.Size.Y / 2, 0)\npart:ApplyImpulseAtPosition(Vector3.new(100, 0, 0), topEdge)"
+    },
+    "BasePart:BindToCollisionSummaries": {
+      "simple": "Advanced. Hands your function a detailed report every frame about each contact this part had: where it touched, the direction, and how fast the parts hit. It returns a connection you can Disconnect later.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nlocal connection = part:BindToCollisionSummaries(function(summaries)\n\tfor _, s in summaries do\n\t\tprint(\"Hit\", s.Part1.Name, \"at\", s.Point)\n\tend\nend)\ntask.wait(10)\nconnection:Disconnect() -- stop listening",
+      "gotcha": "Errors if the part is not in Workspace. It is separate from the Touched event."
+    },
+    "BasePart:BreakJoints": {
+      "simple": "Old — use `Destroy` on the welds/constraints you want removed instead."
+    },
+    "BasePart:breakJoints": {
+      "simple": "Old — use `Destroy` on the welds/constraints you want removed instead."
+    },
+    "BasePart:CanCollideWith": {
+      "simple": "Gives true if this part and another part are allowed to bump into each other, checking their collision groups.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal a = Workspace:WaitForChild(\"PartA\")\nlocal b = Workspace:WaitForChild(\"PartB\")\nprint(a:CanCollideWith(b))"
+    },
+    "BasePart:CanSetNetworkOwnership": {
+      "simple": "Checks whether you are allowed to change who runs this part's physics. Gives true, or false plus a reason message (for example, anchored parts cannot have an owner).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nlocal ok, reason = part:CanSetNetworkOwnership()\nif not ok then\n\tprint(\"Cannot set owner:\", reason)\nend"
+    },
+    "BasePart:GetClosestPointOnSurface": {
+      "simple": "Gives the point on the part's outside surface that is closest to the world position you give. If the position is inside the part, you get the same position back.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nlocal point = part:GetClosestPointOnSurface(Vector3.new(0, 50, 0))\nprint(\"Closest point on the part:\", point)"
+    },
+    "BasePart:GetConnectedParts": {
+      "simple": "Gives a list of parts stuck to this one by rigid joints (like welds). Pass true to get every part in the whole welded group.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nfor _, other in part:GetConnectedParts(true) do\n\tprint(other.Name)\nend"
+    },
+    "BasePart:GetJoints": {
+      "simple": "Gives a list of all joints and constraints (like welds and hinges) connected to this part that are currently active.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(#part:GetJoints(), \"joints\")"
+    },
+    "BasePart:GetMass": {
+      "simple": "Gives the part's mass. Same as reading the `Mass` property, which is the newer way.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part:GetMass())"
+    },
+    "BasePart:getMass": {
+      "simple": "Old — use `Mass` (or `GetMass`) instead."
+    },
+    "BasePart:GetNetworkOwner": {
+      "simple": "Gives the Player whose device is running this part's physics, or nil if the server is running it.",
+      "example": "-- Script in ServerScriptService\nlocal Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nlocal owner = part:GetNetworkOwner()\nprint(owner and owner.Name or \"server\")"
+    },
+    "BasePart:GetNetworkOwnershipAuto": {
+      "simple": "Gives true if Roblox is automatically choosing who runs this part's physics (the normal setting).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part:GetNetworkOwnershipAuto())"
+    },
+    "BasePart:GetNoCollisionConstraints": {
+      "simple": "Gives a list of the enabled NoCollisionConstraints that stop this part from bumping into one specific other part.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(#part:GetNoCollisionConstraints())"
+    },
+    "BasePart:GetRenderCFrame": {
+      "simple": "Old — use `CFrame` instead."
+    },
+    "BasePart:GetRootPart": {
+      "simple": "Old — use `AssemblyRootPart` instead."
+    },
+    "BasePart:GetTouchingParts": {
+      "simple": "Gives a list of parts that are overlapping (inside) this part right now. Parts just sitting side by side do not count.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nfor _, other in part:GetTouchingParts() do\n\tprint(\"Overlapping:\", other.Name)\nend",
+      "gotcha": "If this part has CanCollide false, you get an empty list unless something is connected to its Touched event. For area checks, `Workspace:GetPartsInPart` is often easier."
+    },
+    "BasePart:GetVelocityAtPosition": {
+      "simple": "Gives how fast a certain point on the assembly is moving. On a spinning wheel, the edge moves faster than the middle, so this tells you the speed at any spot.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part:GetVelocityAtPosition(part.Position + Vector3.new(2, 0, 0)))"
+    },
+    "BasePart:IntersectAsync": {
+      "simple": "Makes a new shape from only the parts where this part and the others OVERLAP, like the shared middle of two circles.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal base = Workspace:WaitForChild(\"Base\")\nlocal other = Workspace:WaitForChild(\"Other\")\nlocal ok, result = pcall(function()\n\treturn base:IntersectAsync({other})\nend)\nif ok and result then\n\tresult.Parent = Workspace -- new shape starts with no Parent\n\tbase:Destroy()\n\tother:Destroy()\nend",
+      "gotcha": "It yields (waits) and can fail, so wrap it in pcall. Only Parts work, not MeshParts or Terrain. The result has no Parent until you set one."
+    },
+    "BasePart:IsGrounded": {
+      "simple": "Gives true if the part is held in place by being connected to an anchored part.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part:IsGrounded())"
+    },
+    "BasePart:MakeJoints": {
+      "simple": "Old — use WeldConstraint objects to join parts instead."
+    },
+    "BasePart:makeJoints": {
+      "simple": "Old — use WeldConstraint objects to join parts instead."
+    },
+    "BasePart:Resize": {
+      "simple": "Grows or shrinks one face of the part, just like dragging a resize handle in Studio. The opposite face stays put. Gives true if it worked.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\n-- pull the top face up by 3 studs\npart:Resize(Enum.NormalId.Top, 3)"
+    },
+    "BasePart:resize": {
+      "simple": "Old — use `Resize` instead."
+    },
+    "BasePart:SetNetworkOwner": {
+      "simple": "Server only. Chooses which player's device runs this part's physics (and everything welded to it). Pass nil to make the server run it. Giving a player ownership of their own car makes driving feel smooth.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nlocal Workspace = game:GetService(\"Workspace\")\nlocal seat = Workspace:WaitForChild(\"Car\"):WaitForChild(\"VehicleSeat\")\n\n-- When someone sits, let THEIR device run the car physics\nseat:GetPropertyChangedSignal(\"Occupant\"):Connect(function()\n\tlocal humanoid = seat.Occupant\n\tif humanoid then\n\t\tlocal player = Players:GetPlayerFromCharacter(humanoid.Parent)\n\t\tseat:SetNetworkOwner(player)\n\telse\n\t\tseat:SetNetworkOwnershipAuto()\n\tend\nend)",
+      "gotcha": "Errors on anchored parts. Players who own a part can move it however they like, so do not trust them with important things."
+    },
+    "BasePart:SetNetworkOwnershipAuto": {
+      "simple": "Server only. Lets Roblox go back to choosing automatically who runs this part's physics.",
+      "example": "-- Script in ServerScriptService\nlocal Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart:SetNetworkOwnershipAuto()"
+    },
+    "BasePart:SubtractAsync": {
+      "simple": "Makes a new shape by cutting the other parts OUT of this part, like using a cookie cutter to punch a hole in a wall.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal base = Workspace:WaitForChild(\"Base\")\nlocal other = Workspace:WaitForChild(\"Other\")\nlocal ok, result = pcall(function()\n\treturn base:SubtractAsync({other})\nend)\nif ok and result then\n\tresult.Parent = Workspace -- new shape starts with no Parent\n\tbase:Destroy()\n\tother:Destroy()\nend",
+      "gotcha": "It yields (waits) and can fail, so wrap it in pcall. Only Parts work, not MeshParts or Terrain. The result has no Parent until you set one."
+    },
+    "BasePart:TorqueToAngularAcceleration": {
+      "simple": "Advanced physics. The opposite of AngularAccelerationToTorque: tells you how much faster the assembly would start spinning if you applied a given twisting force.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\nprint(part:TorqueToAngularAcceleration(Vector3.new(0, 1000, 0)))"
+    },
+    "BasePart:UnionAsync": {
+      "simple": "Makes a new single shape by GLUING this part and the others together, like sticking clay blobs into one.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal base = Workspace:WaitForChild(\"Base\")\nlocal other = Workspace:WaitForChild(\"Other\")\nlocal ok, result = pcall(function()\n\treturn base:UnionAsync({other})\nend)\nif ok and result then\n\tresult.Parent = Workspace -- new shape starts with no Parent\n\tbase:Destroy()\n\tother:Destroy()\nend",
+      "gotcha": "It yields (waits) and can fail, so wrap it in pcall. Only Parts work, not MeshParts or Terrain. The result has no Parent until you set one."
+    },
+    "BasePart.LocalSimulationTouched": {
+      "simple": "Old — use `Touched` instead."
+    },
+    "BasePart.OutfitChanged": {
+      "simple": "Old — this event no longer does anything."
+    },
+    "BasePart.StoppedTouching": {
+      "simple": "Old — use `TouchEnded` instead."
+    },
+    "BasePart.Touched": {
+      "simple": "Fires when another part bumps into this one because of physics movement. It gives you the other part. This is how lava, coins, checkpoints, and buttons on the floor usually work.",
+      "example": "-- Script inside a coin Part\nlocal coin = script.Parent\nlocal Players = game:GetService(\"Players\")\nlocal taken = false\n\ncoin.Touched:Connect(function(otherPart)\n\tlocal player = Players:GetPlayerFromCharacter(otherPart.Parent)\n\tif player and not taken then\n\t\ttaken = true\n\t\tprint(player.Name, \"got the coin!\")\n\t\tcoin:Destroy()\n\tend\nend)",
+      "gotcha": "It does not fire if a part was simply teleported into another by setting CFrame, and at least one of the two parts must be unanchored. It often fires many times quickly, so use a flag like `taken` (a debounce)."
+    },
+    "BasePart.TouchEnded": {
+      "simple": "Fires when another part stops touching this one. Useful for things like a pressure plate that turns off when you step off.",
+      "example": "-- Script inside a pressure-plate Part\nlocal plate = script.Parent\nplate.Touched:Connect(function()\n\tplate.Color = Color3.fromRGB(0, 255, 0)\nend)\nplate.TouchEnded:Connect(function()\n\tplate.Color = Color3.fromRGB(255, 0, 0)\nend)",
+      "gotcha": "A character's many body parts each start and stop touching, so it can fire a lot while someone just stands there."
+    }
+  }
+}

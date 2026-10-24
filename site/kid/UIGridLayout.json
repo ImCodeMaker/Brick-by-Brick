@@ -1,0 +1,75 @@
+{
+  "name": "UIGridLayout",
+  "simple": "A UIGridLayout arranges all the UI objects next to it into a grid of same-sized boxes, filling a row and then starting the next. It's perfect for inventories and item shops. Every item gets the same CellSize, and you set the gap between them with CellPadding.",
+  "analogy": "A UIGridLayout is like an egg carton or a chocolate box: every spot is the same size, and things go in row by row.",
+  "whenToUse": [
+    "Inventory slots",
+    "Shop item tiles",
+    "Level-select or character-select screens",
+    "Any group of equal-sized icons"
+  ],
+  "where": "Put it inside the container (a Frame or ScrollingFrame) whose children should form a grid. It arranges its siblings. Create it in Studio or with Instance.new in a LocalScript.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "grid": "Rows and columns of boxes, like a chessboard.",
+    "cell": "One box in the grid.",
+    "UDim2": "Four numbers: X Scale, X Offset, Y Scale, Y Offset. Used for CellSize and CellPadding.",
+    "FillDirection": "Whether the grid fills rows first (Horizontal, default) or columns first (Vertical). It comes from UIGridStyleLayout, the base of UIGridLayout.",
+    "SortOrder": "How items are ordered: by LayoutOrder number or by Name.",
+    "read-only": "You can read the value but not change it."
+  },
+  "examples": [
+    {
+      "title": "An inventory grid",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal inventory = Instance.new(\"Frame\")\ninventory.Size = UDim2.fromOffset(350, 240)\ninventory.Position = UDim2.fromOffset(20, 100)\ninventory.BackgroundColor3 = Color3.fromRGB(30, 30, 40)\ninventory.Parent = screenGui\n\nlocal grid = Instance.new(\"UIGridLayout\")\ngrid.CellSize = UDim2.fromOffset(60, 60)    -- every slot is 60 x 60 pixels\ngrid.CellPadding = UDim2.fromOffset(10, 10) -- 10 px gap between slots\ngrid.SortOrder = Enum.SortOrder.LayoutOrder\ngrid.Parent = inventory\n\nfor i = 1, 12 do\n\tlocal slot = Instance.new(\"TextLabel\")\n\tslot.Text = tostring(i)\n\tslot.LayoutOrder = i\n\tslot.Parent = inventory\nend",
+      "explain": [
+        "The frame is 350 pixels wide. Each slot is 60 wide with a 10 gap, so 70 pixels per slot. 5 slots use 60 x 5 + 10 x 4 = 340 pixels, so 5 fit in a row.",
+        "12 slots make rows of 5, 5 and 2.",
+        "We never set Size or Position on the slots; the grid does it.",
+        "LayoutOrder 1, 2, 3... keeps them in number order."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The grid controls each item's Size and Position, so you can't change them on the items.",
+    "CellSize Scale is a fraction of the CONTAINER. UDim2.fromScale(0.25, 0.25) makes 4 cells across.",
+    "Too many items for the frame? Put the grid in a ScrollingFrame with AutomaticCanvasSize.",
+    "For a table where rows must not break in the middle, a UITableLayout may fit better."
+  ],
+  "members": {
+    "UIGridLayout.AbsoluteCellCount": {
+      "simple": "Read-only. How many cells fit in each direction, as a Vector2 (X = columns, Y = rows).",
+      "example": "local grid = script.Parent\nprint(\"Columns:\", grid.AbsoluteCellCount.X, \"Rows:\", grid.AbsoluteCellCount.Y)"
+    },
+    "UIGridLayout.AbsoluteCellSize": {
+      "simple": "Read-only. The real size in pixels of each cell after Scale is worked out. Not changed by UIScale or constraints on single items.",
+      "example": "local grid = script.Parent\nprint(\"Each cell is\", grid.AbsoluteCellSize)"
+    },
+    "UIGridLayout.CellPadding": {
+      "simple": "The gap between cells, as a UDim2. Default is 5 pixels each way. Scale parts are a fraction of the container's size.",
+      "example": "local grid = script.Parent\ngrid.CellPadding = UDim2.fromOffset(8, 8)"
+    },
+    "UIGridLayout.CellSize": {
+      "simple": "The size of every cell, as a UDim2. Default is 100 x 100 pixels. Scale parts are a fraction of the container: UDim2.new(0.25, -6, 0, 80) is a quarter of the width minus 6 pixels, and 80 pixels tall.",
+      "example": "local grid = script.Parent\ngrid.CellSize = UDim2.fromOffset(80, 80)",
+      "gotcha": "If an item has a size constraint (like UIAspectRatioConstraint), the constraint wins."
+    },
+    "UIGridLayout.FillDirectionMaxCells": {
+      "simple": "The most cells allowed in one row (or column) before starting the next. 0 (default) = as many as fit. 1 = one per row, like a list.",
+      "example": "local grid = script.Parent\ngrid.FillDirectionMaxCells = 4 -- never more than 4 per row"
+    },
+    "UIGridLayout.StartCorner": {
+      "simple": "Which corner the grid starts filling from: TopLeft (default), TopRight, BottomLeft or BottomRight.",
+      "example": "local grid = script.Parent\ngrid.StartCorner = Enum.StartCorner.BottomRight"
+    }
+  }
+}

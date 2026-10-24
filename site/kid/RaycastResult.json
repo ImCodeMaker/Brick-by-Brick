@@ -1,0 +1,75 @@
+{
+  "name": "RaycastResult",
+  "simple": "A RaycastResult is the report you get back when a raycast hits something. It tells you which part was hit, exactly where, how far away, what material it was, and which way the surface was facing. If the ray hits nothing, you get nil instead of a RaycastResult.",
+  "analogy": "It is like the report from a game of laser tag: \"you hit the blue wall, 12 meters away, at this spot, and it was made of metal\".",
+  "whenToUse": [
+    "Finding which part a laser or bullet hit",
+    "Placing something exactly where the player clicked or aimed",
+    "Checking what is under a character's feet (grass, ice, water)",
+    "Lining up an object flat against a wall using the Normal"
+  ],
+  "where": "You never make one yourself. workspace:Raycast(origin, direction, params) gives one back on a hit, or nil on a miss. Works on server and client.",
+  "terms": {
+    "raycast": "Shooting an invisible laser beam through the 3D world and asking \"what does it hit first?\". Roblox tells you what part it hit, where, and how far away.",
+    "origin": "The starting point of the ray: where the laser beam comes out. A Vector3 position like (0, 10, 0).",
+    "direction": "Which way the ray goes AND how far. It is a Vector3 arrow. Vector3.new(0, -50, 0) means \"straight down, 50 studs long\".",
+    "normal": "An arrow of length 1 sticking straight out of a surface, like a flagpole on the ground. On a flat floor the normal points straight up: (0, 1, 0).",
+    "nil": "Lua's word for \"nothing\". workspace:Raycast gives nil when the ray hits nothing.",
+    "Vector3": "Three numbers (X, Y, Z) that describe a position or an arrow in the 3D world. Y is up and down.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "world space": "Positions measured from the center of the whole world (0, 0, 0), not from some part.",
+    "Material": "What a surface is made of, like Grass, Wood, Ice, or Water (an Enum.Material).",
+    "Terrain": "Roblox's built-in landscape made of grass, rock, water, and so on, instead of separate parts."
+  },
+  "examples": [
+    {
+      "title": "What am I standing on?",
+      "place": "LocalScript in StarterCharacterScripts",
+      "code": "local character = script.Parent\nlocal rootPart = character:WaitForChild(\"HumanoidRootPart\")\n\nlocal params = RaycastParams.new()\nparams.ExcludeInstances = { character } -- do not hit myself\n\nwhile true do\n\t-- Shoot 10 studs straight down from my middle\n\tlocal result = workspace:Raycast(rootPart.Position, Vector3.new(0, -10, 0), params)\n\n\tif result then\n\t\tprint(\"Standing on\", result.Instance.Name)\n\t\tprint(\"Material:\", result.Material.Name)\n\t\tprint(\"Floor is\", result.Distance, \"studs below me\")\n\telse\n\t\tprint(\"Nothing below me, I must be in the air!\")\n\tend\n\ttask.wait(2)\nend",
+      "explain": [
+        "The ray starts at the middle of the character and goes 10 studs straight down.",
+        "If it hits, result.Instance is the part (or Terrain) below.",
+        "result.Material tells you if it is Grass, Ice, Sand, and so on.",
+        "result.Distance is how far from the start of the ray to the hit point.",
+        "If nothing is within 10 studs, result is nil and we know the player is in the air."
+      ]
+    },
+    {
+      "title": "Pop a marker just above whatever you hit",
+      "place": "Script in ServerScriptService",
+      "code": "local origin = Vector3.new(0, 50, 0)\nlocal direction = Vector3.new(0, -100, 0) -- straight down, 100 studs\n\nlocal result = workspace:Raycast(origin, direction)\nif result then\n\tlocal marker = Instance.new(\"Part\")\n\tmarker.Shape = Enum.PartType.Ball\n\tmarker.Size = Vector3.new(1, 1, 1)\n\tmarker.Anchored = true\n\tmarker.CanCollide = false\n\t-- Start at the hit point, then move half a stud out of the surface\n\tmarker.Position = result.Position + result.Normal * 0.5\n\tmarker.Parent = workspace\nend",
+      "explain": [
+        "The ray drops from 50 studs up and checks 100 studs down.",
+        "result.Position is the exact spot on the surface that was hit.",
+        "result.Normal points straight out of that surface, length 1. On a flat floor it is (0, 1, 0).",
+        "Adding result.Normal * 0.5 moves the ball half a stud away from the surface, so it sits on top instead of half buried. If the floor is at height 0, the ball ends up at height 0.5."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Always check `if result then` before using it. A miss gives nil, and nil.Instance causes an error.",
+    "result.Instance can be Terrain, not just a Part. Check result.Instance:IsA(\"BasePart\") or result.Instance == workspace.Terrain if it matters."
+  ],
+  "members": {
+    "RaycastResult.Distance": {
+      "simple": "How far it is, in studs, from the ray's starting point (origin) to the spot it hit.",
+      "example": "local result = workspace:Raycast(Vector3.new(0, 20, 0), Vector3.new(0, -50, 0))\nif result then\n\tprint(\"Hit something\", result.Distance, \"studs below\")\nend"
+    },
+    "RaycastResult.Instance": {
+      "simple": "The thing that was hit: a part (BasePart) or the Terrain.",
+      "example": "local result = workspace:Raycast(Vector3.new(0, 20, 0), Vector3.new(0, -50, 0))\nif result then\n\tprint(\"Hit:\", result.Instance.Name)\nend"
+    },
+    "RaycastResult.Material": {
+      "simple": "What the surface is made of at the hit spot, like Enum.Material.Grass. For normal parts it is the part's Material. For Terrain it is whatever terrain is at that spot.",
+      "example": "local result = workspace:Raycast(Vector3.new(0, 20, 0), Vector3.new(0, -50, 0))\nif result and result.Material == Enum.Material.Ice then\n\tprint(\"Careful, it's slippery!\")\nend"
+    },
+    "RaycastResult.Position": {
+      "simple": "The exact point in the world where the ray hit, usually right on the surface of the part or terrain. It is a world position, measured from the world's center.",
+      "example": "local result = workspace:Raycast(Vector3.new(0, 20, 0), Vector3.new(0, -50, 0))\nif result then\n\tprint(\"Hit at\", result.Position)\nend"
+    },
+    "RaycastResult.Normal": {
+      "simple": "An arrow of length 1 that points straight out of the surface that was hit. A flat floor gives (0, 1, 0), meaning \"up\". A wall facing you gives an arrow pointing back toward you. Useful for bouncing things or placing decals flat.",
+      "example": "local result = workspace:Raycast(Vector3.new(0, 20, 0), Vector3.new(0, -50, 0))\nif result then\n\tprint(\"Surface faces:\", result.Normal) --> 0, 1, 0 on a flat floor\nend"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "path": "content/en-us/ui/grid-table-layouts.md",
+  "simple": "Grid and table layouts arrange UI items in neat rows and columns automatically. A `UIGridLayout` makes every item the same size, like squares in a shop inventory. A `UITableLayout` builds a table where each row is an item and the things inside it become columns, like a scoreboard. Both take control of your items' position and size, so you just add items and they fall into place.",
+  "analogy": "A grid layout is like an ice cube tray: every slot is the same size and fills in order. A table layout is like a spreadsheet with rows and columns.",
+  "keyPoints": [
+    "`UIGridLayout` puts sibling items into same-size cells set by `CellSize`.",
+    "Cells fill across (or down) by `FillDirection` until there is no room, then start a new row or column.",
+    "`FillDirectionMaxCells` limits how many cells go in each row or column.",
+    "Items are sorted by `LayoutOrder` (lowest first) by default, or alphabetically if `SortOrder` is `Name`.",
+    "A grid respects size constraints, so an item with a large `UISizeConstraint.MinSize` can take up more than one cell.",
+    "`UITableLayout` makes each sibling a row and each child inside that sibling a column cell (when `FillDirection` is Vertical).",
+    "Table cells in a row share a height, and cells in a column share a width; `FillEmptySpaceColumns`/`FillEmptySpaceRows` stretch them to fill the space.",
+    "Both layouts override the `Position` and `Size` you set on their items."
+  ],
+  "terms": {
+    "cell": "One slot in a grid or table.",
+    "CellSize": "The size of every grid cell, as a `UDim2`. `UDim2.fromOffset(100, 100)` makes 100 by 100 pixel squares.",
+    "sibling": "Objects with the same parent. The layout arranges its siblings.",
+    "FillDirectionMaxCells": "The most cells allowed in one row (or column). Set to 4 and the fifth item starts a new row.",
+    "LayoutOrder": "A number used to sort items. Lower numbers come first.",
+    "constraint": "A rule object like `UISizeConstraint` that limits how big or small something can be.",
+    "row / column": "A row goes across; a column goes down."
+  },
+  "example": {
+    "title": "Build a 4-wide inventory grid",
+    "place": "LocalScript inside a Frame named Inventory (inside a ScreenGui in StarterGui)",
+    "code": "local inventory = script.Parent\n\nlocal grid = Instance.new(\"UIGridLayout\")\ngrid.CellSize = UDim2.fromOffset(80, 80) -- every slot is 80 by 80 pixels\ngrid.CellPadding = UDim2.fromOffset(6, 6) -- 6 pixels between slots\ngrid.FillDirectionMaxCells = 4 -- 4 slots per row\ngrid.SortOrder = Enum.SortOrder.LayoutOrder\ngrid.Parent = inventory\n\nfor i = 1, 10 do\n\tlocal slot = Instance.new(\"TextLabel\")\n\tslot.Text = \"Item \" .. i\n\tslot.LayoutOrder = i\n\tslot.Parent = inventory\nend",
+    "explain": [
+      "We add a `UIGridLayout` to the inventory frame.",
+      "Each cell is 80 by 80 pixels with 6 pixels of space between cells.",
+      "`FillDirectionMaxCells` of 4 makes each row hold at most 4 slots.",
+      "We create 10 labels. The grid places them in rows of 4, 4, and 2, in `LayoutOrder` order."
+    ]
+  },
+  "watchOut": [
+    "Changing an item's `Size` does nothing in a grid; change the grid's `CellSize` instead.",
+    "If items do not appear in the order you expect, check each item's `LayoutOrder` and the layout's `SortOrder`.",
+    "For a table, put cells inside row objects. Putting labels directly as siblings makes each label its own row."
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/parts/models.md",
+  "simple": "A model is a container that groups parts and other objects into one thing, like a whole car, a house or a character. Grouping makes it easy to select, move and copy the whole object at once. This page shows how to make models, set a primary part, move models with scripts, and save them to Roblox to reuse or even sell. Almost every game object bigger than one part is a model.",
+  "analogy": "A model is like a backpack. You can carry everything inside it with one hand, and you can still open it and take out one item when you need it.",
+  "keyPoints": [
+    "Make a model by selecting objects and pressing Ctrl+G (Cmd+G), or by inserting an empty Model and dragging things into it. Ctrl+U (Cmd+U) ungroups it.",
+    "Characters are models: one Model holding the body parts, joints and scripts.",
+    "Set a PrimaryPart for models whose parts are joined, so the model's pivot and bounding box move with that part.",
+    "In scripts, move models with `PivotTo(cframe)`, `TranslateBy(offset)` or `MoveTo(position)`.",
+    "A model with a Humanoid and a part named Head shows a name and health bar above the head.",
+    "Parts that fall below `Workspace.FallenPartsDestroyHeight` are deleted, and the model is deleted too if its last part is gone.",
+    "With streaming on, models can be set to Persistent (never unloaded) or Atomic (loaded and unloaded all at once).",
+    "Right-click a model and choose Save to Roblox to upload it as an asset with its own ID that you can reuse or sell on the Creator Store."
+  ],
+  "terms": {
+    "model": "A container object that groups parts and other objects so they act as one thing in the Explorer.",
+    "container": "An object whose job is to hold other objects, like a folder.",
+    "PrimaryPart": "The part you choose as the model's main part. When the model moves, it moves based on this part.",
+    "pivot": "The point a model moves to and turns around. Without a PrimaryPart, it is the center of the model's bounding box.",
+    "bounding box": "The smallest invisible box that fits around everything in the model.",
+    "CFrame": "A value that stores both a position and a rotation. `CFrame.new(0, 10, 0)` means \"at height 10, not turned\".",
+    "offset": "How far to shift from where something is now. An offset of (0, 10, 0) moves a model from height 5 to height 15.",
+    "selection cycling": "Alt-click (Option-click) repeatedly to pick the parts hidden behind each other inside a model.",
+    "FallenPartsDestroyHeight": "A Y height. Parts that fall below it are deleted so they do not fall forever.",
+    "streaming": "Loading only the parts of the world near the player and unloading far-away parts to save memory.",
+    "Persistent / Atomic": "Streaming settings for a model. Persistent means it never unloads. Atomic means all of its pieces load and unload together.",
+    "asset / asset ID": "Something saved to Roblox's cloud, like a model, with a unique number you can use to insert it anywhere.",
+    "dependency": "Another asset a model needs, like a mesh, texture or sound inside it.",
+    "restricted asset": "An asset you can only use if you have permission. Without permission, it will not show or play in your game."
+  },
+  "example": {
+    "title": "Move and turn a model with code",
+    "place": "Script in ServerScriptService (with a model named House in the Workspace)",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal house = Workspace:WaitForChild(\"House\")\n\n-- Lift the whole house up 10 studs, keeping its rotation\nhouse:TranslateBy(Vector3.new(0, 10, 0))\nprint(\"Pivot is now at\", house:GetPivot().Position)\n\ntask.wait(2)\n\n-- Put the pivot at (50, 5, 0) and turn the house 90 degrees around the up axis\nlocal target = CFrame.new(50, 5, 0) * CFrame.Angles(0, math.rad(90), 0)\nhouse:PivotTo(target)",
+    "explain": [
+      "`WaitForChild` waits until the House model exists, then gives it to us.",
+      "`TranslateBy(Vector3.new(0, 10, 0))` slides every part in the model up by 10 studs. If the pivot was at height 5, it is now at height 15. The rotation does not change.",
+      "`PivotTo` puts the model's pivot exactly at a CFrame. `CFrame.new(50, 5, 0)` is the spot, and `CFrame.Angles(0, math.rad(90), 0)` adds a quarter turn around the up (Y) axis.",
+      "All parts keep their places relative to each other, so the house moves as one piece."
+    ]
+  },
+  "watchOut": [
+    "Moving a model by changing each part's Position one at a time breaks it apart. Use `PivotTo` or `TranslateBy` to move the whole model.",
+    "Grouping parts into a model does not glue them. If parts are not anchored or welded, they still fall separately when the game runs.",
+    "If a model you used from someone else is invisible or silent in-game, it may use restricted assets your game has no permission for.",
+    "Models made with streaming in mind can suddenly vanish when a player walks away. Mark important ones Persistent."
+  ]
+}

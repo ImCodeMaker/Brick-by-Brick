@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/environment/skybox.md",
+  "simple": "A skybox is the big sky picture that surrounds your whole game world. It is made of six images folded into a giant cube around you, lined up so you cannot see the edges. The `Sky` object inside `Lighting` holds these images, plus the sun, moon, and stars, which rise and set with the time of day. A good skybox makes your world feel huge, like outer space or the bottom of the ocean.",
+  "analogy": "A skybox is like the painted walls and ceiling of a giant room you stand in the middle of. If the paintings line up perfectly at the corners, it feels like an endless open sky instead of a box.",
+  "keyPoints": [
+    "A skybox is a cube of six images: back, down, front, left, right, and up.",
+    "The images must line up seamlessly on every edge when folded into a cube.",
+    "To make one: insert a `Sky` object into `Lighting`, then set `SkyboxBk`, `SkyboxDn`, `SkyboxFt`, `SkyboxLf`, `SkyboxRt`, and `SkyboxUp` in the Properties window.",
+    "Import your own images to Roblox first before using them in a skybox.",
+    "The sun, moon, and stars rise and set based on `Lighting.ClockTime`.",
+    "Customize them with `SunTextureId`, `SunAngularSize`, `MoonTextureId`, `MoonAngularSize`, and `StarCount`. Turn them all off with `CelestialBodiesShown`.",
+    "`SkyboxOrientation` rotates the skybox using degrees for X, Y, and Z. It turns around Y first, then X, then Z.",
+    "Rotating the skybox does not move the sun, moon, stars, or dynamic clouds."
+  ],
+  "terms": {
+    "skybox": "Six images arranged as a huge cube around the world to make the sky.",
+    "seamless": "Lined up so perfectly you cannot see where one image ends and the next begins.",
+    "panoramic": "A wide, all-around view, like standing in the middle of a field and looking every direction.",
+    "celestial bodies": "Things in the sky like the sun, moon, and stars.",
+    "angular size": "How big something looks in the sky, measured in degrees. Setting it to 0 hides the sun or moon.",
+    "texture": "An image put on a surface, like a sky picture on one face of the skybox.",
+    "orientation": "Which way something is turned or tilted.",
+    "axis": "An imaginary line something spins around. Spinning around the Y axis keeps the horizon level, like a merry-go-round.",
+    "modulo (%)": "The remainder after dividing. `370 % 360` is 10, which keeps an angle between 0 and 360.",
+    "cubemap": "A set of six images in a cube used for the sky or for reflections."
+  },
+  "example": {
+    "title": "Slowly spin the sky",
+    "place": "Script in ServerScriptService (add a Sky object to Lighting first)",
+    "code": "local Lighting = game:GetService(\"Lighting\")\nlocal RunService = game:GetService(\"RunService\")\n\nlocal sky = Lighting:WaitForChild(\"Sky\")\nlocal ROTATION_SPEED = 5 -- degrees per second\n\nRunService.Heartbeat:Connect(function(deltaTime)\n\tsky.SkyboxOrientation = Vector3.new(\n\t\t30, -- keep a steady 30 degree tilt on X\n\t\t(sky.SkyboxOrientation.Y + ROTATION_SPEED * deltaTime) % 360, -- spin on Y\n\t\t0\n\t)\nend)",
+    "explain": [
+      "The script waits for the `Sky` object inside Lighting.",
+      "Every frame, `Heartbeat` gives `deltaTime`, the seconds since the last frame.",
+      "It adds 5 degrees per second to the Y angle, so the sky turns slowly like a merry-go-round.",
+      "`% 360` keeps the angle between 0 and 360 so the number never grows huge.",
+      "The X angle stays at 30, giving the sky a fixed tilt."
+    ]
+  },
+  "watchOut": [
+    "Using images that do not line up at the edges. You will see seams where the cube faces meet.",
+    "Expecting the sun to spin with `SkyboxOrientation`. Only the six images rotate.",
+    "Forgetting to import your images first. They need asset IDs before you can use them.",
+    "Hiding the sun with `CelestialBodiesShown` when you only wanted it gone. That hides stars too; set `SunAngularSize` to 0 instead."
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "name": "ScrollingFrame",
+  "simple": "A ScrollingFrame is a Frame that can hold more stuff than fits inside it, and lets the player scroll to see the rest, with a mouse wheel, a finger swipe, or the scroll bar. It's how you make inventories, shop lists and leaderboards that can be longer than the window.",
+  "analogy": "A ScrollingFrame is like a window on a long scroll of paper. The window stays the same size, but you can roll the paper up and down to read all of it.",
+  "whenToUse": [
+    "Inventories with lots of items",
+    "Long shop lists or quest lists",
+    "Chat logs or leaderboards that keep growing"
+  ],
+  "where": "Inside a ScreenGui, SurfaceGui or BillboardGui. Create it in Studio or with Instance.new(\"ScrollingFrame\") in a LocalScript.",
+  "terms": {
+    "UI / GUI": "User Interface: the buttons, menus, text and pictures drawn on the screen or on things in the game.",
+    "LocalScript": "A script that runs on the player's own device. All UI code goes in LocalScripts.",
+    "ScreenGui": "The invisible container that holds UI shown on the player's screen. It must be inside the player's PlayerGui (put it in StarterGui in Studio).",
+    "parent": "The object something is placed inside.",
+    "UDim2": "The value used for Size and Position: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction (0 to 1) of the parent's size; Offset is exact pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "transparency": "How see-through something is. 0 = solid, 1 = invisible.",
+    "Color3": "A color made of red, green and blue amounts, like Color3.fromRGB(255, 0, 0) for red.",
+    "canvas": "The big 'paper' inside the ScrollingFrame that holds the content. It can be larger than the frame; the part that fits in the window is what you see.",
+    "CanvasSize": "How big the scrollable paper is. If the frame is 300 pixels tall and CanvasSize is 900 pixels tall, you can scroll down 600 pixels.",
+    "scroll bar": "The thin bar on the side you can drag to scroll.",
+    "inset": "Pushed in to make room. An inset canvas gets a bit smaller so the scroll bar doesn't cover content.",
+    "elastic scrolling": "The bouncy 'rubber band' effect on phones when you scroll past the end.",
+    "velocity": "Speed in a direction.",
+    "inertia": "When you flick a list on a phone and it keeps sliding for a bit after you let go.",
+    "AutomaticSize": "A setting that makes something grow to fit its content."
+  },
+  "examples": [
+    {
+      "title": "A scrolling list that grows to fit its items",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal list = Instance.new(\"ScrollingFrame\")\nlist.Size = UDim2.fromOffset(250, 300)              -- the window: 250 x 300 pixels\nlist.Position = UDim2.fromOffset(20, 100)\nlist.CanvasSize = UDim2.fromScale(0, 0)             -- start with no extra canvas...\nlist.AutomaticCanvasSize = Enum.AutomaticSize.Y     -- ...and let it grow downward to fit\nlist.ScrollingDirection = Enum.ScrollingDirection.Y -- only scroll up and down\nlist.ScrollBarThickness = 8\nlist.Parent = screenGui\n\nlocal layout = Instance.new(\"UIListLayout\")\nlayout.Padding = UDim.new(0, 5) -- 5 pixels between items\nlayout.Parent = list\n\nfor i = 1, 20 do\n\tlocal item = Instance.new(\"TextLabel\")\n\titem.Size = UDim2.new(1, -10, 0, 40) -- full width minus 10 px, 40 px tall\n\titem.Text = \"Item \" .. i\n\titem.Parent = list\nend",
+      "explain": [
+        "The ScrollingFrame window is 300 pixels tall.",
+        "20 items x 40 pixels + 19 gaps x 5 pixels = 895 pixels of content, way more than 300.",
+        "AutomaticCanvasSize Y makes the canvas grow tall enough for all items, so you can scroll down about 595 pixels.",
+        "UIListLayout stacks the labels in a column so we don't have to position each one."
+      ]
+    }
+  ],
+  "gotchas": [
+    "If you can't scroll, the CanvasSize is probably not bigger than the frame. Use AutomaticCanvasSize, or set CanvasSize bigger.",
+    "CanvasSize Scale is measured against the ScrollingFrame itself. CanvasSize UDim2.fromScale(0, 2) makes the canvas twice as tall as the frame.",
+    "UICorner and UIGradient don't work on a ScrollingFrame. Put the ScrollingFrame inside a rounded Frame instead.",
+    "Children with Scale sizes are measured against the canvas, which can make them huge if the canvas is big. Offset heights are often easier inside lists."
+  ],
+  "members": {
+    "ScrollingFrame.AbsoluteCanvasSize": {
+      "simple": "Read-only. The real size of the scrollable canvas in pixels, after AutomaticCanvasSize has done its work.",
+      "example": "local list = script.Parent\nprint(\"Canvas is\", list.AbsoluteCanvasSize.Y, \"pixels tall\")"
+    },
+    "ScrollingFrame.AbsoluteWindowSize": {
+      "simple": "Read-only. The size in pixels of the visible area, not counting the space taken by scroll bars. A 300-wide frame with an 8-pixel scroll bar showing gives about 292.",
+      "example": "local list = script.Parent\nprint(\"Visible area:\", list.AbsoluteWindowSize)"
+    },
+    "ScrollingFrame.AutomaticCanvasSize": {
+      "simple": "Makes the canvas grow automatically to fit everything inside. X = grow sideways, Y = grow downward, XY = both. Saves you from working out CanvasSize by hand.",
+      "example": "local list = script.Parent\nlist.CanvasSize = UDim2.fromScale(0, 0)\nlist.AutomaticCanvasSize = Enum.AutomaticSize.Y"
+    },
+    "ScrollingFrame.BottomImage": {
+      "simple": "The picture used for the bottom end of the vertical scroll bar (or the right end of the horizontal one). Change it to give your scroll bar a custom look.",
+      "example": "local list = script.Parent\nlist.BottomImage = \"rbxassetid://1234567890\" -- replace with your image ID"
+    },
+    "ScrollingFrame.BottomImageContent": {
+      "simple": "The newer Content version of BottomImage. Same picture, different value type. Only supports asset links.",
+      "example": "local list = script.Parent\nlist.BottomImageContent = Content.fromUri(\"rbxassetid://1234567890\")"
+    },
+    "ScrollingFrame.CanvasPosition": {
+      "simple": "How far the canvas is scrolled, in pixels, from the top-left. (0, 0) is the very top. Set it to jump to a spot, read it to know where the player scrolled.",
+      "example": "local list = script.Parent\nlist.CanvasPosition = Vector2.new(0, 0) -- jump back to the top",
+      "gotcha": "Doesn't do anything if there's nothing to scroll."
+    },
+    "ScrollingFrame.CanvasSize": {
+      "simple": "How big the scrollable paper is, as a UDim2. Scale is a fraction of the ScrollingFrame's own size, Offset is pixels. On a 300-pixel-tall frame, UDim2.new(0, 0, 0, 900) means 900 pixels of content, so you can scroll 600 pixels down.",
+      "example": "local list = script.Parent\nlist.CanvasSize = UDim2.new(0, 0, 0, 900) -- 900 px tall canvas",
+      "gotcha": "If it isn't bigger than the frame, nothing scrolls. AutomaticCanvasSize can do it for you."
+    },
+    "ScrollingFrame.ElasticBehavior": {
+      "simple": "On touch screens, decides whether the list bounces when you scroll past the end. WhenScrollable (default), Always or Never.",
+      "example": "local list = script.Parent\nlist.ElasticBehavior = Enum.ElasticBehavior.Never -- no bouncing"
+    },
+    "ScrollingFrame.HorizontalScrollBarInset": {
+      "simple": "Whether the canvas gets shorter to make room for the horizontal (bottom) scroll bar. None (default) = the bar may cover content. ScrollBar = make room only while the bar shows. Always = always make room.",
+      "example": "local list = script.Parent\nlist.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar"
+    },
+    "ScrollingFrame.MidImage": {
+      "simple": "The picture for the middle, stretchy part of the scroll bar, between TopImage and BottomImage.",
+      "example": "local list = script.Parent\nlist.MidImage = \"rbxassetid://1234567890\" -- replace with your image ID"
+    },
+    "ScrollingFrame.MidImageContent": {
+      "simple": "The newer Content version of MidImage. Only supports asset links.",
+      "example": "local list = script.Parent\nlist.MidImageContent = Content.fromUri(\"rbxassetid://1234567890\")"
+    },
+    "ScrollingFrame.ScrollBarImageColor3": {
+      "simple": "Tints the scroll bar pictures with a color. White means no tint. Easy way to make the scroll bar match your theme.",
+      "example": "local list = script.Parent\nlist.ScrollBarImageColor3 = Color3.fromRGB(0, 170, 255) -- blue scroll bar"
+    },
+    "ScrollingFrame.ScrollBarImageTransparency": {
+      "simple": "How see-through the scroll bar is. 0 = solid, 1 = invisible.",
+      "example": "local list = script.Parent\nlist.ScrollBarImageTransparency = 0.5"
+    },
+    "ScrollingFrame.ScrollBarThickness": {
+      "simple": "How thick the scroll bars are, in pixels. 0 hides them (you can still scroll with the wheel or a finger).",
+      "example": "local list = script.Parent\nlist.ScrollBarThickness = 6"
+    },
+    "ScrollingFrame.ScrollingDirection": {
+      "simple": "Which ways the player can scroll: X (sideways), Y (up and down) or XY (both, the default).",
+      "example": "local list = script.Parent\nlist.ScrollingDirection = Enum.ScrollingDirection.Y"
+    },
+    "ScrollingFrame.ScrollingEnabled": {
+      "simple": "Turns scrolling on or off. When false, the player can't scroll and no scroll bars show.",
+      "example": "local list = script.Parent\nlist.ScrollingEnabled = false -- freeze the list"
+    },
+    "ScrollingFrame.TopImage": {
+      "simple": "The picture for the top end of the vertical scroll bar (or the left end of the horizontal one).",
+      "example": "local list = script.Parent\nlist.TopImage = \"rbxassetid://1234567890\" -- replace with your image ID"
+    },
+    "ScrollingFrame.TopImageContent": {
+      "simple": "The newer Content version of TopImage. Only supports asset links.",
+      "example": "local list = script.Parent\nlist.TopImageContent = Content.fromUri(\"rbxassetid://1234567890\")"
+    },
+    "ScrollingFrame.VerticalScrollBarInset": {
+      "simple": "Whether the canvas gets narrower to make room for the vertical (side) scroll bar. None (default) = the bar may cover content. ScrollBar = make room only while the bar shows. Always = always make room.",
+      "example": "local list = script.Parent\nlist.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar"
+    },
+    "ScrollingFrame.VerticalScrollBarPosition": {
+      "simple": "Puts the vertical scroll bar on the Right (default) or Left side.",
+      "example": "local list = script.Parent\nlist.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left"
+    },
+    "ScrollingFrame:GetScrollVelocity": {
+      "simple": "Returns how fast (as a Vector2, in each direction) the list is still sliding after the player flicks it and lets go, mostly on touch screens.",
+      "example": "local list = script.Parent\nprint(\"Still sliding at\", list:GetScrollVelocity())",
+      "gotcha": "You'll mostly see real numbers on a phone or in Studio's Device Emulator."
+    },
+    "ScrollingFrame:ResetScrollVelocity": {
+      "simple": "Stops any leftover sliding right away by setting the scroll speed to 0.",
+      "example": "local list = script.Parent\nlist:ResetScrollVelocity() -- stop the list from sliding\nlist.CanvasPosition = Vector2.new(0, 0)"
+    }
+  }
+}

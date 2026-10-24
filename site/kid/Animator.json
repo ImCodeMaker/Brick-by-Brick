@@ -1,0 +1,91 @@
+{
+  "name": "Animator",
+  "simple": "The Animator is the part of a character that actually plays animations. You give it an Animation and it hands back an AnimationTrack you can play and stop. It also makes sure other players see your animations.",
+  "analogy": "The Animator is like a DVD player. The Animation object is the disc (it just has the movie on it), and the AnimationTrack is the remote control with Play and Stop buttons.",
+  "whenToUse": [
+    "Play a custom animation on a character or NPC (LoadAnimation).",
+    "Find or stop animations that are already playing (GetPlayingAnimationTracks).",
+    "React whenever any animation starts (AnimationPlayed)."
+  ],
+  "where": "Inside a Humanoid (`humanoid:WaitForChild(\"Animator\")`) for characters, or inside an AnimationController for rigs without a Humanoid. Player characters already have one. It must be in Workspace when you call LoadAnimation.",
+  "terms": {
+    "animation": "A recorded set of body movements, like a wave or a dance, saved on Roblox with an ID number.",
+    "Animation (object)": "A small object that just holds an animation's ID. It doesn't play anything by itself.",
+    "Animator": "The object inside a Humanoid (or AnimationController) that actually plays animations on a character.",
+    "AnimationTrack": "The 'remote control' for one loaded animation. You get it from Animator:LoadAnimation and call Play and Stop on it.",
+    "asset ID": "The number that identifies something uploaded to Roblox. Animations use it like `rbxassetid://507770239`.",
+    "rig": "A model set up with joints so it can be animated, like a character.",
+    "keyframe": "A saved pose at a certain moment in an animation. The animation smoothly moves between keyframes.",
+    "fade time": "How many seconds an animation takes to smoothly blend in or out, instead of snapping.",
+    "weight": "How strongly an animation affects the body, from 0 (not at all) to 1 (fully). Used when mixing animations.",
+    "priority": "Which animation wins when two want to move the same body part. Higher priority (like Action) beats lower (like Idle).",
+    "replicate": "Copy across the internet so the server and other players see it too.",
+    "client": "The player's own device. LocalScripts run there.",
+    "server": "The Roblox computer that runs the game for everyone.",
+    "AnimationController": "Like a Humanoid but only for animating. Use it for animated things that aren't characters, like a door or a creature.",
+    "LOD": "Level of detail. Doing less work for things that are far away or small on screen, to keep the game fast."
+  },
+  "examples": [
+    {
+      "title": "Play a wave animation when you press E",
+      "place": "LocalScript in StarterPlayer > StarterCharacterScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal animator = humanoid:WaitForChild(\"Animator\")\n\n-- 1. Make an Animation object that points to the animation's ID\nlocal waveAnimation = Instance.new(\"Animation\")\nwaveAnimation.AnimationId = \"rbxassetid://507770239\" -- Roblox's default R15 wave\n\n-- 2. Load it onto the Animator ONCE to get a track (a remote control)\nlocal waveTrack = animator:LoadAnimation(waveAnimation)\nwaveTrack.Priority = Enum.AnimationPriority.Action -- beat walking/idle animations\n\n-- 3. Play it whenever E is pressed\nUserInputService.InputBegan:Connect(function(input, typing)\n    if typing then\n        return -- ignore keys pressed while typing in chat\n    end\n    if input.KeyCode == Enum.KeyCode.E and not waveTrack.IsPlaying then\n        waveTrack:Play()\n    end\nend)\n\nwaveTrack.Stopped:Connect(function()\n    print(\"Done waving\")\nend)",
+      "explain": [
+        "Three pieces work together: an Animation (holds the ID) -> the Animator (plays it) -> an AnimationTrack (controls it).",
+        "Because this script is in StarterCharacterScripts, it is copied into the character each spawn, so script.Parent is the character.",
+        "We call LoadAnimation once and reuse the track. Loading again every time would make lots of extra tracks.",
+        "Priority Action makes the wave show over the normal walking and idle animations.",
+        "Animations a player plays on their own character from a LocalScript are copied to the server and everyone else automatically.",
+        "You can only play animations you or your group own (or Roblox's own), otherwise they won't load."
+      ]
+    },
+    {
+      "title": "Animate an NPC (everyone sees it)",
+      "place": "Script inside an NPC Model that has a Humanoid",
+      "code": "local npc = script.Parent\nlocal humanoid = npc:WaitForChild(\"Humanoid\")\n\n-- The Animator should be made on the server so animations replicate\nlocal animator = humanoid:FindFirstChildOfClass(\"Animator\")\nif not animator then\n    animator = Instance.new(\"Animator\")\n    animator.Parent = humanoid\nend\n\nlocal danceAnimation = Instance.new(\"Animation\")\ndanceAnimation.AnimationId = \"rbxassetid://507771019\" -- Roblox's default R15 dance\nlocal danceTrack = animator:LoadAnimation(danceAnimation)\ndanceTrack.Looped = true\ndanceTrack:Play()",
+      "explain": [
+        "For NPCs (not a player's character), load and play animations from a server Script so every player sees them.",
+        "If the Animator was made by a LocalScript instead, its animations would only show on that one player's screen.",
+        "Looped = true makes the dance repeat forever."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Use Animator:LoadAnimation, not the old Humanoid:LoadAnimation.",
+    "Don't call LoadAnimation every time you want to play. Load once, keep the track, and call Play again. Use GetTrackByAnimationId to find a track you already loaded.",
+    "The Animator must be in Workspace before LoadAnimation, or it errors.",
+    "Players animate their own character from LocalScripts; NPC animations should be started on the server."
+  ],
+  "members": {
+    "Animator.EvaluationThrottled": {
+      "simple": "Read-only. True if the Animator skipped updating the pose this frame to save work (it reused the last pose). Only needed for advanced scripts that add their own movement on top of animations."
+    },
+    "Animator.PreferLodEnabled": {
+      "simple": "If true (default), Roblox may update animations less often for characters that are far away or small on screen, to save work. Set false for an important NPC that must always animate smoothly.",
+      "example": "animator.PreferLodEnabled = false -- boss NPC always animates at full quality"
+    },
+    "Animator:ApplyJointVelocities": {
+      "simple": "Advanced. Gives body parts the speed they had from the playing animations, so when you turn a character into a ragdoll it keeps moving naturally instead of freezing. You must remove the joints yourself first."
+    },
+    "Animator:GetPlayingAnimationTracks": {
+      "simple": "Gives a list of the AnimationTracks currently active on this Animator, including ones fading out.",
+      "example": "for _, track in animator:GetPlayingAnimationTracks() do\n    track:Stop() -- stop every animation\nend"
+    },
+    "Animator:GetTrackByAnimationId": {
+      "simple": "Finds a track you already loaded for a certain animation ID, without making a new one. Gives nil if there isn't one.",
+      "example": "local track = animator:GetTrackByAnimationId(\"rbxassetid://507770239\")\nif track then\n    track:Play()\nend"
+    },
+    "Animator:LoadAnimation": {
+      "simple": "Loads an Animation onto the Animator and gives you an AnimationTrack to control it. On a player's own character, loading it on their device also loads it for the server.",
+      "example": "local animation = Instance.new(\"Animation\")\nanimation.AnimationId = \"rbxassetid://507770239\"\nlocal track = animator:LoadAnimation(animation)\ntrack:Play()",
+      "gotcha": "Each call makes a NEW track. Load once and reuse it."
+    },
+    "Animator:StepAnimations": {
+      "simple": "Plugin and command bar only. Moves all playing animations forward by a number of seconds, for previewing animations in Studio without running the game."
+    },
+    "Animator.AnimationPlayed": {
+      "simple": "Fires every time any AnimationTrack on this Animator starts playing. Gives you that track.",
+      "example": "animator.AnimationPlayed:Connect(function(track)\n    print(\"Started: \" .. track.Animation.AnimationId)\nend)"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "path": "content/en-us/audio/assets.md",
+  "simple": "This page shows you where to get sounds for your game and how to upload your own. You can grab free sounds from the Creator Store in Studio's Toolbox, or upload audio files you made yourself. Every sound gets an asset ID, which is the number your game uses to play it. It also explains the rules your files must follow and how songs can show up on your game's page.",
+  "analogy": "Uploading audio is like turning in a library book: the library checks it, gives it a code number, and after that anyone with permission can find it by that number.",
+  "keyPoints": [
+    "To find free sounds, open the Toolbox, go to the Creator Store tab, and pick Audio from the category dropdown.",
+    "Use search and filters to narrow results, then right-click a sound and choose Copy Asset ID.",
+    "Paste that asset ID into an `AudioPlayer` to play the sound.",
+    "Clicking a sound in the Toolbox inserts an older `Sound` object, which cannot do as much as an `AudioPlayer`.",
+    "You can upload your own audio through the Asset Manager, the Creator Dashboard, or the Open Cloud API.",
+    "Uploaded files must be yours to use, follow the Community Rules, be `.mp3`, `.ogg`, `.wav`, or `.flac`, be under 20 MB and under 7 minutes.",
+    "ID-verified creators can upload 2,000 free audio files every 30 days; unverified creators can upload 100.",
+    "New uploads go through moderation first, and at the start only you can use them unless you share permission."
+  ],
+  "terms": {
+    "Toolbox": "A Studio window where you can browse and insert free models, images, sounds, and more.",
+    "Asset Manager": "A Studio window that lists the files (assets) in your project and lets you import new ones.",
+    "Creator Dashboard": "The website at create.roblox.com where you manage your games and uploaded files.",
+    "Open Cloud API": "A way for programs outside Roblox to talk to Roblox, for example to upload files automatically. Most beginners will not need it.",
+    "moderation": "Roblox checking your upload to make sure it follows the rules before others can hear it.",
+    "transcode": "Roblox converts your file into its own standard sound format when you upload it. Broken files fail at this step.",
+    "sample rate": "How many tiny slices of sound are recorded each second. Roblox accepts up to 48 kHz, which means 48,000 slices per second.",
+    "mono / stereo": "Mono is one sound channel. Stereo is two channels (left and right). Roblox also accepts 3.0 and 5.1 surround.",
+    "asset privacy": "A system that keeps your uploaded audio private to you until you give other people or games permission to use it.",
+    "ID verified": "Your Roblox account has been confirmed with an official ID, which unlocks higher upload limits.",
+    "sound effect vs. song": "Roblox sorts each upload as one or the other. Only songs can appear on your game's details page."
+  },
+  "watchOut": [
+    "Clicking a sound in the Toolbox drops in a `Sound` object. If you want the newer system, right-click and copy the asset ID instead, then paste it into an `AudioPlayer`.",
+    "If your upload fails, the file may be broken or too big. Check it is under 20 MB, under 7 minutes, and in a supported format.",
+    "Your freshly uploaded sound will not play for others until it passes moderation, so upload early.",
+    "Only upload sounds you made or have the rights to. Copying music from elsewhere can get it removed."
+  ]
+}

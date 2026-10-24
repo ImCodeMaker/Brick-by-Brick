@@ -1,0 +1,58 @@
+{
+  "name": "ColorSequence",
+  "simple": "A ColorSequence is a color gradient: colors that blend from one to another along a timeline from 0 (start) to 1 (end). You describe it with ColorSequenceKeypoints, and Roblox blends smoothly between them. It colors particles, beams, trails, and UI gradients.",
+  "analogy": "It is like a sunset painted on a strip of paper: orange on the left, pink in the middle, purple on the right, all blended together.",
+  "whenToUse": [
+    "ParticleEmitter.Color: fire that starts yellow and turns red",
+    "Trail.Color and Beam.Color: rainbow streaks",
+    "UIGradient.Color: a colorful gradient on a button or frame"
+  ],
+  "where": "Works in any script. Make one with ColorSequence.new(color), ColorSequence.new(startColor, endColor), or ColorSequence.new({ keypoints }).",
+  "terms": {
+    "gradient": "A smooth blend from one color to another.",
+    "keypoint": "One dot on a timeline that says \"at this moment, the value is this\". Roblox draws a straight line between dots to fill in the moments in between.",
+    "time (0 to 1)": "Where on the timeline a keypoint sits, as a fraction. 0 is the very start, 1 is the very end, 0.5 is halfway. For a particle that lives 2 seconds, time 0.5 means after 1 second.",
+    "Color3": "A color made of red, green, and blue amounts.",
+    "ParticleEmitter": "An object that shoots out lots of little images (particles) to make fire, smoke, sparkles, and similar effects.",
+    "Trail": "A streak that follows behind a moving object, like a comet tail.",
+    "UIGradient": "An object you put inside a UI element to color it with a gradient."
+  },
+  "examples": [
+    {
+      "title": "A rainbow gradient on a button",
+      "place": "LocalScript in StarterGui (with a ScreenGui that has a TextButton named PlayButton)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nlocal button = playerGui:WaitForChild(\"ScreenGui\"):WaitForChild(\"PlayButton\")\n\n-- The button's own color should be white so the gradient shows true colors\nbutton.BackgroundColor3 = Color3.new(1, 1, 1)\n\nlocal gradient = Instance.new(\"UIGradient\")\ngradient.Color = ColorSequence.new({\n\tColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),   -- left: red\n\tColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)), -- middle: green\n\tColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255)),   -- right: blue\n})\ngradient.Parent = button",
+      "explain": [
+        "We find the button in the player's screen UI.",
+        "A UIGradient tints its parent, so a white background lets the colors show clearly.",
+        "Three keypoints: red at the start (left edge), green in the middle, blue at the end (right edge).",
+        "Between the keypoints Roblox blends the colors, so you see orange and yellow between red and green."
+      ]
+    },
+    {
+      "title": "Fire that turns from yellow to red",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = workspace\n\nlocal fire = Instance.new(\"ParticleEmitter\")\nfire.Color = ColorSequence.new(Color3.fromRGB(255, 220, 0), Color3.fromRGB(255, 30, 0))\nfire.Parent = part",
+      "explain": [
+        "ColorSequence.new(start, finish) is a shortcut for two keypoints.",
+        "Each particle is yellow when it is born and slowly turns red as it gets older."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The first keypoint must be at time 0 and the last at time 1.",
+    "Keypoints must be in time order, and you can have between 2 and 20 of them.",
+    "There is no built-in \"what color is it at time 0.3?\" function. You can write one that blends the two nearest keypoints."
+  ],
+  "members": {
+    "ColorSequence.new": {
+      "simple": "Makes a ColorSequence. Give it one Color3 (that color the whole way), two Color3s (start and end), or a list of ColorSequenceKeypoints for more colors.",
+      "example": "local allRed = ColorSequence.new(Color3.fromRGB(255, 0, 0))\nlocal sunset = ColorSequence.new(Color3.fromRGB(255, 150, 0), Color3.fromRGB(150, 0, 200))\nlocal three = ColorSequence.new({\n\tColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),\n\tColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 190, 200)),\n\tColorSequenceKeypoint.new(1, Color3.fromRGB(190, 0, 255)),\n})",
+      "gotcha": "With a list, the first time must be 0 and the last must be 1."
+    },
+    "ColorSequence.Keypoints": {
+      "simple": "The list of ColorSequenceKeypoints in this gradient, in time order. Read it to see each color stop.",
+      "example": "local seq = ColorSequence.new(Color3.new(1, 0, 0), Color3.new(0, 0, 1))\nfor _, keypoint in seq.Keypoints do\n\tprint(keypoint.Time, keypoint.Value)\nend"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "path": "content/en-us/workspace/streaming/index.md",
+  "simple": "Instance streaming means a player's device only loads the parts of your world that are near them, and drops far-away parts when memory runs low. This lets players start playing faster, lets big worlds run on cheaper phones, and keeps the game smoother. The catch is that a LocalScript cannot assume every part exists on the player's device at all times. This page explains how streaming decides what to load, the Workspace settings that control it, and model settings for things that must load together or always be there.",
+  "analogy": "It is like a video game map in fog. You only see and remember the area around you clearly. As you walk, new areas appear ahead, and if your backpack (memory) gets too full, you forget the far-away places you are not using.",
+  "keyPoints": [
+    "Streaming is turned on with `Workspace.StreamingEnabled`, which is on by default for new places. You change it in the Properties window, not in a script.",
+    "Only things inside Workspace stream. Things in ReplicatedStorage or ReplicatedFirst are never streamed.",
+    "When a player joins, parts and certain models are held back and sent later as the player gets near them.",
+    "`StreamingMinRadius` (default 64 studs) is the top-priority area that never streams out. `StreamingTargetRadius` (default 1024 studs) is the farthest the game tries to load. Keep the target bigger than the minimum.",
+    "Recommended settings: `ModelStreamingBehavior` = Improved, `StreamingIntegrityMode` = PauseOutsideLoadedArea, `StreamOutBehavior` = Opportunistic.",
+    "Streaming centers on the player's character by default. You can add more centers with `Player:AddReplicationFocus()`, but each one adds server work.",
+    "A model's `ModelStreamingMode` can be Nonatomic (default, parts arrive bit by bit), Atomic (all parts arrive together), Persistent (always loaded, use rarely), or PersistentPerPlayer.",
+    "Press Shift+F3 in a live game (Shift+Ctrl+F3 or Shift+Cmd+F3 in Studio), then Shift+1 to the fourth panel, to see a streaming debug view with colored regions."
+  ],
+  "terms": {
+    "instance streaming": "Loading and unloading parts of the 3D world on a player's device while they play, based on where they are.",
+    "stream in": "When the server sends a part or model to the player's device so it appears there.",
+    "stream out": "When the player's device removes a far-away part to free memory. It can stream back in later.",
+    "memory": "The space a device has to hold the game while it runs. Phones usually have much less than PCs.",
+    "bandwidth": "How much data can travel over the internet connection per second.",
+    "replication focus": "The center point streaming loads around. Normally it is your character's main part (the PrimaryPart).",
+    "radius": "The distance from the center to the edge of a circle or sphere. A `StreamingMinRadius` of 64 means everything within 64 studs of your character gets top priority.",
+    "stud": "Roblox's unit of length. A default character is about 5 studs tall.",
+    "buffer": "Extra loaded space between the minimum and target radius, so you still have content around you if the connection hiccups. With 64 and 1024, the buffer is from 64 to 1024 studs out.",
+    "atomic": "All at once, as one piece. An Atomic model streams in with all its parts together, never half.",
+    "persistent": "Always kept. A Persistent model is sent soon after joining and never streams out.",
+    "assembly": "A group of connected parts that physics treats as one object. Unanchored assemblies stream in as a whole.",
+    "anchored": "A part that is frozen in place and not moved by physics.",
+    "parented to nil": "Taken out of the tree so it is not in the world, without being destroyed. Streamed-out parts are parented to nil so they can come back.",
+    "predictive streaming": "An opt-in setting where Roblox guesses where you are going next, like your respawn point, and starts loading it early.",
+    "garbage collect": "Clean out things that are no longer needed so memory is freed."
+  },
+  "example": {
+    "title": "Show your own loading message when the game pauses for streaming",
+    "place": "LocalScript in StarterPlayerScripts (with Workspace.StreamingIntegrityMode set to PauseOutsideLoadedArea)",
+    "code": "local Players = game:GetService(\"Players\")\nlocal GuiService = game:GetService(\"GuiService\")\n\nlocal player = Players.LocalPlayer\n\n-- Turn off Roblox's default pause popup\nGuiService:SetGameplayPausedNotificationEnabled(false)\n\n-- Build a simple full-screen message\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.ResetOnSpawn = false\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.fromScale(1, 1)\nlabel.BackgroundTransparency = 0.4\nlabel.Text = \"Loading the world around you...\"\nlabel.TextScaled = true\nlabel.Visible = false\nlabel.Parent = screenGui\n\nlocal function onPauseStateChanged()\n\t-- GameplayPaused is true while the area around you is still loading\n\tlabel.Visible = player.GameplayPaused\nend\n\nplayer:GetPropertyChangedSignal(\"GameplayPaused\"):Connect(onPauseStateChanged)",
+    "explain": [
+      "With PauseOutsideLoadedArea on, the game pauses a player who walks into an area that has not loaded yet.",
+      "We turn off the default popup with `SetGameplayPausedNotificationEnabled(false)` so we can show our own.",
+      "We build a ScreenGui with a big see-through TextLabel, hidden at first.",
+      "Whenever `player.GameplayPaused` changes, we show the label if paused and hide it when loading finishes."
+    ]
+  },
+  "watchOut": [
+    "Writing a LocalScript like `workspace.Castle.Door` and getting an error because the door has not streamed in yet. Use `WaitForChild` or wait for it to appear.",
+    "Changing a part only in a LocalScript and expecting it to stay. If the part streams out and back in, local-only changes can be lost.",
+    "Making StreamingMinRadius equal to StreamingTargetRadius. There is then no buffer, which causes more pauses.",
+    "Setting lots of models to Persistent to dodge streaming. It defeats the point and can hurt performance. Use it only for the few things scripts truly need at all times.",
+    "Putting a model in ReplicatedStorage and expecting Atomic streaming to work. Streaming rules only apply inside Workspace."
+  ]
+}

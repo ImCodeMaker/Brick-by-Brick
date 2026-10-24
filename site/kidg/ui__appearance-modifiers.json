@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/ui/appearance-modifiers.md",
+  "simple": "Appearance modifiers are small objects you drop inside a UI element to make it look nicer. `UIGradient` blends colors, `UIStroke` adds an outline, `UICorner` rounds the corners, `UIPadding` adds space inside the edges, and `UIShadow` adds a shadow. You do not need code for any of them; just insert one and change its properties. Mixing them turns plain boxes into polished buttons and panels.",
+  "analogy": "Modifiers are like accessories for your avatar: the avatar is the same, but adding a hat, an outline glow, or a shadow makes it look totally different.",
+  "keyPoints": [
+    "Each modifier works by being placed inside (as a child of) the UI object it changes.",
+    "`UIGradient` blends colors (`Color`) and see-through levels (`Transparency`) across the object; `Rotation` and `Offset` change its direction and starting point.",
+    "Gradient `Type` can be Linear, Radial, Elliptical, or Conical, and `Scale` and `TileMode` control how it repeats (these are beta features).",
+    "`UIStroke` outlines text when placed in a text object, or outlines the border of other objects; `Thickness`, `Color`, and `Transparency` style it.",
+    "`ApplyStrokeMode` set to Border puts the stroke around a text object's box instead of its letters.",
+    "`UICorner` rounds corners with `CornerRadius`: scale 0.5 or more makes a pill shape, and offset rounds by a set number of pixels.",
+    "`UIPadding` adds space between the edges of an object and its contents, such as pushing text away from a label's edges.",
+    "`UIShadow` draws a shadow behind or inside an object, with blur, color, offset, and spread settings."
+  ],
+  "terms": {
+    "modifier": "An object that changes how its parent looks, without being something you see on its own.",
+    "gradient": "A smooth blend from one color to another, like a sunset going from orange to purple.",
+    "keypoint": "A marker on the gradient that says \"at this point, use this color\". Time 0 is the start, 1 is the end.",
+    "ColorSequence / NumberSequence": "Lists of keypoints for colors or numbers along a gradient.",
+    "stroke": "An outline drawn around text or a box.",
+    "Thickness": "How wide the outline is, in pixels by default. 4 is thin, 12 is chunky.",
+    "CornerRadius": "How round the corners are. Offset 16 rounds them by 16 pixels; scale 0.5 makes a full pill shape.",
+    "padding": "Empty space inside the edge. A `PaddingLeft` of 10 pixels moves contents 10 pixels in from the left.",
+    "blur": "Soft, fuzzy edges. A bigger `BlurRadius` makes a softer shadow.",
+    "spread": "How much bigger or smaller the shadow is than the object.",
+    "beta": "A feature still being tested that you may need to turn on in Studio settings."
+  },
+  "example": {
+    "title": "Make a fancy rounded button",
+    "place": "LocalScript inside a TextButton (inside a ScreenGui in StarterGui)",
+    "code": "local button = script.Parent\nbutton.BackgroundColor3 = Color3.new(1, 1, 1) -- start from a plain white button\n\n-- Round the corners by 12 pixels\nlocal corner = Instance.new(\"UICorner\")\ncorner.CornerRadius = UDim.new(0, 12)\ncorner.Parent = button\n\n-- Blue-to-purple background blend\nlocal gradient = Instance.new(\"UIGradient\")\ngradient.Color = ColorSequence.new(Color3.fromRGB(0, 120, 255), Color3.fromRGB(150, 0, 255))\ngradient.Rotation = 90 -- blend from top to bottom\ngradient.Parent = button\n\n-- Dark outline around the button's border\nlocal stroke = Instance.new(\"UIStroke\")\nstroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- outline the box, not the letters\nstroke.Thickness = 3\nstroke.Color = Color3.fromRGB(20, 20, 40)\nstroke.Parent = button\n\n-- Keep text away from the edges\nlocal padding = Instance.new(\"UIPadding\")\npadding.PaddingLeft = UDim.new(0, 10)\npadding.PaddingRight = UDim.new(0, 10)\npadding.Parent = button",
+    "explain": [
+      "We start from a plain white button.",
+      "A `UICorner` rounds the corners by 12 pixels.",
+      "A `UIGradient` blends blue into purple, turned 90 degrees so it goes top to bottom.",
+      "A `UIStroke` with `ApplyStrokeMode` Border draws a dark outline around the button box instead of the text.",
+      "A `UIPadding` keeps the text 10 pixels from the left and right edges."
+    ]
+  },
+  "watchOut": [
+    "A `UIStroke` inside a `TextLabel` or `TextButton` outlines the letters by default. Set `ApplyStrokeMode` to Border to outline the box.",
+    "Do not tween the `Thickness` of a stroke on text. It can cause lag or flickering.",
+    "If two strokes or shadows have the same `ZIndex`, their order is random. Give them different values.",
+    "Some gradient and shadow features are beta, so they may not work until you enable them."
+  ]
+}

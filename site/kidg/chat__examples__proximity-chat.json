@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/chat/examples/proximity-chat.md",
+  "simple": "Proximity chat means players only see messages from people standing near them. This example uses a channel's `ShouldDeliverCallback` to decide, for each listener, whether a message should reach them. If the listener is too far from the sender, the message is not delivered. It makes chat feel like real talking in a big world.",
+  "analogy": "It is like talking in a big park. People next to you hear you, but someone across the field does not.",
+  "keyPoints": [
+    "The script goes in a Script in ServerScriptService.",
+    "It uses the `RBXGeneral` channel, but you could make a separate channel just for nearby chat.",
+    "A helper function finds a player's position with `character:GetPivot().Position`.",
+    "`ShouldDeliverCallback` runs once for each possible listener. Return true to deliver the message, false to skip that listener.",
+    "The example delivers only when the two players are less than 50 studs apart.",
+    "If a player or character cannot be found, the helper returns `Vector3.zero` (the point 0, 0, 0)."
+  ],
+  "terms": {
+    "proximity": "How close two things are. Proximity chat depends on how close players are.",
+    "TextSource": "Represents one speaker or listener in a channel. Its `UserId` tells you which player it is.",
+    "ShouldDeliverCallback": "A function you set on a channel. Roblox asks it, for each listener, should this message reach them?",
+    "Magnitude": "The length of a vector. `(targetPos - sourcePos).Magnitude` is the distance between two players. If one is at (0, 0, 0) and the other at (30, 0, 40), the distance is 50.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall, so 50 studs is about 10 characters tall.",
+    "GetPivot": "Gets a model's main position and rotation. `.Position` is just the location part."
+  },
+  "example": {
+    "title": "Only deliver chat to players within 50 studs",
+    "place": "Script in ServerScriptService",
+    "code": "local TextChatService = game:GetService(\"TextChatService\")\nlocal Players = game:GetService(\"Players\")\n\nlocal MAX_DISTANCE = 50 -- studs\n\nlocal generalChannel = TextChatService:WaitForChild(\"TextChannels\"):WaitForChild(\"RBXGeneral\")\n\n-- Find where a player's character is\nlocal function getPositionFromUserId(userId: number): Vector3\n\tlocal player = Players:GetPlayerByUserId(userId)\n\tif player and player.Character then\n\t\treturn player.Character:GetPivot().Position\n\tend\n\treturn Vector3.zero -- fallback if no character\nend\n\n-- Decide, for each listener, if they should get the message\ngeneralChannel.ShouldDeliverCallback = function(message: TextChatMessage, target: TextSource)\n\tlocal sourcePos = getPositionFromUserId(message.TextSource.UserId)\n\tlocal targetPos = getPositionFromUserId(target.UserId)\n\treturn (targetPos - sourcePos).Magnitude < MAX_DISTANCE\nend",
+    "explain": [
+      "We get the general chat channel.",
+      "`getPositionFromUserId` turns a user ID into a position in the world.",
+      "For every message and every listener, Roblox calls `ShouldDeliverCallback`.",
+      "We subtract the two positions and take `.Magnitude` to get the distance between them.",
+      "If the distance is under 50 studs, we return true and the listener sees the message. Otherwise they do not."
+    ]
+  },
+  "watchOut": [
+    "Players without a character count as being at (0, 0, 0). Two players who just respawned could both be there and hear each other.",
+    "Putting this in a LocalScript. `ShouldDeliverCallback` is set on the server, so use a Script in ServerScriptService.",
+    "Making the distance too small. Try different values in a test server so players can still talk to friends nearby."
+  ]
+}

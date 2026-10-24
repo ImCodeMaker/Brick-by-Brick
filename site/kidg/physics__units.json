@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/physics/units.md",
+  "simple": "This page explains the measuring units Roblox physics uses, like studs for length and RMUs for mass, and how they compare to real-world units. That matters when you tune speeds, forces, springs, and materials and want them to feel right. For example, one stud is about 28 centimeters. It also shows Roblox's default gravity, which is much stronger than real Earth gravity.",
+  "analogy": "It is like converting between Celsius and Fahrenheit: the heat is the same, you just use a different number to describe it. Studs and meters describe the same distance with different numbers.",
+  "keyPoints": [
+    "Time is the same: 1 second in Roblox is 1 real second.",
+    "Length: 1 stud equals 28 cm. So a 10-stud wall is about 2.8 meters tall.",
+    "Mass: 1 RMU (Roblox Mass Unit) equals 21.952 kg.",
+    "Speed: 1 meter per second equals 3.57 studs per second.",
+    "Force is measured in Rowtons (1 newton is 0.163 Rowtons), and torque in Rowton-studs (1 newton-meter is 0.581 Rowton-studs).",
+    "Default Roblox gravity is 196.2 studs/s², about 5.6 times stronger than real gravity. Realistic gravity is 35 studs/s².",
+    "Material settings have limits: density 0.0001 to 100, friction 0 to 2, elasticity 0 to 1, and friction or elasticity weight 0 to 100.",
+    "The engine itself does not care what a stud 'really' is, but it is best to stick with the standard Roblox units so things like VR controls work as expected."
+  ],
+  "terms": {
+    "stud": "Roblox's unit of length. 1 stud is 28 cm, so a 4-stud-wide part is about 1.1 meters wide.",
+    "RMU": "Roblox Mass Unit, the unit for how heavy something is. 1 RMU is 21.952 kg.",
+    "density": "How heavy something is for its size. Water is 1 RMU per cubic stud, so a 1x1x1-stud block of water-density material weighs 1 RMU.",
+    "Rowton": "Roblox's unit of force. 1 newton (the real-world force unit) equals 0.163 Rowtons.",
+    "torque": "A twisting force, measured in Rowton-studs.",
+    "studs/s²": "How fast speed changes each second. Gravity of 196.2 studs/s² means a falling object gains 196.2 studs per second of speed every second.",
+    "spring stiffness and damping": "Stiffness is how hard a spring pulls back; damping is how much it slows down bouncing.",
+    "friction": "How much surfaces grip. 0 is like ice; 2 is very grippy.",
+    "elasticity": "How bouncy something is. 0 does not bounce; 1 bounces back with almost all its energy.",
+    "metric units": "Real-world units like meters, kilograms, and newtons."
+  },
+  "example": {
+    "title": "Switch to realistic gravity",
+    "place": "Script in ServerScriptService",
+    "code": "-- Roblox default gravity is 196.2 studs/s^2\nprint(\"Old gravity:\", workspace.Gravity)\n\n-- 35 studs/s^2 matches real Earth gravity (9.8 m/s^2)\nworkspace.Gravity = 35\n\n-- Convert a real-world speed to studs per second\nlocal metersPerSecond = 5\nlocal studsPerSecond = metersPerSecond * 3.57\nprint(\"5 m/s is about\", studsPerSecond, \"studs per second\")",
+    "explain": [
+      "`workspace.Gravity` holds the gravity strength in studs per second squared.",
+      "Setting it to 35 makes things fall like they do in real life, which feels floatier than normal Roblox.",
+      "To turn a real speed into studs per second, multiply by 3.57, because 1 m/s equals 3.57 studs/s."
+    ]
+  },
+  "watchOut": [
+    "Changing `workspace.Gravity` to realistic values makes jumps feel very floaty and high. Players' jump settings may need adjusting too.",
+    "Numbers from real-world physics will not work as-is. Convert them with the table first, or your forces will be way too strong or weak.",
+    "If you invent your own meaning for a stud (like 1 foot), use it the same way everywhere, or your physics will not match up."
+  ]
+}

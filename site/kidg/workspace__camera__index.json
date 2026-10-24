@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/workspace/camera/index.md",
+  "simple": "Roblox already gives every game a camera that follows your character in third person, and you can zoom into first person. This page shows how to change that camera's settings, like how far players can zoom and how it moves. It also shows how to take full control of the camera with a script for things like cutscenes or a top-down view. Each player has their own camera, so camera scripts run on the player's device.",
+  "analogy": "It is like a camera operator following an actor on a movie set: by default they follow the actor around, but as the director you can tell them how close to stand, or take the camera yourself to film a special shot.",
+  "keyPoints": [
+    "Basic camera settings live on `StarterPlayer` in the Properties window, in the Camera section.",
+    "`CameraMinZoomDistance` and `CameraMaxZoomDistance` set how close and how far players can zoom. Set both to the same number to lock the zoom.",
+    "`CameraMode` can be Classic (third person you can zoom) or LockFirstPerson (always first person).",
+    "Occlusion mode decides what happens when a wall gets between the camera and you: Zoom moves the camera in close, Invisicam makes the wall see-through.",
+    "Movement modes (Classic, Follow, Orbital, CameraToggle, UserChoice) control how players can turn the camera, separately for computers and touch devices.",
+    "Each player's camera is `workspace.CurrentCamera`, and you script it from a `LocalScript`.",
+    "Set `CameraType` to `Scriptable` to take full control, then move it with `CFrame` and change `FieldOfView` (1 to 120 degrees, default 70)."
+  ],
+  "terms": {
+    "third person / first person": "Third person shows your character from behind. First person shows the world through your character's eyes.",
+    "zoom distance": "How far the camera sits from your character, in studs. A max zoom of 25 means you can pull back at most 25 studs.",
+    "occlusion": "When something blocks the view between the camera and your character, like a wall.",
+    "pitch": "Tilting the camera up or down.",
+    "orbit": "Circling the camera around your character while still looking at it.",
+    "client": "The player's own device. Each client has its own camera.",
+    "CFrame": "A value holding both a position and a rotation. The camera's `CFrame` says where it is and which way it looks.",
+    "field of view": "How wide the camera sees, in degrees. 70 is normal; a smaller number like 30 zooms in like binoculars.",
+    "Focus": "The point the camera is looking at. If you script the camera yourself, update it every frame because nearby details depend on it.",
+    "Scriptable": "A `CameraType` that turns off Roblox's automatic camera so your script fully controls it."
+  },
+  "example": {
+    "title": "Make a fixed overhead camera",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\nlocal RunService = game:GetService(\"RunService\")\n\nlocal player = Players.LocalPlayer\nlocal camera = workspace.CurrentCamera\n\ncamera.CameraType = Enum.CameraType.Scriptable\ncamera.FieldOfView = 50\n\nRunService.RenderStepped:Connect(function()\n\tlocal character = player.Character\n\tlocal root = character and character:FindFirstChild(\"HumanoidRootPart\")\n\tif root then\n\t\t-- Sit 40 studs above and 20 studs behind the player, looking at them\n\t\tlocal cameraPosition = root.Position + Vector3.new(0, 40, 20)\n\t\tcamera.CFrame = CFrame.lookAt(cameraPosition, root.Position)\n\t\tcamera.Focus = root.CFrame\n\tend\nend)",
+    "explain": [
+      "This is a LocalScript because each player controls their own camera.",
+      "Setting `CameraType` to `Scriptable` turns off the default following camera.",
+      "Every frame, we find the player's `HumanoidRootPart`.",
+      "We place the camera 40 studs up and 20 studs back from the player, and use `CFrame.lookAt` to aim it at them.",
+      "We also update `Focus` each frame, as the page recommends for scriptable cameras."
+    ]
+  },
+  "watchOut": [
+    "Make sure `CameraMaxZoomDistance` is bigger than or equal to `CameraMinZoomDistance`. Mixing them up makes zoom act strangely.",
+    "Camera code must be in a `LocalScript`. A server `Script` cannot control a player's camera.",
+    "In `Scriptable` mode the camera will not follow the player at all unless your script moves it every frame.",
+    "`CameraToggle` only works on computers, not on phones or tablets."
+  ]
+}

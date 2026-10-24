@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/matchmaking/attributes-and-signals.md",
+  "simple": "This page lists the facts (attributes) and scoring rules (signals) that matchmaking uses to pick a server. Roblox already tracks things like age, language, device, ping, and friends. If you want to match players by something special to your game, like skill rating or game mode, you make your own custom attributes and signals. The page shows the exact math each signal uses to turn a fact into a score from 0 to 1.",
+  "analogy": "Attributes are like ingredients, and signals are recipes. The recipe takes ingredients like age or language and turns them into a taste score from 0 to 1 for each server.",
+  "keyPoints": [
+    "Roblox's built-in attributes include latency, has friends, voice chat, age, device type, language, play history, occupancy, and text chat group.",
+    "Built-in signals turn those into 0-to-1 scores. For example, Occupancy is players in server divided by server capacity.",
+    "The Friends signal is 1 if a friend (or someone on the same IP address) is in the server, otherwise 0.",
+    "The Latency signal gives 1 for no extra ping and 0 for 100 milliseconds or more of extra ping.",
+    "Custom player attributes are saved in data stores (like a skill rating), so they last between sessions.",
+    "Custom server attributes only last while the server runs and are managed with `MatchmakingService:GetServerAttribute` and `SetServerAttribute`.",
+    "Custom signals can be numerical (closer numbers score higher) or categorical (matching or not matching values).",
+    "Categorical signals can cluster (group similar players) or diversify (mix different players)."
+  ],
+  "terms": {
+    "attribute": "A fact used for matchmaking, like a player's age or a server's game mode.",
+    "signal": "A rule that turns an attribute into a score from 0 to 1.",
+    "numerical": "Based on numbers. Scores depend on how far apart two numbers are.",
+    "categorical": "Based on categories like words or true/false. Scores depend on whether values match.",
+    "latency / ping": "How long data takes to travel between your device and the server, in milliseconds (ms).",
+    "delta ping": "Extra ping compared to your best possible server. If your best is 30 ms and this server is 80 ms, delta ping is 50 ms, giving a score of 1 - 50/100 = 0.5.",
+    "IP address": "A number that identifies an internet connection. Players on the same home Wi-Fi often share one, so they count like friends.",
+    "log-10": "A way of shrinking big numbers. log-10 of 10 is 1, of 100 is 2, of 1000 is 3. Play history uses it so 1000 minutes is not treated as wildly different from 500.",
+    "max relevant difference": "The gap where the score hits 0. For Age it is 25 years, so a 30-year gap scores the same as a 25-year gap: 0.",
+    "aggregated value": "A single number that sums up the whole server, like the average skill of all players.",
+    "persistent": "Saved even after the player leaves. Player attributes in data stores are persistent; server attributes are not.",
+    "Elo": "A skill rating number. Winning raises it and losing lowers it.",
+    "clustering": "Putting players with the same value together, like all members of one guild. 15 of 19 matching gives 15/19, about 0.79.",
+    "diversifying": "Mixing players with different values, like different RPG classes. The score is 1 minus the share that match."
+  },
+  "example": {
+    "title": "Read and set a server attribute",
+    "place": "Script in ServerScriptService",
+    "code": "local MatchmakingService = game:GetService(\"MatchmakingService\")\nlocal RunService = game:GetService(\"RunService\")\n\n-- In Studio, set up test values first\nif RunService:IsStudio() then\n\tMatchmakingService:InitializeServerAttributesForStudio({\n\t\tLevel = \"Advanced\",\n\t\tTrainingMode = true,\n\t})\nend\n\n-- Read the Level attribute\nlocal currentLevel, errorMessage = MatchmakingService:GetServerAttribute(\"Level\")\nif errorMessage then\n\twarn(errorMessage)\nelse\n\tprint(\"Current level: \" .. tostring(currentLevel))\nend\n\n-- Change the Level attribute\nlocal success, setError = MatchmakingService:SetServerAttribute(\"Level\", \"Beginner\")\nif not success then\n\twarn(\"Could not set Level: \" .. tostring(setError))\nend",
+    "explain": [
+      "We get `MatchmakingService`, which manages server attributes for matchmaking.",
+      "In Studio there is no real matchmaking, so `InitializeServerAttributesForStudio` sets up pretend values to test with.",
+      "`GetServerAttribute(\"Level\")` gives back the value and an error message. If there is an error, we warn.",
+      "`SetServerAttribute` changes the value. It returns whether it worked and, if not, why.",
+      "Matchmaking can now use this server's Level when scoring it for joining players."
+    ]
+  },
+  "watchOut": [
+    "Expecting server attributes to be saved forever. They vanish when the server shuts down. Use data stores for player data that must last.",
+    "Forgetting to call `InitializeServerAttributesForStudio` when testing in Studio.",
+    "Mixing up clustering and diversifying. Clustering puts similar players together, diversifying spreads them out."
+  ]
+}

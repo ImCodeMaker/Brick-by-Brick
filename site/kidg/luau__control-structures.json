@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/luau/control-structures.md",
+  "simple": "Control structures decide which code runs and how many times. `if` statements make choices, and loops (`while`, `repeat`, and `for`) repeat code. With these, your game can react to players, count down timers, and go through every item in a list. They are the backbone of almost every script you will write.",
+  "analogy": "Control structures are like directions on a treasure map: \"if the bridge is out, take the boat\" (`if`), \"keep walking while you can see the river\" (`while`), and \"take 10 steps north\" (`for`).",
+  "keyPoints": [
+    "`if ... then ... end` runs code only when a condition is true. Add `elseif` and `else` for other cases. Luau checks top to bottom and stops at the first true one.",
+    "Only `false` and `nil` count as false. `0` and `\"\"` count as true.",
+    "`while condition do ... end` repeats as long as the condition stays true.",
+    "`while true do` makes a loop that never ends. Always put `task.wait()` inside, or the game freezes.",
+    "`repeat ... until condition` always runs at least once and stops when the condition becomes true.",
+    "A numeric `for` counts: `for i = 1, 6, 2 do` gives 1, 3, 5. The step defaults to 1 and can be negative or a decimal.",
+    "A generic `for` goes through a table: `for key, value in myTable do`. You can also use `ipairs` for arrays and `pairs` for dictionaries.",
+    "`break` stops a loop right away; `continue` skips to the next round of the loop."
+  ],
+  "terms": {
+    "control structure": "Code that controls the flow of a script, like `if` statements and loops.",
+    "condition": "A check that is true or false, like `health > 0`.",
+    "loop": "Code that repeats.",
+    "iteration": "One trip through a loop. A loop that runs 5 times has 5 iterations.",
+    "infinite loop": "A loop that never stops on its own, like `while true do`.",
+    "counter": "The variable in a numeric `for` loop that changes each time, like `i`.",
+    "increment / step": "How much the counter changes each time. In `for i = 10, 0, -2`, the step is -2, giving 10, 8, 6, 4, 2, 0.",
+    "iterator": "A function that hands out a collection's items one at a time to a `for` loop.",
+    "ipairs": "An iterator for arrays. It goes through indexes 1, 2, 3 in order.",
+    "pairs": "An iterator for dictionaries. It visits every key, in no guaranteed order.",
+    "generalized iteration": "Looping straight over a table with `for k, v in t do`, without `pairs` or `ipairs`.",
+    "break": "A keyword that ends a loop immediately.",
+    "continue": "A keyword that skips the rest of this round and starts the next one."
+  },
+  "example": {
+    "title": "Round countdown and checking players",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\n-- while loop: count down from 5\nlocal timeLeft = 5\nwhile timeLeft > 0 do\n\tprint(\"Round starts in\", timeLeft)\n\ttask.wait(1)\n\ttimeLeft -= 1\nend\n\n-- for loop over all players, with if, continue, and break\nfor _, player in Players:GetPlayers() do\n\tif player.Character == nil then\n\t\tcontinue -- skip players who have not spawned yet\n\tend\n\tif player.Name == \"Admin\" then\n\t\tprint(\"Admin found, stopping the search\")\n\t\tbreak -- end the loop early\n\telseif player.UserId > 0 then\n\t\tprint(player.Name, \"is ready\")\n\telse\n\t\tprint(player.Name, \"is a test player\")\n\tend\nend\n\n-- numeric for loop counting by 2\nfor i = 2, 10, 2 do\n\tprint(i) --> 2 4 6 8 10\nend",
+    "explain": [
+      "The `while` loop prints 5, 4, 3, 2, 1, waiting a second each time, then stops when `timeLeft` hits 0.",
+      "The generic `for` loop goes through every player in the server.",
+      "`continue` skips players without a character.",
+      "`break` stops the loop as soon as a player named Admin is found.",
+      "`elseif` and `else` handle the other cases. In Studio test servers, test players have negative UserIds.",
+      "The last loop counts from 2 to 10 in steps of 2."
+    ]
+  },
+  "watchOut": [
+    "Writing `while true do` without `task.wait()`. It freezes the game and can crash Studio.",
+    "Forgetting `then` after `if` or `do` after `while` and `for`.",
+    "Writing `else if` (two words). Luau uses `elseif` as one word.",
+    "Expecting `pairs` to go in order. Dictionary order is random; use an array if order matters.",
+    "Forgetting that `repeat` always runs at least once, even if the condition is already true."
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "name": "MessagingService",
+  "simple": "MessagingService lets the different servers of your game send messages to each other. Normally each server is its own separate world, but with this, one server can shout 'someone found the rare dragon!' and every other server hears it.",
+  "analogy": "MessagingService is like the school intercom. Any classroom (server) can make an announcement on a channel (topic), and every classroom tuned in to that channel hears it right away.",
+  "whenToUse": [
+    "Global announcements, like 'A player just found a legendary item!' in all servers.",
+    "Telling every server to start a live event at the same time.",
+    "Letting friends in different servers know where each other are.",
+    "Not for saving data, and not for talking to players' devices (use RemoteEvents for that)."
+  ],
+  "where": "Server only. Get it with `game:GetService(\"MessagingService\")` in a Script.",
+  "terms": {
+    "server": "The Roblox computer in charge of one copy of your game. A popular game runs many servers at the same time, each with its own group of players.",
+    "topic": "The name of a message channel, 1 to 80 characters, like \"Announcements\". Servers subscribe to a topic to hear its messages.",
+    "publish": "To send a message on a topic so every subscribed server gets it.",
+    "subscribe": "To start listening to a topic. You give a function that runs every time a message arrives.",
+    "callback": "A function you hand to Roblox so Roblox can run it later, when something happens.",
+    "pcall": "Short for 'protected call'. It runs a function and catches errors instead of crashing your script. It returns `true` and the results if it worked, or `false` and the error message if it failed.",
+    "async / yield": "Functions ending in `Async` talk to other computers over the internet. Your script pauses (yields) until the answer comes back.",
+    "best effort": "Roblox tries hard to deliver every message but does not promise it. Do not use it for things that would break your game if one message got lost."
+  },
+  "examples": [
+    {
+      "title": "Announce a rare find in every server",
+      "place": "Script in ServerScriptService",
+      "code": "local MessagingService = game:GetService(\"MessagingService\")\nlocal TOPIC = \"RareFind\"\n\n-- 1. Listen for announcements from any server\nlocal ok, connection = pcall(function()\n\treturn MessagingService:SubscribeAsync(TOPIC, function(message)\n\t\t-- message.Data is what was sent, message.Sent is when\n\t\tprint(\"Announcement: \" .. tostring(message.Data))\n\tend)\nend)\nif not ok then warn(\"Could not subscribe: \" .. tostring(connection)) end\n\n-- 2. Somewhere in your game, when a player finds something rare:\nlocal function announceRareFind(player, itemName)\n\tlocal success, err = pcall(function()\n\t\tMessagingService:PublishAsync(TOPIC, player.DisplayName .. \" found a \" .. itemName .. \"!\")\n\tend)\n\tif not success then warn(err) end\nend",
+      "explain": [
+        "Every server runs this script, so every server subscribes to the RareFind topic.",
+        "When any server calls `PublishAsync`, all subscribed servers (including itself) run the function and print the message.",
+        "Both calls go over the internet, so they are wrapped in pcall."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Messages must be small: about 1 KB at most.",
+    "Delivery is best effort. A message could be lost, so never use it as the only way to give out items or money.",
+    "There are limits on messages per minute and subscriptions per server; do not publish in a fast loop.",
+    "It only talks between servers. To reach players' screens, the server then uses a RemoteEvent."
+  ],
+  "members": {
+    "MessagingService:PublishAsync": {
+      "simple": "Sends a message on a topic. Every server subscribed to that topic gets it. The message can be text, a number, a boolean or a simple table, up to about 1 KB.",
+      "example": "-- Script in ServerScriptService\nlocal MessagingService = game:GetService(\"MessagingService\")\n\nlocal ok, err = pcall(function()\n\tMessagingService:PublishAsync(\"StartEvent\", { name = \"Meteor Shower\", seconds = 120 })\nend)\nif not ok then warn(err) end"
+    },
+    "MessagingService:SubscribeAsync": {
+      "simple": "Starts listening to a topic. Your function runs each time a message arrives and gets a table with `Data` (the message) and `Sent` (when it was sent). It returns a connection; call `:Disconnect()` on it to stop listening.",
+      "example": "-- Script in ServerScriptService\nlocal MessagingService = game:GetService(\"MessagingService\")\n\nlocal ok, connection = pcall(function()\n\treturn MessagingService:SubscribeAsync(\"StartEvent\", function(message)\n\t\tprint(\"Event starting:\", message.Data.name)\n\tend)\nend)\n\n-- Later, to stop listening:\n-- if ok then connection:Disconnect() end"
+    }
+  }
+}

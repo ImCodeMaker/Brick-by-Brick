@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/characters/appearance.md",
+  "simple": "This page is about changing how characters look in your game, like giving everyone a helmet, a green head, or a special outfit. You can set rules for everyone at once in Studio's Avatar Settings, or change any character with a script using a `HumanoidDescription`. The script way works on players and on NPCs. The page also explains what custom models need so layered clothing can fit them.",
+  "analogy": "A `HumanoidDescription` is like a written order at a costume shop: \"blue shirt, two hats, tall body\". You fill in the order, then hand it to the character, and they change into it.",
+  "keyPoints": [
+    "File > Avatar Settings in Studio changes clothing, body parts, animations, and more for every player character at once.",
+    "For one character or an NPC, use a `HumanoidDescription`, which lists scale, accessories, clothing, body parts, body colors, and animations.",
+    "Step 1: get a description, usually from the character with `humanoid:GetAppliedDescription()`, from an outfit ID, or from a user ID.",
+    "Step 2: change its properties, like `Torso`, `HeadColor`, or `HatAccessory`. Several accessories go in one comma-separated string.",
+    "Use `SetAccessories()` to add many accessories, including layered ones with a set order, at once.",
+    "Step 3: apply it with `humanoid:ApplyDescription()`, or spawn a player in it with `player:LoadCharacterWithHumanoidDescription()`.",
+    "To dress characters as they spawn, set `Players.CharacterAutoLoads = false` and load each character yourself.",
+    "Layered clothing on custom models needs a `WrapTarget` on the body, a `WrapLayer` on the clothing, matching cage UV maps, and a `Weld` if the model is not an R15 humanoid."
+  ],
+  "terms": {
+    "HumanoidDescription": "An object that describes a character's whole look: body, colors, clothes, accessories, and animations.",
+    "asset ID": "The number that identifies an item on Roblox, like `86500008` for a torso.",
+    "comma-separated string": "Several values in one piece of text split by commas, like `\"2551510151,2535600138\"` for two hats.",
+    "scale": "How big a body part is compared to normal. `1` is normal size, so `1.2` is 20% bigger.",
+    "BodyTypeScale": "How much the body shape leans toward a less blocky, more human-like shape. `0.1` is only a little.",
+    "classic clothing": "Flat images painted on the body: `Shirt`, `Pants`, and `ShirtGraphic` (a T-shirt picture).",
+    "layered accessory": "3D clothing that stretches to fit over the body, like a jacket over a sweater.",
+    "Order": "In `SetAccessories()`, which layer goes on first. Order `1` (sweater) sits under order `2` (jacket).",
+    "CharacterAutoLoads": "A setting on `Players`. When `false`, Roblox does not spawn characters by itself, so your script must do it.",
+    "WrapTarget": "A part of a body mesh that layered clothing can wrap around.",
+    "WrapLayer": "A part of a clothing mesh that wraps over a `WrapTarget`.",
+    "cage": "An invisible simple shell around a mesh that guides how clothing stretches over it.",
+    "UV map": "A flat map that says which point on a 2D picture goes on which point of a 3D shape. Cages must use matching UV maps to line up.",
+    "Weld": "An object that locks two parts together. `Part0` and `Part1` are the two parts it joins.",
+    "undefined behavior": "Results nobody can promise, so things might look broken or random."
+  },
+  "example": {
+    "title": "Give every player a green head when they spawn",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal function onCharacterAdded(character)\n\tlocal humanoid = character:WaitForChild(\"Humanoid\")\n\n\t-- Start from the look the character has right now\n\tlocal description = humanoid:GetAppliedDescription()\n\n\t-- Change only what we want\n\tdescription.HeadColor = Color3.new(0, 1, 0) -- bright green\n\tdescription.HeightScale = 1.1 -- 10% taller\n\n\t-- Put the changed look back on the character\n\thumanoid:ApplyDescriptionAsync(description)\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(onCharacterAdded)\nend)",
+    "explain": [
+      "Each time a player's character spawns, `onCharacterAdded` runs.",
+      "`GetAppliedDescription()` copies the character's current look, so we keep their own avatar.",
+      "We change two things: head color to green and height to 1.1 times normal.",
+      "`ApplyDescriptionAsync()` puts the new look on the character. The page shows the older name `ApplyDescription()`, and the API reference says to use `ApplyDescriptionAsync()` for new work."
+    ]
+  },
+  "watchOut": [
+    "Starting from `Instance.new(\"HumanoidDescription\")` when you only want a small change. A blank description wipes the player's whole avatar. Use `GetAppliedDescription()` instead.",
+    "Changing a character's parts directly while also using `HumanoidDescription`. Mixing the two can break the look.",
+    "Setting `HatAccessory = \"123\"` when you meant to add a hat. That replaces all hats. Add with `.. \",123\"` instead.",
+    "Expecting scale properties to work on R6 characters. They only affect R15."
+  ]
+}

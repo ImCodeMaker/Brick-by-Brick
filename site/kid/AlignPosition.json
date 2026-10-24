@@ -1,0 +1,109 @@
+{
+  "name": "AlignPosition",
+  "simple": "AlignPosition moves a part to a goal spot and keeps it there. The goal can be another attachment (TwoAttachment mode) or a position you type in (OneAttachment mode). It only moves the part; it does not turn it. For turning, use AlignOrientation.",
+  "analogy": "AlignPosition is like a pet on an invisible leash that always runs to where you point. Responsiveness is how eager the pet is; MaxForce is how strong it is; MaxVelocity is its top speed.",
+  "whenToUse": [
+    "Pets or drones that follow a player",
+    "Floating platforms that move to points smoothly",
+    "Holding an object in front of the player (like picking something up)",
+    "Smooth physics-based movement instead of teleporting"
+  ],
+  "where": "Create with Instance.new(\"AlignPosition\"), set Attachment0 to an attachment in the part to move, then either set Attachment1 (follow mode) or set Mode to OneAttachment and use Position. Usually from a Script on the server.",
+  "terms": {
+    "force": "A push or pull. In Roblox it is measured in Roblox force units (mass x studs per second per second). A bigger number is a harder push.",
+    "mass": "How much 'stuff' an object has, which decides how hard it is to push. A part's mass = its volume x its material density. A 4x1x2 Plastic part (volume 8, density 0.7) has mass 5.6.",
+    "gravity": "The pull that makes things fall. In Roblox it is `workspace.Gravity`, which is 196.2 studs per second per second by default.",
+    "velocity": "Speed plus direction, written as a Vector3 in studs per second. Vector3.new(0, 0, 20) means 20 studs every second along the Z direction.",
+    "Vector3": "Three numbers (X, Y, Z) bundled together. Used for positions, directions, forces and speeds. Y is up.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "center of mass": "The balance point of an object. Pushing exactly through it moves the object without spinning it; pushing off to the side also makes it spin.",
+    "world space": "Directions measured using the whole game world's fixed arrows: Y is always straight up toward the sky, no matter how a part is turned.",
+    "attachment space": "Directions measured using an attachment's own arrows. If the part tips over, 'up' for the attachment tips over too.",
+    "MaxForce": "A cap (upper limit) on how hard a constraint is allowed to push. It is a limit, not the amount it always pushes.",
+    "Responsiveness": "How quickly an Align constraint tries to reach its goal, from 5 (slow and gentle) to 200 (fast and snappy).",
+    "magnitude": "The length (size) of a vector, ignoring its direction. The magnitude of Vector3.new(3, 4, 0) is 5.",
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "MaxVelocity": "The top speed (studs per second) the part is allowed to move while heading to its goal.",
+    "rigidity": "With RigidityEnabled, the physics engine snaps to the goal as fast and hard as it can, ignoring MaxForce, MaxVelocity and Responsiveness.",
+    "per-axis limit": "A separate force cap for each direction (X, Y, Z) instead of one cap for the total."
+  },
+  "examples": [
+    {
+      "title": "A floating part that glides to a spot",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Size = Vector3.new(4, 1, 2)\npart.Position = Vector3.new(0, 10, 0)\npart.Anchored = false\npart.Parent = workspace\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal align = Instance.new(\"AlignPosition\")\nalign.Attachment0 = attachment\nalign.Mode = Enum.PositionAlignmentMode.OneAttachment -- use Position, not Attachment1\nalign.Position = Vector3.new(20, 15, 0)  -- the goal spot in the world\nalign.Responsiveness = 10                -- fairly gentle (5 = slow, 200 = very snappy)\nalign.MaxForce = 100000                  -- strong enough to beat gravity\nalign.MaxVelocity = 30                   -- never faster than 30 studs/s\nalign.Parent = part\n\ntask.wait(3)\nalign.Position = Vector3.new(-20, 15, 0) -- now glide to a new spot",
+      "explain": [
+        "OneAttachment mode means the goal is the Position value, not another attachment.",
+        "The part starts at (0, 10, 0) and glides toward (20, 15, 0). After 3 seconds we change the goal and it glides to (-20, 15, 0).",
+        "MaxForce must be bigger than the part's weight (mass x 196.2, about 1098.7 here) or it will sag below the goal.",
+        "Responsiveness 10 makes it ease in smoothly; 200 would make it zip there almost instantly."
+      ]
+    },
+    {
+      "title": "A pet ball that follows a player",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(function(character)\n\t\tlocal root = character:WaitForChild(\"HumanoidRootPart\")\n\n\t\t-- Goal point: 3 studs right and 2 up from the player's middle\n\t\tlocal goal = Instance.new(\"Attachment\")\n\t\tgoal.Position = Vector3.new(3, 2, 0)\n\t\tgoal.Parent = root\n\n\t\tlocal pet = Instance.new(\"Part\")\n\t\tpet.Shape = Enum.PartType.Ball\n\t\tpet.Size = Vector3.new(1, 1, 1)\n\t\tpet.CanCollide = false\n\t\tpet.Massless = true\n\t\tpet.Position = root.Position\n\t\tpet.Parent = character\n\n\t\tlocal petAttachment = Instance.new(\"Attachment\")\n\t\tpetAttachment.Parent = pet\n\n\t\tlocal follow = Instance.new(\"AlignPosition\")\n\t\tfollow.Attachment0 = petAttachment -- the pet moves...\n\t\tfollow.Attachment1 = goal          -- ...to this point next to the player\n\t\tfollow.Responsiveness = 25\n\t\tfollow.MaxForce = 10000\n\t\tfollow.Parent = pet\n\tend)\nend)",
+      "explain": [
+        "The goal attachment is inside the player's HumanoidRootPart. Its Position (3, 2, 0) is measured from the root part's center using the root part's own directions, so the goal is always 3 studs to the player's right and 2 up, even when they turn.",
+        "In the default TwoAttachment mode, the pet's Attachment0 is pulled toward Attachment1.",
+        "ReactionForceEnabled is off by default, so the pet never tugs on the player."
+      ]
+    }
+  ],
+  "gotchas": [
+    "If the part sags below the goal, MaxForce is too small to beat gravity. It must be more than mass x 196.2.",
+    "Position is ignored unless Mode is OneAttachment. Attachment1 is ignored when Mode is OneAttachment.",
+    "AlignPosition does not turn the part. Add AlignOrientation if it should also face a direction.",
+    "If the force is applied off-center the part may tumble. Turn on ApplyAtCenterOfMass."
+  ],
+  "members": {
+    "AlignPosition.ApplyAtCenterOfMass": {
+      "simple": "If false (default), the push happens at Attachment0's spot, which can also make the part twist. If true, the push goes through the part's balance point, so it moves without tumbling.",
+      "example": "workspace.Drone.AlignPosition.ApplyAtCenterOfMass = true"
+    },
+    "AlignPosition.ForceLimitMode": {
+      "simple": "How the force is capped when RigidityEnabled is false. Magnitude: one cap (MaxForce) for the total push. PerAxis: separate caps for X, Y and Z (MaxAxesForce).",
+      "example": "local align = workspace.Drone.AlignPosition\nalign.ForceLimitMode = Enum.ForceLimitMode.PerAxis\nalign.MaxAxesForce = Vector3.new(2000, 50000, 2000) -- strong lift, gentle sideways"
+    },
+    "AlignPosition.ForceRelativeTo": {
+      "simple": "With PerAxis limits, chooses whose X, Y and Z the caps in MaxAxesForce use: World (game directions), Attachment0 or Attachment1 (that attachment's own arrows).",
+      "example": "workspace.Drone.AlignPosition.ForceRelativeTo = Enum.ActuatorRelativeTo.World"
+    },
+    "AlignPosition.MaxAxesForce": {
+      "simple": "With PerAxis limits on, the most force allowed in each direction, as a Vector3.",
+      "example": "workspace.Drone.AlignPosition.MaxAxesForce = Vector3.new(1000, 30000, 1000)"
+    },
+    "AlignPosition.MaxForce": {
+      "simple": "The most total force used to reach the goal (when RigidityEnabled is false and ForceLimitMode is Magnitude). It is a cap; Responsiveness decides how much is actually used.",
+      "example": "local part = workspace.Drone\n-- 10 times the part's weight: plenty to lift it\npart.AlignPosition.MaxForce = part.AssemblyMass * workspace.Gravity * 10",
+      "gotcha": "Must be bigger than mass x gravity or the part droops under its goal."
+    },
+    "AlignPosition.MaxVelocity": {
+      "simple": "The top speed (studs per second) the part may move toward its goal, when RigidityEnabled is false.",
+      "example": "workspace.Drone.AlignPosition.MaxVelocity = 16 -- about walking speed"
+    },
+    "AlignPosition.Mode": {
+      "simple": "TwoAttachment (default): move Attachment0 to where Attachment1 is. OneAttachment: ignore Attachment1 and move Attachment0 to the Position value.",
+      "example": "local align = workspace.Drone.AlignPosition\nalign.Mode = Enum.PositionAlignmentMode.OneAttachment\nalign.Position = Vector3.new(0, 30, 0)"
+    },
+    "AlignPosition.Position": {
+      "simple": "The goal spot in the world (in studs) to move Attachment0 to. Only used when Mode is OneAttachment.",
+      "example": "workspace.Drone.AlignPosition.Position = Vector3.new(10, 20, -5)"
+    },
+    "AlignPosition.ReactionForceEnabled": {
+      "simple": "If false (default), only Attachment0's part moves. If true, Attachment1's part is pulled the opposite way, so the two parts pull toward each other.",
+      "example": "-- Two loose blocks that pull together\nworkspace.BlockA.AlignPosition.ReactionForceEnabled = true"
+    },
+    "AlignPosition.Responsiveness": {
+      "simple": "How quickly it tries to reach the goal, from 5 (slow and floaty) to 200 (fast and snappy).",
+      "example": "workspace.Drone.AlignPosition.Responsiveness = 50"
+    },
+    "AlignPosition.RigidityEnabled": {
+      "simple": "If true, the physics engine moves the part to the goal as hard and fast as it can, ignoring MaxForce, MaxVelocity and Responsiveness. If false (default), those three settings control it.",
+      "example": "workspace.HeldItem.AlignPosition.RigidityEnabled = true -- stick tightly to the hand",
+      "gotcha": "Rigid mode can shove other things very hard. Use it for things that should feel locked in place."
+    }
+  }
+}

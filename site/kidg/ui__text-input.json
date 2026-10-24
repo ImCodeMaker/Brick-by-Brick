@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/ui/text-input.md",
+  "simple": "A `TextBox` is a box where players can type, like a search bar, a name field, or a code entry pad. You can show it on the screen or on a part. Scripts can notice when the player finishes typing and then use what they wrote. Because players can type anything, you must filter their text before other people see it.",
+  "analogy": "A `TextBox` is like a blank line on a form. The `PlaceholderText` is the light gray hint that says what to write, and it disappears when you start typing.",
+  "keyPoints": [
+    "A `TextBox` lets a player type when it is in focus (selected).",
+    "`PlaceholderText` shows a hint, like \"Enter your name\", before the player types.",
+    "To add one to the screen: put a `ScreenGui` in `StarterGui`, then a `TextBox` in it.",
+    "To add one to a part: put a `SurfaceGui` in `StarterGui`, add the `TextBox`, then set the `SurfaceGui`'s `Adornee` to the part.",
+    "The `FocusLost` event fires when the player presses Enter or clicks away; its first value tells you if Enter was pressed.",
+    "`GetPropertyChangedSignal(\"Text\")` lets you react every time the text changes, for example to allow only numbers.",
+    "You are responsible for filtering any text players type before showing it to others, or Roblox may remove your game."
+  ],
+  "terms": {
+    "focus": "When a text box is selected and ready for typing. Clicking the box gives it focus; pressing Enter or clicking away removes it.",
+    "FocusLost": "An event that fires when the box stops being selected.",
+    "enterPressed": "True if the player pressed Enter to finish, false if they just clicked somewhere else.",
+    "PlaceholderText": "Gray hint text shown when the box is empty.",
+    "GetPropertyChangedSignal": "Gives you an event that fires when one specific property changes, like `Text`.",
+    "string.gsub": "A function that finds and replaces parts of text. With the pattern `%D` it finds every character that is not a digit.",
+    "text filtering": "Roblox's system that hides bad words and personal info, like phone numbers, from text."
+  },
+  "example": {
+    "title": "Read what the player typed when they press Enter",
+    "place": "LocalScript inside a TextBox (inside a ScreenGui in StarterGui)",
+    "code": "local textBox = script.Parent\ntextBox.PlaceholderText = \"Type a number and press Enter\"\n\n-- Only allow digits: remove anything that is not 0-9\nlocal function allowOnlyNumbers()\n\tlocal cleaned = string.gsub(textBox.Text, \"%D\", \"\")\n\tif cleaned ~= textBox.Text then\n\t\ttextBox.Text = cleaned\n\tend\nend\n\nlocal function onFocusLost(enterPressed)\n\tif enterPressed then\n\t\tprint(\"You typed:\", textBox.Text)\n\tend\nend\n\ntextBox:GetPropertyChangedSignal(\"Text\"):Connect(allowOnlyNumbers)\ntextBox.FocusLost:Connect(onFocusLost)",
+    "explain": [
+      "We set a hint in `PlaceholderText`.",
+      "Every time the text changes, we remove any character that is not a digit using `string.gsub` and `%D`.",
+      "We only set `Text` again if something was removed, so we do not cause extra change events.",
+      "When the box loses focus, we check `enterPressed`; if the player pressed Enter, we print what they typed."
+    ]
+  },
+  "watchOut": [
+    "Never show one player's typed text to other players without running it through Roblox's text filtering first.",
+    "`FocusLost` also fires when the player clicks away. Check `enterPressed` if you only want real submissions.",
+    "Text a player types in a `LocalScript` stays on their device. To use it on the server, you need to send it with a `RemoteEvent`."
+  ]
+}

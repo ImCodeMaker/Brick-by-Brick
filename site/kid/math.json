@@ -1,0 +1,263 @@
+{
+  "name": "math",
+  "simple": "`math` is a toolbox of number helpers that is always ready to use. It can round numbers, pick random numbers, keep a number inside a range, find the bigger of two numbers, and do angle math like sine and cosine. It also changes degrees into radians, which you need for CFrame rotations.",
+  "analogy": "`math` is like a calculator built into every script. You do not need to plug it in; just press its buttons, like `math.random` or `math.floor`.",
+  "whenToUse": [
+    "Picking random things: `math.random(1, 6)` rolls a die.",
+    "Rounding: `math.floor`, `math.ceil`, `math.round`.",
+    "Keeping a value in a safe range: `math.clamp(health, 0, 100)`.",
+    "Converting angles: `math.rad(90)` for CFrame.Angles, `math.deg` to read angles back.",
+    "Smooth wavy motion with `math.sin` (bobbing coins, floating platforms).",
+    "Natural-looking random terrain or wobble with `math.noise`."
+  ],
+  "where": "A built-in library: works in every Script, LocalScript and ModuleScript. Just type `math.` and the function name. No game:GetService needed.",
+  "terms": {
+    "library": "A ready-made toolbox of functions you can use without making anything first.",
+    "function": "A named action you can call, like `math.floor(3.7)`. It takes values in and gives a value back.",
+    "argument": "A value you give to a function inside the brackets. In `math.max(3, 9)`, 3 and 9 are arguments.",
+    "integer": "A whole number with no decimal part, like 7 or -2.",
+    "round down / floor": "Go to the whole number just below (or equal): 3.7 becomes 3, and -3.2 becomes -4.",
+    "round up / ceil": "Go to the whole number just above (or equal): 3.2 becomes 4.",
+    "absolute value": "The number without its minus sign. The absolute value of -7 is 7.",
+    "radians": "The angle unit Roblox math uses. A full circle is 2 times pi radians (about 6.283), and 180 degrees is pi radians (about 3.1416). `math.rad` turns degrees into radians.",
+    "pi": "A special number, about 3.14159, that shows up whenever circles are involved.",
+    "sine / cosine / tangent": "Angle functions. If you walk around a circle, sine tells how high you are and cosine tells how far sideways. Both swing smoothly between -1 and 1, which is great for wavy motion.",
+    "inverse trig (asin, acos, atan)": "The reverse of sine, cosine and tangent: you give a ratio and get back an angle in radians.",
+    "clamp": "Squash a number so it never goes below a minimum or above a maximum.",
+    "lerp / interpolate": "Find a number part-way between two numbers. Lerp from 0 to 10 with 0.5 gives 5.",
+    "remainder": "What is left over after dividing. 7 divided by 3 is 2 with 1 left over, so the remainder is 1.",
+    "exponent / power": "How many times to multiply a number by itself. 2 to the power 3 is 2*2*2 = 8.",
+    "square root": "The number that, multiplied by itself, gives the original. The square root of 16 is 4.",
+    "logarithm": "The reverse of a power: it asks \"what power gives this number?\". log base 2 of 8 is 3 because 2*2*2 = 8.",
+    "infinity": "A value bigger than every normal number. `math.huge` is Roblox's infinity.",
+    "NaN": "Short for Not a Number, a broken number you get from things like 0 divided by 0.",
+    "pseudo-random": "Numbers that look random but come from a recipe. The same seed always gives the same list.",
+    "seed": "The starting value for the random recipe. Same seed, same \"random\" numbers.",
+    "Perlin noise": "A kind of smooth randomness: nearby inputs give nearby outputs, so it looks natural, like rolling hills instead of spiky static.",
+    "hyperbolic functions (sinh, cosh, tanh)": "Advanced cousins of sin, cos and tan used in special curves. Most games never need them.",
+    "mantissa": "In `math.frexp`, the \"main digits\" part of a number when it is written as mantissa times 2 to some power."
+  },
+  "examples": [
+    {
+      "title": "Roll a die",
+      "place": "Script in ServerScriptService",
+      "code": "local roll = math.random(1, 6) -- a whole number from 1 to 6\nprint(\"You rolled a \" .. roll)\n\nif roll == 6 then\n\tprint(\"Lucky six!\")\nend",
+      "explain": [
+        "`math.random(1, 6)` picks a whole number from 1 up to 6, and both ends can be picked.",
+        "Each time the script runs you get a new roll."
+      ]
+    },
+    {
+      "title": "Keep health between 0 and 100",
+      "place": "Script in ServerScriptService",
+      "code": "local health = 80\n\nhealth = health + 50                 -- now 130, too much!\nhealth = math.clamp(health, 0, 100)  -- squash it back into range\nprint(health) --> 100\n\nhealth = health - 250                -- now -150\nhealth = math.clamp(health, 0, 100)\nprint(health) --> 0",
+      "explain": [
+        "`math.clamp(x, min, max)` returns x, unless it is below min (then min) or above max (then max)."
+      ]
+    },
+    {
+      "title": "Make a coin bob up and down",
+      "place": "Script inside an Anchored Part (the coin) in Workspace",
+      "code": "local coin = script.Parent\nlocal startPosition = coin.Position\n\nwhile true do\n\t-- math.sin swings smoothly between -1 and 1 as time goes on\n\tlocal height = math.sin(os.clock() * 2) * 1.5\n\t-- Also spin it: os.clock() grows every second, math.rad turns degrees into radians\n\tlocal spin = CFrame.Angles(0, math.rad(os.clock() * 90), 0)\n\tcoin.CFrame = CFrame.new(startPosition + Vector3.new(0, height, 0)) * spin\n\ttask.wait()\nend",
+      "explain": [
+        "`os.clock()` is a timer that keeps counting up in seconds.",
+        "`math.sin` of a growing number goes up and down between -1 and 1 forever, like a wave.",
+        "Multiplying by 1.5 makes the coin move 1.5 studs up and 1.5 studs down.",
+        "`math.rad(os.clock() * 90)` spins it 90 degrees every second, converted to radians for CFrame.Angles."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Trig functions (sin, cos, tan) use radians, not degrees. `math.sin(90)` is NOT 1; `math.sin(math.rad(90))` is.",
+    "`math.random(1, 6)` gives whole numbers, but `math.random()` with no arguments gives a decimal from 0 up to (but not including) 1.",
+    "`math.floor(-3.2)` is -4, not -3. Floor always goes DOWN, even for negative numbers.",
+    "You cannot check for NaN with `==`. `math.nan == math.nan` is false. Use `math.isnan`.",
+    "In `math.clamp`, the max must be greater than or equal to the min, or you get an error.",
+    "For more control over randomness (for example, several separate random streams), Roblox also has the `Random` data type."
+  ],
+  "members": {
+    "math.e": {
+      "simple": "Euler's number, about 2.718. It shows up in growth and decay math. You will rarely need it in games.",
+      "example": "print(math.e) --> 2.718281828459045"
+    },
+    "math.huge": {
+      "simple": "A number bigger than any other number (infinity). Handy as a starting value when you are searching for the smallest distance.",
+      "example": "local closestDistance = math.huge -- start with \"infinitely far\"\nfor _, part in workspace:GetChildren() do\n\tif part:IsA(\"BasePart\") then\n\t\tlocal d = part.Position.Magnitude -- distance from (0, 0, 0)\n\t\tif d < closestDistance then\n\t\t\tclosestDistance = d\n\t\tend\n\tend\nend\nprint(closestDistance)"
+    },
+    "math.nan": {
+      "simple": "A special \"Not a Number\" value. It is never equal to anything, not even itself, so check for it with `math.isnan`.",
+      "example": "print(math.nan == math.nan)   --> false\nprint(math.isnan(math.nan))   --> true"
+    },
+    "math.phi": {
+      "simple": "The golden ratio, about 1.618. A number found in nature and art, like sunflower spirals.",
+      "example": "print(math.phi) --> 1.618..."
+    },
+    "math.pi": {
+      "simple": "The number pi, about 3.14159. In radians, pi means half a circle (180 degrees).",
+      "example": "print(math.pi)            --> 3.141592653589793\nprint(math.deg(math.pi))  --> 180"
+    },
+    "math.sqrt2": {
+      "simple": "The square root of 2, about 1.414. It is how long the diagonal of a 1 by 1 square is.",
+      "example": "print(math.sqrt2) --> 1.414..."
+    },
+    "math.tau": {
+      "simple": "Tau is 2 times pi, about 6.283. In radians it is one full circle (360 degrees).",
+      "example": "-- Spin a part one full turn\nlocal part = workspace.Part\npart.CFrame = part.CFrame * CFrame.Angles(0, math.tau, 0) -- ends where it started"
+    },
+    "math.abs": {
+      "simple": "Removes the minus sign: gives how big a number is, ignoring whether it is negative. Great for \"how far apart are these two numbers?\".",
+      "example": "print(math.abs(-7)) --> 7\nprint(math.abs(7))  --> 7\nprint(math.abs(3 - 10)) --> 7  (3 and 10 are 7 apart)"
+    },
+    "math.acos": {
+      "simple": "Arc cosine: you give a number from -1 to 1 and it gives back an angle in radians. Combined with the dot product of two unit vectors, it tells you the angle between them.",
+      "example": "print(math.deg(math.acos(0))) --> 90\nlocal a = Vector3.new(1, 0, 0)\nlocal b = Vector3.new(1, 1, 0).Unit\nprint(math.deg(math.acos(a:Dot(b)))) --> about 45",
+      "gotcha": "Numbers outside -1 to 1 give NaN."
+    },
+    "math.asin": {
+      "simple": "Arc sine: give a number from -1 to 1, get back the angle (in radians) whose sine is that number.",
+      "example": "print(math.deg(math.asin(1))) --> 90"
+    },
+    "math.atan": {
+      "simple": "Arc tangent: give a slope (rise divided by run), get back an angle in radians. For aiming, `math.atan2` is usually better.",
+      "example": "print(math.deg(math.atan(1))) --> 45  (a slope of 1 is a 45 degree hill)"
+    },
+    "math.atan2": {
+      "simple": "Gives the angle (in radians, from -pi to pi) of an arrow that goes `x` across and `y` up. Unlike `math.atan`, it understands all four directions and does not break when x is 0. Note the order: Y comes FIRST.",
+      "example": "print(math.deg(math.atan2(1, 1)))  --> 45\nprint(math.deg(math.atan2(1, -1))) --> 135\nprint(math.deg(math.atan2(1, 0)))  --> 90  (straight up, no error)",
+      "gotcha": "It is `math.atan2(y, x)`, not `(x, y)`."
+    },
+    "math.ceil": {
+      "simple": "Rounds UP to the next whole number (or keeps it if it is already whole).",
+      "example": "print(math.ceil(3.2))  --> 4\nprint(math.ceil(-3.8)) --> -3\n-- How many buses of 30 seats for 95 kids?\nprint(math.ceil(95 / 30)) --> 4"
+    },
+    "math.clamp": {
+      "simple": "Keeps a number between a minimum and a maximum. If it is too small you get the min, too big you get the max, otherwise you get it back unchanged.",
+      "example": "print(math.clamp(15, 0, 10)) --> 10\nprint(math.clamp(-3, 0, 10)) --> 0\nprint(math.clamp(7, 0, 10))  --> 7",
+      "gotcha": "The max must be greater than or equal to the min, or it errors."
+    },
+    "math.cos": {
+      "simple": "Cosine of an angle in radians. Walking around a circle, cosine tells how far sideways you are. Pair it with `math.sin` to move things in a circle.",
+      "example": "-- Move a part in a circle of radius 10 around (0, 5, 0)\nlocal part = workspace.Part\nwhile true do\n\tlocal t = os.clock()\n\tpart.Position = Vector3.new(math.cos(t) * 10, 5, math.sin(t) * 10)\n\ttask.wait()\nend"
+    },
+    "math.cosh": {
+      "simple": "Hyperbolic cosine. An advanced math function for special curves; most games do not need it.",
+      "example": "print(math.cosh(0)) --> 1"
+    },
+    "math.deg": {
+      "simple": "Turns an angle in radians into degrees. Use it to read angles from functions like `Vector3:Angle` in normal degrees.",
+      "example": "print(math.deg(math.pi))      --> 180\nprint(math.deg(math.pi / 2))  --> 90"
+    },
+    "math.exp": {
+      "simple": "Gives e (about 2.718) to the power of x. Used for growth curves. Rare in games.",
+      "example": "print(math.exp(1)) --> 2.718281828459045"
+    },
+    "math.floor": {
+      "simple": "Rounds DOWN to a whole number. Very common: turn a decimal into a whole number, or snap things to a grid.",
+      "example": "print(math.floor(3.7))  --> 3\nprint(math.floor(-3.2)) --> -4  (down means more negative)\n-- Show a timer without decimals\nprint(\"Time: \" .. math.floor(12.86)) --> Time: 12"
+    },
+    "math.fmod": {
+      "simple": "Gives the remainder after dividing x by y. It rounds the division toward zero, so a negative x gives a negative remainder.",
+      "example": "print(math.fmod(7, 3))  --> 1\nprint(math.fmod(-7, 3)) --> -1\nprint(-7 % 3)           --> 2  (the % operator works differently with negatives)"
+    },
+    "math.frexp": {
+      "simple": "Splits a number into two parts, m and e, so that x = m * 2^e (with m between 0.5 and 1). Mostly for advanced number tricks.",
+      "example": "local mantissa, exponent = math.frexp(8)\nprint(mantissa, exponent) --> 0.5 4   (0.5 * 2^4 = 8)"
+    },
+    "math.isfinite": {
+      "simple": "Returns true for a normal number, and false if it is infinity (`math.huge`) or NaN. Good safety check before using a calculated value.",
+      "example": "print(math.isfinite(42))        --> true\nprint(math.isfinite(math.huge)) --> false\nprint(math.isfinite(0 / 0))     --> false"
+    },
+    "math.isinf": {
+      "simple": "Returns true if the number is positive or negative infinity.",
+      "example": "print(math.isinf(1 / 0)) --> true\nprint(math.isinf(100))   --> false"
+    },
+    "math.isnan": {
+      "simple": "Returns true if the value is NaN (Not a Number). This is the only reliable way to check, because NaN is never equal to anything.",
+      "example": "local broken = 0 / 0\nprint(math.isnan(broken)) --> true"
+    },
+    "math.ldexp": {
+      "simple": "The reverse of frexp: gives x * 2^e. `e` should be a whole number.",
+      "example": "print(math.ldexp(0.5, 4)) --> 8"
+    },
+    "math.lerp": {
+      "simple": "Finds a number part-way between `a` and `b`. `t` = 0 gives a, 1 gives b, 0.5 gives the middle. The formula is a + (b - a) * t.",
+      "example": "print(math.lerp(0, 10, 0.5))  --> 5\nprint(math.lerp(0, 10, 0.25)) --> 2.5\nprint(math.lerp(20, 40, 1))   --> 40",
+      "gotcha": "t is allowed to be outside 0 to 1; then you go past the ends."
+    },
+    "math.log": {
+      "simple": "Logarithm: answers \"what power do I raise the base to, to get x?\". With no base, it uses e (the natural log).",
+      "example": "print(math.log(8, 2))      --> 3   (2^3 = 8)\nprint(math.log(100, 10))   --> 2\nprint(math.log(math.e))    --> 1"
+    },
+    "math.log10": {
+      "simple": "Logarithm with base 10: roughly \"how many zeros\". Useful for counting digits.",
+      "example": "print(math.log10(1000)) --> 3"
+    },
+    "math.map": {
+      "simple": "Moves a number from one range into another range, keeping its place. Example: 5 is halfway in 0 to 10, so mapped to 0 to 100 it becomes 50.",
+      "example": "print(math.map(5, 0, 10, 0, 100)) --> 50\n-- Turn health (0 to 100) into a bar width (0 to 300 pixels)\nprint(math.map(75, 0, 100, 0, 300)) --> 225"
+    },
+    "math.max": {
+      "simple": "Gives back the BIGGEST of the numbers you pass in. You can pass two or more.",
+      "example": "print(math.max(3, 9, 2)) --> 9\n-- Never let coins go below 0\nlocal coins = math.max(5 - 8, 0) --> 0"
+    },
+    "math.min": {
+      "simple": "Gives back the SMALLEST of the numbers you pass in. You can pass two or more.",
+      "example": "print(math.min(3, 9, 2)) --> 2\n-- Heal, but never above 100\nlocal health = math.min(90 + 25, 100) --> 100"
+    },
+    "math.modf": {
+      "simple": "Splits a number into its whole part and its decimal part. Gives back two numbers.",
+      "example": "local whole, fraction = math.modf(3.7)\nprint(whole)    --> 3\nprint(fraction) --> about 0.7"
+    },
+    "math.noise": {
+      "simple": "Perlin noise: smooth randomness. Give it coordinates and it gives a number, usually between -1 and 1. Coordinates close together give values close together, so it looks natural, great for hills or gentle wobbling. The same inputs always give the same output. Whole-number inputs always give 0, so use decimals.",
+      "example": "-- Build a row of bumpy hills\nfor x = 1, 50 do\n\tlocal height = math.noise(x / 10) * 20 + 25 -- divide by 10 so the hills are gentle\n\tlocal part = Instance.new(\"Part\")\n\tpart.Anchored = true\n\tpart.Size = Vector3.new(4, height, 4)\n\tpart.Position = Vector3.new(x * 4, height / 2, 0)\n\tpart.Parent = workspace\nend",
+      "gotcha": "`math.noise(1, 2, 3)` with whole numbers is always 0. Divide your inputs (like x / 10) so they are decimals."
+    },
+    "math.pow": {
+      "simple": "x to the power y: multiply x by itself y times. You can also write `x ^ y`.",
+      "example": "print(math.pow(2, 10)) --> 1024\nprint(2 ^ 10)          --> 1024 (same thing)"
+    },
+    "math.rad": {
+      "simple": "Turns degrees into radians. You will use this ALL THE TIME with CFrame.Angles, because CFrame rotations want radians.",
+      "example": "print(math.rad(180)) --> 3.141592653589793 (pi)\nprint(math.rad(90))  --> 1.5707963267948966\n\nlocal part = workspace.Part\npart.CFrame = part.CFrame * CFrame.Angles(0, math.rad(45), 0) -- turn 45 degrees"
+    },
+    "math.random": {
+      "simple": "Picks a random number. `math.random()` gives a decimal from 0 up to (not including) 1. `math.random(m)` gives a whole number from 1 to m. `math.random(m, n)` gives a whole number from m to n (both included).",
+      "example": "print(math.random())        -- like 0.4271...\nprint(math.random(10))      -- 1 to 10\nprint(math.random(5, 8))    -- 5, 6, 7 or 8\n\n-- Pick a random item from a list\nlocal colors = {\"Red\", \"Blue\", \"Green\"}\nprint(colors[math.random(1, #colors)])"
+    },
+    "math.randomseed": {
+      "simple": "Sets the starting point (seed) for `math.random`. Using the same seed makes the same \"random\" numbers in the same order, which is handy for a level that should be the same every time.",
+      "example": "math.randomseed(42)\nprint(math.random(1, 100), math.random(1, 100))\nmath.randomseed(42)\nprint(math.random(1, 100), math.random(1, 100)) -- the same two numbers again"
+    },
+    "math.round": {
+      "simple": "Rounds to the nearest whole number. Exactly-halfway numbers go AWAY from zero, so 2.5 becomes 3 and -2.5 becomes -3.",
+      "example": "print(math.round(5.8))  --> 6\nprint(math.round(5.2))  --> 5\nprint(math.round(2.5))  --> 3\nprint(math.round(-2.5)) --> -3"
+    },
+    "math.sign": {
+      "simple": "Tells you if a number is negative (-1), zero (0) or positive (1).",
+      "example": "print(math.sign(-3)) --> -1\nprint(math.sign(0))  --> 0\nprint(math.sign(12)) --> 1"
+    },
+    "math.sin": {
+      "simple": "Sine of an angle in radians. It swings smoothly between -1 and 1, which makes it perfect for bobbing, swaying, and pulsing effects.",
+      "example": "print(math.sin(math.rad(90))) --> 1\nprint(math.sin(math.rad(30))) --> about 0.5\n\n-- Make a light pulse\nlocal light = workspace.Lamp.PointLight\nwhile true do\n\tlight.Brightness = 2 + math.sin(os.clock() * 3) -- goes between 1 and 3\n\ttask.wait()\nend",
+      "gotcha": "The angle must be in radians: `math.sin(90)` is not 1."
+    },
+    "math.sinh": {
+      "simple": "Hyperbolic sine. An advanced math function; most games do not need it.",
+      "example": "print(math.sinh(0)) --> 0"
+    },
+    "math.sqrt": {
+      "simple": "Square root: the number that times itself gives x.",
+      "example": "print(math.sqrt(16)) --> 4\nprint(math.sqrt(2))  --> 1.414...",
+      "gotcha": "Negative numbers give NaN."
+    },
+    "math.tan": {
+      "simple": "Tangent of an angle in radians: the slope (rise divided by run) of a line at that angle.",
+      "example": "print(math.tan(math.rad(45))) --> about 1"
+    },
+    "math.tanh": {
+      "simple": "Hyperbolic tangent. Squashes any number into the range -1 to 1 with a smooth S-curve. Rare in games.",
+      "example": "print(math.tanh(0)) --> 0"
+    }
+  }
+}

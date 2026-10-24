@@ -1,0 +1,35 @@
+{
+  "path": "content/en-us/luau/tuples.md",
+  "simple": "A tuple is just a list of values passed or returned together, separated by commas. When the Roblox API reference says \"Tuple\", it means a function can take several values, or give several values back at once. Knowing this helps you read the API docs and catch every value a function returns.",
+  "analogy": "A tuple is like a combo meal. You order one thing, but you get back a burger, fries, and a drink all at once. You can grab each item into its own hand (variable).",
+  "keyPoints": [
+    "A tuple is a list of values, like `1, true, \"hi\"`.",
+    "If an API says a function takes a \"Tuple\", you can pass it many values, separated by commas.",
+    "`BindableFunction:Invoke()` takes a tuple, so `Invoke(1, true, \"string\", Vector3.new(0, 0, 0))` works.",
+    "If an API says a function returns a \"Tuple\", it gives back more than one value.",
+    "Catch multiple return values with multiple variables: `local content, isReady = Players:GetUserThumbnailAsync(...)`."
+  ],
+  "terms": {
+    "tuple": "Several values grouped together in order, separated by commas.",
+    "parameter": "A value a function asks for when you call it.",
+    "argument": "The actual value you pass to a function, like the `5` in `print(5)`.",
+    "return value": "A value a function gives back when it finishes.",
+    "method": "A function that belongs to an object, called with a colon, like `Players:GetPlayers()`.",
+    "callback": "A function you hand to something else so it can call it later."
+  },
+  "example": {
+    "title": "Get a player's avatar picture",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- This method returns a tuple: two values at once\n\tlocal content, isReady = Players:GetUserThumbnailAsync(\n\t\tplayer.UserId,\n\t\tEnum.ThumbnailType.HeadShot,\n\t\tEnum.ThumbnailSize.Size420x420\n\t)\n\tprint(player.Name, content, isReady)\nend)",
+    "explain": [
+      "When a player joins, the script asks for their headshot image.",
+      "`GetUserThumbnailAsync` returns two values: the image link and a true/false for whether it is ready.",
+      "`local content, isReady =` catches both values into two variables.",
+      "`print` shows the player's name, the image link, and whether it is ready."
+    ]
+  },
+  "watchOut": [
+    "Only writing one variable, like `local content = ...`. You will silently lose the second value; add another variable to catch it.",
+    "Mixing up the order. The values come back in the order the API reference lists them."
+  ]
+}

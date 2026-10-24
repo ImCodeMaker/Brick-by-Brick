@@ -1,0 +1,166 @@
+{
+  "name": "Lighting",
+  "simple": "Lighting controls the look of the whole world's light: the time of day, how bright the sun is, the color of shadows, and fog. You can also put a Sky, an Atmosphere, and effects like Bloom or Blur inside it. Changing Lighting can make your game feel sunny, spooky, or like a sunset.",
+  "analogy": "Lighting is like the light switches, dimmer, and window blinds for your whole world. Turn the clock to night and the sun goes down; add fog and the far-away things fade into mist.",
+  "whenToUse": [
+    "Make a day and night cycle by changing the time.",
+    "Set the mood: dark and foggy for horror, bright and colorful for an obby.",
+    "Hold Sky, Atmosphere, and post-processing effects like BloomEffect or ColorCorrectionEffect."
+  ],
+  "where": "A service on both server and client. Get it with `game:GetService(\"Lighting\")`. Changes made by a server Script are seen by everyone; changes made in a LocalScript are seen only by that player.",
+  "terms": {
+    "service": "A special built-in object at the top of the game. Get one with `game:GetService(\"Name\")`.",
+    "Color3": "A color made of red, green, and blue amounts. `Color3.fromRGB(255, 0, 0)` is red.",
+    "ambient light": "Soft light that fills everything, even places the sun cannot reach directly. It decides how dark shadows are.",
+    "fog": "A haze that makes far-away things fade into a color.",
+    "stud": "Roblox's unit of distance.",
+    "exposure": "How bright the whole picture is made, like a camera letting in more or less light.",
+    "specular": "Shiny highlights and reflections on smooth surfaces.",
+    "latitude": "How far north or south on Earth a place is. It changes the sun's path in the sky.",
+    "post-processing effect": "A filter applied to the whole picture after it is drawn, like blur or extra glow.",
+    "deprecated": "Old and replaced by something newer."
+  },
+  "examples": [
+    {
+      "title": "Day and night cycle",
+      "place": "Script in ServerScriptService",
+      "code": "local Lighting = game:GetService(\"Lighting\")\n\n-- One full day takes 4 minutes (240 seconds)\nlocal secondsPerDay = 240\n\nwhile true do\n\t-- ClockTime goes from 0 to 24 (hours). Move it forward a little each step.\n\tLighting.ClockTime = (Lighting.ClockTime + 24 / secondsPerDay * 0.1) % 24\n\ttask.wait(0.1)\nend",
+      "explain": [
+        "ClockTime is the hour of the day, from 0 (midnight) to 24. 14 means 2 PM.",
+        "Every 0.1 seconds we add a tiny bit of time. 24 hours spread over 240 seconds is 0.1 hours per second.",
+        "`% 24` wraps it back to 0 after midnight, so the cycle repeats forever."
+      ]
+    },
+    {
+      "title": "Spooky fog",
+      "place": "Script in ServerScriptService",
+      "code": "local Lighting = game:GetService(\"Lighting\")\n\nLighting.ClockTime = 0                          -- midnight\nLighting.FogColor = Color3.fromRGB(40, 40, 50)  -- dark gray-blue\nLighting.FogStart = 0                           -- fog starts right at the camera\nLighting.FogEnd = 80                            -- fully foggy 80 studs away",
+      "explain": [
+        "The time is set to midnight.",
+        "Fog begins at 0 studs from the camera and becomes completely solid at 80 studs, so you can barely see far.",
+        "If Lighting has an Atmosphere inside, these fog settings are hidden; use the Atmosphere instead."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Fog settings stop working when an Atmosphere object is inside Lighting. Use the Atmosphere's Density and Haze instead.",
+    "Time does not move on its own. You need a script (like the day/night example) to change it.",
+    "Changes from a LocalScript only show for that player, which is useful for things like a personal night-vision effect."
+  ],
+  "members": {
+    "Lighting.Ambient": {
+      "simple": "The color of light in places the sun cannot reach, like indoors or under a roof. Default is black (0, 0, 0). Brighter colors make those shadowy places lighter.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.Ambient = Color3.fromRGB(70, 70, 70) -- lighter indoor areas"
+    },
+    "Lighting.Brightness": {
+      "simple": "How strong the sun or moon light is. Higher numbers make sunlit areas brighter.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.Brightness = 3"
+    },
+    "Lighting.ClockTime": {
+      "simple": "The time of day as a number of hours, from 0 to 24. 6 is sunrise-ish, 12 is noon, 18 is evening, 0 is midnight. It only changes if a script changes it.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.ClockTime = 18.5 -- 6:30 PM"
+    },
+    "Lighting.ColorShift_Bottom": {
+      "simple": "A color tint added to the sides of parts facing AWAY from the sun or moon.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.ColorShift_Bottom = Color3.fromRGB(0, 0, 80) -- bluish undersides"
+    },
+    "Lighting.ColorShift_Top": {
+      "simple": "A color tint added to the sides of parts facing TOWARD the sun or moon. Orange looks like a warm sunset.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.ColorShift_Top = Color3.fromRGB(255, 150, 50) -- warm sunlight"
+    },
+    "Lighting.EnvironmentDiffuseScale": {
+      "simple": "How much soft light comes from the sky itself, from 0 to 1. Unlike Ambient, it changes with the sky and the time of day.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.EnvironmentDiffuseScale = 1"
+    },
+    "Lighting.EnvironmentSpecularScale": {
+      "simple": "How much smooth and metal surfaces reflect the sky around them, from 0 to 1. Makes metal look more real.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.EnvironmentSpecularScale = 1"
+    },
+    "Lighting.ExposureCompensation": {
+      "simple": "Brightens or darkens the whole picture, from -5 to 5. 1 is twice as bright, -1 is half as bright, 0 is normal.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.ExposureCompensation = -1 -- a darker scene"
+    },
+    "Lighting.ExtendLightRangeTo120": {
+      "simple": "Unused hidden setting. Lights are always limited to a range of 120 studs anyway."
+    },
+    "Lighting.FogColor": {
+      "simple": "The color of the fog.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.FogColor = Color3.fromRGB(200, 200, 255)"
+    },
+    "Lighting.FogEnd": {
+      "simple": "How far from the camera, in studs, the fog becomes completely solid. Smaller numbers mean thicker fog.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.FogEnd = 150"
+    },
+    "Lighting.FogStart": {
+      "simple": "How far from the camera, in studs, the fog starts to appear.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.FogStart = 20"
+    },
+    "Lighting.GeographicLatitude": {
+      "simple": "Pretends your world is at a place on Earth this many degrees north or south. It changes the sun's path across the sky at each time of day.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.GeographicLatitude = 60 -- far north: lower sun"
+    },
+    "Lighting.GlobalShadows": {
+      "simple": "If true, the sun and moon cast shadows, and sheltered areas get the darker Ambient color.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.GlobalShadows = true"
+    },
+    "Lighting.LightingStyle": {
+      "simple": "The overall art style of the light: Soft (more cartoony) or Realistic (more like real life).",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.LightingStyle = Enum.LightingStyle.Realistic"
+    },
+    "Lighting.OutdoorAmbient": {
+      "simple": "The color of soft fill light outdoors. Default is gray (127, 127, 127). Whiter makes outside look brighter.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.OutdoorAmbient = Color3.fromRGB(180, 180, 180)"
+    },
+    "Lighting.Outlines": {
+      "simple": "Old — outlines on parts are no longer drawn."
+    },
+    "Lighting.PrioritizeLightingQuality": {
+      "simple": "On slower devices, decides what to lower first: if true, keep nice lighting and shadows up close and draw less far away; if false, keep the view distance and simplify lighting.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.PrioritizeLightingQuality = true"
+    },
+    "Lighting.ShadowColor": {
+      "simple": "Old — no longer used. Use `Ambient` to change shadow color."
+    },
+    "Lighting.ShadowSoftness": {
+      "simple": "How blurry shadow edges are, from 0 (sharp) to 1 (very soft). Default 0.2. Only works with the newer lighting modes on devices that support them.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.ShadowSoftness = 0.5"
+    },
+    "Lighting.Technology": {
+      "simple": "Old — set the lighting mode in Studio, and use `LightingStyle` and `PrioritizeLightingQuality` instead."
+    },
+    "Lighting.TimeOfDay": {
+      "simple": "The time of day as text on a 24-hour clock, like \"14:00:00\" for 2 PM or \"21:30:00\" for 9:30 PM. Changing it also changes ClockTime.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.TimeOfDay = \"06:00:00\" -- sunrise"
+    },
+    "Lighting:GetMinutesAfterMidnight": {
+      "simple": "Gives how many minutes past midnight the lighting clock is. About ClockTime times 60, so 2 PM gives 840.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nprint(Lighting:GetMinutesAfterMidnight())"
+    },
+    "Lighting:getMinutesAfterMidnight": {
+      "simple": "Old — use `GetMinutesAfterMidnight` instead."
+    },
+    "Lighting:GetMoonDirection": {
+      "simple": "Gives a direction (a Vector3 of length 1) pointing from the center of the world toward the moon. It still points at the moon even when the moon is below the horizon.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nprint(Lighting:GetMoonDirection())"
+    },
+    "Lighting:GetMoonPhase": {
+      "simple": "Old — no longer used."
+    },
+    "Lighting:GetSunDirection": {
+      "simple": "Gives a direction (a Vector3 of length 1) pointing from the center of the world toward the sun. If its Y is below 0, the sun has set.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nif Lighting:GetSunDirection().Y < 0 then\n\tprint(\"It is night\")\nend"
+    },
+    "Lighting:SetMinutesAfterMidnight": {
+      "simple": "Sets the time of day using minutes after midnight, so you can use plain numbers. 720 is noon, 1080 is 6 PM.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting:SetMinutesAfterMidnight(13 * 60) -- 1 PM"
+    },
+    "Lighting:setMinutesAfterMidnight": {
+      "simple": "Old — use `SetMinutesAfterMidnight` instead."
+    },
+    "Lighting.LightingChanged": {
+      "simple": "Fires when a Lighting setting changes or a Sky is added or removed. It gives true if the change was about the sky.",
+      "example": "local Lighting = game:GetService(\"Lighting\")\nLighting.LightingChanged:Connect(function(skyChanged)\n\tprint(\"Lighting changed. Sky changed?\", skyChanged)\nend)",
+      "gotcha": "It does not fire for fog or GlobalShadows changes. Use `GetPropertyChangedSignal` for those."
+    }
+  }
+}

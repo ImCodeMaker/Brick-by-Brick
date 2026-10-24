@@ -1,0 +1,32 @@
+{
+  "path": "content/en-us/physics/sleep-system.md",
+  "simple": "Roblox has to keep track of every moving thing in your game, and that takes work. The sleep system saves that work by letting objects that are sitting still 'fall asleep', so the engine skips them. When something bumps them or changes, they wake up again. Knowing this helps you understand why a very slow-moving part might suddenly stop, and how to keep it moving.",
+  "analogy": "It is like a teacher who only watches the students who are moving around. Kids sitting quietly are skipped, but the moment one of them gets nudged or stands up, the teacher pays attention again.",
+  "keyPoints": [
+    "Every assembly is always in one of three states: awake (simulated), sleeping (skipped), or sleep-checking (skipped, but checking if it should wake).",
+    "An assembly falls asleep when it is moving slower than about 0.33 studs per second and is not speeding up.",
+    "The acceleration check stops mistakes, like a ball thrown up falling asleep at the very top where it is almost still.",
+    "A still assembly connected to an awake neighbor goes into sleep-checking and wakes up if that neighbor starts moving fast enough.",
+    "Parts driven slowly by motors and other actuated joints (like a `HingeConstraint` set to `Motor`) get a stricter rule, so they can move slowly without falling asleep.",
+    "Things that wake an assembly include: being hit by something moving faster than 1 stud per second, changing physics properties like `Anchored` or `AssemblyLinearVelocity`, applying an impulse, changing `workspace.Gravity`, adding or changing a constraint on it, or an explosion nearby.",
+    "To see sleep states while playtesting, turn on Awake parts in the Visualization Options in the top-right of the viewport. Red outline means awake, orange means sleep-checking, no outline means sleeping."
+  ],
+  "terms": {
+    "assembly": "A group of parts joined together that physics moves as one solid object, called a rigid body.",
+    "rigid body": "An object that never bends or squishes. Physics only needs its position and speed to move it.",
+    "simulate": "Have the physics engine calculate how something moves, bit by bit, every moment.",
+    "threshold": "A cut-off number. Below 0.33 studs per second counts as 'not moving'; above it counts as moving.",
+    "linear velocity": "How fast something moves from place to place, in studs per second.",
+    "rotational velocity": "How fast a point on the edge of the object moves because the object is spinning.",
+    "acceleration": "How fast the speed is changing. A ball sitting on a slope that is about to roll has acceleration even if it is still for a moment.",
+    "worldstep": "One tiny step of the physics calculation. Roblox does many of these every second.",
+    "actuated joint": "A constraint that actively drives movement, like a motor or a winch, instead of just holding parts together.",
+    "impulse": "A quick, sudden push, like a kick, given with functions such as `ApplyImpulse()`.",
+    "bounding sphere": "An imaginary ball just big enough to hold every part of the assembly. Spin speed is measured at its edge, so big objects count as moving faster for the same spin."
+  },
+  "watchOut": [
+    "If a part stops moving when you expected it to keep sliding, it may have fallen asleep because it was too slow. Give it a bit more speed, or wake it with a property change or impulse.",
+    "Sleeping parts are not broken. They wake up automatically when something touches them or changes.",
+    "Big assemblies can spin slower without sleeping than small ones, because spin is measured at the edge of their bounding sphere."
+  ]
+}

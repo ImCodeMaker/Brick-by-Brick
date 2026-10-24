@@ -1,0 +1,147 @@
+{
+  "name": "Model",
+  "simple": "A Model is a container that groups parts together into one thing, like a car, a house, or a character. You can move, size and copy the whole group at once instead of part by part. Every player's character is a Model too.",
+  "analogy": "A Model is like a LEGO set glued into one build. It's still made of many bricks, but you can pick up the whole spaceship and move it in one go.",
+  "whenToUse": [
+    "Group the parts of one object (a tree, a car, an NPC) so they move and copy together.",
+    "Move a whole object somewhere with PivotTo or MoveTo.",
+    "Make an object bigger or smaller with ScaleTo.",
+    "Find out how big an object is (GetExtentsSize, GetBoundingBox)."
+  ],
+  "where": "Usually in Workspace (so it shows up in the world) or in ServerStorage / ReplicatedStorage (as a template to clone). Make one in Studio by selecting parts and pressing Ctrl+G (Cmd+G on Mac), or with `Instance.new(\"Model\")`. Use a Folder instead if your group isn't a 3D object (for example, a bunch of scripts).",
+  "terms": {
+    "part": "A single 3D block, ball, or mesh in the world. Models are made of parts.",
+    "PrimaryPart": "The one part of a Model that acts as its main handle. The Model's pivot follows it when things move.",
+    "pivot": "The point a Model moves and spins around. Moving the pivot moves the whole Model.",
+    "CFrame": "A value that stores a position AND a rotation together, like 'stand here, facing that way'.",
+    "Vector3": "Three numbers (X, Y, Z) for a position, size or movement in 3D. Y is up.",
+    "bounding box": "The smallest invisible box that fits around everything in the Model.",
+    "world space": "Measuring from the map's own X, Y, Z directions, not from the Model's own facing.",
+    "scale factor": "A size multiplier. 1 is original size, 2 is double, 0.5 is half.",
+    "streaming": "A game setting where players' devices only load the parts of the world near them. Far-away Models may not exist on their device yet.",
+    "clone": "Make an exact copy of an object with :Clone()."
+  },
+  "examples": [
+    {
+      "title": "Clone a model and place it",
+      "place": "Script in ServerScriptService (put a Model named Tree in ServerStorage)",
+      "code": "local ServerStorage = game:GetService(\"ServerStorage\")\nlocal treeTemplate = ServerStorage:WaitForChild(\"Tree\")\n\nfor i = 1, 5 do\n    local tree = treeTemplate:Clone()\n    -- PivotTo moves the whole model; place trees 10 studs apart along X\n    tree:PivotTo(CFrame.new(i * 10, 0, 0))\n    tree.Parent = workspace\nend",
+      "explain": [
+        "Clone makes a copy of the whole Model, with every part inside.",
+        "PivotTo moves the Model so its pivot ends up at the CFrame you give. CFrame.new(10, 0, 0) is the spot X=10, Y=0, Z=0.",
+        "The trees appear at X = 10, 20, 30, 40, 50.",
+        "Setting Parent to workspace makes them show up in the world."
+      ]
+    },
+    {
+      "title": "Grow a model and lift it",
+      "place": "Script inside a Model in Workspace",
+      "code": "local model = script.Parent\n\nprint(\"Size before: \" .. tostring(model:GetExtentsSize()))\nmodel:ScaleTo(2) -- twice as big as its original size\nprint(\"Size after: \" .. tostring(model:GetExtentsSize()))\n\n-- Move it 10 studs straight up, keeping its rotation\nmodel:TranslateBy(Vector3.new(0, 10, 0))",
+      "explain": [
+        "GetExtentsSize tells you how big the Model is, as a Vector3 (width, height, depth).",
+        "ScaleTo(2) makes everything twice the ORIGINAL size. Calling ScaleTo(2) again doesn't make it 4 times; it stays 2.",
+        "TranslateBy shifts the Model by an amount. If it was at (0, 5, 0), it ends up at (0, 15, 0)."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Set a PrimaryPart (or the pivot) for models that move, so they move predictably.",
+    "Use PivotTo to move a Model. The old SetPrimaryPartCFrame is deprecated.",
+    "MoveTo pops the model upward if something is in the way and doesn't keep its rotation. Use PivotTo for exact placement.",
+    "Parts inside a Model that aren't welded or anchored will fall apart when the game runs.",
+    "With streaming on, a LocalScript might see the Model before all its parts arrive. Use WaitForChild, or set ModelStreamingMode to Atomic."
+  ],
+  "members": {
+    "Model.LevelOfDetail": {
+      "simple": "For games with streaming on: what to show when the Model is far away and not loaded. StreamingMesh or SLIM show a simpler, lower-detail copy so far things don't just vanish. Disabled or Automatic show nothing extra."
+    },
+    "Model.ModelStreamingMode": {
+      "simple": "For games with streaming on: controls how this Model is loaded on players' devices. For example Atomic means all of it loads together, and Persistent means it stays loaded. Change it in Studio or in a server Script, never in a LocalScript.",
+      "example": "model.ModelStreamingMode = Enum.ModelStreamingMode.Atomic -- load all parts together"
+    },
+    "Model.PrimaryPart": {
+      "simple": "The part inside the Model that acts as its main handle. When physics moves the Model, its pivot follows this part. Not set by default. It must be a part inside this Model.",
+      "example": "model.PrimaryPart = model:FindFirstChild(\"Base\")"
+    },
+    "Model.Scale": {
+      "simple": "Studio-only box in the Properties window to resize the Model. Scripts can't use it; call ScaleTo and GetScale instead."
+    },
+    "Model.WorldPivot": {
+      "simple": "Where the Model's pivot is, as a CFrame, when it has no PrimaryPart. If the Model has a PrimaryPart, the PrimaryPart's pivot is used instead and this is ignored.",
+      "example": "print(model.WorldPivot.Position)"
+    },
+    "Model:AddPersistentPlayer": {
+      "simple": "For streaming games: keeps this Model always loaded for one player, even when they're far away. ModelStreamingMode must be PersistentPerPlayer.",
+      "example": "model.ModelStreamingMode = Enum.ModelStreamingMode.PersistentPerPlayer\nmodel:AddPersistentPlayer(player)"
+    },
+    "Model:BreakJoints": {
+      "simple": "Old — use WeldConstraints and destroy them yourself instead."
+    },
+    "Model:breakJoints": {
+      "simple": "Old — use WeldConstraints and destroy them yourself instead."
+    },
+    "Model:GetBoundingBox": {
+      "simple": "Gives two things: a CFrame for the center of the invisible box around the Model, and a Vector3 for that box's size.",
+      "example": "local center, size = model:GetBoundingBox()\nprint(\"Center:\", center.Position, \"Size:\", size)"
+    },
+    "Model:GetExtentsSize": {
+      "simple": "Gives the size of the smallest box that fits around all the parts, as a Vector3 (width, height, depth) in studs.",
+      "example": "local size = model:GetExtentsSize()\nprint(\"This model is \" .. size.Y .. \" studs tall\")"
+    },
+    "Model:GetModelCFrame": {
+      "simple": "Old — use PVInstance:GetPivot instead."
+    },
+    "Model:GetModelSize": {
+      "simple": "Old — use Model:GetExtentsSize instead."
+    },
+    "Model:GetPersistentPlayers": {
+      "simple": "From a server Script: gives the list of players this Model is kept loaded for. From a LocalScript it only checks the local player.",
+      "example": "for _, player in model:GetPersistentPlayers() do\n    print(player.Name)\nend"
+    },
+    "Model:GetPrimaryPartCFrame": {
+      "simple": "Old — use PVInstance:GetPivot instead."
+    },
+    "Model:GetScale": {
+      "simple": "Tells you the Model's current scale factor. A new Model starts at 1; ScaleTo changes it.",
+      "example": "print(model:GetScale()) -- 1 for a model that was never resized"
+    },
+    "Model:MakeJoints": {
+      "simple": "Old — use WeldConstraint instead."
+    },
+    "Model:makeJoints": {
+      "simple": "Old — use WeldConstraint instead."
+    },
+    "Model:move": {
+      "simple": "Old — use Model:MoveTo instead."
+    },
+    "Model:MoveTo": {
+      "simple": "Moves the Model so its PrimaryPart is at a position. If something is in the way, the Model is pushed upward until it fits. It does not keep the Model's rotation.",
+      "example": "model:MoveTo(Vector3.new(0, 10, 0))",
+      "gotcha": "Use PivotTo when you need an exact spot or want to keep the rotation."
+    },
+    "Model:moveTo": {
+      "simple": "Old — use Model:MoveTo instead."
+    },
+    "Model:RemovePersistentPlayer": {
+      "simple": "Stops keeping this Model loaded for a player (undoes AddPersistentPlayer). It may stay loaded while they are close.",
+      "example": "model:RemovePersistentPlayer(player)"
+    },
+    "Model:ResetOrientationToIdentity": {
+      "simple": "Old — use PVInstance:PivotTo instead."
+    },
+    "Model:ScaleTo": {
+      "simple": "Resizes the whole Model (parts, joints, effects, sounds' distances) to a scale factor compared to its ORIGINAL size, around its pivot. ScaleTo(2) is double size, ScaleTo(1) goes back exactly to normal.",
+      "example": "model:ScaleTo(0.5) -- half size\ntask.wait(2)\nmodel:ScaleTo(1)   -- back to normal"
+    },
+    "Model:SetIdentityOrientation": {
+      "simple": "Old — use PVInstance:PivotTo instead."
+    },
+    "Model:SetPrimaryPartCFrame": {
+      "simple": "Old — use PVInstance:PivotTo instead."
+    },
+    "Model:TranslateBy": {
+      "simple": "Shifts the Model by an amount in world space, keeping its rotation. A Model at (0, 5, 0) moved by (2, 0, 0) ends up at (2, 5, 0). It can overlap other things.",
+      "example": "model:TranslateBy(Vector3.new(0, 3, 0)) -- 3 studs up"
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/performance-optimization/microprofiler/task-scheduler.md",
+  "simple": "Every frame, Roblox has a to-do list: read player input, animate characters, run physics, resume waiting scripts, and draw the screen. The task scheduler is what runs that list in order. Knowing the order helps you hook your code into the right moment, like before physics or after physics. Too much per-frame code can overload the scheduler and make the game stutter.",
+  "analogy": "It is like a school day schedule: homeroom, math, lunch, gym. If you want to change your gym clothes, you do it right before gym, not after.",
+  "keyPoints": [
+    "The task scheduler runs each frame's jobs, like input, animation, physics, and resuming scripts paused with `task.wait()`.",
+    "It can get overloaded by custom character rigs, animating parts yourself instead of using an `Animator`, heavy physics, and replicating objects a lot.",
+    "`RunService` gives you per-frame hooks: `PreAnimation`, `PreSimulation`, `PostSimulation`, `Heartbeat`, `BindToRenderStep()`, and `PreRender`.",
+    "Only use render step hooks for things that must happen after input but before drawing, like camera movement.",
+    "Use `BindToRenderStep()` instead of `PreRender` when you need strict control over order.",
+    "Change physics stuff (like a part's velocity) in `PreSimulation`, which runs before physics.",
+    "Read physics results (like a part's position) in `PostSimulation`, which runs after physics.",
+    "Change `Motor6D.Transform` in `PreSimulation`, or the `Animator` will overwrite it."
+  ],
+  "terms": {
+    "task scheduler": "The part of Roblox that runs all of a frame's jobs in a set order.",
+    "frame": "One update of the game. At 60 FPS there are 60 frames each second.",
+    "RunService": "A service with events that fire at certain moments every frame.",
+    "render step": "The moment just before the screen is drawn. Code here delays drawing, so keep it tiny.",
+    "simulation": "The physics step, where Roblox moves falling, bouncing, and pushed parts.",
+    "PreSimulation": "Fires every frame right before physics runs. Good for pushing things.",
+    "PostSimulation": "Fires every frame right after physics runs. Good for checking where things ended up.",
+    "velocity": "How fast and in what direction something moves. A velocity of (0, 50, 0) moves a part up 50 studs per second.",
+    "Motor6D": "A joint that connects two body parts, like an arm to a torso, and can rotate them for animation.",
+    "rig": "The set of parts and joints that make up a character's body."
+  },
+  "example": {
+    "title": "Detect when a ball enters a goal zone",
+    "place": "Script in ServerScriptService (with a part named Ball and a part named GoalZone in Workspace)",
+    "code": "local RunService = game:GetService(\"RunService\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal ball = Workspace:WaitForChild(\"Ball\")\nlocal goalZone = Workspace:WaitForChild(\"GoalZone\")\n\nlocal scored = false\n\n-- PostSimulation runs right after physics, so the ball's position is up to date\nRunService.PostSimulation:Connect(function()\n\tif scored then\n\t\treturn\n\tend\n\n\t-- Is the ball inside the goal zone's box?\n\tlocal localPos = goalZone.CFrame:PointToObjectSpace(ball.Position)\n\tlocal half = goalZone.Size / 2\n\tif math.abs(localPos.X) <= half.X\n\t\tand math.abs(localPos.Y) <= half.Y\n\t\tand math.abs(localPos.Z) <= half.Z then\n\t\tscored = true\n\t\tprint(\"Goal!\")\n\tend\nend)",
+    "explain": [
+      "We find the ball and the goal zone in the Workspace.",
+      "We connect to `PostSimulation`, which fires every frame right after physics moved the ball.",
+      "`PointToObjectSpace` tells us where the ball is measured from the goal zone's center. If the zone is 10 studs wide, the ball is inside when its X is between -5 and 5.",
+      "If the ball is inside on all three axes, we print Goal! once.",
+      "Reading the position after physics means we always check where the ball really is this frame."
+    ]
+  },
+  "watchOut": [
+    "Putting lots of code in render step hooks. That delays drawing every frame. Only use them for things like the camera.",
+    "Setting a part's speed in `PostSimulation`. Physics already ran, so the change waits a frame. Use `PreSimulation`.",
+    "Changing `Motor6D.Transform` outside `PreSimulation`. The `Animator` will overwrite it next frame.",
+    "Animating parts by hand every frame when an `Animator` could do it. This adds load to the task scheduler."
+  ]
+}

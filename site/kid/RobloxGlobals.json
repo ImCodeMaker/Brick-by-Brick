@@ -1,0 +1,136 @@
+{
+  "name": "RobloxGlobals",
+  "simple": "Roblox globals are built-in names Roblox adds to every script. The most important are `game` (the whole game tree), `workspace` (the 3D world), `script` (the script that is running), `Enum` (lists of fixed options), `typeof` (what kind of thing is this?) and `warn` (print in yellow).",
+  "analogy": "Roblox globals are like the light switches already built into every room of a house. You do not install them; they are just there, in every script, ready to flip.",
+  "whenToUse": [
+    "Get any service with `game:GetService(\"Players\")`.",
+    "Reach parts in the world with `workspace`.",
+    "Find things near your script with `script.Parent`.",
+    "Pick fixed options like `Enum.Material.Neon`.",
+    "Check the type of a value, especially for checking values sent by clients (`typeof`)."
+  ],
+  "where": "Available in every Script, LocalScript and ModuleScript. Just type the name.",
+  "terms": {
+    "global": "Something you can use anywhere without getting it first.",
+    "game / DataModel": "The very top of your game's tree. Everything (Workspace, Players, ReplicatedStorage...) lives inside it.",
+    "service": "A big built-in helper object, like Players or DataStoreService. Get it with `game:GetService(\"Name\")`.",
+    "Enum": "Short for enumeration: a fixed list of named choices, like `Enum.Material.Wood` or `Enum.KeyCode.E`.",
+    "parent": "The object something is inside of. If a Script is inside a Part, `script.Parent` is that Part.",
+    "Unix epoch": "Midnight on January 1, 1970. Many clocks count seconds from that moment.",
+    "context level": "Which side code runs on. All server Scripts share one; each player's LocalScripts share another.",
+    "plugin": "A tool that adds features to Roblox Studio, written in Luau.",
+    "Output": "The Studio window where `print`, `warn` and errors appear."
+  },
+  "examples": [
+    {
+      "title": "The everyday Roblox globals",
+      "place": "Script inside a Part in Workspace",
+      "code": "-- script: this script. script.Parent: the Part it sits in\nlocal part = script.Parent\n\n-- game: the whole game. Get services from it\nlocal Players = game:GetService(\"Players\")\n\n-- workspace: the 3D world\nlocal baseplate = workspace:FindFirstChild(\"Baseplate\")\n\n-- Enum: fixed lists of options\npart.Material = Enum.Material.Neon\n\n-- typeof: what kind of thing is this?\nprint(typeof(part.Position)) --> Vector3\n\n-- warn: like print, but yellow, for problems\nif not baseplate then\n\twarn(\"No Baseplate found!\")\nend\n\n-- time: seconds since this game server started\nprint(\"Game has been running for\", time(), \"seconds\")",
+      "explain": [
+        "`script.Parent` finds the Part this script is inside.",
+        "`game:GetService` is the safe way to reach any service.",
+        "`workspace` is a shortcut to the 3D world.",
+        "`Enum.Material.Neon` is one choice from Roblox's fixed list of materials.",
+        "`typeof` tells Roblox types apart, which is great for checking values sent from clients."
+      ]
+    },
+    {
+      "title": "Use typeof to protect a RemoteEvent",
+      "place": "Script in ServerScriptService, RemoteEvent named PlaceBlock in ReplicatedStorage",
+      "code": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal placeBlock = ReplicatedStorage:WaitForChild(\"PlaceBlock\")\n\nplaceBlock.OnServerEvent:Connect(function(player, position)\n\t-- An exploiter might send a string, a table, or nothing\n\tif typeof(position) ~= \"Vector3\" then\n\t\treturn\n\tend\n\tlocal block = Instance.new(\"Part\")\n\tblock.Anchored = true\n\tblock.Position = position\n\tblock.Parent = workspace\nend)",
+      "explain": [
+        "`type(position)` would just say \"userdata\" for a Vector3.",
+        "`typeof(position)` says exactly \"Vector3\", so we can reject anything else."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Use `task.wait`, `task.spawn` and `task.delay` instead of the old `wait`, `spawn` and `delay`.",
+    "Prefer `game:GetService(\"Workspace\")` or `workspace`; both point to the same thing.",
+    "`tick()` can be off and differs between devices. Use `os.time()`, `os.clock()` or `time()` instead.",
+    "`plugin` only exists inside Studio plugins, not in normal game scripts."
+  ],
+  "members": {
+    "Enum": {
+      "simple": "Holds every Roblox enum: fixed lists of named choices. You use it like `Enum.Material.Grass` or `Enum.KeyCode.Space`.",
+      "example": "-- Any script\nlocal part = Instance.new(\"Part\")\npart.Material = Enum.Material.Grass\npart.Shape = Enum.PartType.Ball\npart.Parent = workspace"
+    },
+    "game": {
+      "simple": "The whole game: the top of the tree that holds Workspace, Players, Lighting and every other service. Mostly used as `game:GetService(\"Name\")`.",
+      "example": "-- Any script\nlocal Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nprint(game.PlaceId) -- the ID of this place"
+    },
+    "plugin": {
+      "simple": "Only inside a Studio plugin script: the Plugin object for that plugin, used to make toolbar buttons and more. It is nil in normal game scripts.",
+      "example": "-- Script saved as a Studio plugin\nlocal toolbar = plugin:CreateToolbar(\"My Tools\")\nlocal button = toolbar:CreateButton(\"Hello\", \"Say hello\", \"\")\nbutton.Click:Connect(function()\n\tprint(\"Hello from my plugin!\")\nend)",
+      "gotcha": "ModuleScripts in your plugin do not get `plugin` automatically; pass it to them."
+    },
+    "shared": {
+      "simple": "A shared table, exactly like `_G`: all scripts on the same side can read and write it. ModuleScripts are usually a cleaner way to share.",
+      "example": "-- Script A\nshared.roundNumber = 1\n\n-- Script B (same side, runs later)\ntask.wait(1)\nprint(shared.roundNumber) --> 1"
+    },
+    "script": {
+      "simple": "The script that is running right now. Most often used as `script.Parent` to find the object the script is inside.",
+      "example": "-- Script inside a Part\nlocal part = script.Parent\npart.BrickColor = BrickColor.new(\"Bright red\")\nprint(script.Name .. \" is inside \" .. part.Name)"
+    },
+    "workspace": {
+      "simple": "A shortcut to the Workspace service, where all the 3D stuff in your world lives: parts, models and player characters.",
+      "example": "-- Any script\nlocal part = Instance.new(\"Part\")\npart.Position = Vector3.new(0, 10, 0)\npart.Parent = workspace -- put it into the world\nprint(workspace.Gravity) --> 196.2 by default"
+    },
+    "delay": {
+      "simple": "Old — use task.delay instead."
+    },
+    "DebuggerManager": {
+      "simple": "Old — no longer useful; use Studio's built-in debugger instead."
+    },
+    "elapsedTime": {
+      "simple": "Old — use time() or os.clock() instead."
+    },
+    "PluginManager": {
+      "simple": "An old Studio-only object that was once needed to make plugins. You almost never need it now; plugin scripts get `plugin` directly.",
+      "example": "-- Studio Command Bar only (rarely needed)\nlocal p = PluginManager():CreatePlugin()\nprint(p)",
+      "gotcha": "Does nothing useful in normal game scripts."
+    },
+    "printidentity": {
+      "simple": "Old — a debugging leftover; you don't need it."
+    },
+    "settings": {
+      "simple": "Gives you the GlobalSettings object, which holds Roblox Studio and engine settings like rendering and physics options. Rarely needed in games.",
+      "example": "-- Any script\nlocal globalSettings = settings()\nprint(globalSettings.Rendering.QualityLevel)"
+    },
+    "spawn": {
+      "simple": "Old — use task.spawn instead."
+    },
+    "stats": {
+      "simple": "Old — use game:GetService(\"Stats\") instead."
+    },
+    "tick": {
+      "simple": "Gives the number of seconds since January 1, 1970, using this device's clock. It works, but it can be off by up to a second and varies between devices, so `os.time()`, `os.clock()` or `time()` are better choices.",
+      "example": "-- Any script\nlocal start = os.clock() -- better than tick() for measuring\ntask.wait(1)\nprint(\"Took\", os.clock() - start, \"seconds\")\nprint(\"tick() says:\", tick())"
+    },
+    "time": {
+      "simple": "How many seconds this game session has been running. Good for timers inside the game.",
+      "example": "-- Script in ServerScriptService\ntask.wait(5)\nprint(\"Server has run for about\", math.floor(time()), \"seconds\")"
+    },
+    "typeof": {
+      "simple": "Tells you what kind of value something is, including Roblox types like \"Vector3\", \"Color3\", \"CFrame\" and \"Instance\". Better than `type` for checking values sent by clients.",
+      "example": "-- Any script\nprint(typeof(Vector3.new(1, 2, 3))) --> Vector3\nprint(typeof(workspace))             --> Instance\nprint(typeof(5))                     --> number"
+    },
+    "UserSettings": {
+      "simple": "Gives you the UserSettings object, which lets a LocalScript read the player's own game menu settings, like camera sensitivity or graphics quality.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal gameSettings = UserSettings():GetService(\"UserGameSettings\")\nprint(\"Mouse sensitivity:\", gameSettings.MouseSensitivity)"
+    },
+    "version": {
+      "simple": "Old — prints the Roblox version; you don't need it in games."
+    },
+    "wait": {
+      "simple": "Old — use task.wait instead."
+    },
+    "warn": {
+      "simple": "Like `print`, but the message shows in yellow (orange) in Output, so warnings stand out. Use it for 'something is not right, but the game keeps going'.",
+      "example": "-- Any script\nlocal door = workspace:FindFirstChild(\"Door\")\nif not door then\n\twarn(\"Door is missing! Check Workspace.\")\nend"
+    },
+    "ypcall": {
+      "simple": "Old — use pcall instead."
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/scripting/services.md",
+  "simple": "Services are Roblox's built-in toolkits, like `Players` for player info, `TweenService` for smooth animations, and `DataStoreService` for saving data. You get them with `game:GetService(\"Name\")`. Almost every script follows the same pattern: get services, require modules, write functions, and connect them to events. Learning which service does what is a big part of making games.",
+  "analogy": "Services are like departments in a big company: if you need something paid, you go to Finance; if you need a delivery, you go to Shipping. In Roblox, you ask the right service for the job.",
+  "keyPoints": [
+    "Get a service with `game:GetService(\"ServiceName\")`, and store it in a variable with the same name, like `local Players = game:GetService(\"Players\")`.",
+    "The common script pattern is: 1) get services, 2) require modules, 3) write local functions, 4) connect events that call those functions.",
+    "Use `WaitForChild` when finding things, because Roblox does not promise what loads first.",
+    "Container services hold objects: `Workspace` (the 3D world), `Lighting` (sky and light effects), `ReplicatedStorage` and `ReplicatedFirst` (shared between server and clients).",
+    "Scripting services add features: `TweenService` (smooth changes), `MarketplaceService` (purchases), `RunService` (every-frame updates), `SoundService` (audio), `CollectionService` (tags).",
+    "Cloud services work over the internet: `DataStoreService` (saving data between visits), `MemoryStoreService` (fast short-term data), `MessagingService` (talking between servers)."
+  ],
+  "terms": {
+    "service": "A built-in Roblox object that gives you a group of related features.",
+    "game": "A global variable that points to the very top of your game's data model.",
+    "data model": "The whole tree of everything in your game, as shown in the Explorer.",
+    "container service": "A service that holds other objects, like Workspace holding all your parts.",
+    "cloud service": "A service that runs on Roblox's internet servers, so data can last after players leave.",
+    "persistent data": "Data that is saved and still there next time, like a player's coins.",
+    "ephemeral data": "Short-lived data that changes quickly and does not need to be kept forever, like a live matchmaking queue.",
+    "tween": "A smooth change from one value to another over time, like a door sliding open over 1 second.",
+    "convention": "A common habit everyone follows so code is easy to read, like naming the variable `Players` for the Players service."
+  },
+  "example": {
+    "title": "Greet players and count them",
+    "place": "Script in ServerScriptService",
+    "code": "-- 1. Get services\nlocal Players = game:GetService(\"Players\")\n\n-- 2. (Require modules would go here)\n\n-- 3. Local functions\nlocal function onPlayerAdded(player)\n\tprint(player.Name .. \" joined! Players online: \" .. #Players:GetPlayers())\nend\n\nlocal function onPlayerRemoving(player)\n\tprint(player.Name .. \" left.\")\nend\n\n-- 4. Connect events to the functions\nPlayers.PlayerAdded:Connect(onPlayerAdded)\nPlayers.PlayerRemoving:Connect(onPlayerRemoving)",
+    "explain": [
+      "We get the `Players` service once, at the top, and name the variable after it.",
+      "We write two small local functions for joining and leaving.",
+      "`#Players:GetPlayers()` counts how many players are in the server.",
+      "Finally we connect the functions to the `PlayerAdded` and `PlayerRemoving` events, so they run at the right time."
+    ]
+  },
+  "watchOut": [
+    "Use `game:GetService(\"Players\")` instead of `game.Players`. `GetService` is the reliable way to get services.",
+    "Service names must be spelled exactly, with the right capital letters.",
+    "Do not call `GetService` over and over inside loops. Get it once at the top of the script.",
+    "Cloud services like `DataStoreService` can fail when the internet has trouble. Wrap their calls in `pcall`."
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/ui/on-screen-containers.md",
+  "simple": "A `ScreenGui` is the box that holds everything you want to show flat on a player's screen, like a coin counter or a shop menu. You put it in `StarterGui`, and Roblox copies it to each player when they join. You can have many `ScreenGui`s, like one for the title screen and one for settings, and switch them on and off. This page also covers keeping UI clear of phone notches, choosing which screen is on top, and hiding Roblox's built-in UI.",
+  "analogy": "`StarterGui` is like a stack of printed handouts at the door. Each player who walks in gets their own copy (in their `PlayerGui`), and what they scribble on theirs does not change anyone else's.",
+  "keyPoints": [
+    "Put a `ScreenGui` in `StarterGui` so every player gets a copy in their own `PlayerGui` when their character first spawns.",
+    "Use several `ScreenGui`s for different screens and turn each on or off with its `Enabled` property.",
+    "To change a player's UI while playing, use a `LocalScript` and find it in `Players.LocalPlayer.PlayerGui`.",
+    "`ScreenInsets` keeps UI away from the top bar buttons and phone notches; the default `CoreUISafeInsets` is best for buttons.",
+    "`DisplayOrder` decides which `ScreenGui` is drawn on top; higher numbers are in front.",
+    "`ResetOnSpawn` (on by default) rebuilds the UI each time the character respawns; turn it off to keep UI as it is.",
+    "`StarterGui:SetCoreGuiEnabled()` can hide built-in UI like the health bar, backpack, or player list.",
+    "Set `GuiService.TouchControlsEnabled` to false to hide the phone thumbstick and jump button."
+  ],
+  "terms": {
+    "StarterGui": "A folder-like service in the Explorer. UI you put here is copied to every player.",
+    "PlayerGui": "Each player's personal UI folder, found inside their `Player` object. The copy from `StarterGui` lands here.",
+    "client": "The player's own device. On-screen UI is stored and changed there.",
+    "safe area / insets": "The part of the screen where nothing covers your UI. An inset is the gap left at the edges for notches or top bar buttons.",
+    "top bar": "The row of Roblox buttons at the top of the screen, like the menu and chat buttons.",
+    "DisplayOrder": "A number for each `ScreenGui`. A `ScreenGui` with 10 draws in front of one with 1.",
+    "ResetOnSpawn": "When true, the UI is deleted and copied fresh each time your character respawns, so things like typed text are lost.",
+    "direct descendant": "Sitting right inside something, not inside a folder inside it. `ResetOnSpawn = false` only works if the `ScreenGui` is directly in `StarterGui`.",
+    "CoreGui": "Roblox's own built-in UI, like the chat window and health bar."
+  },
+  "example": {
+    "title": "Switch from a title screen to a settings menu",
+    "place": "LocalScript in StarterPlayerScripts (with ScreenGuis named TitleScreen and SettingsMenu in StarterGui)",
+    "code": "local Players = game:GetService(\"Players\")\nlocal StarterGui = game:GetService(\"StarterGui\")\n\nlocal player = Players.LocalPlayer\nlocal playerGui = player:WaitForChild(\"PlayerGui\")\n\n-- Find this player's copies of the screens\nlocal titleScreen = playerGui:WaitForChild(\"TitleScreen\")\nlocal settingsMenu = playerGui:WaitForChild(\"SettingsMenu\")\n\ntitleScreen.Enabled = false -- hide the title screen\nsettingsMenu.Enabled = true -- show the settings menu\n\n-- Also hide Roblox's built-in backpack bar\nStarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)",
+    "explain": [
+      "We get the local player, which is the person running this script on their device.",
+      "We wait for their `PlayerGui`, where their copies of the `ScreenGui`s live.",
+      "We find TitleScreen and SettingsMenu inside it.",
+      "Setting `Enabled` to false hides a screen; true shows it.",
+      "`SetCoreGuiEnabled` with `Backpack` and false hides Roblox's built-in tool bar."
+    ]
+  },
+  "watchOut": [
+    "Changing the `ScreenGui` in `StarterGui` during play does not change what players already have. Change the copy in `PlayerGui` instead.",
+    "If your menu resets every time a player dies, turn off `ResetOnSpawn` and make sure the `ScreenGui` sits directly in `StarterGui`.",
+    "Setting `ScreenInsets` to None can hide buttons behind phone notches. Only use it for background images.",
+    "UI scripts should be `LocalScript`s, because UI lives on the client."
+  ]
+}

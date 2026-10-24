@@ -1,0 +1,40 @@
+{
+  "path": "content/en-us/parts/meshes.md",
+  "simple": "A mesh is a detailed 3D shape, like a sword, a tree or a treasure chest, that you make in a 3D art program such as Blender and then bring into Studio as a MeshPart. Meshes can look far more detailed than anything built from basic parts. This page explains how to import meshes, paint them with textures, control how much detail shows at a distance, and pick how accurately they bump into things. Choosing the right settings keeps your game looking good and running fast.",
+  "analogy": "If basic parts are wooden building blocks, a mesh is a clay sculpture: you shape it in a separate workshop (Blender), then bring the finished sculpture into your room (Studio).",
+  "keyPoints": [
+    "A MeshPart is a kind of part whose shape comes from a mesh made in another program, then brought in with the Importer.",
+    "The Importer lets you preview a mesh first and turns specially named objects into other things, for example names ending in `_Att` become Attachments.",
+    "You can paint a mesh with one image using `TextureID`, or with up to four realistic PBR maps using a SurfaceAppearance child or a MaterialVariant.",
+    "If a mesh has both a SurfaceAppearance and a MaterialVariant, the SurfaceAppearance's images win, but the MaterialVariant's physical settings still apply.",
+    "With `RenderFidelity` on Automatic, meshes show the most detail under 250 studs from the camera, medium detail from 250 to 500, and the lowest at 500 or more.",
+    "`CollisionFidelity` picks the invisible bump shape: Box (cheapest), Hull, Default, PreciseConvexDecomposition (most exact and most costly), or Tunable with a precision slider.",
+    "Turn on Collision fidelity in Visualization Options to see the invisible bump shapes.",
+    "Rigging adds a skeleton so a mesh can pose and animate, and skinning lets it bend smoothly, like a neck bending instead of the whole head swiveling."
+  ],
+  "terms": {
+    "mesh": "A 3D shape built from points (vertices), lines between them (edges) and flat surfaces (faces). A simple cube mesh has 8 vertices, 12 edges and 6 faces.",
+    "MeshPart": "A part that uses an imported mesh as its shape.",
+    "import / Importer": "Bringing a file from your computer into Studio. The Importer is the Studio window that does it and checks for problems.",
+    "texture": "A flat image wrapped around a 3D shape to give it color and patterns.",
+    "PBR (physically based rendering)": "A way of drawing surfaces realistically by using several image maps, for example one for color, one for bumps, one for roughness and one for metal shine.",
+    "texture map": "One image that controls one look of the surface, like color or shininess.",
+    "SurfaceAppearance": "An object you put inside a MeshPart to give it PBR textures without changing how it behaves physically.",
+    "MaterialVariant": "A custom material with its own PBR textures and physical properties, kept in MaterialService.",
+    "asset ID": "The unique number Roblox gives an uploaded file, used to point to it, like `rbxassetid://123456`.",
+    "level of detail / render fidelity": "How detailed a mesh is drawn. Far-away meshes are drawn with fewer details to save effort. At 600 studs away, an Automatic mesh uses its lowest detail.",
+    "collision fidelity": "How closely the invisible bump shape matches the visible mesh. A donut with Box fidelity is solid in the middle, so you could not throw a ball through the hole.",
+    "bounding box": "The smallest box that fits all the way around the mesh.",
+    "convex hull": "The shape you would get by stretching plastic wrap tightly around the mesh. Dents and holes get filled in.",
+    "concave / concavity": "Having dents or hollows, like the inside of a bowl.",
+    "rigging": "Putting a skeleton of bones inside a mesh so parts of it can rotate, like an elbow.",
+    "skinning": "Linking the mesh's surface to the bones so it bends and stretches smoothly when the bones move.",
+    "performance cost": "How much work the computer has to do. More precise collisions cost more and can make the game slower."
+  },
+  "watchOut": [
+    "Using PreciseConvexDecomposition on every small decoration slows your game down. Use Box for small things players will not touch, like cups on a shelf.",
+    "Setting `TextureID` will not override a mesh that already has PBR textures. Remove or edit the SurfaceAppearance instead.",
+    "A mesh with Box or Hull collision may block doorways or holes that look open. Check with the Collision fidelity visualization before you blame the mesh.",
+    "The Asset Manager can bulk-import meshes, but not ones with rigging, skinning, animation, accessories or facial animation. Use the Importer for those."
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "path": "content/en-us/performance-optimization/index.md",
+  "simple": "Performance optimization means making your game run smoothly, use less memory, and load faster. Smooth games feel better to play, work on more devices, and keep players around longer. You start by building smart from day one, then repeat a cycle: find problems, fix them, and keep watching. This page explains the three big things to measure: frame rate, memory, and join time.",
+  "analogy": "It is like taking care of a bike. You build it well, then you keep checking for squeaks, fix them, and ride it to make sure the fix worked.",
+  "keyPoints": [
+    "First, design for performance while you build. It is easier than fixing everything later.",
+    "After publishing, repeat the cycle: identify issues, improve performance, then monitor the results.",
+    "Smooth, fast games are more fun, keep players longer, and usually earn more.",
+    "Frame rate is how many pictures per second the player sees. Roblox games aim for 60 FPS, which is one frame every 16.67 milliseconds.",
+    "The server has a heartbeat instead of a frame rate. A low server heartbeat makes the game laggy for everyone.",
+    "Memory usage is how much RAM your game takes. Too much can crash the server (kicking everyone) or crash players' devices.",
+    "Join time is how long it takes from pressing Play to being able to move. Long join times make players leave before they start."
+  ],
+  "terms": {
+    "performance": "How smoothly and quickly your game runs.",
+    "frame rate (FPS)": "Frames per second, how many new pictures the screen shows each second. 60 FPS means 60 pictures every second.",
+    "millisecond (ms)": "One thousandth of a second. At 60 FPS, each frame has about 16.67 ms: 1000 / 60 = 16.67.",
+    "frame pacing": "Showing frames at even, steady times so movement looks smooth, not jumpy.",
+    "CPU": "The main brain of a device. It runs your scripts and physics.",
+    "GPU": "The graphics chip. It draws what you see on screen.",
+    "server heartbeat": "How many times per second the server updates the game world. It is like the server's version of frame rate.",
+    "latency": "Delay between doing something and the game reacting, like the time between pressing jump and seeing it happen online.",
+    "RAM": "Short-term memory on a device, where the running game keeps its stuff.",
+    "swap": "Backup memory on storage that a device uses when RAM is full. It is much slower.",
+    "memory leak": "When a game keeps holding on to memory it no longer needs, so usage keeps growing over time.",
+    "join time": "Time from clicking Play until the world shows and you can move.",
+    "retention": "How many players come back to play again."
+  },
+  "watchOut": [
+    "Waiting until the end to think about performance. Building with good habits from the start saves a lot of work.",
+    "Only testing on a powerful computer. Many players use phones with much less memory.",
+    "Ignoring the server. A slow or crashing server hurts every player in it, not just one."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/chat/voice-chat.md",
+  "simple": "Voice Chat lets players talk out loud to each other in your game. It is only for age-verified users 13 and older, and only in places that allow 100 players or fewer. By default, voices get quieter the farther away someone is, like real life. This page shows how to turn voice on or off, and how to change it so only teammates hear each other, or everyone hears everyone at the same volume.",
+  "analogy": "Default voice chat is like talking in a big park: people near you are loud, people far away are quiet. Team chat is like walkie-talkies that only your team can hear.",
+  "keyPoints": [
+    "Voice Chat is for verified 13+ users, and only works in places with a maximum of 100 players.",
+    "Turn it on or off in Studio with File, Experience Settings, Communication, Enable Voice Chat, then publish. Enable Camera optionally lets eligible players animate their avatar with their movement.",
+    "If a place allows more than 100 players, lower Maximum Visitor Count on the Creator Dashboard to 100 or less, then restart servers.",
+    "By default, voice is proximity-based. Set `VoiceChatService.UseAudioApi` to `Enabled` to control voice yourself.",
+    "For team-only voice, a server Script sets each player's `AudioDeviceInput` to only allow teammates' UserIds.",
+    "For equal volume for everyone, wire every player's `AudioDeviceInput` to one shared `AudioFader` and `AudioDeviceOutput`, and remove your own wires on the client so you do not hear yourself.",
+    "To turn off voice in just one place, insert `VoiceChatService` with Show Services and turn off `EnableDefaultVoice`.",
+    "Use `VoiceChatService:IsVoiceEnabledForUserIdAsync()` on the client to check if a player has voice turned on."
+  ],
+  "terms": {
+    "proximity-based": "Volume depends on distance. A player 5 studs away sounds louder than one 50 studs away.",
+    "non-spatial": "Everyone sounds the same volume no matter where they are in the world.",
+    "age-verified": "A player who proved their age to Roblox, for example with ID.",
+    "opt in": "Choose to turn something on yourself. Players must opt in to use voice.",
+    "AudioDeviceInput": "An object that represents a player's microphone in the game.",
+    "AudioDeviceOutput": "An object that plays audio out to the player's speakers or headphones.",
+    "AudioFader": "An object that acts like a volume slider audio can pass through.",
+    "Wire": "An object that connects one audio object to another, like a cable from a mic to a speaker.",
+    "access list": "A list of UserIds allowed (or blocked) from hearing a microphone.",
+    "restart servers": "Shut down running copies of your game so new ones start with your latest settings.",
+    "speech-to-text": "Turning spoken words into written text. It requires Voice Chat to be enabled."
+  },
+  "example": {
+    "title": "Check if your voice chat is on",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\nlocal VoiceChatService = game:GetService(\"VoiceChatService\")\n\nlocal localPlayer = Players.LocalPlayer\n\n-- This call can fail, so wrap it in pcall\nlocal success, enabled = pcall(function()\n\treturn VoiceChatService:IsVoiceEnabledForUserIdAsync(localPlayer.UserId)\nend)\n\nif success and enabled then\n\tprint(\"Voice Chat enabled!\")\nelse\n\tprint(\"Voice Chat is off or unavailable\")\nend",
+    "explain": [
+      "This runs on the player's device, so `Players.LocalPlayer` is you.",
+      "`IsVoiceEnabledForUserIdAsync` asks Roblox if voice is on for your UserId.",
+      "It can fail or take a moment, so we wrap it in `pcall`.",
+      "If it worked and voice is on, we print a message. You could show a mic icon instead."
+    ]
+  },
+  "watchOut": [
+    "Expecting voice in a place with more than 100 max players. Lower it to 100 or less and restart old servers.",
+    "Raising Max Players above 100 just to turn voice off. Use `EnableDefaultVoice` off instead.",
+    "In the non-spatial setup, players hear themselves unless you add the LocalScript that destroys their own `Wire` objects.",
+    "Forgetting to publish after changing Experience Settings. Changes only apply after publishing.",
+    "Calling `IsVoiceEnabledForUserIdAsync` from a normal server Script. Use a LocalScript or a Script with `RunContext` set to Client."
+  ]
+}

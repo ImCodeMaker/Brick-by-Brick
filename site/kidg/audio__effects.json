@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/audio/effects.md",
+  "simple": "Audio effects change how a sound comes out without changing the original file. You place an effect between the `AudioPlayer` and the speaker, so the sound passes through it on the way. This lets you make rain sound muffled, make a gym echo, or make a voice sound like a robot. You can chain several effects, and the order you put them in changes the result.",
+  "analogy": "Effects are like the filters on a photo app. The original photo stays the same, but each filter changes how it looks, and putting a black-and-white filter before or after a blur gives a slightly different picture.",
+  "keyPoints": [
+    "Effects go in the middle of the wiring: `AudioPlayer` to effect to output, each step joined by a `Wire`.",
+    "Several audio players can be wired into one effect, so you do not need a copy of the effect for each sound.",
+    "You can stack many effects on one sound, and their order matters.",
+    "`AudioEqualizer` raises or lowers low, middle, and high sounds, for example to make things sound muffled underwater.",
+    "`AudioCompressor` evens out loud and quiet parts so volume stays steady; `AudioReverb` adds room bounce, like in a gym.",
+    "`AudioEcho` repeats the sound with fading volume; `AudioChorus` and `AudioFlanger` layer slightly changed copies for robotic or sci-fi sounds.",
+    "`AudioDistortion` adds fuzz, `AudioPitchShifter` makes sounds higher or lower without changing speed, and `AudioTremolo` makes volume wobble.",
+    "`AudioFader` turns the volume of everything passing through up or down, and `AudioAnalyzer` measures volume and frequencies."
+  ],
+  "terms": {
+    "non-destructively": "The effect changes what players hear, but the sound file itself is never edited. Remove the effect and it sounds like the original again.",
+    "audio stream": "The sound traveling through wires from one audio object to the next.",
+    "frequency": "How high or low a sound is. A bass drum is low frequency; a whistle is high frequency.",
+    "dynamic range": "The gap between the quietest and loudest parts of a sound. A compressor makes that gap smaller.",
+    "ducking": "Automatically making one sound quieter so another one is easier to hear, like lowering music when someone talks.",
+    "reverb": "The many quick bounces of sound off walls that make a big room sound big.",
+    "clipping": "When a sound is pushed louder than the equipment can handle, so the peaks get chopped off and it sounds crunchy.",
+    "pitch": "How high or low a note sounds. Pitching down makes a small sound feel huge; pitching up can turn an explosion into a balloon pop.",
+    "modulated": "Changed back and forth over time, like a wobble.",
+    "gain": "How much louder or quieter a part of the sound is made, measured in decibels. On `AudioEqualizer` each band goes from -80 to 10."
+  },
+  "example": {
+    "title": "Muffle music with an equalizer",
+    "place": "Script in ServerScriptService",
+    "code": "local SoundService = game:GetService(\"SoundService\")\n\nlocal player = Instance.new(\"AudioPlayer\")\nplayer.Asset = \"rbxassetid://1234567890\" -- replace with your audio asset ID\nplayer.Looping = true\nplayer.Parent = SoundService\n\n-- The effect sits in the middle\nlocal equalizer = Instance.new(\"AudioEqualizer\")\nequalizer.HighGain = -30 -- cut the high sounds a lot\nequalizer.MidGain = -10 -- cut the middle a little\nequalizer.Parent = SoundService\n\nlocal output = Instance.new(\"AudioDeviceOutput\")\noutput.Parent = SoundService\n\n-- Wire 1: player -> equalizer\nlocal wire1 = Instance.new(\"Wire\")\nwire1.SourceInstance = player\nwire1.TargetInstance = equalizer\nwire1.Parent = SoundService\n\n-- Wire 2: equalizer -> speakers\nlocal wire2 = Instance.new(\"Wire\")\nwire2.SourceInstance = equalizer\nwire2.TargetInstance = output\nwire2.Parent = SoundService\n\nwhile not player.IsReady do\n\ttask.wait(0.1)\nend\nplayer:Play()",
+    "explain": [
+      "We make an `AudioPlayer` with a sound to play.",
+      "We make an `AudioEqualizer` and lower the high and middle sounds, which makes music sound like it is behind a wall or underwater.",
+      "We make an `AudioDeviceOutput` so everyone can hear it.",
+      "The first wire goes from the player into the equalizer, and the second goes from the equalizer to the output.",
+      "Once the sound is loaded, we play it. Everyone hears the muffled version, but the original file is unchanged."
+    ]
+  },
+  "watchOut": [
+    "If you wire the player straight to the output, the effect is skipped. The sound must pass through the effect.",
+    "Swapping the order of two effects (for example chorus then distortion versus distortion then chorus) can change the sound, so try both.",
+    "Too many strong effects at once can make sound messy. Change one setting at a time and listen."
+  ]
+}

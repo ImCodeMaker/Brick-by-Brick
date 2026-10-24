@@ -1,0 +1,51 @@
+{
+  "name": "NumberSequenceKeypoint",
+  "simple": "A NumberSequenceKeypoint is one dot on a NumberSequence's timeline. It says \"at this time (from 0 to 1), the value is this\", and can also add some random wiggle room called an envelope.",
+  "analogy": "If a NumberSequence is a road trip plan, each keypoint is one stop: \"at the halfway point, we are at the gas station\".",
+  "whenToUse": [
+    "Building a NumberSequence with more than two points",
+    "Adding random variety to particle sizes using the envelope",
+    "Reading the dots of an existing NumberSequence"
+  ],
+  "where": "Works in any script. Make one with NumberSequenceKeypoint.new(time, value) or NumberSequenceKeypoint.new(time, value, envelope), then put several in a list for NumberSequence.new.",
+  "terms": {
+    "keypoint": "One dot on a timeline that says \"at this moment, the value is this\". Roblox draws a straight line between dots to fill in the moments in between.",
+    "time (0 to 1)": "Where on the timeline a keypoint sits, as a fraction. 0 is the very start, 1 is the very end, 0.5 is halfway. For a particle that lives 2 seconds, time 0.5 means after 1 second.",
+    "envelope": "A random wiggle room around the value. Value 0.5 with envelope 0.1 can come out anywhere from 0.4 to 0.6. It must not be negative.",
+    "interpolate": "Fill in the in-between values. Halfway between 0 and 10 is 5."
+  },
+  "examples": [
+    {
+      "title": "Particles of slightly different sizes",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = workspace\n\nlocal emitter = Instance.new(\"ParticleEmitter\")\nemitter.Size = NumberSequence.new({\n\tNumberSequenceKeypoint.new(0, 1, 0.5), -- start: size 1, give or take 0.5\n\tNumberSequenceKeypoint.new(1, 0),      -- end: size 0 (shrinks away)\n})\nemitter.Parent = part",
+      "explain": [
+        "The first keypoint is at time 0 with value 1 and envelope 0.5, so each particle starts somewhere between size 0.5 and 1.5.",
+        "The second keypoint is at time 1 with value 0, so every particle shrinks to nothing by the end.",
+        "The envelope makes the effect look more natural because not every particle is the same."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Time must be between 0 and 1. It is a fraction of the whole timeline, not seconds.",
+    "Envelope must be 0 or more."
+  ],
+  "members": {
+    "NumberSequenceKeypoint.new": {
+      "simple": "Makes a keypoint from a time (0 to 1) and a value. You can add a third number, the envelope, for random wiggle room. Without it, the envelope is 0.",
+      "example": "local plain = NumberSequenceKeypoint.new(0.5, 2)       -- halfway: value 2\nlocal wobbly = NumberSequenceKeypoint.new(0.5, 2, 0.5) -- halfway: 1.5 to 2.5"
+    },
+    "NumberSequenceKeypoint.Envelope": {
+      "simple": "How much random wiggle room the value has. Value 0.5 with envelope 0.1 can come out between 0.4 and 0.6. Mostly used to make particles different sizes.",
+      "example": "local kp = NumberSequenceKeypoint.new(0, 1, 0.25)\nprint(kp.Envelope) --> 0.25"
+    },
+    "NumberSequenceKeypoint.Time": {
+      "simple": "Where this dot sits on the timeline, from 0 (start) to 1 (end). In a sequence the first dot must be at 0 and the last at 1.",
+      "example": "local kp = NumberSequenceKeypoint.new(0.25, 3)\nprint(kp.Time) --> 0.25 (a quarter of the way through)"
+    },
+    "NumberSequenceKeypoint.Value": {
+      "simple": "The number at this dot. Between dots, Roblox fills in the values with straight lines.",
+      "example": "local kp = NumberSequenceKeypoint.new(0.25, 3)\nprint(kp.Value) --> 3"
+    }
+  }
+}

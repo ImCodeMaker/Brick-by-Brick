@@ -1,0 +1,149 @@
+{
+  "name": "ProximityPrompt",
+  "simple": "A ProximityPrompt is the little \"Press E to Open\" pop-up that appears when your character walks close to something. When the player presses the key (or taps it on mobile, or presses the controller button), its Triggered event fires so your script can open the door, pick up the item, or anything else.",
+  "analogy": "A ProximityPrompt is like a doorbell with a sign next to it. When you walk up, you see the sign \"Ring bell\". Press it, and the people inside (your script) hear it and react.",
+  "whenToUse": [
+    "Open doors, chests, or gates.",
+    "Pick up items or talk to NPCs.",
+    "Hold-to-do actions like \"Hold E to repair\" using `HoldDuration`."
+  ],
+  "where": "Put it inside a BasePart, an Attachment, or a Model (with a PrimaryPart) in Workspace. Listen to Triggered in a Script (server) for things everyone sees. Shown/Hidden events fire on the client for LocalScripts.",
+  "terms": {
+    "trigger": "To set something off. A prompt is triggered when the player presses its key.",
+    "stud": "Roblox's unit of distance.",
+    "line of sight": "A clear, unblocked straight path for seeing something.",
+    "localize / localization": "Translating text into the player's language.",
+    "UI": "User interface: the buttons and pop-ups you see on the screen.",
+    "client": "One player's own device.",
+    "server": "Roblox's computer that runs the shared game for everyone.",
+    "KeyCode": "The name of a keyboard key or controller button, like `Enum.KeyCode.E`."
+  },
+  "examples": [
+    {
+      "title": "Press E to open a door",
+      "place": "Script inside the Door Part (with a ProximityPrompt also inside the Door)",
+      "code": "local door = script.Parent\nlocal prompt = door:WaitForChild(\"ProximityPrompt\")\n\nprompt.ActionText = \"Open\"\nprompt.ObjectText = \"Door\"\nprompt.MaxActivationDistance = 10 -- must be within 10 studs\n\nprompt.Triggered:Connect(function(player)\n\tprint(player.Name, \"opened the door\")\n\tdoor.Transparency = 0.8\n\tdoor.CanCollide = false\n\tprompt.Enabled = false -- hide the prompt while open\n\n\ttask.wait(3)\n\n\tdoor.Transparency = 0\n\tdoor.CanCollide = true\n\tprompt.Enabled = true\nend)",
+      "explain": [
+        "The prompt shows \"Open\" and \"Door\" when a player is within 10 studs.",
+        "Triggered gives us the player who pressed E.",
+        "The door becomes see-through and walkable for 3 seconds, then closes again. The prompt hides while the door is open."
+      ]
+    },
+    {
+      "title": "Hold to collect",
+      "place": "Script inside a Part with a ProximityPrompt",
+      "code": "local gem = script.Parent\nlocal prompt = gem:WaitForChild(\"ProximityPrompt\")\n\nprompt.ActionText = \"Collect\"\nprompt.HoldDuration = 2 -- must hold the key for 2 seconds\n\nprompt.Triggered:Connect(function(player)\n\tprint(player.Name, \"collected the gem\")\n\tgem:Destroy()\nend)",
+      "explain": [
+        "`HoldDuration = 2` makes the player hold the key for 2 seconds; a circle fills up while they hold.",
+        "Triggered only fires after the full 2 seconds."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The prompt must be inside a part, attachment, or model with a PrimaryPart that is in Workspace, or it will not show up.",
+    "Handle Triggered in a server Script if the result should be seen by everyone (like opening a door).",
+    "PromptShown and PromptHidden only fire in LocalScripts, because showing a prompt happens on each player's device."
+  ],
+  "members": {
+    "ProximityPrompt.ActionText": {
+      "simple": "The action word shown on the prompt, like \"Open\", \"Talk\", or \"Pick up\". Default is \"Interact\".",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.ActionText = \"Open\""
+    },
+    "ProximityPrompt.AutoLocalize": {
+      "simple": "If true, ActionText and ObjectText are automatically translated to the player's language using the localization table.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.AutoLocalize = true"
+    },
+    "ProximityPrompt.ClickablePrompt": {
+      "simple": "If true, players can also click or tap the prompt pop-up itself to use it. If false, they must press the key (mobile can still tap).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.ClickablePrompt = false"
+    },
+    "ProximityPrompt.Enabled": {
+      "simple": "If false, the prompt is hidden and cannot be used. Handy to turn a prompt off for a while, like after a chest is opened.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.Enabled = false"
+    },
+    "ProximityPrompt.Exclusivity": {
+      "simple": "Decides which prompts can show at the same time: only one prompt total, one per key, or always show.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.Exclusivity = Enum.ProximityPromptExclusivity.AlwaysShow"
+    },
+    "ProximityPrompt.GamepadKeyCode": {
+      "simple": "Which controller button triggers the prompt. Default is ButtonX.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.GamepadKeyCode = Enum.KeyCode.ButtonA"
+    },
+    "ProximityPrompt.HoldDuration": {
+      "simple": "How many seconds the player must hold the key to trigger. 0 means a quick press is enough.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.HoldDuration = 1.5"
+    },
+    "ProximityPrompt.KeyboardKeyCode": {
+      "simple": "Which keyboard key triggers the prompt. Default is E.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.KeyboardKeyCode = Enum.KeyCode.F"
+    },
+    "ProximityPrompt.MaxActivationDistance": {
+      "simple": "How close, in studs, the player's character must be for the prompt to appear and work.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.MaxActivationDistance = 8"
+    },
+    "ProximityPrompt.MaxIndicatorDistance": {
+      "simple": "If above 0, a small hint marker shows when the player is farther than MaxActivationDistance but closer than this, so they know something is nearby. Default 0 turns the hint off.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.MaxActivationDistance = 10\nprompt.MaxIndicatorDistance = 40 -- hint from 10 to 40 studs away"
+    },
+    "ProximityPrompt.ObjectText": {
+      "simple": "Optional name of the thing, shown above the action, like \"Treasure Chest\".",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.ObjectText = \"Treasure Chest\""
+    },
+    "ProximityPrompt.RequiresLineOfSight": {
+      "simple": "If true, the prompt hides when something blocks the view between the player's camera and the object, like a wall.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.RequiresLineOfSight = false -- show even through walls"
+    },
+    "ProximityPrompt.RootLocalizationTable": {
+      "simple": "Which LocalizationTable to use when translating this prompt's text.",
+      "example": "local LocalizationService = game:GetService(\"LocalizationService\")\nlocal Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.RootLocalizationTable = LocalizationService:FindFirstChild(\"MyTable\")"
+    },
+    "ProximityPrompt.Style": {
+      "simple": "Default uses Roblox's built-in pop-up look. Custom shows nothing, so you can draw your own pop-up in a LocalScript using PromptShown and PromptHidden.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.Style = Enum.ProximityPromptStyle.Custom"
+    },
+    "ProximityPrompt.UIOffset": {
+      "simple": "Shifts the pop-up on the screen by this many pixels (X right, Y down), so it does not cover something.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.UIOffset = Vector2.new(0, -50) -- 50 pixels higher"
+    },
+    "ProximityPrompt:InputHoldBegin": {
+      "simple": "For custom prompt buttons: tells the prompt the player started pressing, just as if they pressed the key.",
+      "example": "-- LocalScript: a custom on-screen button starts the hold\nlocal Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt:InputHoldBegin()\ntask.wait(prompt.HoldDuration)\nprompt:InputHoldEnd()"
+    },
+    "ProximityPrompt:InputHoldEnd": {
+      "simple": "For custom prompt buttons: tells the prompt the player let go.",
+      "example": "-- LocalScript\nlocal Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt:InputHoldEnd()"
+    },
+    "ProximityPrompt.IndicatorHidden": {
+      "simple": "Fires on the player's device when the small hint marker disappears (they walked away, or got close enough for the real prompt).",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.IndicatorHidden:Connect(function()\n\tprint(\"Hint hidden\")\nend)"
+    },
+    "ProximityPrompt.IndicatorShown": {
+      "simple": "Fires on the player's device when the small hint marker appears because they are getting close.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.IndicatorShown:Connect(function()\n\tprint(\"Something is nearby!\")\nend)"
+    },
+    "ProximityPrompt.PromptButtonHoldBegan": {
+      "simple": "Fires when a player starts holding the key on a prompt that has a HoldDuration above 0. Gives you the player.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.PromptButtonHoldBegan:Connect(function(player)\n\tprint(player.Name, \"started holding\")\nend)"
+    },
+    "ProximityPrompt.PromptButtonHoldEnded": {
+      "simple": "Fires when the player stops holding the key on a hold prompt (whether or not they finished).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.PromptButtonHoldEnded:Connect(function(player)\n\tprint(player.Name, \"let go\")\nend)"
+    },
+    "ProximityPrompt.PromptHidden": {
+      "simple": "Fires in LocalScripts when the prompt disappears from the player's screen.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.PromptHidden:Connect(function()\n\tprint(\"Prompt hidden\")\nend)"
+    },
+    "ProximityPrompt.PromptShown": {
+      "simple": "Fires in LocalScripts when the prompt appears on the player's screen. It tells you the kind of input they are using (keyboard, touch, or gamepad).",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.PromptShown:Connect(function(inputType)\n\tprint(\"Prompt shown for\", inputType)\nend)"
+    },
+    "ProximityPrompt.Triggered": {
+      "simple": "The main event: fires when the player presses the key (or finishes holding it). Gives you the player who did it.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.Triggered:Connect(function(player)\n\tprint(player.Name, \"used the prompt\")\nend)"
+    },
+    "ProximityPrompt.TriggerEnded": {
+      "simple": "Fires when the player lets go of the key after triggering. Useful for actions that last while held, like healing a friend.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal prompt = Workspace:WaitForChild(\"Door\"):WaitForChild(\"ProximityPrompt\")\nprompt.TriggerEnded:Connect(function(player)\n\tprint(player.Name, \"stopped\")\nend)"
+    }
+  }
+}

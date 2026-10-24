@@ -1,0 +1,40 @@
+{
+  "path": "content/en-us/effects/highlighting.md",
+  "simple": "A `Highlight` adds a glowing outline and a colored overlay to a part or model. It is used to show that something is important, can be picked up, or to let players see teammates through walls. You can change the outline color, the fill color, how see-through each is, and whether it shows through other objects. It is easy to add and cheap to turn on and off.",
+  "analogy": "It is like using a highlighter pen on a page: it draws attention to the important part so your eyes find it right away.",
+  "keyPoints": [
+    "Every highlight has an outline around the object and a fill that covers the object.",
+    "Add one by putting a `Highlight` inside a model or part, or place it elsewhere and set its `Adornee` to the object.",
+    "`OutlineColor` and `FillColor` set the colors. `OutlineTransparency` and `FillTransparency` go from 0 (solid) to 1 (invisible).",
+    "`DepthMode = AlwaysOnTop` shows the highlight even through walls. `Occluded` hides it when something is in the way.",
+    "Use `Enabled` to turn it on and off. This costs almost nothing.",
+    "Only 255 highlights can show at once on a player's screen. Extra ones are silently ignored, even disabled ones still take a slot.",
+    "For better performance, change properties instead of adding and removing highlights, and avoid putting highlighted objects inside other highlighted objects."
+  ],
+  "terms": {
+    "outline": "The colored line drawn around the edge of the object.",
+    "fill / interior": "The color layer drawn over the object itself.",
+    "transparency": "How see-through something is. 0 is solid, 0.5 is half see-through, 1 is invisible.",
+    "Adornee": "The object a highlight is attached to, when the highlight is not inside that object.",
+    "DepthMode": "Whether the highlight can be seen through walls (AlwaysOnTop) or only when nothing blocks it (Occluded).",
+    "client-side": "On each player's own device. The 255 limit counts the highlights one player's screen is showing.",
+    "performance spike": "A sudden moment of lag. Adding or removing highlights can cause one."
+  },
+  "example": {
+    "title": "Highlight a treasure chest when a player gets close",
+    "place": "LocalScript in StarterPlayerScripts (with a model named Chest in Workspace)",
+    "code": "local Players = game:GetService(\"Players\")\nlocal RunService = game:GetService(\"RunService\")\n\nlocal player = Players.LocalPlayer\nlocal chest = workspace:WaitForChild(\"Chest\")\n\nlocal highlight = Instance.new(\"Highlight\")\nhighlight.FillColor = Color3.fromRGB(255, 215, 0) -- gold\nhighlight.FillTransparency = 0.6\nhighlight.OutlineColor = Color3.fromRGB(255, 255, 255)\nhighlight.DepthMode = Enum.HighlightDepthMode.Occluded\nhighlight.Enabled = false\nhighlight.Parent = chest\n\nRunService.Heartbeat:Connect(function()\n\tlocal character = player.Character\n\tlocal root = character and character:FindFirstChild(\"HumanoidRootPart\")\n\tif root then\n\t\tlocal distance = (root.Position - chest:GetPivot().Position).Magnitude\n\t\thighlight.Enabled = distance < 15 -- glow when within 15 studs\n\tend\nend)",
+    "explain": [
+      "This is a LocalScript, so only this player sees the glow.",
+      "We create one `Highlight` with a gold fill and a white outline, and put it in the chest.",
+      "It starts turned off with `Enabled = false`.",
+      "Every frame we measure how far the player is from the chest.",
+      "If they are closer than 15 studs, we turn the highlight on; otherwise we turn it off. Toggling `Enabled` is cheap, so this is fine."
+    ]
+  },
+  "watchOut": [
+    "Do not create and destroy highlights over and over. Make one and toggle `Enabled` instead.",
+    "A disabled highlight still uses one of the 255 slots. Delete highlights you will never use again.",
+    "If players can see something through walls by accident, check that `DepthMode` is not `AlwaysOnTop`."
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "name": "CollectionService",
+  "simple": "CollectionService lets you put name stickers, called tags, on objects. Then ONE script can find every object with a certain tag and give them all the same behavior. Instead of copying the same script into 50 lava bricks, you tag them all \"Lava\" and write one script that handles every Lava brick.",
+  "analogy": "Tags are like colored stickers in a classroom. Put a red sticker on every kid in the soccer club, and the coach can just say \"everyone with a red sticker, come to the field\" instead of calling 30 names.",
+  "whenToUse": [
+    "Many objects should act the same way (lava, coins, doors, checkpoints)",
+    "Find all objects of one kind quickly, like every enemy spawn point",
+    "Run code automatically when a tagged object appears or disappears",
+    "Mark objects with a label, like \"Breakable\", and check for it later"
+  ],
+  "where": "Server and client. Get it with game:GetService(\"CollectionService\"). You can also add tags in Studio: select an object, then look in the Properties window under Tags.",
+  "terms": {
+    "tag": "A word you stick on an object, like \"Lava\" or \"Coin\". An object can have many tags. Tags are just text.",
+    "instance": "Any object in your game, like a Part, Model or Sound.",
+    "DataModel": "The whole game tree (everything you see in the Explorer window, starting at `game`).",
+    "descendant": "Anything inside something else, at any depth: its children, its children's children, and so on.",
+    "replicate": "To be copied from the server to every player's device automatically. Tags added on the server replicate to players.",
+    "signal": "An event object you can `:Connect` a function to. It runs your function every time it fires.",
+    "query": "A short search text describing which objects you want, like `Part.Lava` (Parts that have the Lava tag).",
+    "Collection": "A live group that keeps track of every object matching a query, adding and removing members automatically as things change.",
+    "memory leak": "When your game keeps holding on to stuff it no longer needs, which slowly makes it slower. Clean up connections when an object leaves."
+  },
+  "examples": [
+    {
+      "title": "Every part tagged Lava hurts players",
+      "place": "Script in ServerScriptService (tag some parts \"Lava\" in the Properties window)",
+      "code": "local CollectionService = game:GetService(\"CollectionService\")\n\nlocal function makeLava(part)\n    part.Touched:Connect(function(otherPart)\n        -- otherPart might be a leg or arm; its Parent is the character\n        local humanoid = otherPart.Parent:FindFirstChildOfClass(\"Humanoid\")\n        if humanoid then\n            humanoid.Health = 0\n        end\n    end)\nend\n\n-- set up all the Lava parts that already exist\nfor _, part in CollectionService:GetTagged(\"Lava\") do\n    makeLava(part)\nend\n\n-- and any Lava parts added later\nCollectionService:GetInstanceAddedSignal(\"Lava\"):Connect(makeLava)",
+      "explain": [
+        "`makeLava` gives one part the lava behavior.",
+        "`GetTagged(\"Lava\")` returns a list of every object that has the Lava tag right now; we set each one up.",
+        "`GetInstanceAddedSignal(\"Lava\")` fires whenever a new Lava-tagged object appears later, so those get set up too.",
+        "Now you can place 1 or 1,000 lava parts and you only ever wrote one script."
+      ]
+    },
+    {
+      "title": "Add and check tags from code",
+      "place": "Script in ServerScriptService",
+      "code": "local CollectionService = game:GetService(\"CollectionService\")\n\nlocal part = Instance.new(\"Part\")\npart.Parent = workspace\n\nCollectionService:AddTag(part, \"Coin\")           -- stick on a tag\nprint(CollectionService:HasTag(part, \"Coin\"))    -- true\nprint(CollectionService:GetTags(part))           -- {\"Coin\"}\n\nCollectionService:RemoveTag(part, \"Coin\")        -- peel it off\nprint(CollectionService:HasTag(part, \"Coin\"))    -- false",
+      "explain": [
+        "`AddTag` puts a tag on an object. `HasTag` checks for one. `GetTags` lists them all. `RemoveTag` takes one off.",
+        "Every object also has shortcut methods that do the same thing: `part:AddTag(\"Coin\")`, `part:HasTag(\"Coin\")`, `part:RemoveTag(\"Coin\")`."
+      ]
+    }
+  ],
+  "gotchas": [
+    "`GetTagged` only finds objects that exist NOW. Also connect `GetInstanceAddedSignal` to catch ones added later.",
+    "Tags are case-sensitive: \"Lava\" and \"lava\" are different tags.",
+    "Tags added by a LocalScript only exist on that player's device, and they get wiped out if the server later changes tags on the same object.",
+    "Objects stored in ServerStorage are not inside Workspace, but they are still in the game, so `GetTagged` can still find them on the server.",
+    "When a tagged object is removed, disconnect any connections you made for it (use `GetInstanceRemovedSignal`) to avoid memory leaks."
+  ],
+  "members": {
+    "CollectionService:AddTag": {
+      "simple": "Sticks a tag (a word) onto an object. If it already has that tag, nothing happens. Fires the tag's added signal.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nCollectionService:AddTag(workspace.Door, \"Openable\")",
+      "gotcha": "If a LocalScript adds a tag and the server later changes any tag on that object, the local tag disappears."
+    },
+    "CollectionService:CreateCollection": {
+      "simple": "Makes a live group that always contains every object matching a search text (a query). Unlike `GetTagged`, which is a one-time snapshot, a Collection keeps updating: it calls your `OnAdded` function when something starts matching and `OnRemoved` when it stops. The query can be a class name (`Part`), a name (`#Door`), a tag (`.Lava`), or mixes like `Part.Lava`. By default it searches inside Workspace.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\n-- every Part with the KillBrick tag, inside Workspace\nlocal killBricks = CollectionService:CreateCollection(\"Part.KillBrick\")\n\n-- runs once for each matching part, now and in the future\nfunction killBricks.OnAdded(brick)\n    brick.Material = Enum.Material.Neon\n    brick.Color = Color3.new(1, 0, 0)\nend\n\n-- runs when a matched part is touched\nfunction killBricks.OnTouched(brick, otherPart)\n    local humanoid = otherPart.Parent and otherPart.Parent:FindFirstChildOfClass(\"Humanoid\")\n    if humanoid then\n        humanoid.Health = 0\n    end\nend\n\n-- runs when a part stops matching (tag removed or part deleted)\nfunction killBricks.OnRemoved(brick)\n    print(\"No longer a kill brick:\", brick.Name)\nend",
+      "gotcha": "The Collection keeps working until you call its `:Destroy()` method or the object it searches inside (the root) is destroyed."
+    },
+    "CollectionService:GetAllTags": {
+      "simple": "Gives a list of every tag that is on at least one object in the game right now. The order is random.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nfor _, tag in CollectionService:GetAllTags() do\n    print(tag)\nend"
+    },
+    "CollectionService:GetCollection": {
+      "simple": "Old — use `CollectionService:GetTagged` instead."
+    },
+    "CollectionService:GetCollections": {
+      "simple": "Given one object, lists every Collection (made with `CreateCollection`) that it currently belongs to.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nlocal collections = CollectionService:GetCollections(workspace.Part)\nprint(#collections, \"collections include this part\")"
+    },
+    "CollectionService:GetInstanceAddedSignal": {
+      "simple": "Gives a signal that fires whenever an object gets a certain tag, or a tagged object is added into the game. Connect a function to set up new tagged objects.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nCollectionService:GetInstanceAddedSignal(\"Coin\"):Connect(function(coin)\n    print(\"A new coin appeared:\", coin.Name)\nend)",
+      "gotcha": "It does not fire for objects that were already tagged before you connected. Loop over `GetTagged` for those."
+    },
+    "CollectionService:GetInstanceRemovedSignal": {
+      "simple": "Gives a signal that fires whenever an object loses a certain tag, or a tagged object is removed from the game. Good for cleaning up.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nCollectionService:GetInstanceRemovedSignal(\"Coin\"):Connect(function(coin)\n    print(\"A coin was removed:\", coin.Name)\nend)"
+    },
+    "CollectionService:GetTagged": {
+      "simple": "Gives a list of every object in the game that has a certain tag right now.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nfor _, door in CollectionService:GetTagged(\"Door\") do\n    door.Transparency = 0.5\nend"
+    },
+    "CollectionService:GetTags": {
+      "simple": "Gives a list of all the tags on one object.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nprint(CollectionService:GetTags(workspace.Part)) -- e.g. {\"Lava\", \"Shiny\"}",
+      "gotcha": "To check for just one tag, `HasTag` is faster."
+    },
+    "CollectionService:HasTag": {
+      "simple": "True if the object has that tag, false if not.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nif CollectionService:HasTag(workspace.Part, \"Breakable\") then\n    workspace.Part:Destroy()\nend"
+    },
+    "CollectionService:RemoveTag": {
+      "simple": "Peels a tag off an object. Fires the tag's removed signal.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nCollectionService:RemoveTag(workspace.Door, \"Openable\")"
+    },
+    "CollectionService.ItemAdded": {
+      "simple": "Old — use `CollectionService:GetInstanceAddedSignal` instead."
+    },
+    "CollectionService.ItemRemoved": {
+      "simple": "Old — use `CollectionService:GetInstanceRemovedSignal` instead."
+    },
+    "CollectionService.TagAdded": {
+      "simple": "Fires when a tag is used for the FIRST time in the game (the first object gets it). It fires once per tag, not once per object.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nCollectionService.TagAdded:Connect(function(tag)\n    print(\"New tag in use:\", tag)\nend)"
+    },
+    "CollectionService.TagRemoved": {
+      "simple": "Fires when the LAST object with a tag loses it or leaves the game, so nobody has that tag anymore.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nCollectionService.TagRemoved:Connect(function(tag)\n    print(\"No one has this tag anymore:\", tag)\nend)"
+    }
+  }
+}

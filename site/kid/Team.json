@@ -1,0 +1,65 @@
+{
+  "name": "Team",
+  "simple": "A Team is a group players can belong to, like Red Team or Blue Team. Each Team has a color. Players on a team get their name shown in that color and are grouped together in the player list. Team objects must live inside the Teams service.",
+  "analogy": "A Team is like a jersey color in a school sports day. Everyone wearing red is on the Red Team, sits together on the scoreboard, and starts at the red starting line (red SpawnLocations).",
+  "whenToUse": [
+    "Split players into sides for a game (cops vs robbers, red vs blue).",
+    "Count or loop over everyone on one side (GetPlayers).",
+    "Make team-only spawn points or team-only doors."
+  ],
+  "where": "Inside the Teams service. Add them in Studio (hover Teams, click +, insert Team) or with `Instance.new(\"Team\")` parented to `game:GetService(\"Teams\")`. Players join a team by setting `player.Team`.",
+  "terms": {
+    "TeamColor": "The BrickColor that identifies a team. Many team features match things by this color, so give every team a different one.",
+    "BrickColor": "One of Roblox's named colors, like \"Bright red\" or \"Lapis\".",
+    "auto-assign": "Roblox putting a joining player on a team by itself, choosing the team with the fewest players.",
+    "neutral": "Not on any team.",
+    "SpawnLocation": "A pad where players appear. It can be locked to one team's color."
+  },
+  "examples": [
+    {
+      "title": "Create two teams and balance players yourself",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\nlocal Teams = game:GetService(\"Teams\")\n\nlocal function makeTeam(name, colorName)\n    local team = Instance.new(\"Team\")\n    team.Name = name\n    team.TeamColor = BrickColor.new(colorName)\n    team.AutoAssignable = false -- we'll choose teams ourselves\n    team.Parent = Teams\n    return team\nend\n\nlocal red = makeTeam(\"Red Team\", \"Bright red\")\nlocal blue = makeTeam(\"Blue Team\", \"Bright blue\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    -- Put the new player on whichever team has fewer people\n    if #red:GetPlayers() <= #blue:GetPlayers() then\n        player.Team = red\n    else\n        player.Team = blue\n    end\nend)\n\nred.PlayerAdded:Connect(function(player)\n    print(player.Name .. \" joined the Red Team\")\nend)",
+      "explain": [
+        "Each Team gets a name and a unique TeamColor, and is parented to the Teams service.",
+        "AutoAssignable = false stops Roblox from choosing teams for us.",
+        "GetPlayers() gives the list of a team's players; # counts them.",
+        "Setting player.Team moves the player onto that team, which fires the team's PlayerAdded event."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Teams only work when they're directly inside the Teams service.",
+    "Give every team a different TeamColor. Spawns and Player.TeamColor match teams by color.",
+    "AutoAssignable only evens out teams when players join, not when they leave.",
+    "Teams don't block friendly fire on their own. Check teams in your weapon scripts."
+  ],
+  "members": {
+    "Team.AutoAssignable": {
+      "simple": "If true, new players can be placed on this team automatically. Roblox picks the auto-assignable team with the fewest players. If no team allows it, players join as neutral.",
+      "example": "team.AutoAssignable = false -- only scripts put people on this team"
+    },
+    "Team.AutoColorCharacters": {
+      "simple": "Old — it no longer does anything. Color characters yourself with a script if you want."
+    },
+    "Team.Score": {
+      "simple": "Old — use a leaderstats leaderboard instead."
+    },
+    "Team.TeamColor": {
+      "simple": "The team's color. Players on the team get this color as their Player.TeamColor, their name shows in it, and SpawnLocations with the same TeamColor belong to this team.",
+      "example": "team.TeamColor = BrickColor.new(\"Lapis\")"
+    },
+    "Team:GetPlayers": {
+      "simple": "Gives a list of all players on this team right now.",
+      "example": "for _, player in team:GetPlayers() do\n    print(player.Name .. \" is on \" .. team.Name)\nend\nprint(team.Name .. \" has \" .. #team:GetPlayers() .. \" players\")"
+    },
+    "Team.PlayerAdded": {
+      "simple": "Fires when a player joins this team. Gives you that player.",
+      "example": "team.PlayerAdded:Connect(function(player)\n    print(player.Name .. \" has joined the team\")\nend)"
+    },
+    "Team.PlayerRemoved": {
+      "simple": "Fires when a player leaves this team: they switched teams, became neutral, or left the game.",
+      "example": "team.PlayerRemoved:Connect(function(player)\n    print(player.Name .. \" has left the team\")\nend)"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/luau/functions.md",
+  "simple": "A function is a named chunk of code you can run whenever you want, as many times as you want. You can hand it values (parameters) and get answers back (return values). Functions are also how your game reacts to things, like running code when a player joins. Learning functions lets you stop copying and pasting the same code over and over.",
+  "analogy": "A function is like a recipe card. You write it once, then any time you want cookies you follow the card. The ingredients you hand over are the parameters, and the cookies you get back are the return value.",
+  "keyPoints": [
+    "Make a function with `local function name(parameters) ... end`, and run it by writing `name()`.",
+    "Parameters are inputs. Extra arguments are ignored, and missing ones become `nil`.",
+    "`return` sends a result back and ends the function. A function can return several values, like `return sum, difference`.",
+    "Methods are functions that belong to an object. Call them with a colon, like `part:Destroy()`, which passes the object in as `self`.",
+    "`obj:Method()` is the same as `obj.Method(obj)`.",
+    "Callbacks are functions you give to something else to run later, like the sort rule in `table.sort` or `BindableFunction.OnInvoke`.",
+    "Event handlers are functions connected to events, like `Players.PlayerAdded:Connect(onPlayerAdded)`.",
+    "Anonymous functions have no name and are written right where they are used. Variadic functions use `...` to accept any number of arguments."
+  ],
+  "terms": {
+    "function": "A reusable block of code that runs when you call it.",
+    "call": "To run a function by writing its name followed by parentheses, like `jump()`.",
+    "parameter": "A named input listed in the function's parentheses, like `num1` in `function add(num1, num2)`.",
+    "argument": "The actual value you pass in when calling, like the `2` in `add(2, 3)`.",
+    "return value": "The answer a function sends back. `add(2, 3)` might return 5.",
+    "body": "The code inside the function, between the first line and `end`.",
+    "method": "A function that belongs to an object or table and is called with `:`.",
+    "self": "Inside a method, the object the method was called on.",
+    "callback": "A function you give to another function or system so it can call yours later.",
+    "invoke": "To call a function, especially through something like `BindableFunction:Invoke()`.",
+    "event handler": "A function that runs when an event happens, like a player joining.",
+    "anonymous function": "A function with no name, often written inside `:Connect(function() ... end)`.",
+    "variadic function": "A function that accepts any number of arguments, using `...`. `print` is one.",
+    "unpack": "A function that spreads a table's items out as separate values. `unpack({1, 2})` gives 1, 2."
+  },
+  "example": {
+    "title": "Greet players and give a reward",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\n-- A function with parameters and a return value\nlocal function calculateReward(level: number, bonus: number): number\n\treturn level * 10 + bonus\nend\n\n-- A function that returns two values\nlocal function minAndMax(a: number, b: number)\n\treturn math.min(a, b), math.max(a, b)\nend\n\nprint(calculateReward(3, 5)) --> 35\nlocal low, high = minAndMax(8, 2)\nprint(low, high) --> 2 8\n\n-- A named event handler\nlocal function onPlayerAdded(player)\n\tprint(player.Name .. \" joined the game!\")\nend\nPlayers.PlayerAdded:Connect(onPlayerAdded)\n\n-- An anonymous function used as a callback\ntask.delay(2, function()\n\tprint(\"Two seconds have passed\")\nend)",
+    "explain": [
+      "`calculateReward` takes a level and a bonus and returns level times 10 plus bonus, so (3, 5) gives 35.",
+      "`minAndMax` returns two values, caught by `local low, high`.",
+      "`onPlayerAdded` is connected to `PlayerAdded`, so it runs every time someone joins.",
+      "The function passed to `task.delay` has no name. It runs after 2 seconds."
+    ]
+  },
+  "watchOut": [
+    "Writing `Connect(onPlayerAdded())` with parentheses. That calls the function right away; pass it without `()`.",
+    "Using a dot instead of a colon for methods, like `part.Destroy()`. Use `part:Destroy()`.",
+    "Putting code after `return` in the same block. `return` must be the last line before `end`.",
+    "Forgetting arguments. Missing ones become `nil`, which often causes \"attempt to perform arithmetic\" errors.",
+    "Using a function before it is defined with `local`. Define it above the line that calls it."
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "name": "Attachment",
+  "simple": "An Attachment is an invisible point with a direction that you stick onto a part. Its position is measured from the part it is inside, so when the part moves or turns, the attachment moves and turns with it. Constraints (like ropes, springs, and hinges), particles, lights, and beams use attachments to know exactly where to connect or shine from.",
+  "analogy": "An Attachment is like a sticker on a toy car. If you put the sticker on the front bumper, it stays on the front bumper no matter where you drive the car or which way you turn it.",
+  "whenToUse": [
+    "Connect constraints like RopeConstraint, SpringConstraint, or HingeConstraint at exact spots.",
+    "Make particles, lights, or sounds come from one exact spot on a part instead of its center.",
+    "Connect the two ends of a Beam.",
+    "Remember a spot on a part (like the tip of a sword) and read where it is in the world."
+  ],
+  "where": "Put it inside a BasePart (or a Bone, or another Attachment). It needs to be in Workspace to matter. Create with `Instance.new(\"Attachment\")`. Works in Scripts and LocalScripts.",
+  "terms": {
+    "offset": "How far something is shifted from a starting point. An attachment's Position is its offset from the center of its parent part.",
+    "local space": "Measuring from the part itself, using the part's own directions. \"2 studs above the part\" means along the part's own up direction, even if the part is tipped over.",
+    "world space": "Measuring from the center of the whole map, (0, 0, 0), where up is always straight up.",
+    "CFrame": "Position plus rotation in one value.",
+    "axis": "A direction line that something points along or turns around. X, Y, and Z are the three main axes.",
+    "unit vector": "A direction arrow exactly 1 stud long. Only its direction matters.",
+    "constraint": "An object that connects two attachments with a physical rule, like a rope, spring, or hinge.",
+    "stud": "Roblox's unit of distance.",
+    "deprecated": "Old and replaced by something newer."
+  },
+  "examples": [
+    {
+      "title": "Local Position vs WorldPosition (with numbers)",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(10, 5, 0)\npart.Parent = Workspace\n\nlocal att = Instance.new(\"Attachment\")\natt.Position = Vector3.new(0, 2, 0) -- 2 studs above the part's center (local)\natt.Parent = part\n\nprint(att.WorldPosition) --> 10, 7, 0  (part position + offset)\n\n-- Tip the part over 90 degrees around the Z axis\npart.Orientation = Vector3.new(0, 0, 90)\n\nprint(att.Position)      --> 0, 2, 0   (still 2 studs \"above\" in the part's own view)\nprint(att.WorldPosition) --> 8, 5, 0   (the part's \"up\" now points along -X)",
+      "explain": [
+        "`Position` is measured from the part: (0, 2, 0) means 2 studs along the part's own up direction.",
+        "The part is at (10, 5, 0) and not turned, so the attachment is at (10, 7, 0) in the world.",
+        "After tipping the part 90 degrees around Z, the part's up direction points toward -X. The attachment's local Position stays (0, 2, 0), but in the world it is now at (8, 5, 0)."
+      ]
+    },
+    {
+      "title": "Hang a part from a rope",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal ceiling = Instance.new(\"Part\")\nceiling.Anchored = true\nceiling.Position = Vector3.new(0, 20, 0)\nceiling.Parent = Workspace\n\nlocal ball = Instance.new(\"Part\")\nball.Shape = Enum.PartType.Ball\nball.Position = Vector3.new(5, 15, 0)\nball.Parent = Workspace\n\n-- One attachment on each part\nlocal top = Instance.new(\"Attachment\")\ntop.Parent = ceiling\nlocal bottom = Instance.new(\"Attachment\")\nbottom.Parent = ball\n\n-- Connect them with a rope 10 studs long\nlocal rope = Instance.new(\"RopeConstraint\")\nrope.Attachment0 = top\nrope.Attachment1 = bottom\nrope.Length = 10\nrope.Visible = true\nrope.Parent = ceiling",
+      "explain": [
+        "Each part gets an Attachment at its center (Position (0, 0, 0)).",
+        "A RopeConstraint links the two attachments, so the ball swings like a pendulum under the anchored ceiling.",
+        "Constraints always connect attachments, which is why attachments are so important for physics builds."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Position is measured from the parent part, not from the world. Use WorldPosition when you need the spot in the world.",
+    "An attachment does nothing useful by itself unless something uses it, like a constraint, ParticleEmitter, light, or Beam.",
+    "Turn on `Visible` to see a small green dot where the attachment is while testing."
+  ],
+  "members": {
+    "Attachment.Axis": {
+      "simple": "The direction the attachment's X axis points, measured from its parent part (a 1-stud-long direction arrow). Constraints like hinges spin around this direction.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\natt.Axis = Vector3.new(0, 1, 0) -- point the X axis up"
+    },
+    "Attachment.CFrame": {
+      "simple": "The attachment's position AND rotation, measured from its parent part. Changing it also changes Position and Orientation.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\n-- 3 studs in front of the part (its -Z side), turned 90 degrees\natt.CFrame = CFrame.new(0, 0, -3) * CFrame.Angles(0, math.rad(90), 0)"
+    },
+    "Attachment.Orientation": {
+      "simple": "Which way the attachment is turned, in degrees, measured from the way its parent part is turned. (0, 0, 0) means it faces the same way as the part.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\natt.Orientation = Vector3.new(0, 90, 0)"
+    },
+    "Attachment.Position": {
+      "simple": "Where the attachment is, measured from the center of its parent part using the part's own directions. Default (0, 0, 0), the center. (0, 2, 0) is 2 studs toward the part's top.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\natt.Position = Vector3.new(0, 2, 0) -- on top of a 4-stud-tall part"
+    },
+    "Attachment.Rotation": {
+      "simple": "Old — use `Orientation` instead."
+    },
+    "Attachment.SecondaryAxis": {
+      "simple": "The direction the attachment's Y axis points, measured from its parent part. It is always kept at a right angle to Axis. Some constraints use it as a second direction.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\natt.SecondaryAxis = Vector3.new(0, 0, 1)"
+    },
+    "Attachment.Visible": {
+      "simple": "If true, the attachment shows as a small green ball during the game. Handy for checking where it is. Off by default.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\natt.Visible = true"
+    },
+    "Attachment.WorldAxis": {
+      "simple": "The direction of the attachment's X axis in the world (instead of measured from its part). Setting it turns the attachment.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\nprint(att.WorldAxis)"
+    },
+    "Attachment.WorldCFrame": {
+      "simple": "The attachment's position and rotation in the world. It equals the parent part's CFrame times the attachment's own CFrame. Setting it moves the attachment (not the part).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\nprint(\"Attachment is at\", att.WorldCFrame.Position)"
+    },
+    "Attachment.WorldOrientation": {
+      "simple": "Which way the attachment is turned in the world, in degrees, instead of compared to its part.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\nprint(att.WorldOrientation)"
+    },
+    "Attachment.WorldPosition": {
+      "simple": "Where the attachment is in the world. Part at (10, 5, 0) plus attachment Position (0, 2, 0) on an un-turned part gives WorldPosition (10, 7, 0). Setting it moves the attachment to that world spot.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\n-- put a small sparkle effect at the attachment's real spot\nprint(att.WorldPosition)"
+    },
+    "Attachment.WorldRotation": {
+      "simple": "Old — use `WorldOrientation` instead."
+    },
+    "Attachment.WorldSecondaryAxis": {
+      "simple": "The direction of the attachment's Y axis in the world.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\nprint(att.WorldSecondaryAxis)"
+    },
+    "Attachment:GetAxis": {
+      "simple": "Old — use `Axis` instead."
+    },
+    "Attachment:GetConstraints": {
+      "simple": "Gives a list of all the constraints (ropes, springs, hinges, and so on) that are connected to this attachment.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal att = Workspace:WaitForChild(\"Part\"):WaitForChild(\"Attachment\")\nfor _, c in att:GetConstraints() do\n\tprint(c.ClassName)\nend"
+    },
+    "Attachment:GetSecondaryAxis": {
+      "simple": "Old — use `SecondaryAxis` instead."
+    },
+    "Attachment:SetAxis": {
+      "simple": "Old — set `Axis` instead."
+    },
+    "Attachment:SetSecondaryAxis": {
+      "simple": "Old — set `SecondaryAxis` instead."
+    }
+  }
+}

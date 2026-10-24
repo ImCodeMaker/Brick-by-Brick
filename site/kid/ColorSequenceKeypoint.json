@@ -1,0 +1,46 @@
+{
+  "name": "ColorSequenceKeypoint",
+  "simple": "A ColorSequenceKeypoint is one color stop in a ColorSequence. It says \"at this point (from 0 to 1), the color is this\". Roblox blends smoothly between the stops.",
+  "analogy": "It is one blob of paint on a strip of paper. Put a few blobs along the strip and smear between them to get a gradient.",
+  "whenToUse": [
+    "Building a ColorSequence with three or more colors",
+    "Reading the color stops of an existing ColorSequence"
+  ],
+  "where": "Works in any script. Make one with ColorSequenceKeypoint.new(time, color) and put several in a list for ColorSequence.new.",
+  "terms": {
+    "keypoint": "One dot on a timeline that says \"at this moment, the value is this\". Roblox draws a straight line between dots to fill in the moments in between.",
+    "time (0 to 1)": "Where on the timeline a keypoint sits, as a fraction. 0 is the very start, 1 is the very end, 0.5 is halfway. For a particle that lives 2 seconds, time 0.5 means after 1 second.",
+    "Color3": "A color made of red, green, and blue amounts, each from 0 to 1.",
+    "RGB blending": "Mixing two colors by moving each of red, green, and blue part of the way. Halfway between red (1, 0, 0) and blue (0, 0, 1) is (0.5, 0, 0.5), a purple."
+  },
+  "examples": [
+    {
+      "title": "A trail with three colors",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = workspace\n\n-- A Trail needs two Attachments to draw between\nlocal a0 = Instance.new(\"Attachment\")\na0.Position = Vector3.new(0, 0.5, 0)\na0.Parent = part\nlocal a1 = Instance.new(\"Attachment\")\na1.Position = Vector3.new(0, -0.5, 0)\na1.Parent = part\n\nlocal trail = Instance.new(\"Trail\")\ntrail.Attachment0 = a0\ntrail.Attachment1 = a1\ntrail.Color = ColorSequence.new({\n\tColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 0)), -- yellow\n\tColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 0, 150)), -- pink\n\tColorSequenceKeypoint.new(1, Color3.fromRGB(0, 120, 255)), -- blue\n})\ntrail.Parent = part",
+      "explain": [
+        "Each ColorSequenceKeypoint has a time and a color.",
+        "Time 0 is yellow, time 0.5 is pink, time 1 is blue.",
+        "The trail only shows up while the part is moving, so try moving the part in Studio to see it."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Time is a fraction from 0 to 1, not seconds.",
+    "The color must be a Color3 with parts from 0 to 1. Use Color3.fromRGB if you think in 0 to 255."
+  ],
+  "members": {
+    "ColorSequenceKeypoint.new": {
+      "simple": "Makes a color stop from a time (0 to 1) and a Color3.",
+      "example": "local start = ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0))   -- red at the start\nlocal middle = ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 0)) -- green halfway"
+    },
+    "ColorSequenceKeypoint.Time": {
+      "simple": "Where this color stop sits, from 0 (start) to 1 (end). The first stop in a sequence must be at 0 and the last at 1.",
+      "example": "local kp = ColorSequenceKeypoint.new(0.5, Color3.new(0, 1, 0))\nprint(kp.Time) --> 0.5"
+    },
+    "ColorSequenceKeypoint.Value": {
+      "simple": "The color (a Color3) at this stop.",
+      "example": "local kp = ColorSequenceKeypoint.new(0.5, Color3.new(0, 1, 0))\nprint(kp.Value) --> 0, 1, 0"
+    }
+  }
+}

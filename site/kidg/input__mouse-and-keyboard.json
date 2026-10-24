@@ -1,0 +1,40 @@
+{
+  "path": "content/en-us/input/mouse-and-keyboard.md",
+  "simple": "Lots of Roblox players use a mouse and keyboard, so your game should work well with them. This page shows how to detect key presses and mouse clicks with `UserInputService`, and how to change, hide, or lock the mouse pointer. For most game actions, Roblox suggests the Input Action System, but `UserInputService` is great for general key and mouse input.",
+  "analogy": "`UserInputService` is like a doorbell camera for your keyboard and mouse. Every time a key is pressed or released, it rings and tells your script which one.",
+  "keyPoints": [
+    "The Input Action System is the simplest way to support many devices for actions like jump or sprint.",
+    "`UserInputService.InputBegan` fires when a key or mouse button is pressed, and `InputEnded` fires when it is released.",
+    "The second value these events give you, often called `processedEvent` or `gameProcessed`, is `true` if something else already used that input, like typing in chat.",
+    "`UserInputService:IsKeyDown()` checks if a key is held right now.",
+    "Change the mouse pointer with `UserInputService.MouseIcon = \"rbxassetid://...\"`.",
+    "Hide the pointer with `MouseIconEnabled = false`.",
+    "Lock the pointer with `MouseBehavior` set to `LockCenter` or `LockCurrentPosition`, and unlock with `Default`. `InputChanged` still reports how far the mouse moved."
+  ],
+  "terms": {
+    "UserInputService": "The service that tells LocalScripts about keyboard, mouse, touch, and gamepad input.",
+    "InputObject": "The info about one input, such as `KeyCode` (which key) and `Position` (where the mouse was).",
+    "KeyCode": "The name of a key or button, like `Enum.KeyCode.E` or `Enum.KeyCode.Space`.",
+    "processed event": "An input that the game already used for something else, like typing in a TextBox. Usually you ignore it.",
+    "mouse icon": "The little pointer picture that moves with the mouse.",
+    "delta": "How much something changed. A mouse delta of `(5, -2)` means it moved 5 pixels right and 2 pixels up since the last check.",
+    "LockCenter": "Keeps the mouse pointer stuck in the middle of the screen, common in first-person shooters."
+  },
+  "example": {
+    "title": "Press E to say hello",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nUserInputService.InputBegan:Connect(function(input, gameProcessed)\n\t-- Ignore keys used for other things, like typing in chat\n\tif gameProcessed then\n\t\treturn\n\tend\n\n\tif input.KeyCode == Enum.KeyCode.E then\n\t\tprint(\"Hello! You pressed E\")\n\telseif input.UserInputType == Enum.UserInputType.MouseButton1 then\n\t\tprint(\"You clicked at\", input.Position)\n\tend\nend)",
+    "explain": [
+      "`InputBegan` runs every time the player presses a key or mouse button.",
+      "If `gameProcessed` is true, the player was probably typing in chat, so we stop.",
+      "If the key was E, we print a hello message.",
+      "If it was a left mouse click (`MouseButton1`), we print where on the screen they clicked."
+    ]
+  },
+  "watchOut": [
+    "Forgetting to check `gameProcessed`. Your E action will fire while players type the letter E in chat.",
+    "Using `UserInputService` in a server Script. It only works in LocalScripts.",
+    "Locking or hiding the mouse and never giving it back. Players will not be able to click menus.",
+    "Only supporting the keyboard. Mobile and console players need other ways to do the same action."
+  ]
+}

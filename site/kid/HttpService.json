@@ -1,0 +1,107 @@
+{
+  "name": "HttpService",
+  "simple": "HttpService lets your game's server talk to websites outside of Roblox, like a weather site or your own web server. It also has handy tools that work anywhere: turning tables into JSON text and back, and making random unique IDs.",
+  "analogy": "HttpService is like the server's phone line to the outside world. Players' devices cannot use this phone; only the server can make calls, and only after you switch the phone on in Game Settings.",
+  "whenToUse": [
+    "Getting information from an outside website (server only).",
+    "Sending game stats or error logs to your own web server (server only).",
+    "Turning a Luau table into JSON text, or JSON text into a table (works anywhere).",
+    "Making a random unique ID for something, like a trade or an item (works anywhere)."
+  ],
+  "where": "Get it with `game:GetService(\"HttpService\")`. Web requests (`GetAsync`, `PostAsync`, `RequestAsync`) only work in server Scripts and only when HTTP requests are allowed (Game Settings > Security > Allow HTTP Requests). JSON and GUID functions work on server and client.",
+  "terms": {
+    "HTTP": "The language web browsers and websites use to talk. A web address like https://example.com is sent an HTTP request and replies with a response.",
+    "client vs server for HttpService": "Roblox clients and the Roblox server talk to each other over Roblox's own network connection (that is what RemoteEvents use), NOT over HTTP. HttpService is something different: it lets the SERVER call websites outside Roblox. LocalScripts cannot send web requests.",
+    "server": "The Roblox computer in charge of one copy of your game. A popular game runs many servers at the same time, each with its own group of players.",
+    "client": "A player's own device (phone, PC, console). LocalScripts run there.",
+    "URL": "A web address, like `https://httpbin.org/get`.",
+    "GET / POST": "Two kinds of web request. GET means 'please give me something'. POST means 'here is some data for you'.",
+    "JSON": "A very common way to write data as text, for example `{\"coins\":10,\"name\":\"Ava\"}`. Websites use it to send data back and forth.",
+    "encode / decode": "Encode means turn a Luau table into JSON text. Decode means turn JSON text back into a Luau table.",
+    "GUID / UUID": "A long random ID like `db454790-7563-44ed-ab4b-397ff5df737b`. There are so many possible ones that two will basically never be the same.",
+    "secret": "A hidden password or API key stored safely in your game's settings. Scripts can use it in requests but cannot print it.",
+    "API key": "A password a website gives you so it knows the request comes from you.",
+    "status code": "A number a website replies with. 200 means OK. 404 means not found. 500 means the website had an error.",
+    "pcall": "Short for 'protected call'. It runs a function and catches errors instead of crashing your script. It returns `true` and the results if it worked, or `false` and the error message if it failed.",
+    "async / yield": "Functions ending in `Async` talk to other computers over the internet. Your script pauses (yields) until the answer comes back."
+  },
+  "examples": [
+    {
+      "title": "Ask a website for data (server only)",
+      "place": "Script in ServerScriptService (turn on Allow HTTP Requests first)",
+      "code": "local HttpService = game:GetService(\"HttpService\")\n\nlocal ok, result = pcall(function()\n\treturn HttpService:GetAsync(\"https://httpbin.org/get\")\nend)\n\nif ok then\n\t-- The reply is JSON text; turn it into a table\n\tlocal data = HttpService:JSONDecode(result)\n\tprint(\"The website saw this address:\", data.url)\nelse\n\twarn(\"Request failed: \" .. tostring(result))\nend",
+      "explain": [
+        "Only a server Script can do this. A LocalScript would get an error.",
+        "`GetAsync` sends a GET request and waits for the reply text.",
+        "Web requests can fail (site down, internet hiccup, HTTP not allowed), so we use pcall.",
+        "`JSONDecode` turns the JSON reply into a Luau table we can read."
+      ]
+    },
+    {
+      "title": "Turn a table into JSON and back (works anywhere)",
+      "place": "Script in ServerScriptService or LocalScript",
+      "code": "local HttpService = game:GetService(\"HttpService\")\n\nlocal inventory = { coins = 10, items = { \"Sword\", \"Shield\" } }\n\nlocal text = HttpService:JSONEncode(inventory)\nprint(text) --> something like {\"coins\":10,\"items\":[\"Sword\",\"Shield\"]}\n\nlocal back = HttpService:JSONDecode(text)\nprint(back.items[1]) --> Sword",
+      "explain": [
+        "`JSONEncode` makes text out of the table.",
+        "`JSONDecode` rebuilds a table from the text.",
+        "These do not use the internet, so they work even with HTTP requests turned off."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Web requests only work from server Scripts. Clients talk to the server with RemoteEvents, not HTTP.",
+    "Turn on Game Settings > Security > Allow HTTP Requests, or every request fails.",
+    "You cannot call most roblox.com websites with it (only some Open Cloud ones).",
+    "There is a limit of about 500 web requests per minute per server. Do not call websites in a fast loop.",
+    "Always use pcall: websites can be slow, down, or return errors.",
+    "Never put API keys or passwords directly in your scripts. Use secrets with `GetSecret`.",
+    "Only call websites you trust."
+  ],
+  "members": {
+    "HttpService.HttpEnabled": {
+      "simple": "True if the game is allowed to send web requests. You normally switch it on in Game Settings > Security; scripts can read it but a normal script cannot change it.",
+      "example": "-- Script in ServerScriptService\nlocal HttpService = game:GetService(\"HttpService\")\n\nif not HttpService.HttpEnabled then\n\twarn(\"Turn on Allow HTTP Requests in Game Settings > Security\")\nend",
+      "gotcha": "JSON and GUID functions work even when this is false."
+    },
+    "HttpService:CreateWebStreamClient": {
+      "simple": "Opens a long-lasting connection to a website that sends data bit by bit (a stream), so you can handle each piece the moment it arrives. It only works in Studio, mostly for plugins and tools.",
+      "example": "-- Script (Studio only, e.g. inside a plugin)\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal client = HttpService:CreateWebStreamClient(Enum.WebStreamClientType.RawStream, {\n\tUrl = \"https://example.com/stream\",\n\tMethod = \"GET\",\n})\n\nclient.MessageReceived:Connect(function(message)\n\tprint(\"Got a piece:\", message)\nend)\n\n-- When finished: client:Close()",
+      "gotcha": "Only 4 can be open at once. Close them with `:Close()` and disconnect your connections when done. Remove this code before publishing."
+    },
+    "HttpService:GenerateGUID": {
+      "simple": "Makes a random unique ID string. Pass `false` if you do not want curly braces around it. Works on server and client, even with HTTP turned off.",
+      "example": "-- Script or LocalScript\nlocal HttpService = game:GetService(\"HttpService\")\n\nprint(HttpService:GenerateGUID())      --> {94b717b2-d54f-4340-a504-bd809ef5bf5c}\nprint(HttpService:GenerateGUID(false)) --> db454790-7563-44ed-ab4b-397ff5df737b"
+    },
+    "HttpService:GetAsync": {
+      "simple": "Server only. Sends a GET request to a web address and returns the reply text. A quick shortcut; `RequestAsync` gives more control.",
+      "example": "-- Script in ServerScriptService\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal ok, body = pcall(function()\n\treturn HttpService:GetAsync(\"https://httpbin.org/get\")\nend)\nprint(ok, body)",
+      "gotcha": "Results can be cached. Pass `true` as the second value to always get a fresh answer."
+    },
+    "HttpService:GetSecret": {
+      "simple": "Gets a secret (like an API key) that you stored in your game's settings on the Creator Hub. You can send it in a web request, but you cannot print it, so it stays hidden.",
+      "example": "-- Script in ServerScriptService\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal ok, secret = pcall(function()\n\treturn HttpService:GetSecret(\"weather_api_key\")\nend)\nif ok then\n\t-- Build a URL with the key hidden inside\n\tlocal url = secret:AddPrefix(\"https://api.example.com/weather?key=\")\n\tpcall(function()\n\t\tprint(HttpService:GetAsync(url))\n\tend)\nend",
+      "gotcha": "Secrets are not available when you test locally unless you set them up for Studio too."
+    },
+    "HttpService:JSONDecode": {
+      "simple": "Turns JSON text into a Luau table. Errors if the text is not valid JSON, so use pcall if the text comes from outside.",
+      "example": "-- Script or LocalScript\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal data = HttpService:JSONDecode('{\"name\":\"Ava\",\"level\":7}')\nprint(data.name, data.level) --> Ava 7"
+    },
+    "HttpService:JSONEncode": {
+      "simple": "Turns a Luau table into JSON text, ready to send to a website or store as text.",
+      "example": "-- Script or LocalScript\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal text = HttpService:JSONEncode({ name = \"Ava\", level = 7 })\nprint(text) --> {\"name\":\"Ava\",\"level\":7} (order may differ)",
+      "gotcha": "Things like Parts, Vector3 or functions cannot be turned into JSON. Use plain numbers, strings, booleans and tables."
+    },
+    "HttpService:PostAsync": {
+      "simple": "Server only. Sends data to a web address with a POST request and returns the reply text. The data is usually JSON text.",
+      "example": "-- Script in ServerScriptService\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal body = HttpService:JSONEncode({ event = \"PlayerWon\", score = 99 })\nlocal ok, reply = pcall(function()\n\treturn HttpService:PostAsync(\"https://httpbin.org/post\", body, Enum.HttpContentType.ApplicationJson)\nend)\nprint(ok, reply)"
+    },
+    "HttpService:RequestAsync": {
+      "simple": "Server only. The most flexible web request. You give a table with `Url`, and optionally `Method` (like \"GET\" or \"POST\"), `Headers` and `Body`. You get back a table with `Success`, `StatusCode`, `StatusMessage`, `Headers` and `Body`.",
+      "example": "-- Script in ServerScriptService\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal ok, response = pcall(function()\n\treturn HttpService:RequestAsync({\n\t\tUrl = \"https://httpbin.org/post\",\n\t\tMethod = \"POST\",\n\t\tHeaders = { [\"Content-Type\"] = \"application/json\" },\n\t\tBody = HttpService:JSONEncode({ hello = \"world\" }),\n\t})\nend)\n\nif ok and response.Success then\n\tprint(\"Status:\", response.StatusCode) --> 200\nelse\n\twarn(\"Request failed\")\nend"
+    },
+    "HttpService:UrlEncode": {
+      "simple": "Makes text safe to put inside a web address by replacing spaces and special characters with % codes. For example, a space becomes `%20`.",
+      "example": "-- Script or LocalScript\nlocal HttpService = game:GetService(\"HttpService\")\n\nlocal safe = HttpService:UrlEncode(\"cats & dogs\")\nprint(safe) --> cats%20%26%20dogs"
+    }
+  }
+}

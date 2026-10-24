@@ -1,0 +1,108 @@
+{
+  "name": "RemoteEvent",
+  "simple": "A RemoteEvent is a one-way message tube between the server and the players' devices. A LocalScript on your device can send a message up to the server, and the server can send a message down to one player or to everyone. The sender does not wait for an answer; it just sends and keeps going.",
+  "analogy": "A RemoteEvent is like a mail slot in the door between the kitchen (the server) and the dining room (each player). Customers can slide in an order note and the kitchen can slide out notes, but the kitchen always decides what actually gets cooked. A customer writing 'free pizza for me' on a note does not make it true.",
+  "whenToUse": [
+    "A player clicks a button and the server needs to do something (buy an item, open a door, swing a sword).",
+    "The server wants to tell one player something (show a message, play a sound, update their screen).",
+    "The server wants to tell every player something at once (round starting, someone won).",
+    "You do not need an answer back. If you do need an answer, use a RemoteFunction."
+  ],
+  "where": "Create it in Studio (Insert Object > RemoteEvent) and put it somewhere both sides can see, usually ReplicatedStorage. The server uses `FireClient`, `FireAllClients` and `OnServerEvent`. LocalScripts use `FireServer` and `OnClientEvent`.",
+  "terms": {
+    "server": "The one computer, run by Roblox in a data center, that is in charge of a game. Every player in the same game is connected to it. It keeps the official copy of the game, like who has how many coins.",
+    "client": "Your own device (phone, PC, Xbox) running the game. Every player has their own client. The client draws the screen and reads your keyboard, mouse or touch.",
+    "client-server boundary": "The invisible wall between the server and each client. They are different computers, so a script on one side cannot just reach over and change a variable on the other side. Messages have to be sent across.",
+    "replicate / replication": "Roblox automatically copying changes from the server to every client so everyone sees the same world. If the server moves a part to (0,10,0), every player's screen soon shows it at (0,10,0). Most changes a client makes do NOT copy back to the server.",
+    "Script": "A script that runs on the server. Put it in ServerScriptService.",
+    "LocalScript": "A script that runs on one player's client. Put it in StarterPlayerScripts, StarterGui or StarterCharacterScripts.",
+    "ReplicatedStorage": "A storage folder that both the server and every client can see. The usual home for RemoteEvents and RemoteFunctions.",
+    "fire": "To send off an event so that the functions listening to it run.",
+    "event / signal": "Something that can happen, like `PlayerAdded` or `OnServerEvent`. You connect a function to it and that function runs each time it happens.",
+    "exploiter": "A cheater who uses hacking tools to change their own client. They can run any code they want on their own device, including firing your RemoteEvents with fake values.",
+    "validate": "To double-check something before trusting it. The server validates a request by asking: is this a real item? Can this player afford it? Are they close enough?",
+    "one-way": "The message goes in one direction only and the sender does not get a reply.",
+    "network protocol": "The special language computers use to talk over the internet. Roblox clients and the server use Roblox's own private network connection for RemoteEvents, not web pages or HTTP.",
+    "throttle": "Slowing things down on purpose. If one client fires more than about 500 RemoteEvent messages per second, the server delays the extra ones.",
+    "magnitude": "The length of a Vector3. `(a - b).Magnitude` is the distance in studs between point a and point b. From (0,3,0) to (3,7,0) is 5 studs.",
+    "NaN": "Short for 'not a number', a strange number value cheaters can send. It is the only value that is not equal to itself, so `n ~= n` is true only for NaN."
+  },
+  "examples": [
+    {
+      "title": "How client and server fit together (read this first)",
+      "place": "Explanation only - no code to paste",
+      "code": "-- A Roblox game is always split into two kinds of computers:\n--\n--   SERVER  (one computer at Roblox, the boss)\n--     runs Scripts in ServerScriptService\n--     holds the TRUE copy of the game: coins, health, who owns what\n--     can talk to DataStores, HttpService, MarketplaceService receipts\n--\n--   CLIENTS (every player's own phone/PC/console)\n--     run LocalScripts\n--     draw the screen, read keyboard/mouse/touch, play sounds, show GUIs\n--\n-- Replication: when the SERVER changes something in Workspace,\n-- Roblox copies (replicates) that change to every client automatically.\n-- When a CLIENT changes something, usually only that one player sees it.\n--\n-- RemoteEvents and RemoteFunctions are how the two sides send messages.\n-- They travel over Roblox's own network connection, not over HTTP.\n-- (HttpService is something else: the server calling outside websites.)",
+      "explain": [
+        "The server is the referee. Clients are the players' own devices.",
+        "Changes made by the server copy to everyone. Changes made by a client stay on that client (with a few exceptions, like moving your own character).",
+        "So when a player does something that should matter to everyone, their LocalScript fires a RemoteEvent and the server makes the real change."
+      ]
+    },
+    {
+      "title": "Click a button, server makes a part",
+      "place": "Script in ServerScriptService + LocalScript in StarterPlayerScripts, with a RemoteEvent named MakePart in ReplicatedStorage",
+      "code": "-- SERVER: Script in ServerScriptService\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal makePart = ReplicatedStorage:WaitForChild(\"MakePart\")\n\n-- The first value is ALWAYS the player who fired it (added by Roblox)\nmakePart.OnServerEvent:Connect(function(player, color)\n\t-- Never trust the client: check the type before using it\n\tif typeof(color) ~= \"Color3\" then\n\t\treturn\n\tend\n\tlocal part = Instance.new(\"Part\")\n\tpart.Color = color\n\tpart.Position = Vector3.new(0, 10, 0)\n\tpart.Parent = workspace -- server made it, so everyone sees it\nend)\n\n-- CLIENT: LocalScript in StarterPlayerScripts\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal makePart = ReplicatedStorage:WaitForChild(\"MakePart\")\n\ntask.wait(3)\n-- Do NOT pass the player; Roblox adds it for us on the server\nmakePart:FireServer(Color3.fromRGB(255, 0, 0))",
+      "explain": [
+        "Both scripts find the same RemoteEvent in ReplicatedStorage.",
+        "The LocalScript calls `FireServer` with a color.",
+        "On the server, `OnServerEvent` runs. Roblox puts the player who sent it as the first value, then our color.",
+        "The server checks the color really is a Color3, then makes the part. Because the server made it, it replicates to every player."
+      ]
+    },
+    {
+      "title": "Never trust the client: a cheater vs a careful server",
+      "place": "Script in ServerScriptService, RemoteEvent named BuyItem in ReplicatedStorage",
+      "code": "-- BAD server code (do not do this):\n-- buyItem.OnServerEvent:Connect(function(player, itemName, price)\n--     player.leaderstats.Coins.Value -= price  -- trusts the price!\n--     giveItem(player, itemName)\n-- end)\n--\n-- An exploiter can run this on THEIR OWN client:\n--     buyItem:FireServer(\"GoldenSword\", 0)     -- price 0 = free sword\n--     buyItem:FireServer(\"GoldenSword\", -1e9)  -- negative price = a billion coins\n\n-- GOOD server code: the server keeps the prices and checks everything\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal buyItem = ReplicatedStorage:WaitForChild(\"BuyItem\")\n\n-- Prices live ONLY on the server\nlocal PRICES = {\n\tSword = 50,\n\tShield = 30,\n}\nlocal SHOP_POSITION = Vector3.new(0, 3, 0)\n\nbuyItem.OnServerEvent:Connect(function(player, itemName)\n\t-- 1. Is it the right type?\n\tif typeof(itemName) ~= \"string\" then return end\n\t-- 2. Is it a real item? (look up the price ourselves)\n\tlocal price = PRICES[itemName]\n\tif not price then return end\n\t-- 3. Is the player near the shop?\n\tlocal character = player.Character\n\tlocal root = character and character:FindFirstChild(\"HumanoidRootPart\")\n\tif not root or (root.Position - SHOP_POSITION).Magnitude > 15 then return end\n\t-- 4. Can they afford it?\n\tlocal leaderstats = player:FindFirstChild(\"leaderstats\")\n\tlocal coins = leaderstats and leaderstats:FindFirstChild(\"Coins\")\n\tif not coins or coins.Value < price then return end\n\t-- All checks passed: the server does the real work\n\tcoins.Value -= price\n\tprint(player.Name .. \" bought \" .. itemName)\nend)",
+      "explain": [
+        "Exploiters can change anything on their own device and can fire your RemoteEvents with any values they like.",
+        "So the client only says WHAT it wants (\"Sword\"). It never says the price, how many coins it has, or whether it is allowed.",
+        "The server looks up the price itself, checks the player is close to the shop (within 15 studs), and checks they have enough coins.",
+        "If any check fails, the server simply ignores the request."
+      ]
+    },
+    {
+      "title": "Server tells everyone a round started",
+      "place": "Script in ServerScriptService + LocalScript in StarterPlayerScripts, RemoteEvent named RoundStarted in ReplicatedStorage",
+      "code": "-- SERVER\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal roundStarted = ReplicatedStorage:WaitForChild(\"RoundStarted\")\n\nwhile true do\n\ttask.wait(30)\n\troundStarted:FireAllClients(\"Lava Run\", 60) -- map name, seconds\nend\n\n-- CLIENT\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal roundStarted = ReplicatedStorage:WaitForChild(\"RoundStarted\")\n\nroundStarted.OnClientEvent:Connect(function(mapName, seconds)\n\tprint(\"New round on \" .. mapName .. \" for \" .. seconds .. \" seconds!\")\nend)",
+      "explain": [
+        "Every 30 seconds the server fires the event to all players.",
+        "On each player's device, `OnClientEvent` runs with the same values. There is no player value on the client side."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Never trust values from the client. Check type, check it makes sense, check the player is allowed. Keep prices, damage and rewards on the server.",
+    "On the server, the first value in `OnServerEvent` is always the player. Do not send the player yourself from the LocalScript.",
+    "Put the RemoteEvent in ReplicatedStorage. If it is in ServerStorage or ServerScriptService, clients cannot see it.",
+    "Use `WaitForChild` on the client, because the RemoteEvent might not have loaded yet when your LocalScript starts.",
+    "You cannot send functions. Tables with metatables lose them. Do not mix number keys and text keys in one table, and avoid holes (nil values) in lists.",
+    "A part made only on the server side in ServerStorage cannot be sent to a client; it will arrive as nil because the client cannot see it.",
+    "Do not fire every frame from many scripts. Clients are limited to about 500 messages per second, shared by all RemoteEvents."
+  ],
+  "members": {
+    "RemoteEvent:FireAllClients": {
+      "simple": "Server only. Sends a message to every player at once. Each player's `OnClientEvent` runs with the values you pass.",
+      "example": "-- Script in ServerScriptService\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal announce = ReplicatedStorage:WaitForChild(\"Announce\")\n\nannounce:FireAllClients(\"Double coins weekend!\")",
+      "gotcha": "Calling it from a LocalScript does not work. Clients can only use `FireServer`."
+    },
+    "RemoteEvent:FireClient": {
+      "simple": "Server only. Sends a message to just one player. The first value must be that Player; the rest are what you want to send.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal welcome = ReplicatedStorage:WaitForChild(\"Welcome\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- Only this player gets the message\n\twelcome:FireClient(player, \"Welcome, \" .. player.DisplayName)\nend)",
+      "gotcha": "The player value is used to choose who receives it; the client's `OnClientEvent` does not get it as its first value."
+    },
+    "RemoteEvent:FireServer": {
+      "simple": "Client only. A LocalScript uses this to send a message up to the server. The server's `OnServerEvent` will get your player first, then your values.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal jumpPad = ReplicatedStorage:WaitForChild(\"UseJumpPad\")\n\njumpPad:FireServer(\"PadA\") -- just say WHAT we want, the server decides",
+      "gotcha": "Anything you send can be faked by an exploiter, so the server must check it."
+    },
+    "RemoteEvent.OnClientEvent": {
+      "simple": "Runs in a LocalScript when the server calls `FireClient` or `FireAllClients`. You get the values the server sent.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal welcome = ReplicatedStorage:WaitForChild(\"Welcome\")\n\nwelcome.OnClientEvent:Connect(function(message)\n\tprint(message)\nend)"
+    },
+    "RemoteEvent.OnServerEvent": {
+      "simple": "Runs in a server Script when a client calls `FireServer`. The first value is the Player who sent it (Roblox adds it, so it cannot be faked); after that come the values the client sent (which CAN be faked).",
+      "example": "-- Script in ServerScriptService\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal setTeamColor = ReplicatedStorage:WaitForChild(\"SetTeamColor\")\n\nlocal ALLOWED = { Red = true, Blue = true }\n\nsetTeamColor.OnServerEvent:Connect(function(player, colorName)\n\t-- Check the client's value before using it\n\tif typeof(colorName) == \"string\" and ALLOWED[colorName] then\n\t\tplayer:SetAttribute(\"TeamColor\", colorName)\n\tend\nend)",
+      "gotcha": "Check every value after `player`. Numbers can even be NaN (not-a-number); `if n ~= n then return end` catches that."
+    }
+  }
+}

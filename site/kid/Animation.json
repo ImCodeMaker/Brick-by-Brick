@@ -1,0 +1,55 @@
+{
+  "name": "Animation",
+  "simple": "An Animation object just stores the ID of an animation saved on Roblox. It can't play by itself. You load it onto an Animator to get an AnimationTrack, and that track plays it.",
+  "analogy": "An Animation is like a sticky note with a song's name on it. You need to hand it to a music player (the Animator) to actually hear the song.",
+  "whenToUse": [
+    "Point to an animation you want a character or NPC to play.",
+    "Replace one of the default animations (inside the character's Animate script)."
+  ],
+  "where": "Make one with `Instance.new(\"Animation\")`, or insert one in Studio (for example inside a script or tool) and paste the ID into AnimationId. Works on the server and the client.",
+  "terms": {
+    "animation": "A recorded set of body movements, like a wave or a dance, saved on Roblox with an ID number.",
+    "Animation (object)": "A small object that just holds an animation's ID. It doesn't play anything by itself.",
+    "Animator": "The object inside a Humanoid (or AnimationController) that actually plays animations on a character.",
+    "AnimationTrack": "The 'remote control' for one loaded animation. You get it from Animator:LoadAnimation and call Play and Stop on it.",
+    "asset ID": "The number that identifies something uploaded to Roblox. Animations use it like `rbxassetid://507770239`.",
+    "rig": "A model set up with joints so it can be animated, like a character.",
+    "keyframe": "A saved pose at a certain moment in an animation. The animation smoothly moves between keyframes.",
+    "fade time": "How many seconds an animation takes to smoothly blend in or out, instead of snapping.",
+    "weight": "How strongly an animation affects the body, from 0 (not at all) to 1 (fully). Used when mixing animations.",
+    "priority": "Which animation wins when two want to move the same body part. Higher priority (like Action) beats lower (like Idle).",
+    "replicate": "Copy across the internet so the server and other players see it too.",
+    "client": "The player's own device. LocalScripts run there.",
+    "server": "The Roblox computer that runs the game for everyone."
+  },
+  "examples": [
+    {
+      "title": "Play a wave animation when you press E",
+      "place": "LocalScript in StarterPlayer > StarterCharacterScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal animator = humanoid:WaitForChild(\"Animator\")\n\n-- 1. Make an Animation object that points to the animation's ID\nlocal waveAnimation = Instance.new(\"Animation\")\nwaveAnimation.AnimationId = \"rbxassetid://507770239\" -- Roblox's default R15 wave\n\n-- 2. Load it onto the Animator ONCE to get a track (a remote control)\nlocal waveTrack = animator:LoadAnimation(waveAnimation)\nwaveTrack.Priority = Enum.AnimationPriority.Action -- beat walking/idle animations\n\n-- 3. Play it whenever E is pressed\nUserInputService.InputBegan:Connect(function(input, typing)\n    if typing then\n        return -- ignore keys pressed while typing in chat\n    end\n    if input.KeyCode == Enum.KeyCode.E and not waveTrack.IsPlaying then\n        waveTrack:Play()\n    end\nend)\n\nwaveTrack.Stopped:Connect(function()\n    print(\"Done waving\")\nend)",
+      "explain": [
+        "Three pieces work together: an Animation (holds the ID) -> the Animator (plays it) -> an AnimationTrack (controls it).",
+        "Because this script is in StarterCharacterScripts, it is copied into the character each spawn, so script.Parent is the character.",
+        "We call LoadAnimation once and reuse the track. Loading again every time would make lots of extra tracks.",
+        "Priority Action makes the wave show over the normal walking and idle animations.",
+        "Animations a player plays on their own character from a LocalScript are copied to the server and everyone else automatically.",
+        "You can only play animations you or your group own (or Roblox's own), otherwise they won't load."
+      ]
+    }
+  ],
+  "gotchas": [
+    "AnimationId must be the full form, like \"rbxassetid://507770239\", not just the number.",
+    "An animation only loads in your game if you (or your group) own it, or Roblox made it.",
+    "Animations made for R15 won't look right on R6 characters, and the other way around.",
+    "For animations to show for everyone, the Animator should be made on the server (players' characters already have one)."
+  ],
+  "members": {
+    "Animation.AnimationContent": {
+      "simple": "Another way to store the same animation reference, as a Content value. Changing it changes AnimationId too. Normal scripts should just use AnimationId."
+    },
+    "Animation.AnimationId": {
+      "simple": "The ID of the animation this object points to, like \"rbxassetid://507770239\". Copy the ID from the Creator Dashboard after you upload an animation.",
+      "example": "local animation = Instance.new(\"Animation\")\nanimation.AnimationId = \"rbxassetid://507770239\""
+    }
+  }
+}

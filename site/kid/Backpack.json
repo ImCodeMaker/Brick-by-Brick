@@ -1,0 +1,49 @@
+{
+  "name": "Backpack",
+  "simple": "The Backpack is the player's inventory. It's a folder inside each Player, and every Tool in it shows up as a button on the hotbar at the bottom of the screen. When the player picks a tool to hold, the tool leaves the Backpack and goes into their character's hand.",
+  "analogy": "The Backpack is like a school bag. Your tools wait in it until you pull one out to use. But this bag is magic: every time you respawn you get a brand-new bag, refilled from StarterPack and your StarterGear.",
+  "whenToUse": [
+    "Give a player a tool for this life: clone it into player.Backpack.",
+    "Check what tools a player has.",
+    "Take tools away from a player."
+  ],
+  "where": "Inside every Player: `player.Backpack` or `player:WaitForChild(\"Backpack\")`. Both the server and the player's own device can see it. A LocalScript can get its own with `Players.LocalPlayer:WaitForChild(\"Backpack\")`.",
+  "terms": {
+    "Tool": "An item a player can hold and use, like a sword.",
+    "inventory": "The list of items a player is carrying.",
+    "StarterPack": "A service in Studio. Its tools are copied into every player's Backpack each time they spawn.",
+    "StarterGear": "A folder inside each Player. Its tools are copied into that one player's Backpack each time they spawn.",
+    "equip": "Take a tool out of the Backpack to hold it. While held it lives in the character Model, not the Backpack.",
+    "spawn": "When a character appears in the world (first time or after dying).",
+    "clone": "Make a copy of an object with :Clone()."
+  },
+  "examples": [
+    {
+      "title": "Give a tool, and give it back after every respawn",
+      "place": "Script in ServerScriptService (put a Tool named Flashlight in ServerStorage)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal ServerStorage = game:GetService(\"ServerStorage\")\nlocal flashlight = ServerStorage:WaitForChild(\"Flashlight\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAdded:Connect(function()\n        -- A new Backpack is made every spawn, so give the tool every spawn\n        local backpack = player:WaitForChild(\"Backpack\")\n        flashlight:Clone().Parent = backpack\n    end)\nend)",
+      "explain": [
+        "When a character spawns, Roblox makes a fresh Backpack and fills it from StarterPack and the player's StarterGear.",
+        "When the character dies, the old Backpack (and anything you put in it) is thrown away.",
+        "So we clone the flashlight into the Backpack inside CharacterAdded, which runs after every spawn.",
+        "An easier way for one player: put the tool in player.StarterGear once and Roblox does this for you."
+      ]
+    },
+    {
+      "title": "List all tools a player has (held or not)",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nlocal function listTools(player)\n    local names = {}\n    -- Tools waiting in the Backpack\n    for _, item in player.Backpack:GetChildren() do\n        if item:IsA(\"Tool\") then\n            table.insert(names, item.Name)\n        end\n    end\n    -- The tool currently held is inside the character, not the Backpack\n    local character = player.Character\n    if character then\n        local held = character:FindFirstChildOfClass(\"Tool\")\n        if held then\n            table.insert(names, held.Name .. \" (held)\")\n        end\n    end\n    return names\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAdded:Connect(function()\n        task.wait(1)\n        print(player.Name .. \" has: \" .. table.concat(listTools(player), \", \"))\n    end)\nend)",
+      "explain": [
+        "Backpack:GetChildren() lists tools that are NOT being held.",
+        "The held tool is inside the character Model, so we check there too.",
+        "table.concat joins the names into one line of text."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Tools placed only in the Backpack disappear when the player dies, because the Backpack is replaced.",
+    "A held tool is in player.Character, not in the Backpack.",
+    "To hide the default hotbar and make your own, call StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false) in a LocalScript."
+  ],
+  "members": {}
+}

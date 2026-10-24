@@ -1,0 +1,35 @@
+{
+  "path": "content/en-us/performance-optimization/test-on-hardware.md",
+  "simple": "Your computer is probably much stronger than the phones most Roblox players use. Studio can pretend to be a phone, but it cannot copy real memory limits, heat, or touch controls. This page explains why you should test your game on real devices and what to check. Testing on a cheap phone is the best way to find problems before your players do.",
+  "analogy": "It is like testing a paper airplane. Throwing it inside your quiet room is not the same as throwing it outside on a windy day, where real players will be.",
+  "keyPoints": [
+    "Studio runs the client and server together on a powerful computer, so it hides problems that show up on phones.",
+    "The device emulator is good for screen shapes and controls, but not for memory.",
+    "Most players use lower-end mobile devices. About 65 percent are on Android, and about 60 percent of those have only 2 to 4 GB of RAM.",
+    "Pick at least one low-end baseline device that matches your players and test on it often.",
+    "The MicroProfiler (Ctrl+Alt+F6) and Developer Console (F9) work on real devices too, and Performance Stats shows FPS, memory, and ping.",
+    "Play 10 to 15 minutes on a phone to check for thermal throttling. A slow drop in frame rate usually means the device is overheating.",
+    "Check network behavior over mobile data, not just home Wi-Fi.",
+    "Also check the feel: button size on small screens, readable text, switching between touch and controller, load times, and sound on phone speakers."
+  ],
+  "terms": {
+    "emulation": "Pretending to be another device. Studio can show a phone-sized screen, but it is still your computer underneath.",
+    "hardware": "The real, physical device, like an actual phone or tablet.",
+    "thermal throttling": "When a device gets hot and slows itself down to cool off. A game might run at 60 FPS at first and drop to 40 after 10 minutes.",
+    "memory pressure": "When the device is running low on RAM because the game, the system, and other apps all need some.",
+    "input latency": "The delay between touching or pressing a button and the game reacting.",
+    "RAM": "A device's short-term memory. A phone with 3 GB of RAM has much less room than a PC with 16 GB.",
+    "Passmark": "A test that gives a device a speed score. Over half of Roblox players have devices scoring 10,000 to 20,000.",
+    "cross-play": "Players on phones, PCs, consoles, and tablets all playing together in the same game.",
+    "jitter": "When network delay keeps changing, like 50 ms, then 120 ms, then 60 ms. It makes movement look choppy.",
+    "packet loss": "When some bits of network data never arrive and have to be re-sent.",
+    "touch target": "The area of a button you can tap. Too small, and players miss it on a phone.",
+    "pop-in": "When objects suddenly appear as you get close, which can happen with streaming."
+  },
+  "watchOut": [
+    "Only testing on your own powerful computer. You are then testing for a small part of your players.",
+    "Testing for just a minute. Overheating and memory growth often only show up after 10 or more minutes.",
+    "Trusting desktop-sized buttons. Something easy to click with a mouse can be too small for a thumb on a 5-inch screen.",
+    "Using a Windows handheld as your only low-end test. These are great for checking controls but are much faster than a typical phone."
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "ServerStorage",
+  "simple": "ServerStorage is a private storage box that only the server can see. Players' devices never get a copy, so it is safe for secret things and for big things you do not need yet, like extra maps, boss enemies, or rare loot. Scripts on the server can clone things out of it and put them into Workspace when it is time.",
+  "analogy": "ServerStorage is like the teacher's locked cabinet. Students (players) cannot look inside, but the teacher (server) can take things out and put them on the desk (Workspace) whenever they want.",
+  "whenToUse": [
+    "Maps or levels that are not being played right now, to save download time.",
+    "Templates for enemies, loot, or prizes that players should not see early.",
+    "Server-only ModuleScripts with secret logic (ServerScriptService also works)."
+  ],
+  "where": "Server only. Get it with `game:GetService(\"ServerStorage\")` in a Script. LocalScripts cannot see anything inside it.",
+  "terms": {
+    "server": "Roblox's computer that runs the one shared copy of the game for everyone in the server. What happens here is the truth everyone sees.",
+    "client": "One player's own device (computer, phone, tablet, or console). Each player has their own client.",
+    "service": "A special built-in object at the top of the game. Get one with `game:GetService(\"Name\")`.",
+    "replicate": "To copy from the server to players' devices. ServerStorage never replicates.",
+    "network traffic": "Data sent over the internet between the server and players. Less traffic means faster loading."
+  },
+  "examples": [
+    {
+      "title": "Load a new map every round",
+      "place": "Script in ServerScriptService (with Models named Desert and Forest inside a Folder called Maps in ServerStorage)",
+      "code": "local ServerStorage = game:GetService(\"ServerStorage\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal maps = ServerStorage:WaitForChild(\"Maps\"):GetChildren()\n\nwhile true do\n\t-- pick a random map and copy it into the world\n\tlocal chosen = maps[math.random(1, #maps)]\n\tlocal map = chosen:Clone()\n\tmap.Parent = Workspace\n\tprint(\"Now playing on\", map.Name)\n\n\ttask.wait(60) -- one round lasts 60 seconds\n\tmap:Destroy() -- remove it before the next round\nend",
+      "explain": [
+        "The maps sit hidden in ServerStorage, so players do not download them all at the start.",
+        "Each round, the server clones one random map into Workspace, which sends it to players.",
+        "After 60 seconds the map is destroyed and a new one is picked."
+      ]
+    }
+  ],
+  "gotchas": [
+    "LocalScripts cannot use anything in ServerStorage. If players need it, move a copy to Workspace or ReplicatedStorage.",
+    "Scripts do not run inside ServerStorage. Put Scripts in ServerScriptService instead. ModuleScripts here still work when a server Script requires them."
+  ],
+  "members": {}
+}

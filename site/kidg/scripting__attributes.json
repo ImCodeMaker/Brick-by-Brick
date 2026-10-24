@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/scripting/attributes.md",
+  "simple": "Properties are the built-in settings of an object, like a part's `Size` or `Color`. Attributes are your own custom settings you add, like `Price = 50` or `Harvestable = true`. This page shows how to find objects, change their properties, add and read attributes, and run code when any of them change. It also explains why client scripts should use `WaitForChild`, because things load in an unknown order.",
+  "analogy": "Properties are like the facts printed on a trading card (name, color, size). Attributes are like sticky notes you add yourself, such as 'worth 50 coins' or 'can be harvested'.",
+  "keyPoints": [
+    "Get an object with `script.Parent` if the script is inside it, or with `FindFirstChild` and `WaitForChild` from a service.",
+    "Change a property with a dot: `part.Size = Vector3.new(10, 1, 10)`.",
+    "`SetAttribute(\"Name\", value)` creates or changes an attribute. Set it to `nil` to delete it.",
+    "`GetAttribute(\"Name\")` reads one attribute; `GetAttributes()` gives a table of all of them.",
+    "Listen for changes with `Changed` (any property), `AttributeChanged` (any attribute), `GetPropertyChangedSignal(\"Name\")` (one property), or `GetAttributeChangedSignal(\"Name\")` (one attribute).",
+    "Roblox does not promise the order things are copied from the server to players, so client scripts should use `WaitForChild` instead of assuming something exists.",
+    "On joining, the client loads ReplicatedFirst first, then the rest of the game, then runs PlayerScripts, then spawns the character and runs character scripts.",
+    "Changes of the same type, like two attribute changes, usually arrive in order."
+  ],
+  "terms": {
+    "property": "A built-in setting on an object, like a part's `Size`, `Color`, or `Anchored`.",
+    "attribute": "A custom setting you add to an object yourself, like `GrowthRate = 2`.",
+    "replication": "Copying objects and changes from the server to each player's device.",
+    "replication order": "The order things arrive on a player's device. It is not guaranteed, so something might not be there yet when your script runs.",
+    "reference": "A variable that points to an object so you can work with it, like `local sign = script.Parent`.",
+    "WaitForChild": "Waits until a child with that name exists, then gives it to you. Safe for client scripts.",
+    "FindFirstChild": "Looks for a child with that name right now. Returns `nil` if it is not there yet.",
+    "signal": "Another word for an event you can connect a function to.",
+    "anonymous function": "A function with no name, written right inside `:Connect(function() ... end)`.",
+    "dictionary": "A table with named keys, like `{ GrowthRate = 2, Harvestable = true }`."
+  },
+  "example": {
+    "title": "A crop that becomes harvestable",
+    "place": "Script inside a Part named Cabbage in Workspace",
+    "code": "local cabbage = script.Parent\n\n-- Create attributes with starting values\ncabbage:SetAttribute(\"Harvestable\", false)\ncabbage:SetAttribute(\"GrowthRate\", 2)\n\n-- Run code whenever Harvestable changes\ncabbage:GetAttributeChangedSignal(\"Harvestable\"):Connect(function()\n\tif cabbage:GetAttribute(\"Harvestable\") then\n\t\tcabbage.Color = Color3.fromRGB(0, 200, 0) -- turn bright green\n\t\tprint(\"The cabbage is ready!\")\n\tend\nend)\n\n-- Wait a few seconds, then make it harvestable\ntask.wait(10 / cabbage:GetAttribute(\"GrowthRate\")) -- 5 seconds\ncabbage:SetAttribute(\"Harvestable\", true)",
+    "explain": [
+      "We add two attributes to the cabbage: `Harvestable` and `GrowthRate`.",
+      "We listen for changes to just `Harvestable` with `GetAttributeChangedSignal`.",
+      "When it becomes true, we change the cabbage's `Color` property to green.",
+      "We wait 10 divided by the growth rate (10 / 2 = 5 seconds), then set `Harvestable` to true, which fires our listener."
+    ]
+  },
+  "watchOut": [
+    "Attribute names are case-sensitive. `GetAttribute(\"growthrate\")` will not find `GrowthRate`.",
+    "In client scripts, use `WaitForChild` for objects from the server. Using a dot right away can error if the object has not arrived yet.",
+    "`GetPropertyChangedSignal` and `GetAttributeChangedSignal` do not tell you the new value. Read it inside your function.",
+    "A Model does not have properties like `Size` or `Color` the way parts do. Pick the part inside the model to change those."
+  ]
+}

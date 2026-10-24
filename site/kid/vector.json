@@ -1,0 +1,122 @@
+{
+  "name": "vector",
+  "simple": "`vector` is a toolbox of functions for 3D vectors: groups of three numbers X, Y, Z. It does the same jobs as Vector3's own methods (length, direction, dot, cross, rounding and more), but you call them like `vector.magnitude(v)` instead of `v.Magnitude`. You can use these functions on normal Vector3 values like `part.Position`.",
+  "analogy": "If a Vector3 is a backpack with its own built-in tools, the `vector` library is a shared tool bench. You bring the backpack to the bench: `vector.magnitude(v)` instead of `v.Magnitude`.",
+  "whenToUse": [
+    "Doing vector math with a function style: `vector.magnitude(a - b)` for distance.",
+    "Clamping each number of a position into a box with `vector.clamp`.",
+    "Any time you would use Vector3 methods; pick whichever style you like."
+  ],
+  "where": "A built-in Luau library that works in every Script, LocalScript and ModuleScript. Type `vector.` and the function name. No game:GetService needed.",
+  "terms": {
+    "vector": "Three numbers (X, Y, Z) that can mean a spot in the world or an arrow with a direction and length.",
+    "component": "One of the numbers inside a vector: x, y or z.",
+    "magnitude": "The length of the vector. For a difference of two positions, the distance between them.",
+    "normalize": "Change a vector's length to exactly 1 but keep its direction. The result is called a unit vector.",
+    "unit vector": "An arrow exactly 1 long; it only says which way.",
+    "dot product": "One number showing how much two arrows point the same way: positive = same-ish, 0 = right angle, negative = opposite-ish.",
+    "cross product": "A new arrow at a right angle (90 degrees) to both input arrows.",
+    "radians": "The angle unit Roblox math uses. 180 degrees is pi (about 3.1416). Use `math.deg` for degrees.",
+    "lerp / interpolate": "Find a point part-way between two vectors. 0.5 means halfway.",
+    "clamp": "Squash each number so it stays between a minimum and a maximum.",
+    "immutable": "Cannot be changed after it is made. You cannot do `v.x = 5`; make a new vector instead.",
+    "NaN": "Not a Number: a broken value, for example from normalizing a zero-length vector."
+  },
+  "examples": [
+    {
+      "title": "Distance and direction with the vector library",
+      "place": "Script in ServerScriptService (needs Parts named A and B in Workspace)",
+      "code": "local a = workspace:WaitForChild(\"A\")\nlocal b = workspace:WaitForChild(\"B\")\n\nlocal difference = b.Position - a.Position\nlocal distance = vector.magnitude(difference)   -- same as difference.Magnitude\nlocal direction = vector.normalize(difference)  -- same as difference.Unit\n\nprint(\"B is\", distance, \"studs from A\")\nprint(\"Direction from A to B:\", direction)",
+      "explain": [
+        "`b.Position - a.Position` is the arrow from A to B.",
+        "`vector.magnitude` measures its length: the distance.",
+        "`vector.normalize` shrinks it to length 1 so it only tells you the direction."
+      ]
+    },
+    {
+      "title": "Keep a part inside an invisible box",
+      "place": "Script inside an unanchored Part in Workspace",
+      "code": "local part = script.Parent\nlocal boxMin = vector.create(-20, 0, -20)\nlocal boxMax = vector.create(20, 50, 20)\n\nwhile true do\n\tlocal pos = part.Position\n\tlocal safe = vector.clamp(pos, boxMin, boxMax)\n\tif safe ~= pos then\n\t\tpart.Position = safe -- push it back inside\n\tend\n\ttask.wait(0.1)\nend",
+      "explain": [
+        "`vector.clamp` keeps X between -20 and 20, Y between 0 and 50, and Z between -20 and 20.",
+        "If the part wanders outside, it gets placed back on the edge of the box."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Vectors cannot be changed piece by piece: `v.x = 5` does not work. Make a new one with `vector.create`.",
+    "`vector.normalize` on (0, 0, 0) gives NaN. Check the magnitude first.",
+    "`vector.angle` returns radians. Use `math.deg` to see degrees.",
+    "In `vector.clamp`, each number of `max` must be at least as big as the matching number of `min`, or it errors.",
+    "`vector.create(1, 2)` gives (1, 2, 0): a missing z becomes 0."
+  ],
+  "members": {
+    "vector.zero": {
+      "simple": "A ready-made vector of (0, 0, 0).",
+      "example": "print(vector.zero) --> 0, 0, 0"
+    },
+    "vector.one": {
+      "simple": "A ready-made vector of (1, 1, 1). Multiply it to get an even size.",
+      "example": "print(vector.one * 4) --> 4, 4, 4"
+    },
+    "vector.create": {
+      "simple": "Makes a new vector from x, y and z. If you leave out z it becomes 0.",
+      "example": "local v = vector.create(1, 2, 3)\nprint(v.x, v.y, v.z) --> 1 2 3\nprint(vector.create(5, 6)) --> 5, 6, 0"
+    },
+    "vector.magnitude": {
+      "simple": "The length of a vector. Use it on the difference of two positions to get the distance between them.",
+      "example": "print(vector.magnitude(vector.create(3, 4, 0))) --> 5\nlocal distance = vector.magnitude(vector.create(6, 0, 8) - vector.zero) --> 10"
+    },
+    "vector.normalize": {
+      "simple": "Makes a copy with length exactly 1 that points the same way (a unit vector). Use it when you only care about direction.",
+      "example": "print(vector.normalize(vector.create(3, 4, 0))) --> 0.6, 0.8, 0",
+      "gotcha": "The zero vector has no direction, so normalizing it gives NaN."
+    },
+    "vector.cross": {
+      "simple": "Gives a new arrow at a right angle (90 degrees) to both arrows. Swapping the order flips it to point the other way.",
+      "example": "local right = vector.create(1, 0, 0)\nlocal up = vector.create(0, 1, 0)\nprint(vector.cross(right, up)) --> 0, 0, 1\nprint(vector.cross(up, right)) --> 0, 0, -1"
+    },
+    "vector.dot": {
+      "simple": "One number telling how much two arrows point the same way: multiply matching numbers and add them up. With 1-long arrows: 1 = same way, 0 = right angle, -1 = opposite.",
+      "example": "print(vector.dot(vector.create(1, 2, 3), vector.create(4, 5, 6))) --> 32 (1*4 + 2*5 + 3*6)\nprint(vector.dot(vector.create(1, 0, 0), vector.create(0, 1, 0))) --> 0  (right angle)"
+    },
+    "vector.angle": {
+      "simple": "The angle between two vectors, in radians. If you also give an `axis`, the answer gets a plus or minus sign showing which way around it turns.",
+      "example": "local a = vector.create(1, 0, 0)\nlocal b = vector.create(0, 1, 0)\nprint(math.deg(vector.angle(a, b))) --> 90"
+    },
+    "vector.floor": {
+      "simple": "Rounds every number DOWN to a whole number.",
+      "example": "print(vector.floor(vector.create(-2.6, 5.1, 8.8))) --> -3, 5, 8"
+    },
+    "vector.ceil": {
+      "simple": "Rounds every number UP to a whole number.",
+      "example": "print(vector.ceil(vector.create(-2.6, 5.1, 8.8))) --> -2, 6, 9"
+    },
+    "vector.abs": {
+      "simple": "Removes the minus sign from every number.",
+      "example": "print(vector.abs(vector.create(-2, 4, -6))) --> 2, 4, 6"
+    },
+    "vector.sign": {
+      "simple": "Turns each number into -1 (negative), 0 (zero) or 1 (positive).",
+      "example": "print(vector.sign(vector.create(-2.6, 5.1, 0))) --> -1, 1, 0"
+    },
+    "vector.clamp": {
+      "simple": "Keeps each number between the matching numbers of `min` and `max`, like keeping something inside a box.",
+      "example": "local v = vector.create(30, -5, 10)\nprint(vector.clamp(v, vector.create(-20, 0, -20), vector.create(20, 50, 20))) --> 20, 0, 10",
+      "gotcha": "Each number in `max` must be greater than or equal to the matching number in `min`, or it errors."
+    },
+    "vector.lerp": {
+      "simple": "Finds a point part-way from `vec1` to `vec2`. `alpha` 0 gives vec1, 1 gives vec2, 0.5 gives halfway.",
+      "example": "local a = vector.create(0, 0, 0)\nlocal b = vector.create(10, 20, 0)\nprint(vector.lerp(a, b, 0.5)) --> 5, 10, 0",
+      "gotcha": "`alpha` is not limited to 0 to 1; numbers outside go past the ends."
+    },
+    "vector.max": {
+      "simple": "Builds a vector from the BIGGEST x, the biggest y and the biggest z among all the vectors you pass in.",
+      "example": "print(vector.max(vector.create(1, 5, 2), vector.create(4, 1, 3))) --> 4, 5, 3"
+    },
+    "vector.min": {
+      "simple": "Builds a vector from the SMALLEST x, the smallest y and the smallest z among all the vectors you pass in.",
+      "example": "print(vector.min(vector.create(1, 5, 2), vector.create(4, 1, 3))) --> 1, 1, 2"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "name": "ProximityPromptService",
+  "simple": "A ProximityPrompt is the little pop-up like \"[E] Open Door\" that appears when you walk close to something. ProximityPromptService watches ALL of those prompts in the game at once. Instead of writing a script for every single prompt, you can listen here and find out whenever any prompt is shown, held or used.",
+  "analogy": "Each ProximityPrompt is a doorbell on a different house. ProximityPromptService is the neighborhood watch that hears every doorbell in town and tells you which one was pressed and by whom.",
+  "whenToUse": [
+    "Handle many prompts with one script (for example every chest in your game)",
+    "Turn off all prompts at once, like during a cutscene or between rounds",
+    "Limit how many prompts can show on screen at the same time",
+    "Make your own custom look for prompts on the player's screen"
+  ],
+  "where": "Server and client. Get it with game:GetService(\"ProximityPromptService\"). `PromptTriggered`, `PromptTriggerEnded` and the hold events work on the server and client; `PromptShown`, `PromptHidden`, `IndicatorShown` and `IndicatorHidden` only fire in LocalScripts.",
+  "terms": {
+    "ProximityPrompt": "An object you put inside a part (or attachment). When a player gets close enough, a pop-up appears saying which key to press, like \"[E] Open\".",
+    "proximity": "Being close to something.",
+    "trigger": "To use the prompt: press the key (or tap the button), or hold it for the full HoldDuration.",
+    "HoldDuration": "How many seconds a player must hold the key to trigger a prompt. 0 means a quick press is enough.",
+    "indicator": "A small hint that shows a prompt is nearby but you are not close enough to use it yet. Prompts only show one if their MaxIndicatorDistance is more than 0.",
+    "MaxActivationDistance": "How close (in studs) a player must be to use a prompt.",
+    "client": "The player's own device. LocalScripts run here.",
+    "server": "Roblox's computer that runs the game for everyone.",
+    "event": "A signal that something happened. `:Connect` a function to run each time."
+  },
+  "examples": [
+    {
+      "title": "One script for every treasure chest",
+      "place": "Script in ServerScriptService (put a ProximityPrompt inside each chest part, with ObjectText \"Chest\")",
+      "code": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\n\nProximityPromptService.PromptTriggered:Connect(function(prompt, player)\n    -- only react to prompts that belong to chests\n    if prompt.ObjectText ~= \"Chest\" then\n        return\n    end\n\n    print(player.Name .. \" opened a chest!\")\n    prompt.Enabled = false -- each chest can only be opened once\nend)",
+      "explain": [
+        "`PromptTriggered` fires for ANY prompt in the game, and tells us which prompt and which player.",
+        "We check the prompt's `ObjectText` to make sure it is a chest prompt.",
+        "Then we disable that prompt so the chest cannot be opened again."
+      ]
+    },
+    {
+      "title": "Hide all prompts during a cutscene",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\n\nProximityPromptService.Enabled = false -- no prompts show\ntask.wait(5)                            -- pretend a 5 second cutscene plays\nProximityPromptService.Enabled = true  -- prompts are back",
+      "explain": [
+        "Setting `Enabled` to false hides every prompt at once.",
+        "After the cutscene we turn them back on."
+      ]
+    }
+  ],
+  "gotchas": [
+    "`PromptShown` and `PromptHidden` only fire in LocalScripts. They will never fire in a server Script.",
+    "`PromptTriggered` fires for every prompt in the game. Check which prompt it is (by name, ObjectText, ActionText or a tag) before doing anything.",
+    "Hold events (`PromptButtonHoldBegan`, `PromptButtonHoldEnded`) only fire for prompts whose HoldDuration is more than 0.",
+    "Indicators only appear for prompts that set MaxIndicatorDistance above 0 (the default 0 means no indicator)."
+  ],
+  "members": {
+    "ProximityPromptService.Enabled": {
+      "simple": "If false, no ProximityPrompts are shown anywhere. Handy for turning interactions off between rounds or during cutscenes.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.Enabled = false -- hide every prompt"
+    },
+    "ProximityPromptService.MaxIndicatorsVisible": {
+      "simple": "The most prompt indicators (small \"something is nearby\" hints) that can show at once. Default 16, allowed from 0 to 64. Only matters if some prompts use indicators.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.MaxIndicatorsVisible = 8"
+    },
+    "ProximityPromptService.MaxPromptsVisible": {
+      "simple": "The most prompts that can show on the player's screen at the same time.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.MaxPromptsVisible = 1 -- only the closest one"
+    },
+    "ProximityPromptService.IndicatorHidden": {
+      "simple": "LocalScript only. Fires when a prompt's indicator (nearby hint) disappears, for example the player walked away. Use it to hide your own custom hint.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.IndicatorHidden:Connect(function(prompt)\n    print(\"Indicator hidden for\", prompt.ActionText)\nend)"
+    },
+    "ProximityPromptService.IndicatorShown": {
+      "simple": "LocalScript only. Fires when a prompt's indicator appears: the player is near, but not yet close enough to use it.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.IndicatorShown:Connect(function(prompt)\n    print(\"Something to do nearby:\", prompt.ActionText)\nend)"
+    },
+    "ProximityPromptService.PromptButtonHoldBegan": {
+      "simple": "Fires when a player starts holding the key on a prompt that needs holding (HoldDuration more than 0). Tells you the prompt and the player.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt, player)\n    print(player.Name .. \" started holding\")\nend)"
+    },
+    "ProximityPromptService.PromptButtonHoldEnded": {
+      "simple": "Fires when a player lets go of the key on a hold prompt, whether or not they held it long enough.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.PromptButtonHoldEnded:Connect(function(prompt, player)\n    print(player.Name .. \" let go\")\nend)"
+    },
+    "ProximityPromptService.PromptHidden": {
+      "simple": "LocalScript only. Fires when a prompt disappears from the player's screen.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.PromptHidden:Connect(function(prompt)\n    print(\"Hidden:\", prompt.ActionText)\nend)"
+    },
+    "ProximityPromptService.PromptShown": {
+      "simple": "LocalScript only. Fires when a prompt appears on the player's screen. Also tells you the input type (keyboard, gamepad or touch), useful for custom prompt designs.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.PromptShown:Connect(function(prompt, inputType)\n    print(\"Shown:\", prompt.ActionText, \"using\", inputType.Name)\nend)"
+    },
+    "ProximityPromptService.PromptTriggered": {
+      "simple": "Fires when a player USES any prompt: presses the key, or holds it for the full HoldDuration. Tells you the prompt and the player. The most useful event here.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.PromptTriggered:Connect(function(prompt, player)\n    print(player.Name .. \" used \" .. prompt.ActionText)\nend)"
+    },
+    "ProximityPromptService.PromptTriggerEnded": {
+      "simple": "Fires when the player lets go of the key after triggering a prompt. Use it with PromptTriggered for things that happen only while the key is held, like charging up.",
+      "example": "local ProximityPromptService = game:GetService(\"ProximityPromptService\")\nProximityPromptService.PromptTriggerEnded:Connect(function(prompt, player)\n    print(player.Name .. \" released the prompt key\")\nend)"
+    }
+  }
+}

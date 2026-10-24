@@ -1,0 +1,43 @@
+{
+  "name": "RBXScriptConnection",
+  "simple": "An RBXScriptConnection is the link between an event and your function. You get one back every time you call `:Connect` (or `:Once`). Keep it if you want to stop listening later with `:Disconnect()`.",
+  "analogy": "If connecting to an event is like subscribing to a newsletter, the connection is the 'unsubscribe' link. Keep it handy and click it when you do not want any more messages.",
+  "whenToUse": [
+    "Stopping a function from running when an event fires, for example after a power-up ends.",
+    "Cleaning up listeners you no longer need so your game stays fast.",
+    "Checking if a link is still active with `.Connected`."
+  ],
+  "where": "Returned by `RBXScriptSignal:Connect`, `:Once` and `:ConnectParallel`. Also returned by `MessagingService:SubscribeAsync`. Works in Scripts and LocalScripts.",
+  "terms": {
+    "event / signal": "Something that can happen, like a touch or a click.",
+    "connect": "Attaching your function to an event.",
+    "disconnect": "Removing that attachment so your function stops running when the event fires.",
+    "memory leak": "When a game keeps holding onto things it no longer needs, using more and more memory over time. Old connections you forget to disconnect can cause this."
+  },
+  "examples": [
+    {
+      "title": "A lava floor that turns off after 10 seconds",
+      "place": "Script inside a Part in Workspace",
+      "code": "local part = script.Parent\n\n-- Save the connection so we can stop it later\nlocal connection = part.Touched:Connect(function(otherPart)\n\tlocal humanoid = otherPart.Parent:FindFirstChildOfClass(\"Humanoid\")\n\tif humanoid then\n\t\thumanoid.Health = 0\n\tend\nend)\n\ntask.wait(10)\nconnection:Disconnect() -- lava is now safe to walk on\nprint(\"Still connected?\", connection.Connected) --> false",
+      "explain": [
+        "`:Connect` gives back a connection, which we save in a variable.",
+        "For 10 seconds, touching the part defeats players.",
+        "`connection:Disconnect()` unhooks the function, so touching does nothing now."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Destroying an object disconnects its events automatically, but connections to things that live forever (like Players or RunService) stay until you disconnect them.",
+    "Disconnecting does not stop a function that is already running; it only stops future runs."
+  ],
+  "members": {
+    "RBXScriptConnection.Connected": {
+      "simple": "True while the link is active. Turns false after `:Disconnect()` (or after a `:Once` connection has fired).",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\n\nlocal conn = Players.PlayerAdded:Connect(function() end)\nprint(conn.Connected) --> true\nconn:Disconnect()\nprint(conn.Connected) --> false"
+    },
+    "RBXScriptConnection:Disconnect": {
+      "simple": "Stops your function from running when the event fires. Safe to call more than once.",
+      "example": "-- Script in ServerScriptService\nlocal RunService = game:GetService(\"RunService\")\n\nlocal frames = 0\nlocal conn\nconn = RunService.Heartbeat:Connect(function()\n\tframes += 1\n\tif frames >= 60 then\n\t\tprint(\"Counted 60 frames, stopping\")\n\t\tconn:Disconnect()\n\tend\nend)"
+    }
+  }
+}

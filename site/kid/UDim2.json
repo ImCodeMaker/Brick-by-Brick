@@ -1,0 +1,117 @@
+{
+  "name": "UDim2",
+  "simple": "A UDim2 tells Roblox where a piece of UI goes on the screen and how big it is. It has an X part (left to right) and a Y part (top to bottom), and each part has a Scale and an Offset. Scale is a fraction of the parent's size, and Offset is exact pixels. You use it for the Size and Position of things like Frames, TextLabels, and buttons.",
+  "analogy": "Think of hanging a poster on a wall. Scale is like saying \"put it halfway across the wall\", which works on any wall size. Offset is like saying \"move it 20 centimeters to the left\", which is the same distance on a small wall or a big wall. A UDim2 lets you say both at once, for both across and up-down.",
+  "whenToUse": [
+    "Setting the Size of a Frame, TextLabel, ImageLabel, or button",
+    "Setting the Position of UI on the screen",
+    "Centering a box on the screen",
+    "Animating UI moving or growing with TweenService"
+  ],
+  "where": "Works in any script, but UI is usually changed from a LocalScript (in StarterGui or StarterPlayerScripts), because each player has their own screen. Make one with UDim2.new, UDim2.fromScale, or UDim2.fromOffset.",
+  "terms": {
+    "Scale": "A fraction of the parent's size. 0 means nothing, 0.5 means half, 1 means all of it. On a screen 1000 pixels wide, Scale 0.5 = 500 pixels. On a phone 400 pixels wide, the same Scale 0.5 = 200 pixels. It grows and shrinks with the screen.",
+    "Offset": "An exact number of pixels that never changes. Offset 20 is always 20 pixels, on a giant monitor or a tiny phone.",
+    "pixel": "One tiny dot on the screen. A normal computer screen is around 1920 pixels wide; a phone held sideways might be around 800.",
+    "parent": "The thing a UI object sits inside. For a Frame directly inside a ScreenGui, the parent is the whole screen. For a button inside a Frame, the parent is that Frame.",
+    "GuiObject": "Any 2D thing you can see on the screen in Roblox UI, like a Frame, TextLabel, TextButton, or ImageLabel.",
+    "read-only": "You can look at the value but you cannot change it directly. To get a different value, make a new one.",
+    "X": "The left-to-right direction on the screen. X = 0 is the left edge.",
+    "Y": "The top-to-bottom direction on the screen. Y = 0 is the TOP edge, and bigger Y goes down.",
+    "Position": "Where a UI object's top-left corner sits inside its parent (unless you change AnchorPoint).",
+    "AnchorPoint": "A GuiObject property that picks which spot of the object is placed at Position. (0, 0) is the top-left corner (the default), (0.5, 0.5) is the middle.",
+    "interpolate / lerp": "Find a value part of the way between two values. Halfway (0.5) between 0 and 10 is 5.",
+    "TweenService": "A Roblox service that smoothly animates a property from one value to another over time."
+  },
+  "examples": [
+    {
+      "title": "Scale vs Offset on a real screen",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\n-- Make a ScreenGui to hold our boxes\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\n-- Box A uses SCALE: half the screen wide, a tenth of the screen tall\nlocal boxA = Instance.new(\"Frame\")\nboxA.Size = UDim2.fromScale(0.5, 0.1)\nboxA.Position = UDim2.fromScale(0, 0) -- top-left corner\nboxA.BackgroundColor3 = Color3.fromRGB(0, 170, 255)\nboxA.Parent = screenGui\n\n-- Box B uses OFFSET: always 500 x 60 pixels\nlocal boxB = Instance.new(\"Frame\")\nboxB.Size = UDim2.fromOffset(500, 60)\nboxB.Position = UDim2.new(0, 0, 0.2, 0) -- 20% down from the top\nboxB.BackgroundColor3 = Color3.fromRGB(255, 85, 0)\nboxB.Parent = screenGui",
+      "explain": [
+        "On a computer screen 1000 pixels wide, box A is 0.5 x 1000 = 500 pixels wide, and box B is also 500 pixels wide. They look the same.",
+        "Now open the game on a phone that is only 400 pixels wide.",
+        "Box A becomes 0.5 x 400 = 200 pixels wide. It still fills exactly half the screen.",
+        "Box B is still 500 pixels wide, which is wider than the whole 400-pixel phone screen, so it gets cut off.",
+        "That is why Scale works on phones and pure Offset often does not: Scale grows and shrinks with the screen, Offset never changes."
+      ]
+    },
+    {
+      "title": "Center a box with UDim2.new(0.5, -50, 0.5, -25)",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\nlocal box = Instance.new(\"Frame\")\nbox.Size = UDim2.fromOffset(100, 50) -- always 100 wide, 50 tall\n-- Go to the middle (0.5), then back up by half the box size\nbox.Position = UDim2.new(0.5, -50, 0.5, -25)\nbox.Parent = screenGui",
+      "explain": [
+        "The box is 100 pixels wide and 50 pixels tall.",
+        "Position says where the box's TOP-LEFT corner goes.",
+        "X part: Scale 0.5, Offset -50. On a 1000-pixel-wide screen that is 0.5 x 1000 - 50 = 450 pixels from the left.",
+        "Y part: Scale 0.5, Offset -25. On a 600-pixel-tall screen that is 0.5 x 600 - 25 = 275 pixels from the top.",
+        "So the box covers 450 to 550 across and 275 to 325 down. Its middle is (500, 300), the exact center of the screen.",
+        "The -50 and -25 are half of the box's width and height. That shift is what makes the box's middle (not its corner) land in the center.",
+        "An easier way: set box.AnchorPoint = Vector2.new(0.5, 0.5) and box.Position = UDim2.fromScale(0.5, 0.5)."
+      ]
+    },
+    {
+      "title": "A health bar that fills part of its background",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.ResetOnSpawn = false -- keep the bar when the character respawns\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\n-- Gray background bar: 40% of the screen wide, 20 pixels tall\nlocal background = Instance.new(\"Frame\")\nbackground.Size = UDim2.new(0.4, 0, 0, 20)\nbackground.Position = UDim2.new(0.3, 0, 1, -40) -- 40 pixels up from the bottom\nbackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)\nbackground.Parent = screenGui\n\n-- Green fill INSIDE the background\nlocal fill = Instance.new(\"Frame\")\nfill.Size = UDim2.fromScale(1, 1) -- start full\nfill.BackgroundColor3 = Color3.fromRGB(0, 200, 0)\nfill.Parent = background\n\nlocal function update(humanoid)\n\tlocal percent = humanoid.Health / humanoid.MaxHealth\n\t-- X scale is a fraction of the BACKGROUND, because the fill is inside it\n\tfill.Size = UDim2.fromScale(percent, 1)\nend\n\nlocal function onCharacter(character)\n\tlocal humanoid = character:WaitForChild(\"Humanoid\")\n\tupdate(humanoid)\n\thumanoid.HealthChanged:Connect(function()\n\t\tupdate(humanoid)\n\tend)\nend\n\nif player.Character then\n\tonCharacter(player.Character)\nend\nplayer.CharacterAdded:Connect(onCharacter)",
+      "explain": [
+        "The background is 0.4 of the screen wide (Scale) and exactly 20 pixels tall (Offset).",
+        "Its Y position is Scale 1 (the very bottom) with Offset -40, so it sits 40 pixels above the bottom on every screen.",
+        "The green fill is inside the background, so its Scale is a fraction of the background, not the screen.",
+        "If health is 75 out of 100, percent is 0.75 and the fill covers three quarters of the bar."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The order of UDim2.new is (xScale, xOffset, yScale, yOffset), not (x, y, width, height). Mixing up the order is the number one mistake.",
+    "Scale is a fraction from 0 to 1, not a percent. 50% is 0.5.",
+    "Pure Offset sizes can look fine in Studio and then be too big or too small on phones. Test with the Device Emulator in Studio.",
+    "Y = 0 is the top of the screen, not the bottom. To place something near the bottom, use Y Scale 1 with a negative Offset, like UDim2.new(0, 0, 1, -50).",
+    "Scale is always a fraction of the PARENT. A Frame inside another Frame uses the outer Frame's size, not the screen's."
+  ],
+  "members": {
+    "UDim2.new": {
+      "simple": "Makes a new UDim2. You can give it nothing (all zeros), four numbers (xScale, xOffset, yScale, yOffset), or two UDims (one for X, one for Y). Every number you leave out is 0.",
+      "example": "local zero = UDim2.new() -- same as UDim2.new(0, 0, 0, 0)\n-- Half the parent wide plus 20 pixels, full parent tall\nlocal size = UDim2.new(0.5, 20, 1, 0)\n-- Same idea, built from two UDims\nlocal same = UDim2.new(UDim.new(0.5, 20), UDim.new(1, 0))\nprint(size == same) --> true",
+      "gotcha": "Remember the order: X scale, X offset, Y scale, Y offset."
+    },
+    "UDim2.fromScale": {
+      "simple": "A shortcut that makes a UDim2 using only Scale (fractions of the parent), with both Offsets set to 0. UDim2.fromScale(0.5, 0.25) is the same as UDim2.new(0.5, 0, 0.25, 0). Great for UI that should look the same on every screen.",
+      "example": "local frame = Instance.new(\"Frame\")\nframe.Size = UDim2.fromScale(0.5, 0.25) -- half as wide, a quarter as tall as the parent\nprint(frame.Size) --> {0.5, 0}, {0.25, 0}"
+    },
+    "UDim2.fromOffset": {
+      "simple": "A shortcut that makes a UDim2 using only Offset (exact pixels), with both Scales set to 0. UDim2.fromOffset(100, 50) is the same as UDim2.new(0, 100, 0, 50). Good for things that must stay an exact size, like a small icon.",
+      "example": "local icon = Instance.new(\"ImageLabel\")\nicon.Size = UDim2.fromOffset(32, 32) -- always 32 x 32 pixels\nprint(icon.Size) --> {0, 32}, {0, 32}",
+      "gotcha": "Big fromOffset sizes can be too large for small phone screens."
+    },
+    "UDim2.X": {
+      "simple": "The left-to-right part of the UDim2, as a UDim with its own .Scale and .Offset. Same as UDim2.Width.",
+      "example": "local pos = UDim2.new(0.5, 10, 1, 0)\nprint(pos.X.Scale)  --> 0.5\nprint(pos.X.Offset) --> 10"
+    },
+    "UDim2.Y": {
+      "simple": "The top-to-bottom part of the UDim2, as a UDim with its own .Scale and .Offset. Same as UDim2.Height.",
+      "example": "local pos = UDim2.new(0.5, 10, 1, 0)\nprint(pos.Y.Scale)  --> 1\nprint(pos.Y.Offset) --> 0"
+    },
+    "UDim2.Width": {
+      "simple": "Another name for UDim2.X. It reads nicely when the UDim2 is a Size, like frame.Size.Width.",
+      "example": "local size = UDim2.new(0.3, 0, 0, 40)\nprint(size.Width.Scale) --> 0.3 (same as size.X.Scale)"
+    },
+    "UDim2.Height": {
+      "simple": "Another name for UDim2.Y. It reads nicely when the UDim2 is a Size, like frame.Size.Height.",
+      "example": "local size = UDim2.new(0.3, 0, 0, 40)\nprint(size.Height.Offset) --> 40 (same as size.Y.Offset)"
+    },
+    "UDim2:Lerp": {
+      "simple": "Gives you a UDim2 part of the way between this one and a goal. alpha 0 gives this one, 1 gives the goal, 0.5 gives exactly halfway. Each of the four numbers is worked out separately. Handy for making your own UI animations.",
+      "example": "local startPos = UDim2.fromScale(0, 0.5)\nlocal endPos = UDim2.fromScale(1, 0.5)\nlocal halfway = startPos:Lerp(endPos, 0.5)\nprint(halfway) --> {0.5, 0}, {0.5, 0}",
+      "gotcha": "For smooth UI movement, TweenService or GuiObject:TweenPosition is often easier than calling Lerp every frame yourself."
+    },
+    "op:UDim2+UDim2": {
+      "simple": "Adds two UDim2s. Each of the four numbers is added to its partner: X scales together, X offsets together, and the same for Y. Useful for nudging a position, like adding UDim2.fromOffset(0, 10) to move something 10 pixels down.",
+      "example": "local a = UDim2.new(0.5, 10, 0, 20)\nlocal b = UDim2.new(0.25, 5, 1, 0)\nprint(a + b) --> {0.75, 15}, {1, 20}"
+    },
+    "op:UDim2-UDim2": {
+      "simple": "Subtracts one UDim2 from another, number by number: X scale minus X scale, X offset minus X offset, and the same for Y.",
+      "example": "local a = UDim2.new(1, 100, 1, 50)\nlocal b = UDim2.new(0.5, 30, 0, 10)\nprint(a - b) --> {0.5, 70}, {1, 40}"
+    }
+  }
+}

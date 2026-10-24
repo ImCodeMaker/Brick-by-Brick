@@ -1,0 +1,32 @@
+{
+  "path": "content/en-us/matchmaking/index.md",
+  "simple": "Matchmaking is how Roblox decides which server a player joins when they press Play. It looks at all the servers that have room, gives each one a score, and sends the player to the server with the highest score. Scores are based on things like friends, language, age, and ping. You can change how much each thing matters so players land in the best server for your game.",
+  "analogy": "It is like a school cafeteria. When a new kid walks in, they look at every table with an open seat and pick the one with their friends, people who speak their language, or people their age.",
+  "keyPoints": [
+    "Matchmaking matches players to servers based on things like age, language, skill level, and game preferences.",
+    "Step by step: a player asks to join, matchmaking finds eligible servers, scores them, and sends the player to the top one.",
+    "Servers that are full, private, reserved, or about to shut down are skipped.",
+    "Scores come from a weighted sum: each signal's score is multiplied by its weight, then all are added up.",
+    "Attributes are raw facts like age or language. Signals turn those facts into scores from 0 to 1.",
+    "Roblox has built-in signals, and you can make custom signals using custom attributes from your data stores.",
+    "You can change signal weights and test them on pretend (mock) servers before using them for real.",
+    "Matchmaking analytics show how well your settings are working."
+  ],
+  "terms": {
+    "server": "One running copy of your game with its own group of players.",
+    "eligible server": "A server the player is allowed to join: not full, not private, not reserved, and not shutting down.",
+    "attribute": "A fact about a player or server. It can be a number, like age 12, or text, like language `English`.",
+    "numerical attribute": "An attribute that is a number. Scores compare the player's number to the server's average, like skill 50 vs a server average of 48.",
+    "categorical attribute": "An attribute that is a word or category, like language. Scores depend on how many players in the server share it.",
+    "signal": "A rule that turns an attribute into a score between 0 and 1. 1 means a great fit, 0 means a poor fit.",
+    "weight": "How much a signal matters. A signal with weight 3 counts three times as much as one with weight 1.",
+    "weighted sum": "Multiply each signal score by its weight, then add them up. Scores 0.5 (weight 2) and 1 (weight 1) give 0.5 x 2 + 1 x 1 = 2.",
+    "latency": "How long data takes to travel between the player and the server, also called ping. Lower is smoother.",
+    "mock server": "A pretend server you set up to test how your matchmaking settings would choose."
+  },
+  "watchOut": [
+    "Thinking you must set up matchmaking before your game works. Roblox's default configuration already runs for every game.",
+    "Trying to make a custom signal first. You need to create a custom attribute before you can build a custom signal from it.",
+    "Changing weights without testing. Use mock servers to preview what your new weights will do."
+  ]
+}

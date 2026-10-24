@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/players/users.md",
+  "simple": "Every Roblox account has a number that identifies it, called a user ID. Roblox is changing things so that each game gets its own private ID number for each player, called a domain-scoped user ID. So the same player has one number in your game and a different number in someone else's game. This page shows how to use the `User` type in your scripts so your saves, badges, and leaderboards keep working.",
+  "analogy": "It is like a school giving you a student number. Your number at your school is different from your number at a summer camp, even though you are the same person. Each place only understands its own number.",
+  "keyPoints": [
+    "A User is your Roblox account. A Player is that account while it is inside a running game server.",
+    "New players get a different ID number in every game, so an ID only makes sense inside the game that gave it out.",
+    "Players who joined your game before this change keep their old global ID in your game, so old saves still work.",
+    "Get a player's `User` value with `player.User`. It has `Id`, `DomainType`, and `DomainId`.",
+    "Engine functions that take a user ID, like `BadgeService:AwardBadge()`, also accept a `User` value, and Roblox recommends passing the `User`.",
+    "For data store keys inside one game, use `player.User.Id`. To save the full identity for other systems, use `user:ToString()` and later `User.fromString()`.",
+    "Use `Player` for things during the session (movement, GUI, chat) and `User` for identity that lasts (saves, cross-game references).",
+    "Never use an ID number from one game to find a player in a different game."
+  ],
+  "terms": {
+    "user ID": "A number that identifies a Roblox account. For example, a player might be `123` in one game.",
+    "domain": "The place an ID belongs to, such as one specific game or one outside app. An ID only means something inside its own domain.",
+    "domain-scoped user ID": "An ID number that only works inside one game or app. The same player could be `500789` in Game B and `302441` in Game C.",
+    "global user ID": "The older kind of ID that was the same in every game. Returning players keep this one in games they already played.",
+    "Datatype": "A built-in kind of value in Luau, like `Vector3` or `User`. It is a value, not an object you see in the Explorer.",
+    "DomainType": "An enum that says what kind of domain the ID belongs to: `EXPERIENCE` (a game) or `OAUTH` (an outside app).",
+    "serialize": "Turn a value into text so it can be saved or sent somewhere, then turned back later. `ToString()` serializes a `User`.",
+    "collide": "When two different things accidentally get the same number. Scoped IDs never collide with global IDs.",
+    "session": "One visit to a server, from when a player joins until they leave."
+  },
+  "example": {
+    "title": "Print a player's IDs and make a save key",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- The User value for this player in this game\n\tlocal user = player.User\n\tprint(player.Name, \"has ID\", user.Id, \"in this game\")\n\n\t-- A data store key that only needs to work inside this game\n\tlocal key = (\"player_%d\"):format(user.Id)\n\tprint(\"Save key:\", key)\n\n\t-- Full identity as text, safe to store for other systems\n\tlocal encoded = user:ToString()\n\tprint(\"Saved as text:\", encoded)\nend)",
+    "explain": [
+      "When a player joins, `PlayerAdded` runs the function and hands it the `player`.",
+      "`player.User` gives you the `User` value for that player in your game.",
+      "`user.Id` is the number for that player in this game only. It builds a save key like `player_500789`.",
+      "`user:ToString()` turns the whole identity into text, which you can turn back with `User.fromString()` later."
+    ]
+  },
+  "watchOut": [
+    "Do not copy a player's ID from your game and use it in another game or tool. The number will point to nobody, or to someone else.",
+    "Do not panic about old saves. Players who joined before the change keep their old ID in your game.",
+    "Use `ToString()` and `User.fromString()` when you save a full `User`, not your own homemade format."
+  ]
+}

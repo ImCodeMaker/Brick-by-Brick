@@ -1,0 +1,157 @@
+{
+  "name": "TextLabel",
+  "simple": "A TextLabel is a box that shows text. Use it for titles, scores, timers, names and messages. You can change the words, the font, the color, the size, and whether the background box shows at all.",
+  "analogy": "A TextLabel is like a name sticker: a piece of paper (the background) with words written on it. You can even peel off the paper and keep only the words by making the background invisible.",
+  "whenToUse": [
+    "Showing a score, coin count, or timer",
+    "Titles and headings in menus",
+    "Messages like 'Round starting in 5...'",
+    "Names above heads (inside a BillboardGui)"
+  ],
+  "where": "Inside a ScreenGui, SurfaceGui or BillboardGui. Create it in Studio or with Instance.new(\"TextLabel\") in a LocalScript (for one player's screen) or a Script (for a SurfaceGui/BillboardGui everyone sees in Workspace).",
+  "terms": {
+    "UI / GUI": "User Interface: the buttons, menus, text and pictures drawn on the screen or on things in the game.",
+    "LocalScript": "A script that runs on the player's own device. All UI code goes in LocalScripts.",
+    "ScreenGui": "The invisible container that holds UI shown on the player's screen. It must be inside the player's PlayerGui (put it in StarterGui in Studio).",
+    "parent": "The object something is placed inside.",
+    "UDim2": "The value used for Size and Position: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction (0 to 1) of the parent's size; Offset is exact pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "transparency": "How see-through something is. 0 = solid, 1 = invisible.",
+    "Color3": "A color made of red, green and blue amounts, like Color3.fromRGB(255, 0, 0) for red.",
+    "font": "The style of the letters, like Arial, Comic, or a blocky game font.",
+    "rich text": "Text with simple tags inside it, like <b>word</b>, that make parts bold, italic or colored.",
+    "grapheme": "One visible character, like a letter, a number, or a symbol.",
+    "wrap": "When text reaches the edge, it continues on the next line.",
+    "truncate": "Cut off text that's too long, often adding '...' at the end.",
+    "stroke": "An outline around each letter.",
+    "read-only": "You can read the value but not change it.",
+    "localization": "Translating text into the player's language.",
+    "deprecated": "Old and replaced by something better. Don't use it in new code."
+  },
+  "examples": [
+    {
+      "title": "A countdown timer in the middle of the screen",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.AnchorPoint = Vector2.new(0.5, 0.5)\nlabel.Position = UDim2.fromScale(0.5, 0.3) -- centered, 30% down the screen\nlabel.Size = UDim2.fromOffset(400, 80)\nlabel.BackgroundTransparency = 1           -- no box, only text\nlabel.TextColor3 = Color3.fromRGB(255, 255, 255)\nlabel.TextStrokeTransparency = 0           -- black outline so it's readable anywhere\nlabel.TextSize = 48\nlabel.FontFace = Font.fromEnum(Enum.Font.GothamBold)\nlabel.Parent = screenGui\n\nfor seconds = 5, 1, -1 do\n\tlabel.Text = \"Starting in \" .. seconds\n\ttask.wait(1)\nend\nlabel.Text = \"GO!\"\ntask.wait(1)\nlabel.Visible = false",
+      "explain": [
+        "AnchorPoint (0.5, 0.5) and Position X 0.5 put the label's middle in the middle of the screen sideways.",
+        "BackgroundTransparency = 1 hides the box so only the white text shows.",
+        "TextStrokeTransparency = 0 adds a solid outline so the text is readable on bright or dark backgrounds.",
+        "The for loop counts 5, 4, 3, 2, 1, changing Text and waiting 1 second each time."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Text cut off? Turn on TextWrapped, make the label bigger, use AutomaticSize, or use TextScaled.",
+    "BackgroundTransparency hides the box but not the text. TextTransparency hides the text.",
+    "Text a player typed, shown to OTHER players, must be filtered with TextService first, or your game could be moderated.",
+    "Use TextColor3, not the old TextColor, and TextWrapped, not the old TextWrap."
+  ],
+  "members": {
+    "TextLabel.ContentText": {
+      "simple": "Read-only. The text exactly as players see it. If RichText is on, the formatting tags like <b> are removed. For Text = \"<b>Hi</b>\" with RichText on, ContentText is \"Hi\".",
+      "example": "local label = script.Parent\nprint(label.ContentText)"
+    },
+    "TextLabel.Font": {
+      "simple": "Picks a built-in font from a list (Enum.Font), like Gotham or Cartoon. It stays in sync with FontFace; FontFace is the newer, more flexible choice.",
+      "example": "local label = script.Parent\nlabel.Font = Enum.Font.GothamBold"
+    },
+    "TextLabel.FontFace": {
+      "simple": "The font used to draw the text, including its weight (how bold) and style (italic). It can use fonts that aren't in the old Font list.",
+      "example": "local label = script.Parent\nlabel.FontFace = Font.new(\"rbxasset://fonts/families/FredokaOne.json\")\n-- A bold font: pass the weight when you make it\nlabel.FontFace = Font.new(\"rbxasset://fonts/families/GothamSSm.json\", Enum.FontWeight.Bold)"
+    },
+    "TextLabel.FontSize": {
+      "simple": "Old — use TextSize instead."
+    },
+    "TextLabel.LineHeight": {
+      "simple": "The space between lines of text, as a multiplier from 1 to 3. 1 is normal, 1.5 adds extra breathing room, 2 is double spacing.",
+      "example": "local label = script.Parent\nlabel.LineHeight = 1.5"
+    },
+    "TextLabel.LocalizedText": {
+      "simple": "Read-only. The translated text actually being shown, when automatic translation (AutoLocalize) found a translation for the player's language. If no translation applies, it's just the normal text.",
+      "example": "local label = script.Parent\nprint(\"Showing:\", label.LocalizedText)"
+    },
+    "TextLabel.MaxVisibleGraphemes": {
+      "simple": "Limits how many characters are shown. -1 (default) shows everything. Count up from 0 to make a 'typewriter' effect where letters appear one by one.",
+      "example": "local label = script.Parent\nlabel.Text = \"Welcome, adventurer!\"\nfor i = 0, #label.Text do\n\tlabel.MaxVisibleGraphemes = i\n\ttask.wait(0.05)\nend\nlabel.MaxVisibleGraphemes = -1 -- show everything",
+      "gotcha": "The text layout doesn't move while letters appear; it's planned as if all the text is already there."
+    },
+    "TextLabel.OpenTypeFeatures": {
+      "simple": "Turns on special font features using short codes separated by commas, like \"zero\" for a zero with a slash through it. Empty (default) means none. If a code doesn't work, OpenTypeFeaturesError says why.",
+      "example": "local label = script.Parent\nlabel.OpenTypeFeatures = \"zero\" -- slashed zeros, so 0 doesn't look like O"
+    },
+    "TextLabel.OpenTypeFeaturesError": {
+      "simple": "Read-only. Empty when OpenTypeFeatures worked. Otherwise a message like \"Unsupported feature: xyz\" telling you what went wrong.",
+      "example": "local label = script.Parent\nif label.OpenTypeFeaturesError ~= \"\" then\n\twarn(label.OpenTypeFeaturesError)\nend"
+    },
+    "TextLabel.RichText": {
+      "simple": "When true, you can style parts of the text with tags like <b>bold</b>, <i>italic</i> or <font color=\"#FF0000\">red</font>.",
+      "example": "local label = script.Parent\nlabel.RichText = true\nlabel.Text = \"You found a <b>golden</b> <font color=\\\"#FFD700\\\">sword</font>!\""
+    },
+    "TextLabel.Text": {
+      "simple": "The words shown. You can use \\n in a script to start a new line.",
+      "example": "local label = script.Parent\nlabel.Text = \"Line one\\nLine two\""
+    },
+    "TextLabel.TextBounds": {
+      "simple": "Read-only. The size in pixels of the box the text actually needs. Handy for making a background exactly fit the text.",
+      "example": "local label = script.Parent\nprint(\"Text needs\", label.TextBounds.X, \"by\", label.TextBounds.Y, \"pixels\")"
+    },
+    "TextLabel.TextColor": {
+      "simple": "Old — use TextColor3 instead."
+    },
+    "TextLabel.TextColor3": {
+      "simple": "The color of the text.",
+      "example": "local label = script.Parent\nlabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- white text"
+    },
+    "TextLabel.TextDirection": {
+      "simple": "Which way the text reads. Auto (default) figures it out from the language, so languages like Arabic read right-to-left. You can force LeftToRight or RightToLeft.",
+      "example": "local label = script.Parent\nlabel.TextDirection = Enum.TextDirection.Auto"
+    },
+    "TextLabel.TextFits": {
+      "simple": "Read-only. true if all the text fits inside, false if some of it is cut off.",
+      "example": "local label = script.Parent\nif not label.TextFits then\n\tprint(\"Text is too long for this box!\")\nend"
+    },
+    "TextLabel.TextScaled": {
+      "simple": "When true, the text automatically grows or shrinks to fill the whole box (TextSize is ignored and wrapping turns on). Great for BillboardGuis and SurfaceGuis.",
+      "example": "local label = script.Parent\nlabel.TextScaled = true",
+      "gotcha": "Text can become tiny and hard to read. Add a UITextSizeConstraint to set a min/max size, and don't combine it with AutomaticSize."
+    },
+    "TextLabel.TextSize": {
+      "simple": "How tall one line of text is, in pixels. 14 is small, 24 is medium, 48 is big. Ignored when TextScaled is on.",
+      "example": "local label = script.Parent\nlabel.TextSize = 24",
+      "gotcha": "Try not to go below 9; tiny text is hard to read for many players."
+    },
+    "TextLabel.TextStrokeColor3": {
+      "simple": "The color of the outline drawn around each letter. Only shows when TextStrokeTransparency is less than 1.",
+      "example": "local label = script.Parent\nlabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0) -- black outline\nlabel.TextStrokeTransparency = 0             -- make it visible",
+      "gotcha": "For thicker or gradient outlines, use a UIStroke instead."
+    },
+    "TextLabel.TextStrokeTransparency": {
+      "simple": "How see-through the letter outline is. 1 (default) = no outline, 0 = solid outline. The outline is drawn several times stacked, so even 0.5 looks quite solid; 0.75 to 1 gives a soft outline.",
+      "example": "local label = script.Parent\nlabel.TextStrokeTransparency = 0.5"
+    },
+    "TextLabel.TextTransparency": {
+      "simple": "How see-through the text is. 0 = solid, 1 = invisible. Doesn't affect the background box (that's BackgroundTransparency).",
+      "example": "local TweenService = game:GetService(\"TweenService\")\nlocal label = script.Parent\n-- Fade the text out over 1 second\nTweenService:Create(label, TweenInfo.new(1), {TextTransparency = 1}):Play()"
+    },
+    "TextLabel.TextTruncate": {
+      "simple": "What to do with text that's too long to fit. None (default) just cuts it off. AtEnd replaces the end with \"...\". SplitWord can cut in the middle of a word.",
+      "example": "local label = script.Parent\nlabel.TextTruncate = Enum.TextTruncate.AtEnd -- \"A really long na...\""
+    },
+    "TextLabel.TextWrap": {
+      "simple": "Old — use TextWrapped instead."
+    },
+    "TextLabel.TextWrapped": {
+      "simple": "When true, long text continues on the next line instead of running off the side. It prefers to break at spaces. Lines that don't fit vertically aren't shown.",
+      "example": "local label = script.Parent\nlabel.TextWrapped = true"
+    },
+    "TextLabel.TextXAlignment": {
+      "simple": "Lines the text up sideways inside the box: Left, Center (default) or Right.",
+      "example": "local label = script.Parent\nlabel.TextXAlignment = Enum.TextXAlignment.Left"
+    },
+    "TextLabel.TextYAlignment": {
+      "simple": "Lines the text up up-and-down inside the box: Top, Center (default) or Bottom.",
+      "example": "local label = script.Parent\nlabel.TextYAlignment = Enum.TextYAlignment.Top"
+    }
+  }
+}

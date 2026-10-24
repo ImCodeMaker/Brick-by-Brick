@@ -1,0 +1,66 @@
+{
+  "name": "Highlight",
+  "simple": "A Highlight makes an object stand out with a glowing outline and a colored fill over it. Put it inside a part, model, or character and that thing gets highlighted. It can even show through walls, which is great for showing teammates or important items.",
+  "analogy": "A Highlight is like running a highlighter marker around a picture in a book. The outline makes it pop out, and the fill colors it in, so your eye goes straight to it.",
+  "whenToUse": [
+    "Show that an object can be picked up or used.",
+    "Show teammates or a target through walls.",
+    "Make a selected item glow while the player is choosing it."
+  ],
+  "where": "Put it inside the thing you want highlighted (a part, model, or character), or set its Adornee to point at that thing. Works in Scripts (everyone sees it) and LocalScripts (only that player sees it).",
+  "terms": {
+    "outline": "The glowing line around the edge of the object.",
+    "fill / interior": "The see-through color laid over the whole object.",
+    "transparency": "How see-through something is, from 0 (solid) to 1 (invisible).",
+    "adornee": "The object a Highlight decorates when it is not inside that object.",
+    "occluded": "Hidden behind something else.",
+    "Color3": "A color made from red, green, and blue amounts."
+  },
+  "examples": [
+    {
+      "title": "Highlight a chest when the player gets close",
+      "place": "LocalScript in StarterPlayerScripts (with a Model named Chest in Workspace)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal player = Players.LocalPlayer\nlocal chest = Workspace:WaitForChild(\"Chest\")\n\nlocal highlight = Instance.new(\"Highlight\")\nhighlight.FillColor = Color3.fromRGB(255, 215, 0)  -- gold fill\nhighlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- white outline\nhighlight.FillTransparency = 0.6\nhighlight.Enabled = false\nhighlight.Parent = chest\n\nwhile true do\n\tlocal character = player.Character\n\tlocal root = character and character:FindFirstChild(\"HumanoidRootPart\")\n\tif root then\n\t\tlocal distance = (root.Position - chest:GetPivot().Position).Magnitude\n\t\thighlight.Enabled = distance < 20 -- glow within 20 studs\n\tend\n\ttask.wait(0.2)\nend",
+      "explain": [
+        "We make a gold Highlight inside the chest but start with it turned off.",
+        "Every 0.2 seconds we measure how far the player's character is from the chest (`.Magnitude` is the length of the gap, in studs).",
+        "If the player is closer than 20 studs, the highlight turns on. Because this is a LocalScript, only this player sees it."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Only 255 Highlights can show at once on a player's screen; extras are ignored. Disabled Highlights still count, so Destroy ones you no longer need.",
+    "By default the highlight shows through walls (AlwaysOnTop). Set DepthMode to Occluded if it should hide behind walls."
+  ],
+  "members": {
+    "Highlight.Adornee": {
+      "simple": "The object to highlight, if the Highlight is not inside it. If Adornee is empty, the Highlight highlights its parent.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal highlight = Instance.new(\"Highlight\")\nhighlight.Adornee = Workspace:WaitForChild(\"Target\")\nhighlight.Parent = Workspace"
+    },
+    "Highlight.DepthMode": {
+      "simple": "AlwaysOnTop means the highlight is visible even through walls. Occluded means it hides when something is in front of the object.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal highlight = Workspace:WaitForChild(\"Chest\"):WaitForChild(\"Highlight\")\nhighlight.DepthMode = Enum.HighlightDepthMode.Occluded"
+    },
+    "Highlight.Enabled": {
+      "simple": "Turns the highlight on (true) or off (false).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal highlight = Workspace:WaitForChild(\"Chest\"):WaitForChild(\"Highlight\")\nhighlight.Enabled = false",
+      "gotcha": "A disabled Highlight still uses one of the 255 slots. Destroy it if you will not need it again."
+    },
+    "Highlight.FillColor": {
+      "simple": "The color laid over the inside of the object.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal highlight = Workspace:WaitForChild(\"Chest\"):WaitForChild(\"Highlight\")\nhighlight.FillColor = Color3.fromRGB(255, 0, 0) -- red"
+    },
+    "Highlight.FillTransparency": {
+      "simple": "How see-through the fill color is, from 0 (solid color covering the object) to 1 (no fill at all, just the outline).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal highlight = Workspace:WaitForChild(\"Chest\"):WaitForChild(\"Highlight\")\nhighlight.FillTransparency = 1 -- outline only"
+    },
+    "Highlight.OutlineColor": {
+      "simple": "The color of the glowing outline around the object.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal highlight = Workspace:WaitForChild(\"Chest\"):WaitForChild(\"Highlight\")\nhighlight.OutlineColor = Color3.fromRGB(0, 255, 255) -- cyan"
+    },
+    "Highlight.OutlineTransparency": {
+      "simple": "How see-through the outline is, from 0 (fully visible) to 1 (invisible, no outline).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal highlight = Workspace:WaitForChild(\"Chest\"):WaitForChild(\"Highlight\")\nhighlight.OutlineTransparency = 0"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "name": "UIScale",
+  "simple": "A UIScale makes its parent UI object, and everything inside it, bigger or smaller by multiplying its size. Scale 2 is twice as big, 0.5 is half. Corners, outlines and text inside all grow together, which makes it perfect for 'pop' animations.",
+  "analogy": "UIScale is like a zoom button on a camera: everything in the picture gets bigger or smaller together, keeping the same layout.",
+  "whenToUse": [
+    "A button that grows a bit when hovered",
+    "A menu that pops in by growing from 0 to full size",
+    "Making an entire menu smaller on small screens"
+  ],
+  "where": "Put it inside the UI object to scale. Create in Studio or with Instance.new in a LocalScript.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "multiplier": "A number you multiply by. 2 doubles, 0.5 halves.",
+    "AbsoluteSize": "The real size in pixels after all the math.",
+    "tween": "Smoothly animate a value from one number to another over time."
+  },
+  "examples": [
+    {
+      "title": "Pop a menu open",
+      "place": "LocalScript inside a Frame (in a ScreenGui in StarterGui)",
+      "code": "local TweenService = game:GetService(\"TweenService\")\nlocal menu = script.Parent\n\nlocal scale = Instance.new(\"UIScale\")\nscale.Scale = 0 -- start invisible-tiny\nscale.Parent = menu\n\n-- Grow to full size with a little bounce\nlocal info = TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)\nTweenService:Create(scale, info, {Scale = 1}):Play()",
+      "explain": [
+        "Scale 0 makes the menu (and everything in it) zero size.",
+        "The tween smoothly changes Scale from 0 to 1 over 0.4 seconds. EasingStyle Back overshoots slightly for a bouncy pop.",
+        "A 300x200 menu at Scale 0.5 would be 150x100 pixels."
+      ]
+    }
+  ],
+  "gotchas": [
+    "It changes AbsoluteSize, not Size. The Size property stays the same."
+  ],
+  "members": {
+    "UIScale.Scale": {
+      "simple": "The multiplier for the parent's real size. 1 = normal, 2 = double, 0.5 = half. A 200x50 button at Scale 0.5 becomes 100x25 pixels; at 2 it becomes 400x100.",
+      "example": "local scale = script.Parent -- a UIScale inside a button\nlocal button = scale.Parent\nbutton.MouseEnter:Connect(function()\n\tscale.Scale = 1.1 -- 10% bigger on hover\nend)\nbutton.MouseLeave:Connect(function()\n\tscale.Scale = 1\nend)"
+    }
+  }
+}

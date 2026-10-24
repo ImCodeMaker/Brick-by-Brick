@@ -1,0 +1,64 @@
+{
+  "name": "RodConstraint",
+  "simple": "RodConstraint keeps two attachments exactly Length studs apart, like a stiff stick between them. Unlike a rope, they cannot get closer either. Both ends can still swivel freely unless you turn on limits.",
+  "analogy": "RodConstraint is like a broom handle held between two hands: your hands can tilt and turn, but they always stay the same distance apart.",
+  "whenToUse": [
+    "Train cars linked together",
+    "Pendulums that should not go slack",
+    "Pistons and linkages in machines",
+    "Trailers hitched to vehicles"
+  ],
+  "where": "Make it with Instance.new(\"RodConstraint\"), set Attachment0 and Attachment1 (one in each part) and put it in workspace. Set Visible = true to draw it.",
+  "terms": {
+    "constraint": "An invisible rule or connector that the physics engine follows, like 'these two parts must stay stuck together' or 'push this part upward'.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "stud": "Roblox's unit of length. A default baseplate grid square is 1 stud; a classic character is about 5 studs tall.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "limits": "Stops that keep a joint from moving too far, like a door that can only swing 90 degrees.",
+    "cone limit": "A limit that lets an end tilt only up to a certain angle away from the rod, like moving your arm inside an ice-cream-cone shape."
+  },
+  "examples": [
+    {
+      "title": "A pendulum that never goes slack",
+      "place": "Script in ServerScriptService",
+      "code": "local ceiling = workspace:WaitForChild(\"Ceiling\") -- anchored part\nlocal ball = workspace:WaitForChild(\"Ball\")       -- unanchored part\n\nlocal a0 = Instance.new(\"Attachment\")\na0.Parent = ceiling\nlocal a1 = Instance.new(\"Attachment\")\na1.Parent = ball\n\nlocal rod = Instance.new(\"RodConstraint\")\nrod.Attachment0 = a0\nrod.Attachment1 = a1\nrod.Length = 8        -- always exactly 8 studs apart\nrod.Visible = true\nrod.Thickness = 0.2\nrod.Parent = ceiling",
+      "explain": [
+        "The ball always stays exactly 8 studs from the ceiling attachment.",
+        "Unlike a rope, if you push the ball up toward the ceiling, the rod pushes back; it never goes slack."
+      ]
+    }
+  ],
+  "gotchas": [
+    "If you want the ends to be able to get closer, use RopeConstraint instead.",
+    "Length is set in studs. If the parts start farther apart or closer than Length, they will be yanked to the right distance.",
+    "If a part is joined this way to an anchored part (or something connected to an anchored part), its physics is not calculated on the player's own device when they touch it, so it may feel slightly delayed."
+  ],
+  "members": {
+    "RodConstraint.CurrentDistance": {
+      "simple": "Read-only: how far apart the two attachments are right now, in studs (usually very close to Length).",
+      "example": "print(workspace.Ceiling.RodConstraint.CurrentDistance)"
+    },
+    "RodConstraint.Length": {
+      "simple": "The distance, in studs, the rod keeps between the two attachments.",
+      "example": "workspace.Train.Link.RodConstraint.Length = 3"
+    },
+    "RodConstraint.LimitAngle0": {
+      "simple": "When LimitsEnabled is true, the biggest angle allowed between the rod and Attachment0, so that end can only tilt so far.",
+      "example": "workspace.Ceiling.RodConstraint.LimitAngle0 = 30"
+    },
+    "RodConstraint.LimitAngle1": {
+      "simple": "When LimitsEnabled is true, the biggest angle allowed between the rod and Attachment1.",
+      "example": "workspace.Ceiling.RodConstraint.LimitAngle1 = 30"
+    },
+    "RodConstraint.LimitsEnabled": {
+      "simple": "If true, LimitAngle0 and LimitAngle1 restrict how far each end can tilt away from the rod.",
+      "example": "local rod = workspace.Ceiling.RodConstraint\nrod.LimitsEnabled = true\nrod.LimitAngle0 = 45"
+    },
+    "RodConstraint.Thickness": {
+      "simple": "How thick the rod looks when drawn. Only changes the look.",
+      "example": "workspace.Ceiling.RodConstraint.Thickness = 0.3"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/sound/groups.md",
+  "simple": "A `SoundGroup` lets you control many sounds at once, like a volume slider for all your music or all your sound effects. This is part of the older sound system, but it is still common. Instead of putting sounds inside the group, you point each sound's `SoundGroup` property at it. You can also make quieter sounds dip in volume automatically when an important sound plays, which is called ducking.",
+  "analogy": "A sound group is like the volume buttons on a TV remote that control a whole channel at once, instead of turning each speaker up or down by hand.",
+  "keyPoints": [
+    "Create a `SoundGroup` in SoundService and give it a clear name, such as SoundEffects or BackgroundMusic.",
+    "Sounds join a group through their `SoundGroup` property, not by being placed inside the group.",
+    "To assign one, select the sound, click its `SoundGroup` property, then click the group in the Explorer.",
+    "Groups can be nested inside other groups to build a tidy mix tree, like Music and Effects under a main group.",
+    "A group's `Volume` (0 to 10) multiplies every sound in it: a sound at 0.5 in a group at 0.5 plays at 0.25.",
+    "Put a `CompressorSoundEffect` in a low-priority group and set its `SideChain` to the important sound or group to make it duck.",
+    "The compressor's `Threshold`, `Attack`, `Release`, and `Ratio` control when, how fast, and how much the ducking happens."
+  ],
+  "terms": {
+    "audio mixer": "A tool that adjusts many sounds together, like the sliders on a DJ board.",
+    "mix tree": "Sound groups placed inside other groups, like folders inside folders, so you can control big or small sets of sounds.",
+    "volume multiplier": "A number that the sound's own volume is multiplied by. Sound volume 0.5 times group volume 2 gives 1.",
+    "ducking": "Making less important sounds quieter for a moment so an important sound can be heard, then bringing them back.",
+    "SideChain": "The compressor setting that says which sound or group to listen for. When that one plays, this group ducks.",
+    "Threshold": "How loud the important sound must be, in decibels, before ducking starts. From -80 to 0.",
+    "Attack / Release": "How fast ducking starts (Attack) and how fast it stops (Release), each from 0.001 to 1 second.",
+    "Ratio": "How strong the ducking is, from 1 (none) to 50 (a lot).",
+    "decibel": "A unit for loudness. Higher numbers are louder."
+  },
+  "example": {
+    "title": "Turn all music down with one group",
+    "place": "Script in ServerScriptService (with two Sounds named Song1 and Song2 in SoundService)",
+    "code": "local SoundService = game:GetService(\"SoundService\")\n\n-- Make a group for music\nlocal musicGroup = Instance.new(\"SoundGroup\")\nmusicGroup.Name = \"BackgroundMusic\"\nmusicGroup.Volume = 0.5 -- half volume for every song in the group\nmusicGroup.Parent = SoundService\n\n-- Assign each song to the group using its SoundGroup property\nfor _, name in { \"Song1\", \"Song2\" } do\n\tlocal song = SoundService:WaitForChild(name)\n\tsong.SoundGroup = musicGroup\nend",
+    "explain": [
+      "We make a new `SoundGroup` named BackgroundMusic in SoundService.",
+      "We set its `Volume` to 0.5, so every sound in the group plays at half its own volume.",
+      "We loop over the two song names, find each `Sound`, and set its `SoundGroup` property to our group.",
+      "Now changing `musicGroup.Volume` changes all the music at once."
+    ]
+  },
+  "watchOut": [
+    "Dragging a `Sound` into a `SoundGroup` in the Explorer moves where it plays from, but does not put it in the group. Set the `SoundGroup` property instead.",
+    "Ducking settings depend on your exact sounds. Playtest and adjust `Threshold`, `Attack`, `Release`, and `Ratio` until it sounds right.",
+    "Sound groups are part of the older system. The newer audio objects use effects like `AudioFader` for this job."
+  ]
+}

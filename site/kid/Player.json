@@ -1,0 +1,437 @@
+{
+  "name": "Player",
+  "simple": "A Player object stands for one real person connected to your game. It holds who they are (name, UserId, team) and their personal containers: Backpack, StarterGear, PlayerGui and PlayerScripts. It is NOT their body. The body is a separate Model called the Character, which you reach with player.Character.",
+  "analogy": "A Player is like a student's ID card plus their school locker. The card says who they are (name, ID number, which team or class). The locker holds their stuff (Backpack for tools, PlayerGui for what's on their screen). The student's actual body walking the halls is the Character, which can get knocked out and come back, while the ID card stays the same the whole day.",
+  "whenToUse": [
+    "Find a player's character to change speed, health, or position (player.Character).",
+    "Save and load data using their UserId.",
+    "Put a player on a team (player.Team).",
+    "Run code every time their character spawns or is removed (CharacterAdded, CharacterRemoving).",
+    "Kick someone out of the server (player:Kick).",
+    "Respawn someone on purpose (player:LoadCharacterAsync)."
+  ],
+  "where": "Player objects are created automatically inside the Players service when someone joins, and destroyed when they leave. Get them from Players.PlayerAdded, Players:GetPlayers(), Players:GetPlayerFromCharacter(), or in a LocalScript with Players.LocalPlayer. You can't create them yourself with Instance.new.",
+  "terms": {
+    "Character": "The player's 3D body: a Model with a Humanoid, a head, a torso and limbs. A new one is made every time they spawn.",
+    "spawn / respawn": "Spawning is when a body appears in the world. Respawning is getting a new body after the old one died.",
+    "Backpack": "A folder inside the Player that holds their Tools (the inventory bar at the bottom of the screen). It is replaced with a new one every time they respawn.",
+    "StarterGear": "A folder inside the Player whose Tools get copied into their Backpack every time they spawn. It's personal: only this player gets them.",
+    "PlayerGui": "A folder inside the Player that holds the UI (buttons, text, menus) shown on their screen. Filled with copies from StarterGui when they spawn.",
+    "PlayerScripts": "A folder inside the Player for client scripts copied from StarterPlayerScripts. Only that player's device can see it, not the server.",
+    "UserId": "A number that belongs to one Roblox account forever. Even if they change their username, the UserId stays the same.",
+    "DisplayName": "The name shown above a player's head. Several people can have the same display name, so don't use it to tell people apart.",
+    "client": "The player's own device. LocalScripts run there.",
+    "server": "The Roblox computer that runs the game for everyone. Scripts run there and it is the one everyone trusts.",
+    "replicate": "To copy a change across the internet so the server and every player see the same thing.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "nil": "Luau's word for 'nothing here'.",
+    "yield": "Pause the script and wait. Functions ending in Async usually yield.",
+    "pcall": "Runs a function safely: if it errors, your script keeps going and you get the error message instead.",
+    "streaming": "A setting where the game only sends players the parts of the world near them, to save memory. Parts far away may not exist on their device yet.",
+    "Team": "A group players can be put in, like Red Team and Blue Team. Teams live in the Teams service."
+  },
+  "examples": [
+    {
+      "title": "Follow one player's whole visit: join, every life, and leave",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nlocal function onPlayerAdded(player)\n    print(player.Name .. \" joined (UserId \" .. player.UserId .. \")\")\n    local lives = 0\n\n    -- Fires every time a new body spawns: first spawn AND every respawn\n    player.CharacterAdded:Connect(function(character)\n        lives += 1\n        print(player.Name .. \" started life #\" .. lives)\n\n        local humanoid = character:WaitForChild(\"Humanoid\")\n        humanoid.Died:Connect(function()\n            -- After Players.RespawnTime seconds (default 5) the body is removed\n            -- and a new one spawns, which fires CharacterAdded again.\n            print(player.Name .. \" died\")\n        end)\n    end)\n\n    -- Fires right before the old body is removed (before respawning, or when leaving)\n    player.CharacterRemoving:Connect(function(character)\n        print(player.Name .. \"'s old body is being removed\")\n    end)\nend\n\nPlayers.PlayerAdded:Connect(onPlayerAdded)\nfor _, player in Players:GetPlayers() do\n    task.spawn(onPlayerAdded, player)\nend\n\nPlayers.PlayerRemoving:Connect(function(player)\n    print(player.Name .. \" left the game\")\nend)",
+      "explain": [
+        "The order is: PlayerAdded -> CharacterAdded -> Died -> (wait RespawnTime) -> CharacterRemoving -> CharacterAdded -> ... -> PlayerRemoving.",
+        "The Player object lives for the whole visit. The Character is replaced every life.",
+        "That's why we connect Died inside CharacterAdded: each new body has a new Humanoid, so we must connect again each time.",
+        "lives is stored per player because it is created inside onPlayerAdded."
+      ]
+    },
+    {
+      "title": "Give a tool that survives death using StarterGear",
+      "place": "Script in ServerScriptService (put a Tool named Sword inside ServerStorage)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal ServerStorage = game:GetService(\"ServerStorage\")\n\nlocal sword = ServerStorage:WaitForChild(\"Sword\")\n\nlocal function giveSwordForever(player)\n    -- 1. Backpack: they get it right now, but it's lost when they die\n    sword:Clone().Parent = player:WaitForChild(\"Backpack\")\n    -- 2. StarterGear: Roblox copies it into every NEW Backpack after each respawn\n    sword:Clone().Parent = player:WaitForChild(\"StarterGear\")\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n    -- Imagine they bought the sword earlier and we loaded that from saved data\n    giveSwordForever(player)\nend)",
+      "explain": [
+        "The Backpack is thrown away and rebuilt every time the character spawns, so a tool put only in the Backpack disappears on death.",
+        "When the new Backpack is made, Roblox fills it from StarterPack (same for everyone) and from this player's StarterGear (just for them).",
+        "So for a tool everyone should have, put it in StarterPack in Studio. For a tool only some players earned, clone it into that player's StarterGear.",
+        "We put a copy in both places so they get it now and after every respawn."
+      ]
+    },
+    {
+      "title": "Respawn on command and a team-only spawn",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\nlocal Teams = game:GetService(\"Teams\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    -- Put everyone on the Red Team (make a Team named \"Red Team\" under Teams first)\n    player.Team = Teams:WaitForChild(\"Red Team\")\n\n    player.Chatted:Connect(function(message)\n        if message == \"!respawn\" then\n            -- Makes a brand new character. Also resets their Backpack and PlayerGui.\n            player:LoadCharacterAsync()\n        end\n    end)\nend)",
+      "explain": [
+        "Setting player.Team moves them onto that team. They'll spawn on SpawnLocations whose TeamColor matches the team (or neutral ones).",
+        "Chatted fires when the player sends a chat message. If they type !respawn we give them a new body.",
+        "LoadCharacterAsync removes the old body and makes a new one, so CharacterRemoving and CharacterAdded both fire."
+      ]
+    },
+    {
+      "title": "Kick a player with a message",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nlocal MIN_ACCOUNT_AGE = 3 -- days\n\nPlayers.PlayerAdded:Connect(function(player)\n    if player.AccountAge < MIN_ACCOUNT_AGE then\n        player:Kick(\"Your account must be at least 3 days old to play here.\")\n    end\nend)",
+      "explain": [
+        "AccountAge is how many days old their Roblox account is.",
+        "Kick disconnects them from this server right away and shows your message. They can rejoin later. For a lasting block, use Players:BanAsync instead.",
+        "From the server you can kick anyone. A LocalScript can only kick its own player."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Player is not the body. To change speed or health, go through player.Character and its Humanoid.",
+    "player.Character is nil before the first spawn and can briefly be nil between lives. Use player.CharacterAdded or `player.Character or player.CharacterAdded:Wait()`.",
+    "Connections made to the old Humanoid stop mattering after respawn. Reconnect inside CharacterAdded.",
+    "Tools put only in the Backpack are lost on death. Use StarterGear (per player) or StarterPack (everyone) to keep them.",
+    "Save data with UserId, not Name or DisplayName.",
+    "The server can't see inside PlayerScripts, and server Scripts placed there won't run."
+  ],
+  "members": {
+    "Player.AccountAge": {
+      "simple": "How many days old the player's Roblox account is. Read-only. Useful for keeping brand-new (possibly alt) accounts out of special areas.",
+      "example": "print(player.Name .. \"'s account is \" .. player.AccountAge .. \" days old\")"
+    },
+    "Player.AgeChecked": {
+      "simple": "Read-only. Tells you whether the player has finished an age verification check, as an Enum.AgeCheckStatus (Unchecked or Checked). It changes after they pass the check started by PromptAgeCheck.",
+      "example": "if player.AgeChecked == Enum.AgeCheckStatus.Checked then\n    print(\"Age check done\")\nend"
+    },
+    "Player.AutoJumpEnabled": {
+      "simple": "On phones and tablets, if true the character jumps by itself when it walks into something it could hop over. It starts from StarterPlayer.AutoJumpEnabled and is copied to the Humanoid on spawn.",
+      "example": "player.AutoJumpEnabled = false -- mobile players must press jump themselves"
+    },
+    "Player.CameraMaxZoomDistance": {
+      "simple": "How far (in studs) this player can scroll their camera away from their character. If set lower than CameraMinZoomDistance, it gets raised to match it.",
+      "example": "player.CameraMaxZoomDistance = 20 -- can't zoom out further than 20 studs"
+    },
+    "Player.CameraMinZoomDistance": {
+      "simple": "How close (in studs) this player's camera can zoom in to their character. If set higher than CameraMaxZoomDistance, it gets lowered to match it.",
+      "example": "player.CameraMinZoomDistance = 5 -- can't go into first person"
+    },
+    "Player.CameraMode": {
+      "simple": "Picks third person (Classic, the default, you can see your character) or first person (LockFirstPerson, you see through your character's eyes).",
+      "example": "player.CameraMode = Enum.CameraMode.LockFirstPerson -- horror game style"
+    },
+    "Player.CanLoadCharacterAppearance": {
+      "simple": "If true, the player spawns wearing their own avatar. If false, they spawn as a plain default character. Changing it only affects the next spawn.",
+      "example": "player.CanLoadCharacterAppearance = false\nplayer:LoadCharacterAsync() -- respawn to see the plain look"
+    },
+    "Player.Character": {
+      "simple": "The Model that is this player's body in the world, with a Humanoid, body parts and scripts inside. It is nil until they first spawn and is replaced with a new Model each time they respawn.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\n-- Use the current body, or wait until one spawns\nlocal character = player.Character or player.CharacterAdded:Wait()\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nhumanoid.WalkSpeed = 24",
+      "gotcha": "Don't save a reference to the character forever. After a respawn it points at the old, removed body. Use CharacterAdded to grab the new one."
+    },
+    "Player.CharacterAppearance": {
+      "simple": "Old — use Player.CharacterAppearanceId instead."
+    },
+    "Player.CharacterAppearanceId": {
+      "simple": "The UserId whose avatar look this player spawns with. By default it is their own UserId. Set it to someone else's UserId and they'll spawn looking like that person.",
+      "example": "player.CharacterAppearanceId = 1 -- look like the \"Roblox\" account\nplayer:LoadCharacterAsync() -- respawn to apply"
+    },
+    "Player.DataComplexity": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player.DataReady": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player.DevCameraOcclusionMode": {
+      "simple": "What the default camera does when a wall gets between it and the character: Zoom (move the camera closer, the default) or Invisicam (make the wall see-through). It comes from StarterPlayer.DevCameraOcclusionMode."
+    },
+    "Player.DevComputerCameraMode": {
+      "simple": "How this player moves the camera with mouse and keyboard (for example Classic or Follow). Must be set from a server Script. It starts from StarterPlayer.DevComputerCameraMovementMode.",
+      "example": "-- Script (server)\nplayer.DevComputerCameraMode = Enum.DevComputerCameraMovementMode.Follow"
+    },
+    "Player.DevComputerMovementMode": {
+      "simple": "How this player moves their character with mouse and keyboard (for example KeyboardMouse or ClickToMove). Must be set from a server Script.",
+      "example": "-- Script (server)\nplayer.DevComputerMovementMode = Enum.DevComputerMovementMode.ClickToMove"
+    },
+    "Player.DevEnableMouseLock": {
+      "simple": "Whether the player can press Shift to lock the mouse in the middle of the screen (shift lock), which makes the camera sit over the right shoulder. Set from a server Script.",
+      "example": "-- Script (server)\nplayer.DevEnableMouseLock = false -- no shift lock in this game"
+    },
+    "Player.DevTouchCameraMode": {
+      "simple": "How a player on a touch screen (phone or tablet) moves the camera. Must be set from a server Script."
+    },
+    "Player.DevTouchMovementMode": {
+      "simple": "How a player on a touch screen moves their character, for example with a thumbstick or a d-pad. Must be set from a server Script.",
+      "example": "-- Script (server)\nplayer.DevTouchMovementMode = Enum.DevTouchMovementMode.DPad"
+    },
+    "Player.DisplayName": {
+      "simple": "The name shown to others, which the user can pick and change. Two players can have the same display name, so use UserId when you need to tell people apart.",
+      "example": "print(\"Hi \" .. player.DisplayName .. \" (@\" .. player.Name .. \")\")"
+    },
+    "Player.FollowUserId": {
+      "simple": "If this player joined by clicking 'Join' on a friend's profile, this is that friend's UserId. Otherwise it's 0.",
+      "example": "local Players = game:GetService(\"Players\")\nif player.FollowUserId ~= 0 then\n    local friend = Players:GetPlayerByUserId(player.FollowUserId)\n    if friend then\n        print(player.Name .. \" followed \" .. friend.Name .. \" here\")\n    end\nend"
+    },
+    "Player.FrustumStreaming": {
+      "simple": "For games with streaming on: whether the game also sends this player what's in front of their camera (their view), not only what's near them. Enabled, Disabled or Automatic (Roblox decides based on their device)."
+    },
+    "Player.GameplayPaused": {
+      "simple": "Hidden, read-only. True when this player's game is paused because the world around them hasn't streamed in yet."
+    },
+    "Player.HasRobloxSubscription": {
+      "simple": "Read-only. True if the player has an active Roblox subscription (the main Roblox membership). Use this instead of the old MembershipType.",
+      "example": "if player.HasRobloxSubscription then\n    print(player.Name .. \" is a member, give them a bonus!\")\nend"
+    },
+    "Player.HasVerifiedBadge": {
+      "simple": "True if the player has the blue Verified badge on Roblox (usually well-known creators).",
+      "example": "if player.HasVerifiedBadge then\n    print(\"A verified creator joined!\")\nend"
+    },
+    "Player.HealthDisplayDistance": {
+      "simple": "How close (in studs) another character has to be before this player sees its health bar. 0 hides health bars.",
+      "example": "player.HealthDisplayDistance = 0 -- never show other people's health bars"
+    },
+    "Player.InputLatency": {
+      "simple": "Internal value used by Roblox's networking. Scripts can't read it."
+    },
+    "Player.LocaleId": {
+      "simple": "Hidden, read-only. The language/region code the player picked for their account, like `en-us`."
+    },
+    "Player.MembershipType": {
+      "simple": "Old — use Player.HasRobloxSubscription instead."
+    },
+    "Player.NameDisplayDistance": {
+      "simple": "How close (in studs) another character has to be before this player sees its name. 0 hides names.",
+      "example": "player.NameDisplayDistance = 30 -- only see names within 30 studs"
+    },
+    "Player.Neutral": {
+      "simple": "True if the player is not on any team. Then Player.Team is nil. False means they are on a team.",
+      "example": "player.Neutral = true -- take them off their team"
+    },
+    "Player.PartyId": {
+      "simple": "Hidden, read-only. An ID string for the Roblox Party the player is in, or an empty string if they're not in one. Used with SocialService party features."
+    },
+    "Player.ReplicationFocus": {
+      "simple": "For streaming games: the part that the world streams in around, for this player. By default it's their character. Set it (server only) to stream around something else, like a camera spot far away. nil means 'use the character'.",
+      "example": "-- Script (server): stream the area around a cutscene part\nplayer.ReplicationFocus = workspace.CutsceneSpot"
+    },
+    "Player.RespawnLocation": {
+      "simple": "A SpawnLocation where this player will respawn next time. It must be inside Workspace and must be Neutral or have the same TeamColor as the player.",
+      "example": "-- Checkpoint: touching this SpawnLocation makes it your respawn point\nlocal checkpoint = workspace.Checkpoint2\ncheckpoint.Touched:Connect(function(hit)\n    local player = game:GetService(\"Players\"):GetPlayerFromCharacter(hit.Parent)\n    if player then\n        player.RespawnLocation = checkpoint\n    end\nend)"
+    },
+    "Player.Team": {
+      "simple": "The Team this player is on (a Team object in the Teams service), or nil if none. Setting it moves them to that team.",
+      "example": "local Teams = game:GetService(\"Teams\")\nplayer.Team = Teams[\"Blue Team\"]"
+    },
+    "Player.TeamColor": {
+      "simple": "The BrickColor of the team the player is on. Setting it puts them on whichever team has that color. Setting Player.Team is usually clearer.",
+      "example": "player.TeamColor = BrickColor.new(\"Bright red\") -- joins the team whose TeamColor is Bright red"
+    },
+    "Player.ThirdPartyTextChatRestrictionStatus": {
+      "simple": "Internal. Tells Roblox if another platform (like a console's parental settings) limits this player's text chat. Normal scripts can't read it."
+    },
+    "Player.User": {
+      "simple": "A User value that identifies this player in your game. It holds the ID plus which game (domain) the ID belongs to. Roblox recommends using it in new code. Most methods that take a UserId also accept player.User.",
+      "example": "local Players = game:GetService(\"Players\")\nprint(\"User id in this game: \" .. player.User.Id)\nlocal same = Players:GetPlayerByUserId(player.User) -- works with User too"
+    },
+    "Player.UserId": {
+      "simple": "The number that belongs to this player's account. It never changes, so it's the right thing to use as a save key.",
+      "example": "local key = \"Player_\" .. player.UserId\nprint(key) -- e.g. Player_123456"
+    },
+    "Player.userId": {
+      "simple": "Old — use Player.UserId instead."
+    },
+    "Player:AddReplicationFocus": {
+      "simple": "For streaming games: adds an extra spot (a part) for the world to stream in around, on top of the character. Server only.",
+      "example": "-- Script (server): keep the player's base loaded too\nplayer:AddReplicationFocus(workspace.BaseCenter)"
+    },
+    "Player:ClearCachedAvatarAppearance": {
+      "simple": "Roblox remembers a player's avatar look to make respawning faster. This forgets it, so the next LoadCharacterAsync fetches their newest look (useful for a 'refresh my avatar' button).",
+      "example": "player:ClearCachedAvatarAppearance()\nplayer:LoadCharacterAsync() -- spawns with their latest avatar"
+    },
+    "Player:ClearCharacterAppearance": {
+      "simple": "Takes off all accessories, shirts, pants, body colors and the t-shirt from the player's current character. Face and skin colors stay.",
+      "example": "player.CharacterAppearanceLoaded:Connect(function()\n    player:ClearCharacterAppearance() -- everyone plays in plain clothes\nend)"
+    },
+    "Player:DistanceFromCharacter": {
+      "simple": "Tells you how many studs a point is from the player's head. Gives 0 if they have no character.",
+      "example": "local distance = player:DistanceFromCharacter(Vector3.new(0, 5, 0))\nif distance > 0 and distance < 10 then\n    print(\"Close to the center!\")\nend"
+    },
+    "Player:GetCameraState": {
+      "simple": "Gives a table about the player's camera: CFrame (where it is and where it looks), FieldOfView and ViewportSize (screen size). Needs the game's Server Authority setting turned on. On the client, only works for the LocalPlayer."
+    },
+    "Player:GetFriendsOnline": {
+      "simple": "Old — use Player:GetFriendsOnlineAsync instead."
+    },
+    "Player:GetFriendsOnlineAsync": {
+      "simple": "Gets a list of this player's friends who are online right now, up to maxFriends (default 200). Each entry has things like VisitorId and UserName. Results are remembered for 30 seconds.",
+      "example": "-- LocalScript\nlocal player = game:GetService(\"Players\").LocalPlayer\nlocal ok, friends = pcall(function()\n    return player:GetFriendsOnlineAsync(10)\nend)\nif ok then\n    for _, friend in friends do\n        print(friend.UserName .. \" is online\")\n    end\nend"
+    },
+    "Player:GetFriendsWhoPlayedAsync": {
+      "simple": "Gets a list of UserIds of this player's friends who have played your game before. Handy for a friends-only leaderboard.",
+      "example": "local ok, ids = pcall(function()\n    return player:GetFriendsWhoPlayedAsync()\nend)\nif ok then\n    print(#ids .. \" friends have played this game\")\nend"
+    },
+    "Player:GetJoinData": {
+      "simple": "Gives a table about how the player arrived: which game/place they teleported from, teleport data, who invited them (ReferredByPlayerId), launch data from a share link, and more. Teleport data from here is checked by Roblox, but still don't trust it for valuable stuff like money.",
+      "example": "-- Script (server)\nlocal Players = game:GetService(\"Players\")\nPlayers.PlayerAdded:Connect(function(player)\n    local joinData = player:GetJoinData()\n    if joinData.ReferredByPlayerId then\n        print(player.Name .. \" was invited by \" .. joinData.ReferredByPlayerId)\n    end\nend)"
+    },
+    "Player:GetMouse": {
+      "simple": "Gives you the player's Mouse object so you can see where they click and point. Use it in a LocalScript. UserInputService is the newer, more powerful way.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal mouse = game:GetService(\"Players\").LocalPlayer:GetMouse()\nmouse.Button1Down:Connect(function()\n    print(\"Clicked at\", mouse.Hit.Position)\nend)"
+    },
+    "Player:GetNetworkPing": {
+      "simple": "How long (in seconds) a message takes to go from the player's device to the server and back. Lower is better. On the client you can only ask about the LocalPlayer.",
+      "example": "local ping = player:GetNetworkPing()\nprint(\"Ping: \" .. math.floor(ping * 1000) .. \" ms\") -- seconds to milliseconds"
+    },
+    "Player:GetRankInGroup": {
+      "simple": "Old — use GroupService:GetRolesInGroupAsync instead."
+    },
+    "Player:GetRankInGroupAsync": {
+      "simple": "Old — use GroupService:GetRolesInGroupAsync instead."
+    },
+    "Player:GetRoleInGroup": {
+      "simple": "Old — use GroupService:GetRolesInGroupAsync instead."
+    },
+    "Player:GetRoleInGroupAsync": {
+      "simple": "Old — use GroupService:GetRolesInGroupAsync instead."
+    },
+    "Player:HasAppearanceLoaded": {
+      "simple": "True if the character's clothes and accessories have finished loading.",
+      "example": "if not player:HasAppearanceLoaded() then\n    player.CharacterAppearanceLoaded:Wait() -- wait until they're dressed\nend\nprint(\"Fully loaded!\")"
+    },
+    "Player:IsBestFriendsWith": {
+      "simple": "Old — use Player:IsFriendsWithAsync instead."
+    },
+    "Player:IsFriendsWith": {
+      "simple": "Old — use Player:IsFriendsWithAsync instead."
+    },
+    "Player:isFriendsWith": {
+      "simple": "Old — use Player:IsFriendsWithAsync instead."
+    },
+    "Player:IsFriendsWithAsync": {
+      "simple": "Asks Roblox if this player is friends with another user (by UserId). The answer is remembered, so it might not notice a brand-new friendship right away.",
+      "example": "local ok, isFriend = pcall(function()\n    return player:IsFriendsWithAsync(otherPlayer.UserId)\nend)\nif ok and isFriend then\n    print(\"They're friends!\")\nend"
+    },
+    "Player:IsInGroup": {
+      "simple": "Old — use Player:IsInGroupAsync instead."
+    },
+    "Player:IsInGroupAsync": {
+      "simple": "Asks Roblox if the player is a member of a group (by group ID). Good for group-only doors. The answer is remembered for the session, so joining or leaving mid-game may not update it.",
+      "example": "local GROUP_ID = 1234567 -- your group's ID\nlocal ok, inGroup = pcall(function()\n    return player:IsInGroupAsync(GROUP_ID)\nend)\nif ok and inGroup then\n    print(\"Welcome, group member!\")\nend"
+    },
+    "Player:IsVerified": {
+      "simple": "Server only. True if the player has verified their account to a certain level (for example with a phone number or ID). Always false in Studio. Be careful not to accidentally lock out everyone who isn't verified.",
+      "example": "-- Script (server)\nif player:IsVerified() then\n    print(player.Name .. \" is verified\")\nend"
+    },
+    "Player:Kick": {
+      "simple": "Removes the player from this server, showing them your message (up to 500 bytes). They can rejoin. The server can kick anyone. A LocalScript can only kick its own player.",
+      "example": "-- Script (server)\nplayer:Kick(\"The server is restarting for an update. Please rejoin!\")",
+      "gotcha": "Never let a RemoteEvent from the client choose who to kick without checking on the server that the sender is an admin."
+    },
+    "Player:LoadBoolean": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:loadBoolean": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:LoadCharacter": {
+      "simple": "Old — use Player:LoadCharacterAsync instead."
+    },
+    "Player:LoadCharacterAppearance": {
+      "simple": "Old — use Humanoid:ApplyDescriptionAsync instead."
+    },
+    "Player:LoadCharacterAsync": {
+      "simple": "Spawns a brand new character for the player and removes the old one. It also resets their Backpack and PlayerGui. Use it to respawn someone on purpose, or to spawn players when CharacterAutoLoads is off.",
+      "example": "-- Script (server)\nplayer:LoadCharacterAsync()\n-- Order: Character is set -> CharacterAdded fires -> appearance loads ->\n-- CharacterAppearanceLoaded fires -> body goes into Workspace -> moves to a spawn",
+      "gotcha": "Don't call it again for the same player until CharacterAppearanceLoaded has fired."
+    },
+    "Player:LoadCharacterWithHumanoidDescription": {
+      "simple": "Old — use Player:LoadCharacterWithHumanoidDescriptionAsync instead."
+    },
+    "Player:LoadCharacterWithHumanoidDescriptionAsync": {
+      "simple": "Like LoadCharacterAsync, but the new character wears exactly what a HumanoidDescription says instead of the player's own avatar.",
+      "example": "-- Script (server)\nlocal description = Instance.new(\"HumanoidDescription\")\ndescription.HeightScale = 0.8 -- a bit shorter than normal\nplayer:LoadCharacterWithHumanoidDescriptionAsync(description)"
+    },
+    "Player:LoadInstance": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:loadInstance": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:LoadNumber": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:loadNumber": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:LoadString": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:loadString": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:Move": {
+      "simple": "Makes the player's character walk in a direction until stopped or until the player uses their own controls. The second argument says if the direction is relative to the camera (true) or the world (false, the default).",
+      "example": "-- LocalScript: walk toward the world's +X side\nlocal player = game:GetService(\"Players\").LocalPlayer\nplayer:Move(Vector3.new(1, 0, 0))\ntask.wait(2)\nplayer:Move(Vector3.zero) -- stop"
+    },
+    "Player:PromptAgeCheck": {
+      "simple": "Shows the player the age verification pop-up. From a LocalScript it must be the LocalPlayer. From the server it can be anyone. Calling it again too quickly is ignored.",
+      "example": "-- LocalScript\ngame:GetService(\"Players\").LocalPlayer:PromptAgeCheck()"
+    },
+    "Player:RemoveReplicationFocus": {
+      "simple": "Removes a spot you added earlier with AddReplicationFocus. Server only.",
+      "example": "player:RemoveReplicationFocus(workspace.BaseCenter)"
+    },
+    "Player:RequestStreamAroundAsync": {
+      "simple": "For streaming games: asks the server to send the player the world around a position before you teleport them there, so they don't land in an empty, unloaded area.",
+      "example": "-- Script (server)\nlocal target = Vector3.new(500, 10, 500)\nplayer:RequestStreamAroundAsync(target)\nplayer.Character:PivotTo(CFrame.new(target))"
+    },
+    "Player:SaveBoolean": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:saveBoolean": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:SaveInstance": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:saveInstance": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:SaveNumber": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:saveNumber": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:SaveString": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:saveString": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:SetAccountAge": {
+      "simple": "Only plugins can use this. Normal game scripts can't change account age."
+    },
+    "Player:SetSuperSafeChat": {
+      "simple": "Only plugins can use this. It switches whether the player sees filtered chat."
+    },
+    "Player:WaitForDataReady": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player:waitForDataReady": {
+      "simple": "Old — use DataStoreService instead."
+    },
+    "Player.CharacterAdded": {
+      "simple": "Fires every time this player gets a new body: when they first spawn and after every respawn. It hands you the new character Model.",
+      "example": "player.CharacterAdded:Connect(function(character)\n    local humanoid = character:WaitForChild(\"Humanoid\")\n    humanoid.WalkSpeed = 30 -- fast every life\nend)",
+      "gotcha": "Clothes and hats may still be loading when this fires. Use CharacterAppearanceLoaded if you need them."
+    },
+    "Player.CharacterAppearanceLoaded": {
+      "simple": "Fires (on the server) once the character is fully dressed: all accessories, shirts and pants are added. Good when you want to change or remove them.",
+      "example": "player.CharacterAppearanceLoaded:Connect(function(character)\n    local humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n    humanoid:RemoveAccessories() -- no hats allowed\nend)"
+    },
+    "Player.CharacterRemoving": {
+      "simple": "Fires right before the player's body is removed, like just before a respawn or when they leave. Good for cleaning up things linked to that body.",
+      "example": "player.CharacterRemoving:Connect(function(character)\n    print(\"Saying goodbye to \" .. character.Name .. \"'s old body\")\nend)"
+    },
+    "Player.Chatted": {
+      "simple": "Fires when the player sends a message in chat. Gives you the message text. Great for simple chat commands.",
+      "example": "player.Chatted:Connect(function(message)\n    if message == \"/dance\" then\n        print(player.Name .. \" wants to dance\")\n    end\nend)"
+    },
+    "Player.Idled": {
+      "simple": "Fires on the player's device about 2 minutes after they stop doing anything, then every 30 seconds while they stay idle. Roblox kicks players idle for 20 minutes, so use this to warn them. Client only.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal player = game:GetService(\"Players\").LocalPlayer\nplayer.Idled:Connect(function(seconds)\n    print(\"You've been idle for \" .. math.floor(seconds) .. \" seconds\")\nend)"
+    },
+    "Player.OnTeleport": {
+      "simple": "Fires when the player's teleport status changes (started, in progress, failed...). Lets you know if a teleport to another place worked.",
+      "example": "player.OnTeleport:Connect(function(teleportState, placeId)\n    print(\"Teleport state:\", teleportState, \"to place\", placeId)\nend)"
+    }
+  }
+}

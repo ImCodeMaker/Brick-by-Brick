@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/scripting/multithreading.md",
+  "simple": "Normally, Roblox runs your scripts one at a time, like a single line at a store. Parallel Luau lets some code run at the same time on different parts of the computer's processor, called cores. This can stop big games with lots of NPCs or heavy math from lagging. You do this by putting scripts inside `Actor` objects and telling them when they are allowed to run in parallel.",
+  "analogy": "Picture a kitchen. One cook making 30 sandwiches alone is slow. With several cooks, each with their own station (an Actor), they can make sandwiches at the same time. But only one cook at a time is allowed to touch the shared fridge (changing game objects), so they take turns for that part.",
+  "keyPoints": [
+    "By default, scripts run in order, one after another (serial). Parallel Luau lets work run at the same time.",
+    "To run code in parallel, put the script inside an `Actor` instance. Each Actor can run on its own thread.",
+    "Being inside an Actor is not enough. Call `task.desynchronize()` to switch to parallel, and `task.synchronize()` to switch back to serial.",
+    "`Signal:ConnectParallel()` runs a connected function in parallel right away, without calling `task.desynchronize()`.",
+    "In parallel mode you usually cannot change instances (like setting a part's Position). Do the math in parallel, then `task.synchronize()` before changing things.",
+    "Every API member has a thread safety level: Unsafe, Read Parallel, Local Safe, or Safe. If none is listed, treat it as Unsafe.",
+    "Actors can talk to each other with `Actor:SendMessage()` and `Actor:BindToMessageParallel()`, or share data through a `SharedTable`.",
+    "Use a good number of Actors split by logic (for example one per NPC), but not so many that the game is hard to manage."
+  ],
+  "terms": {
+    "thread": "One line of work the computer is doing. Many threads can run at the same time on different cores.",
+    "core": "One worker inside the computer's processor. A 4-core computer can do about 4 things truly at once.",
+    "serial": "One after another, in order. Script A finishes its turn, then script B runs.",
+    "parallel": "At the same time. Script A and script B run together on different cores.",
+    "Actor": "A special container instance. Scripts inside different Actors can run in parallel with each other. Scripts inside the same Actor still take turns.",
+    "desynchronize": "To leave the shared, one-at-a-time mode and start running in parallel. `task.desynchronize()` does this.",
+    "synchronize": "To come back to the shared, one-at-a-time mode so you can safely change the game. `task.synchronize()` does this.",
+    "thread safety": "Whether an API is safe to use while other threads run at the same time. Unsafe ones can only be used in serial mode.",
+    "SharedTable": "A table that scripts in many Actors can all read and update. A change made by one Actor shows up for all of them right away.",
+    "atomic": "Done all at once so no other thread can sneak in halfway. Atomic updates cannot get mixed up.",
+    "asynchronous": "Not waiting. When you send an Actor message, your script keeps going instead of waiting for it to be received.",
+    "topic": "A name you give a message, like \"Greeting\", so the receiving Actor knows which function should handle it.",
+    "data model": "The whole tree of objects in your game, the stuff you see in the Explorer.",
+    "procedural generation": "Making content, like terrain, with code and math instead of building it by hand."
+  },
+  "example": {
+    "title": "Do math in parallel, then update a part",
+    "place": "Script inside an Actor in ServerScriptService (add a Part named SpinPart to Workspace)",
+    "code": "local RunService = game:GetService(\"RunService\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal part = Workspace:WaitForChild(\"SpinPart\")\nlocal angle = 0\n\n-- ConnectParallel runs this function in parallel every frame\nRunService.Heartbeat:ConnectParallel(function(deltaTime)\n\t-- PARALLEL: math only, no changing instances here\n\tangle += math.rad(90) * deltaTime -- 90 degrees per second\n\tlocal newCFrame = CFrame.new(part.Position) * CFrame.Angles(0, angle, 0)\n\n\t-- Switch back to serial before changing the part\n\ttask.synchronize()\n\n\t-- SERIAL: now it is safe to change the part\n\tpart.CFrame = newCFrame\nend)",
+    "explain": [
+      "The script must sit inside an `Actor` to be allowed to run in parallel.",
+      "`Heartbeat:ConnectParallel` runs the function every frame in parallel mode.",
+      "In the parallel part, the script only does math: it grows the angle by 90 degrees each second and builds a new `CFrame`.",
+      "`task.synchronize()` switches to serial mode, because changing a part is not allowed in parallel.",
+      "Then it sets `part.CFrame`, which makes the part spin."
+    ]
+  },
+  "watchOut": [
+    "Putting a script in an Actor and expecting it to be faster. It still runs in serial until you call `task.desynchronize()` or use `ConnectParallel`.",
+    "Changing instance properties in parallel mode. Call `task.synchronize()` first, or the engine will block it.",
+    "Calling `require()` in parallel mode. Require your modules at the top of the script, in serial.",
+    "Putting all scripts in one Actor. Scripts in the same Actor take turns, so use several Actors.",
+    "Running very long calculations in parallel. They can still cause lag, so keep each piece of work small."
+  ]
+}

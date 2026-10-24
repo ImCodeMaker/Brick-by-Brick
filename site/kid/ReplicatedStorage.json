@@ -1,0 +1,37 @@
+{
+  "name": "ReplicatedStorage",
+  "simple": "ReplicatedStorage is a storage box that BOTH the server and every player's device can see. Put things here that both sides need: ModuleScripts with shared code, RemoteEvents for sending messages, and items or effects you will clone later. Things here are not in the 3D world, so they are not drawn and do not do physics.",
+  "analogy": "ReplicatedStorage is like a shared bookshelf in a classroom. The teacher (server) and every student (client) can grab books from it. ServerStorage, by contrast, is the teacher's locked cabinet.",
+  "whenToUse": [
+    "ModuleScripts that both Scripts and LocalScripts need to require.",
+    "RemoteEvents and RemoteFunctions, so the server and clients can talk.",
+    "Templates like tools, pets, or effects that both sides might clone."
+  ],
+  "where": "A service that exists on the server and all clients. Get it with `game:GetService(\"ReplicatedStorage\")`. Anything the server puts here is copied to every player.",
+  "terms": {
+    "server": "Roblox's computer that runs the one shared copy of the game for everyone in the server. What happens here is the truth everyone sees.",
+    "client": "One player's own device (computer, phone, tablet, or console). Each player has their own client.",
+    "service": "A special built-in object at the top of the game, like Workspace or Players. Get one with `game:GetService(\"Name\")`.",
+    "replicate": "To copy from the server to every player's device. Everything in ReplicatedStorage replicates.",
+    "RemoteEvent": "A messenger object that lets server Scripts and LocalScripts send each other messages.",
+    "template": "An original object you keep tucked away and `Clone` whenever you need a new copy."
+  },
+  "examples": [
+    {
+      "title": "Server clones a sword from ReplicatedStorage",
+      "place": "Script in ServerScriptService (with a Tool named Sword in ReplicatedStorage)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n\nlocal swordTemplate = ReplicatedStorage:WaitForChild(\"Sword\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(function()\n\t\tlocal sword = swordTemplate:Clone()\n\t\tsword.Parent = player:WaitForChild(\"Backpack\")\n\tend)\nend)",
+      "explain": [
+        "The Sword sits in ReplicatedStorage as a template.",
+        "Every time a player's character spawns, the server clones it.",
+        "Putting the copy in the player's Backpack gives them the tool."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Scripts and LocalScripts do not run here (with default settings). Only ModuleScripts here run, and only when required.",
+    "Players can see everything in here, even exploiters, so never put secrets or server-only code here. Use ServerStorage or ServerScriptService for that.",
+    "Changes a client makes in ReplicatedStorage stay on that client only and are not sent to the server."
+  ],
+  "members": {}
+}

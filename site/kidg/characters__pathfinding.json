@@ -1,0 +1,51 @@
+{
+  "path": "content/en-us/characters/pathfinding.md",
+  "simple": "Pathfinding lets a character find its own way to a spot, walking around walls, jumping gaps, and climbing ladders. You ask `PathfindingService` for a path, and it gives you a list of waypoints to walk to one by one. This is how you make NPCs chase players, guide a pet, or auto-walk a player to a goal. You can also make characters avoid lava or water, skip danger zones, or use a boat.",
+  "analogy": "It is like a map app on a phone. You say where you want to go, it plans a route around buildings, and if a road gets blocked it finds a new route. Costs are like telling the app to avoid toll roads.",
+  "keyPoints": [
+    "Turn on Navigation mesh and Pathfinding modifiers in the Visualization Options at the top right of the viewport to see where characters can walk.",
+    "Create a path with `PathfindingService:CreatePath()`, giving settings like `AgentRadius`, `AgentHeight`, `AgentCanJump`, `AgentCanClimb`, and `Costs`.",
+    "Compute it with `path:ComputeAsync(start, finish)` inside `pcall`, then check that `path.Status` is `Enum.PathStatus.Success`.",
+    "`path:GetWaypoints()` returns waypoints in order. Each has a `Position` and an `Action`, such as `Jump`.",
+    "Listen to `path.Blocked` and recompute only if the blocked waypoint is ahead of the character.",
+    "`Costs` make some materials or regions less attractive. Every material costs 1 by default, and `math.huge` means never go there.",
+    "A `PathfindingModifier` on an invisible, non-colliding part can mark a region with a `Label`, like `DangerZone`, or let paths pass through with `PassThrough`.",
+    "A `PathfindingLink` between two attachments, with a `Label` like `UseBoat`, lets your script do a special action to cross a gap.",
+    "Paths fail if they are over 3,000 studs, need over 20,000 nodes, or the agent settings make the goal unreachable."
+  ],
+  "terms": {
+    "agent": "The character or object that is following the path.",
+    "waypoint": "One stop along the path. The character walks from waypoint to waypoint, about 4 studs apart by default.",
+    "navigation mesh": "An invisible map of all the places a character can walk, swim, or jump to.",
+    "AgentRadius": "How wide the agent is, in studs, measured from its center. Default `2`, so paths stay about 2 studs from walls.",
+    "AgentHeight": "How tall the agent is, in studs. Default `5`. Gaps lower than this, like under stairs, are treated as blocked.",
+    "cost": "How much the pathfinder dislikes a material or region. With `Water = 20`, one stud of water counts like 20 studs of grass, so it will go around if it can.",
+    "math.huge": "A number bigger than any other. As a cost, it means the agent will never go there.",
+    "PathfindingModifier": "An object you put in a part to label a region or let paths go through it.",
+    "PathfindingLink": "A shortcut between two attachments that the pathfinder can use, like a boat ride or a teleport pad.",
+    "TrussPart": "A ladder-like part that characters can climb.",
+    "node": "A tiny step the pathfinder checks while searching. It gives up after 20,000.",
+    "streaming": "Loading only the parts of the world near the player. Faraway objects might not exist yet on the player's device.",
+    "persistent model": "A model that loads soon after joining and never unloads, even with streaming on."
+  },
+  "example": {
+    "title": "Make an NPC walk to a goal part",
+    "place": "Script inside an NPC model (with a Humanoid) in Workspace, and a part named Goal in Workspace",
+    "code": "local PathfindingService = game:GetService(\"PathfindingService\")\n\nlocal npc = script.Parent\nlocal humanoid = npc:WaitForChild(\"Humanoid\")\nlocal rootPart = npc:WaitForChild(\"HumanoidRootPart\")\nlocal goal = workspace:WaitForChild(\"Goal\")\n\nlocal path = PathfindingService:CreatePath({\n\tAgentCanJump = true,\n\tCosts = {\n\t\tWater = 20, -- avoid water when possible\n\t\tCrackedLava = math.huge, -- never walk on lava\n\t},\n})\n\n-- Ask for a path from the NPC to the goal\nlocal success, err = pcall(function()\n\tpath:ComputeAsync(rootPart.Position, goal.Position)\nend)\n\nif success and path.Status == Enum.PathStatus.Success then\n\tfor _, waypoint in path:GetWaypoints() do\n\t\t-- Jump if this waypoint needs it\n\t\tif waypoint.Action == Enum.PathWaypointAction.Jump then\n\t\t\thumanoid.Jump = true\n\t\tend\n\t\thumanoid:MoveTo(waypoint.Position)\n\t\thumanoid.MoveToFinished:Wait() -- wait to reach this waypoint\n\tend\n\tprint(\"Arrived!\")\nelse\n\twarn(\"No path found:\", err)\nend",
+    "explain": [
+      "We create a path that can jump, avoids water if it can, and never crosses cracked lava.",
+      "`ComputeAsync` plans the route from the NPC to the Goal part. It is in `pcall` because it can fail.",
+      "If it worked, we loop through each waypoint in order.",
+      "If a waypoint says Jump, we make the NPC jump, then `MoveTo` walks it there.",
+      "`MoveToFinished:Wait()` pauses until the NPC reaches that waypoint, then the loop moves to the next one.",
+      "This simple version does not handle `path.Blocked`. For moving obstacles, connect to it and recompute."
+    ]
+  },
+  "watchOut": [
+    "Not checking `path.Status`. A path can compute without an error but still have no route.",
+    "Computing a path while the character is in the air. Wait until it is on the ground for a better start point.",
+    "Using a destination object in a LocalScript that has not streamed in yet. Use a persistent model or do it on the server.",
+    "Giving a material `math.huge` cost when you only want it as a last option. Use a big but normal number like `100`.",
+    "Ignoring blocked paths in a changing world. Recompute when `path.Blocked` fires ahead of the character."
+  ]
+}

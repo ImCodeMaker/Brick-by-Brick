@@ -1,0 +1,58 @@
+{
+  "name": "Region3",
+  "simple": "A Region3 is an invisible 3D box in the world, described by two opposite corners. Its sides always line up with the world's X, Y, and Z directions, so it can never be tilted. It is mostly used with Terrain, for example to fill an area with grass or water.",
+  "analogy": "A Region3 is like a shoebox you place in the world by saying where two opposite corners go. The box is always sitting straight, never tipped over.",
+  "whenToUse": [
+    "Filling an area with Terrain using workspace.Terrain:FillRegion",
+    "Reading or clearing Terrain in an area",
+    "Describing a simple straight box zone"
+  ],
+  "where": "Works in any script. Make one with Region3.new(minCorner, maxCorner). For finding parts in a box, the newer workspace:GetPartBoundsInBox (with OverlapParams) is usually a better choice.",
+  "terms": {
+    "axis-aligned": "The box's edges point exactly along X, Y, and Z. It cannot be rotated.",
+    "min corner": "The corner with the smallest X, Y, and Z numbers (bottom, left, back).",
+    "max corner": "The corner with the biggest X, Y, and Z numbers (top, right, front).",
+    "CFrame": "A position plus a rotation. For a Region3 the rotation is always none.",
+    "voxel": "A tiny 3D cube that Terrain is built from, like a pixel but in 3D. Roblox Terrain voxels are 4 studs on each side.",
+    "resolution": "The size of the grid squares to line up with, in studs. Terrain usually uses 4.",
+    "Vector3": "Three numbers (X, Y, Z) that describe a position or size in the 3D world.",
+    "stud": "Roblox's unit of distance."
+  },
+  "examples": [
+    {
+      "title": "Make a patch of grass terrain",
+      "place": "Script in ServerScriptService",
+      "code": "local Terrain = workspace.Terrain\n\n-- A box from (0, 0, 0) to (16, 8, 16)\nlocal region = Region3.new(Vector3.new(0, 0, 0), Vector3.new(16, 8, 16))\n\n-- Line it up with the 4-stud terrain grid\nregion = region:ExpandToGrid(4)\n\n-- Fill it with grass, using 4-stud voxels\nTerrain:FillRegion(region, 4, Enum.Material.Grass)\n\nprint(region.CFrame.Position) --> 8, 4, 8 (the middle of the box)\nprint(region.Size)            --> 16, 8, 16",
+      "explain": [
+        "Region3.new takes the low corner (0, 0, 0) and the high corner (16, 8, 16).",
+        "ExpandToGrid(4) makes sure the corners sit on multiples of 4, which Terrain needs. These corners already do, so nothing changes here.",
+        "FillRegion fills the box with Grass terrain.",
+        "The middle of the box is halfway between the corners: (8, 4, 8). The size is high corner minus low corner: (16, 8, 16)."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Give the low corner first and the high corner second. Swapping them makes a box with negative size.",
+    "A Region3 cannot be rotated. For a tilted box, use workspace:GetPartBoundsInBox with a CFrame instead.",
+    "Terrain functions like FillRegion need the region lined up with the 4-stud grid. Use ExpandToGrid(4) first."
+  ],
+  "members": {
+    "Region3.new": {
+      "simple": "Makes a Region3 box from two corners: min (the low corner) and max (the high corner).",
+      "example": "local region = Region3.new(Vector3.new(-5, 0, -5), Vector3.new(5, 10, 5))\nprint(region.Size) --> 10, 10, 10",
+      "gotcha": "Order matters. Region3.new(high, low) gives a negative size."
+    },
+    "Region3.CFrame": {
+      "simple": "The middle of the box (and a rotation, which is always none). The middle is halfway between the two corners. Corners (0, 0, 0) and (10, 20, 10) give a middle of (5, 10, 5). Read-only.",
+      "example": "local region = Region3.new(Vector3.new(0, 0, 0), Vector3.new(10, 20, 10))\nprint(region.CFrame.Position) --> 5, 10, 5"
+    },
+    "Region3.Size": {
+      "simple": "How big the box is in X, Y, and Z, worked out as max corner minus min corner. Can be negative if the corners were given in the wrong order. Read-only.",
+      "example": "local region = Region3.new(Vector3.new(0, 0, 0), Vector3.new(10, 20, 10))\nprint(region.Size) --> 10, 20, 10"
+    },
+    "Region3:ExpandToGrid": {
+      "simple": "Gives a new Region3 grown outward so its corners land on a grid of the size you pick. The low corner rounds down and the high corner rounds up, so the box can only get bigger, never smaller. Used before Terrain functions, which need a 4-stud grid.",
+      "example": "local region = Region3.new(Vector3.new(1, 1, 1), Vector3.new(6, 6, 6))\nlocal snapped = region:ExpandToGrid(4)\nprint(snapped.Size) --> 8, 8, 8 (corners became 0 and 8)"
+    }
+  }
+}

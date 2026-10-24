@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/luau/type-checking.md",
+  "simple": "Type checking lets you label what kind of value each variable or function input should be, like `number` or `string`. Studio then warns you, before you even play, if you mix them up, like passing text where a number belongs. This catches bugs early and makes autocomplete smarter. Labels are optional, so you can add them a little at a time.",
+  "analogy": "Type labels are like the shaped holes in a toddler's shape-sorter toy. If the hole says \"star\" (number), Studio complains when you try to push a square (string) through it, before anything breaks.",
+  "keyPoints": [
+    "Put `--!strict`, `--!nonstrict`, or `--!nocheck` on the first line to pick how strict checking is.",
+    "`--!strict` checks everything, `--!nonstrict` only checks what you labeled, and `--!nocheck` turns checking off.",
+    "Label a variable with a colon: `local coins: number = 0`. Mistakes show up in the Script Editor and Script Analysis window.",
+    "Basic types are `nil`, `boolean`, `number`, and `string`. Roblox classes like `Part` and enums like `Enum.Material` are types too.",
+    "Add `?` to allow `nil`: `local target: Player? = nil`.",
+    "Label function inputs and outputs: `local function add(x: number, y: number): number`.",
+    "Table types use braces: `{number}` is a list of numbers, and `{[string]: number}` is a dictionary from text to numbers.",
+    "Make your own types with `type`, combine types with `|` (either one) or `&` (both), and share them from a ModuleScript with `export type`."
+  ],
+  "terms": {
+    "type": "The kind of value something is, like number, string, or Part.",
+    "type annotation": "A label after a colon that says a value's type, like `x: number`.",
+    "type inference": "Luau figuring out a type by itself. `local x = 5` is inferred as a number.",
+    "gradual typing": "You can add type labels to some code and not others.",
+    "strict mode": "`--!strict`. Every variable is checked, using labels or inferred types.",
+    "type error": "A warning that a value is the wrong type, like giving a string to a number parameter.",
+    "optional type": "A type with `?` that can also be `nil`. `string?` means a string or nil.",
+    "literal type": "A type that only allows one exact value, like `true` or `\"Hello world!\"`.",
+    "type cast": "Using `::` to tell the checker to treat a value as a certain type, like `value :: any`.",
+    "any": "A type that turns off checking for that value. It can be anything.",
+    "union type": "Either one type or another, written `number | string`.",
+    "intersection type": "Must match both types at once, written `A & B`.",
+    "generic": "A type with a blank to fill in later, like `List<T>`. `List<string>` is a list of strings.",
+    "export": "Making a type defined in a ModuleScript usable in other scripts."
+  },
+  "example": {
+    "title": "A typed damage function",
+    "place": "Script in ServerScriptService",
+    "code": "--!strict\nlocal Players = game:GetService(\"Players\")\n\n-- Our own type for weapon stats\ntype Weapon = {\n\tName: string,\n\tDamage: number,\n}\n\nlocal sword: Weapon = { Name = \"Sword\", Damage = 25 }\n\n-- Inputs and output are labeled\nlocal function dealDamage(humanoid: Humanoid, weapon: Weapon): number\n\thumanoid:TakeDamage(weapon.Damage)\n\treturn humanoid.Health\nend\n\n-- Player? means this can be a Player or nil\nlocal function findPlayer(name: string): Player?\n\treturn Players:FindFirstChild(name) :: Player?\nend\n\nlocal target = findPlayer(\"Builder\")\nif target and target.Character then\n\tlocal humanoid = target.Character:FindFirstChildOfClass(\"Humanoid\")\n\tif humanoid then\n\t\tprint(\"Health left:\", dealDamage(humanoid, sword))\n\tend\nend\n\n-- dealDamage(humanoid, \"Sword\") would show a type error in Studio",
+    "explain": [
+      "`--!strict` turns on full type checking for this script.",
+      "`type Weapon` describes what a weapon table must look like: a string name and a number damage.",
+      "`dealDamage` says it needs a `Humanoid` and a `Weapon`, and returns a number.",
+      "`findPlayer` returns `Player?`, so Studio reminds you to check for `nil` before using it.",
+      "Passing a plain string instead of a Weapon would be underlined as an error before you even press Play."
+    ]
+  },
+  "watchOut": [
+    "Putting `--!strict` below other code. It must be on the first line.",
+    "Forgetting that `Player?` can be `nil`. Check `if target then` before using it.",
+    "Using `:: any` everywhere to make warnings go away. That hides real bugs.",
+    "Thinking type errors stop the game. They are warnings in the editor; the game still runs, and a wrong type can still crash at runtime."
+  ]
+}

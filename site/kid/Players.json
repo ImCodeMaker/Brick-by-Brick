@@ -1,0 +1,264 @@
+{
+  "name": "Players",
+  "simple": "Players is the service that keeps track of everyone who is in your game server right now. Every person who joins gets a Player object placed inside it, and that object is taken out when they leave. It also has the events that tell your scripts when someone joins or leaves, plus tools for looking up users, building avatars, and banning rule-breakers.",
+  "analogy": "Players is like the front desk of a hotel. It has the guest book (who is staying right now), it rings a bell when a guest checks in (PlayerAdded) and when one checks out (PlayerRemoving), and it can look up any guest's name or ID card. It can even put someone on the 'not allowed back' list (BanAsync).",
+  "whenToUse": [
+    "Run code when a player joins or leaves (give them stats, load or save their data).",
+    "Loop over everyone in the server, for example to start a round or give everyone a prize.",
+    "Find which player owns a character that touched something (GetPlayerFromCharacter).",
+    "Get the player who is running a LocalScript (Players.LocalPlayer).",
+    "Change how long it takes to respawn (RespawnTime) or stop automatic spawning (CharacterAutoLoads).",
+    "Ban or unban users who break your game's rules (BanAsync, UnbanAsync)."
+  ],
+  "where": "Server and client. It is a service, so you get it with `local Players = game:GetService(\"Players\")`. You can see it in the Explorer window. Some things only work on one side: LocalPlayer only works on the client, and the ban methods only work on the server.",
+  "terms": {
+    "service": "A special built-in object that does one big job for the whole game. You get services with game:GetService(\"Name\").",
+    "Player": "The object that stands for one real person connected to your game. It is not their body. The body is the Character.",
+    "Character": "The 3D body (a Model with a Humanoid inside) that a player walks around with. It is created when they spawn and removed when they die and respawn.",
+    "client": "The player's own device (computer, phone, console). LocalScripts run there.",
+    "server": "The Roblox computer that runs the game for everyone in that server. Normal Scripts run there. It is the boss that everyone trusts.",
+    "event": "Something that happens in the game, like a player joining. You can :Connect a function to an event so your function runs every time it happens.",
+    "Connect": "How you tell an event 'run this function when you happen'.",
+    "nil": "Luau's word for 'nothing' or 'no value'. If a lookup finds nobody, you get nil.",
+    "UserId": "A number that belongs to one Roblox account and never changes, even if the user changes their name. Best way to save data for a player.",
+    "yield": "When a function makes your script pause and wait (for example while it asks the Roblox website something). Functions ending in Async usually yield.",
+    "Async": "Short for asynchronous. A function that has to wait for something (often the internet) before it can give an answer, so it pauses your script.",
+    "pcall": "Short for protected call. It runs a function and catches errors instead of letting them crash your script. Use it around things that talk to the internet.",
+    "respawn": "Coming back to life with a new character after dying.",
+    "ban": "Blocking a user from joining your game, for a set time or forever.",
+    "alt account": "A second (alternate) account someone makes, sometimes to sneak back in after a ban.",
+    "device block": "An extra ban option that blocks the computer itself from rejoining for 24 hours, so the person can't just log in on another account on the same computer.",
+    "universe": "Your whole game (sometimes called an experience), including every place inside it. A ban can cover the whole universe or just one place.",
+    "dictionary": "A table where each value has a name (a key), like { Duration = 60, DisplayReason = \"Cheating\" }.",
+    "plugin": "A tool that runs inside Roblox Studio to help you build. Some methods are only allowed for plugins, not your game scripts.",
+    "HumanoidDescription": "An object that lists everything about an avatar's look: hats, clothes, body colors, sizes, animations.",
+    "thumbnail": "A small picture, like a headshot of someone's avatar."
+  },
+  "examples": [
+    {
+      "title": "The full player lifecycle: join, spawn, die, respawn, leave",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\n-- How many seconds a dead player waits before coming back (default is 5)\nPlayers.RespawnTime = 3\n\nlocal function onCharacterAdded(character)\n    -- Step 2: the player's body has spawned (this happens again after every respawn)\n    local player = Players:GetPlayerFromCharacter(character)\n    print(player.Name .. \" spawned\")\n\n    local humanoid = character:WaitForChild(\"Humanoid\")\n    humanoid.Died:Connect(function()\n        -- Step 3: the body died. After RespawnTime seconds Roblox removes it\n        print(player.Name .. \" died, respawning in \" .. Players.RespawnTime .. \" seconds\")\n    end)\nend\n\nlocal function onCharacterRemoving(character)\n    -- Step 4: the old body is about to be removed (right before a respawn, or when leaving)\n    print(\"Removing old body: \" .. character.Name)\nend\n\nlocal function onPlayerAdded(player)\n    -- Step 1: a person joined the server\n    print(player.Name .. \" joined! UserId: \" .. player.UserId)\n\n    player.CharacterAdded:Connect(onCharacterAdded)\n    player.CharacterRemoving:Connect(onCharacterRemoving)\n\n    -- If the character already exists (can happen in Studio), handle it now\n    if player.Character then\n        onCharacterAdded(player.Character)\n    end\nend\n\nlocal function onPlayerRemoving(player)\n    -- Step 5: the person is leaving. The Player object still exists right now,\n    -- so this is the place to save their data.\n    print(player.Name .. \" is leaving\")\nend\n\n-- Handle anyone who joined before this script started (common in Studio Play tests)\nfor _, player in Players:GetPlayers() do\n    task.spawn(onPlayerAdded, player)\nend\nPlayers.PlayerAdded:Connect(onPlayerAdded)\nPlayers.PlayerRemoving:Connect(onPlayerRemoving)",
+      "explain": [
+        "The order things happen in is always: PlayerAdded (joined) -> CharacterAdded (body spawned) -> Humanoid.Died (body died) -> wait RespawnTime seconds -> CharacterRemoving (old body removed) -> CharacterAdded again (new body) -> ... -> PlayerRemoving (left the game).",
+        "PlayerAdded and PlayerRemoving happen once per visit. CharacterAdded and CharacterRemoving can happen many times, once for every life.",
+        "We connect CharacterAdded inside onPlayerAdded, because each player has their own CharacterAdded event.",
+        "We also call onCharacterAdded right away if player.Character already exists, in case the body spawned before we connected.",
+        "The loop over Players:GetPlayers() catches anyone who was already in the game before the script connected to PlayerAdded. In Studio solo tests your player is often created before scripts run, so without this loop PlayerAdded might never fire for you.",
+        "task.spawn runs onPlayerAdded for each player without waiting for one to finish before starting the next."
+      ]
+    },
+    {
+      "title": "Where things get copied when a player joins and spawns",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    -- These four containers live inside every Player object:\n    --   Backpack      = their inventory of Tools. Filled from StarterPack + StarterGear each spawn.\n    --   StarterGear   = this player's own personal 'always give me this' Tools.\n    --   PlayerGui     = what shows on their screen. Filled from StarterGui on spawn.\n    --   PlayerScripts = client scripts from StarterPlayer > StarterPlayerScripts.\n    --                   The server can NOT see inside PlayerScripts.\n    local backpack = player:WaitForChild(\"Backpack\")\n    local starterGear = player:WaitForChild(\"StarterGear\")\n    local playerGui = player:WaitForChild(\"PlayerGui\")\n    print(player.Name, backpack, starterGear, playerGui)\n\n    player.CharacterAdded:Connect(function(character)\n        -- By now StarterCharacterScripts have been copied into the character,\n        -- and StarterPack tools have been copied into a fresh Backpack.\n        print(player.Name .. \" has \" .. #player.Backpack:GetChildren() .. \" tools\")\n    end)\nend)",
+      "explain": [
+        "The Starter containers you edit in Studio are like templates. When the game runs, Roblox copies them into each player.",
+        "StarterGui -> PlayerGui: copied when the character spawns.",
+        "StarterPack -> Backpack: copied every time the character spawns. When the character dies, the old Backpack is thrown away and a new one is made.",
+        "StarterGear (inside the Player) -> Backpack: also copied every spawn, but it is personal to that one player. A good place to put a tool they bought so they keep it after dying.",
+        "StarterPlayer > StarterPlayerScripts -> PlayerScripts: copied once when the player joins. Good for scripts that should keep running even when the character dies, like input controls.",
+        "StarterPlayer > StarterCharacterScripts -> inside the Character model: copied every spawn.",
+        "WaitForChild waits until the child exists, because these containers might be created a moment after PlayerAdded fires."
+      ]
+    },
+    {
+      "title": "Ban a cheater (with device block) and unban them later",
+      "place": "Script in ServerScriptService (BanningEnabled must be turned on in the Players properties in Studio)",
+      "code": "local Players = game:GetService(\"Players\")\n\nlocal function banPlayer(player, reasonForPlayer, secretNotes)\n    local config = {\n        UserIds = { player.UserId },   -- who to ban (up to 50 at once)\n        Duration = 60 * 60 * 24,       -- seconds: 1 day. Use -1 for forever\n        DisplayReason = reasonForPlayer, -- shown to the banned user (max 400 chars, filtered)\n        PrivateReason = secretNotes,   -- only you see this, in ban history (max 1000 chars)\n        ExcludeAltAccounts = false,    -- false = also ban their suspected alt accounts\n        ApplyToUniverse = true,        -- true = banned from every place in this game\n        ApplyDeviceBlock = true,       -- also block their computer for 24 hours\n    }\n\n    -- BanAsync talks to Roblox's servers, so it can fail. pcall catches the error.\n    local ok, err = pcall(function()\n        Players:BanAsync(config)\n    end)\n    if not ok then\n        warn(\"Ban failed: \" .. tostring(err))\n    end\nend\n\nlocal function unbanUser(userId)\n    local ok, err = pcall(function()\n        Players:UnbanAsync({\n            UserIds = { userId },\n            ApplyToUniverse = true, -- must match how the ban was made\n        })\n    end)\n    if not ok then\n        warn(\"Unban failed: \" .. tostring(err))\n    end\nend\n\n-- Example: someone fired a suspicious remote. (Your own cheat check goes here.)\n-- banPlayer(somePlayer, \"Exploiting is against the rules. Appeal on our group page.\", \"Teleported 500 studs in 0.1s\")",
+      "explain": [
+        "BanAsync takes one table (a dictionary) that describes the ban. UserIds, Duration, DisplayReason and PrivateReason are required.",
+        "Duration is in seconds. 3600 is one hour, 86400 is one day, and -1 means a permanent ban. 0 or other negative numbers are not allowed.",
+        "DisplayReason is what the banned person sees on their error screen. It goes through Roblox's text filter. You may mention places like 'our Discord' but not usernames or direct links.",
+        "PrivateReason is a note for you and your team. It is never sent to players, and you can read it later with GetBanHistoryAsync.",
+        "By default bans also reach the person's suspected alt accounts. Set ExcludeAltAccounts = true to turn that off.",
+        "ApplyDeviceBlock = true also blocks the banned person's device for 24 hours, so they can't hop onto a different account on the same computer. It only works for players currently in your game, only on Windows and macOS (not phones or consoles), and it does not ban the other accounts on that device.",
+        "Unbanning with UnbanAsync removes the device block too. Unbanning from the Creator Hub or Open Cloud does NOT remove the device block.",
+        "An unban only cancels a ban with the same ApplyToUniverse setting. A whole-game unban won't undo a single-place ban, and the other way around.",
+        "Banned players are kicked right away from all servers and see how long is left on their ban.",
+        "These methods only work on the server, only when Players.BanningEnabled is on, and bans made while testing in Studio don't affect the real game.",
+        "Rules: post your game rules where everyone can see them, apply them fairly to everyone, and let people appeal."
+      ]
+    },
+    {
+      "title": "Find who touched a part",
+      "place": "Script inside a Part in Workspace",
+      "code": "local Players = game:GetService(\"Players\")\nlocal part = script.Parent\n\npart.Touched:Connect(function(otherPart)\n    -- otherPart is the body part that bumped into us, like a LeftFoot\n    local character = otherPart.Parent\n    local player = Players:GetPlayerFromCharacter(character)\n    if player then\n        print(player.Name .. \" touched the part!\")\n    end\nend)",
+      "explain": [
+        "Touched gives you the part that touched, not the player.",
+        "The body part's Parent is the character Model.",
+        "GetPlayerFromCharacter turns that character into its Player, or gives nil if it was an NPC or a falling brick."
+      ]
+    }
+  ],
+  "gotchas": [
+    "PlayerAdded may not fire for you in a Studio solo test, because your player joins before the script connects. Always also loop over Players:GetPlayers() once at the start.",
+    "Players.LocalPlayer is nil in a server Script. It only works in LocalScripts (and ModuleScripts they require).",
+    "Use player.UserId (or player.User) to save data, not player.Name. Names can change, UserIds never do.",
+    "Functions that end in Async talk to the internet and can fail. Wrap them in pcall.",
+    "BanAsync, UnbanAsync and GetBanHistoryAsync error unless BanningEnabled is turned on in Studio, and they only run on the server.",
+    "Don't let the client decide who gets banned or kicked. A cheater could fire your RemoteEvent with someone else's name. Make the server check everything."
+  ],
+  "members": {
+    "Players.BanningEnabled": {
+      "simple": "A switch that turns the ban tools (BanAsync, UnbanAsync, GetBanHistoryAsync) on or off. Scripts can't change it. You tick it in Studio in the Players Properties window."
+    },
+    "Players.BubbleChat": {
+      "simple": "Read-only true/false that tells you if the old bubble chat style is on. It is set by an internal method scripts can't call, so you will rarely need it."
+    },
+    "Players.CharacterAutoLoads": {
+      "simple": "If true (the default), players get a body automatically when they join and after they die. Set it to false if you want to decide yourself when people spawn, for example only at the start of each round.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nPlayers.CharacterAutoLoads = false -- nobody spawns on their own now\n\nPlayers.PlayerAdded:Connect(function(player)\n    task.wait(3) -- wait 3 seconds, like a short lobby countdown\n    player:LoadCharacterAsync() -- now spawn them by hand\nend)",
+      "gotcha": "With this off, StarterGui also won't copy into PlayerGui until you call LoadCharacterAsync, so the player sees no custom UI."
+    },
+    "Players.ClassicChat": {
+      "simple": "Read-only true/false that tells you if the old classic chat style is on. Set internally, rarely needed."
+    },
+    "Players.LocalPlayer": {
+      "simple": "The Player object of the person on this device. Only works in LocalScripts (code running on the player's own device). On the server it is nil, because the server isn't any one player.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\nprint(\"Hi, \" .. player.DisplayName .. \"!\")",
+      "gotcha": "Using Players.LocalPlayer in a server Script gives nil and then errors when you try to use it."
+    },
+    "Players.localPlayer": {
+      "simple": "Old — use Players.LocalPlayer instead."
+    },
+    "Players.MaxPlayers": {
+      "simple": "Read-only number: the most people allowed in one server. You set it in your place settings on the Creator Dashboard, not in a script.",
+      "example": "local Players = game:GetService(\"Players\")\nprint(\"Server holds up to \" .. Players.MaxPlayers .. \" players\")"
+    },
+    "Players.NumPlayers": {
+      "simple": "Old — use #Players:GetPlayers() instead."
+    },
+    "Players.numPlayers": {
+      "simple": "Old — use #Players:GetPlayers() instead."
+    },
+    "Players.PreferredPlayers": {
+      "simple": "Read-only number: how many players Roblox tries to fill a server up to before it starts a new one. It is less than MaxPlayers so friends still have room to join."
+    },
+    "Players.RespawnTime": {
+      "simple": "How many seconds a player waits after dying before a new body appears. The default is 5. Only matters when CharacterAutoLoads is true.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nPlayers.RespawnTime = 1 -- fast respawns for an obby"
+    },
+    "Players.UseStrafingAnimations": {
+      "simple": "A Studio-only setting (scripts can't change it). When on, R15 characters can walk sideways and backwards while still facing forward, instead of always turning to face where they walk. Default is off."
+    },
+    "Players:BanAsync": {
+      "simple": "Bans one or more users from your game for a set time or forever. You give it a table with who, how long (in seconds, -1 means forever), a message they see, and a private note for yourself. It can also ban their alt accounts and block their device for 24 hours.",
+      "example": "-- Script in ServerScriptService (turn on BanningEnabled in Studio first)\nlocal Players = game:GetService(\"Players\")\n\nlocal ok, err = pcall(function()\n    Players:BanAsync({\n        UserIds = { 123456789 },          -- the UserId(s) to ban\n        Duration = 3600,                  -- 3600 seconds = 1 hour\n        DisplayReason = \"Please follow the rules.\", -- they see this\n        PrivateReason = \"Spamming chat\",  -- only you see this\n        ApplyDeviceBlock = true,          -- also block their computer for 24 hours\n    })\nend)\nif not ok then\n    warn(err)\nend",
+      "gotcha": "Server only, needs BanningEnabled, and bans made while testing in Studio don't apply to the real game. Device blocks only work on Windows and macOS."
+    },
+    "Players:Chat": {
+      "simple": "Only plugins can use this, not game scripts. It makes the local player say a message in chat. Use TextChatService for custom chat instead."
+    },
+    "Players:CreateHumanoidModelFromDescription": {
+      "simple": "Old — use Players:CreateHumanoidModelFromDescriptionAsync instead."
+    },
+    "Players:CreateHumanoidModelFromDescriptionAsync": {
+      "simple": "Builds a brand new character Model (with a Humanoid) dressed exactly as a HumanoidDescription says. Handy for making NPCs or display mannequins. You choose R6 or R15.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\n\nlocal description = Instance.new(\"HumanoidDescription\")\ndescription.HeadColor = Color3.fromRGB(255, 200, 150)\ndescription.HeightScale = 1.1 -- 10% taller than normal\n\nlocal npc = Players:CreateHumanoidModelFromDescriptionAsync(description, Enum.HumanoidRigType.R15)\nnpc.Name = \"Shopkeeper\"\nnpc:PivotTo(CFrame.new(0, 5, 0)) -- put it at position (0, 5, 0)\nnpc.Parent = workspace"
+    },
+    "Players:CreateHumanoidModelFromUserId": {
+      "simple": "Old — use Players:CreateHumanoidModelFromUserIdAsync instead."
+    },
+    "Players:CreateHumanoidModelFromUserIdAsync": {
+      "simple": "Builds a character Model that looks exactly like a real user's avatar (R6 or R15 matches what they use). Great for statues of top players.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\n\nlocal ok, statue = pcall(function()\n    return Players:CreateHumanoidModelFromUserIdAsync(1) -- UserId 1 is the account \"Roblox\"\nend)\nif ok then\n    statue:PivotTo(CFrame.new(10, 5, 0))\n    statue.Parent = workspace\nend"
+    },
+    "Players:GetBanHistoryAsync": {
+      "simple": "Gets the list of every ban and unban for one user in your game, including your private notes. Useful for giving longer bans to repeat rule-breakers. Results come in pages.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\n\nlocal ok, pages = pcall(function()\n    return Players:GetBanHistoryAsync(123456789)\nend)\nif ok then\n    for _, entry in pages:GetCurrentPage() do\n        -- entry.Ban is true for a ban, false for an unban\n        print(entry.Ban, entry.Duration, entry.StartTime, entry.PrivateReason)\n    end\nend",
+      "gotcha": "Only works in real (live) servers, not in Studio or on the client."
+    },
+    "Players:GetCharacterAppearanceAsync": {
+      "simple": "Old — use Players:GetHumanoidDescriptionFromUserIdAsync instead."
+    },
+    "Players:GetCharacterAppearanceInfoAsync": {
+      "simple": "Asks the Roblox website what a user is wearing and returns it as a table of info: their items, body colors, scales, emotes, and whether they use R6 or R15. It only gives information, it doesn't build anything.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal ok, info = pcall(function()\n    return Players:GetCharacterAppearanceInfoAsync(1)\nend)\nif ok then\n    print(\"Avatar type: \" .. info.playerAvatarType) -- \"R6\" or \"R15\"\n    for _, asset in info.assets do\n        print(asset.name)\n    end\nend"
+    },
+    "Players:GetFriendsAsync": {
+      "simple": "Gets a user's friends list. The answer comes as pages (like pages in a book), each holding some friends with their Id, Username and DisplayName.",
+      "example": "local Players = game:GetService(\"Players\")\n\nlocal pages = Players:GetFriendsAsync(1)\nwhile true do\n    for _, friend in pages:GetCurrentPage() do\n        print(friend.Username)\n    end\n    if pages.IsFinished then\n        break -- no more pages\n    end\n    pages:AdvanceToNextPageAsync() -- go to the next page\nend"
+    },
+    "Players:GetHumanoidDescriptionFromOutfitId": {
+      "simple": "Old — use Players:GetHumanoidDescriptionFromOutfitIdAsync instead."
+    },
+    "Players:GetHumanoidDescriptionFromOutfitIdAsync": {
+      "simple": "Gets a HumanoidDescription for a saved outfit (one a user made, or a Roblox bundle's outfit). You can then put that outfit on a character with ApplyDescriptionAsync.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal outfitId = 1234567 -- replace with a real outfit ID\nlocal ok, description = pcall(function()\n    return Players:GetHumanoidDescriptionFromOutfitIdAsync(outfitId)\nend)\nif ok then\n    print(\"Loaded outfit, head color: \" .. tostring(description.HeadColor))\nend"
+    },
+    "Players:GetHumanoidDescriptionFromUserId": {
+      "simple": "Old — use Players:GetHumanoidDescriptionFromUserIdAsync instead."
+    },
+    "Players:GetHumanoidDescriptionFromUserIdAsync": {
+      "simple": "Gets a HumanoidDescription that matches a user's whole avatar: items, body colors and sizes. Use it to make someone look like someone else, or to build a statue.",
+      "example": "-- Script in ServerScriptService: everyone spawns looking like UserId 1\nlocal Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAppearanceLoaded:Connect(function(character)\n        local humanoid = character:WaitForChild(\"Humanoid\")\n        local description = Players:GetHumanoidDescriptionFromUserIdAsync(1)\n        humanoid:ApplyDescriptionAsync(description)\n    end)\nend)"
+    },
+    "Players:GetNameFromUserIdAsync": {
+      "simple": "Asks Roblox for the username that belongs to a UserId, even if that person isn't in your game. It errors if no such account exists, so use pcall.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal ok, name = pcall(function()\n    return Players:GetNameFromUserIdAsync(1)\nend)\nprint(ok and name or \"Unknown user\") -- prints \"Roblox\""
+    },
+    "Players:GetPlayerByUserId": {
+      "simple": "Finds the Player in this server with a certain UserId, or gives nil if they aren't here. Very useful when you only have an ID, such as in a purchase receipt.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal player = Players:GetPlayerByUserId(123456789)\nif player then\n    print(player.Name .. \" is in this server\")\nelse\n    print(\"Not in this server\")\nend"
+    },
+    "Players:GetPlayerFromCharacter": {
+      "simple": "Give it a character Model and it gives back the Player who owns it, or nil if it isn't a player's body (for example an NPC). Super common inside Touched events.",
+      "example": "-- Script inside a lava Part\nlocal Players = game:GetService(\"Players\")\nscript.Parent.Touched:Connect(function(hit)\n    local player = Players:GetPlayerFromCharacter(hit.Parent)\n    if player then\n        local humanoid = hit.Parent:FindFirstChildOfClass(\"Humanoid\")\n        if humanoid then\n            humanoid.Health = 0 -- lava!\n        end\n    end\nend)",
+      "gotcha": "Pass the character Model (hit.Parent), not the body part (hit)."
+    },
+    "Players:GetPlayers": {
+      "simple": "Gives you a list (table) of every player in the server right now. Use it with a for loop to do something to everyone.",
+      "example": "local Players = game:GetService(\"Players\")\nfor _, player in Players:GetPlayers() do\n    print(player.Name)\nend\nprint(\"Players online: \" .. #Players:GetPlayers()) -- # counts items in a list"
+    },
+    "Players:getPlayers": {
+      "simple": "Old — use Players:GetPlayers instead."
+    },
+    "Players:GetProfileConfigurationFromUserIdAsync": {
+      "simple": "Gets the profile decoration a user picked, such as their profile background and frame image IDs. Server only, and you can only call it a limited number of times per minute.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nlocal ok, config = pcall(function()\n    return Players:GetProfileConfigurationFromUserIdAsync(1)\nend)\nif ok then\n    print(config.BackgroundAssetId, config.FrameAssetId)\nend"
+    },
+    "Players:GetUserIdFromNameAsync": {
+      "simple": "The opposite of GetNameFromUserIdAsync: give it a username and it asks Roblox for that account's UserId. Errors if the name doesn't exist, so use pcall.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal ok, userId = pcall(function()\n    return Players:GetUserIdFromNameAsync(\"Roblox\")\nend)\nif ok then\n    print(userId) -- 1\nend"
+    },
+    "Players:GetUserThumbnailAsync": {
+      "simple": "Gets a picture of a user's avatar (like a headshot) that you can show in an ImageLabel. It returns the image plus true/false for whether the picture is ready.",
+      "example": "-- LocalScript inside an ImageLabel in StarterGui\nlocal Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\nlocal image, isReady = Players:GetUserThumbnailAsync(\n    player.UserId,\n    Enum.ThumbnailType.HeadShot,\n    Enum.ThumbnailSize.Size420x420\n)\nscript.Parent.Image = image"
+    },
+    "Players:playerFromCharacter": {
+      "simple": "Old — use Players:GetPlayerFromCharacter instead."
+    },
+    "Players:players": {
+      "simple": "Old — use Players:GetPlayers instead."
+    },
+    "Players:SetChatStyle": {
+      "simple": "Used inside Roblox to pick the chat style. Your game scripts can't call it (it will error)."
+    },
+    "Players:TeamChat": {
+      "simple": "Used inside Roblox to send a team-only chat message. Your game scripts can't call it (it will error)."
+    },
+    "Players:UnbanAsync": {
+      "simple": "Lets banned users back into your game. Give it a table with UserIds and ApplyToUniverse. It also lifts any device block made by BanAsync.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nlocal ok, err = pcall(function()\n    Players:UnbanAsync({\n        UserIds = { 123456789 },\n        ApplyToUniverse = true, -- must match the ban's setting\n    })\nend)\nif not ok then\n    warn(err)\nend",
+      "gotcha": "A whole-game (ApplyToUniverse = true) unban does not cancel a single-place ban, and the other way around."
+    },
+    "Players.PlayerAdded": {
+      "simple": "Fires once each time a person joins the server, and hands you their Player object. The usual place to load data, make a leaderboard, or put them on a team.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\n\nlocal function onPlayerAdded(player)\n    print(\"Welcome, \" .. player.DisplayName)\nend\n\nfor _, player in Players:GetPlayers() do\n    onPlayerAdded(player) -- people already here\nend\nPlayers.PlayerAdded:Connect(onPlayerAdded) -- people who join later",
+      "gotcha": "In Studio solo tests you may join before this connects. The GetPlayers loop above fixes that."
+    },
+    "Players.PlayerMembershipChanged": {
+      "simple": "Fires when the server notices a player's Premium membership changed, for example right after they buy Premium through your in-game prompt.",
+      "example": "local Players = game:GetService(\"Players\")\nPlayers.PlayerMembershipChanged:Connect(function(player)\n    print(player.Name .. \"'s membership changed\")\nend)"
+    },
+    "Players.PlayerRemoving": {
+      "simple": "Fires right before a player leaves the server. The Player object still exists at this moment, so it's the perfect time to save their data. It also tells you why they left.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nPlayers.PlayerRemoving:Connect(function(player, reason)\n    print(player.Name .. \" left. Reason: \" .. tostring(reason))\n    -- save player data here (see DataStoreService)\nend)"
+    },
+    "Players.UserSubscriptionStatusChanged": {
+      "simple": "Fires on the server when a player's status for one of your game's subscriptions changes, like after they buy it. Gives you the player and the subscription ID.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nPlayers.UserSubscriptionStatusChanged:Connect(function(player, subscriptionId)\n    print(player.Name .. \" changed subscription \" .. subscriptionId)\nend)"
+    }
+  }
+}

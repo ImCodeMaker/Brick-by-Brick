@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/luau/variables.md",
+  "simple": "A variable is a name that holds a value, like `coins = 10`. You use variables to remember things in your game, such as scores, player names, or parts. This page explains how to name variables, give them values, change them, and lock them with `const` so they cannot change. Variables are one of the very first things every scripter learns.",
+  "analogy": "A variable is like a labeled jar. The label is the name, like \"coins\", and what is inside is the value, like 10. You can swap out what is inside whenever you want, unless the jar is sealed with `const`.",
+  "keyPoints": [
+    "Make a variable with `local name = value`. Without a value, it starts as `nil`.",
+    "Names can use letters, digits, and underscores, but cannot start with a digit. `a1` works; `25th` does not.",
+    "Names are case-sensitive: `Score` and `score` are different variables.",
+    "You cannot use reserved words like `if`, `end`, `local`, or `function` as names.",
+    "Use `local` almost always. Local variables are faster than global ones.",
+    "Assign several at once: `local a, b = 1, 2`. Extra variables become `nil`; extra values are thrown away.",
+    "`const` makes a variable you cannot reassign, like `const MAX_HEALTH = 100`. The contents of a const table can still change.",
+    "Naming style: `camelCase` for normal variables, `PascalCase` for classes, and `LOUD_SNAKE_CASE` for constants."
+  ],
+  "terms": {
+    "variable": "A name that holds a value so you can use it later.",
+    "value": "The data stored in a variable, like `10`, `\"Hello\"`, or `true`.",
+    "assign": "To put a value into a variable using `=`.",
+    "case-sensitive": "Capital and lowercase letters count as different. `Coins` is not the same as `coins`.",
+    "reserved word / keyword": "A word Luau already uses for its own grammar, like `if`, `then`, or `end`. You cannot use it as a name.",
+    "local": "A keyword that limits where a variable can be used, to the block of code it was made in. Faster and safer.",
+    "global": "A variable made without `local`. Any code in the same script can use it, but it is slower.",
+    "const": "A keyword that makes a variable you cannot point at a new value after creating it.",
+    "immutable": "Cannot be changed.",
+    "constant": "A value that is not supposed to change, like the max health of 100.",
+    "camelCase": "Writing names with the first word lowercase and later words capitalized, like `playerScore`.",
+    "PascalCase": "Every word capitalized, like `PlayerScore`.",
+    "LOUD_SNAKE_CASE": "All capitals with underscores between words, like `MAX_HEALTH`."
+  },
+  "example": {
+    "title": "Track a player's health",
+    "place": "Script in ServerScriptService",
+    "code": "const MAX_HEALTH = 100 -- cannot be reassigned\n\nlocal playerName = \"Nova\"\nlocal health = MAX_HEALTH\nlocal isAlive = true\n\nprint(playerName, health, isAlive) --> Nova 100 true\n\n-- Change a value\nhealth = health - 30\nprint(health) --> 70\n\n-- Assign several values at once\nlocal x, y, z = 1, 2\nprint(x, y, z) --> 1 2 nil\n\n-- MAX_HEALTH = 50 would cause an error because it is const",
+    "explain": [
+      "`const MAX_HEALTH = 100` makes a value that the script cannot reassign.",
+      "`local` creates three variables holding a string, a number, and a boolean.",
+      "`health = health - 30` reads the old value, subtracts 30, and stores 70.",
+      "With three names but only two values, `z` gets `nil`."
+    ]
+  },
+  "watchOut": [
+    "Forgetting `local`. The variable becomes global, which is slower and easier to mess up.",
+    "Typos in names. `Health` and `health` are two different variables.",
+    "Starting a name with a digit, like `1stPlace`. Use `firstPlace` instead.",
+    "Thinking `const` locks a table's contents. It only stops you reassigning the name; use `table.freeze` to lock contents.",
+    "Naming things with an underscore plus all caps, like `_VERSION`. Luau may reserve those."
+  ]
+}

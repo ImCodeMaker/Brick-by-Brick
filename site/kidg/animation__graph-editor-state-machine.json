@@ -1,0 +1,47 @@
+{
+  "path": "content/en-us/animation/graph-editor-state-machine.md",
+  "simple": "A state machine is a node in the Animation Graph Editor that holds named states, like Idle, Walk, Fall, and Land, and plays one at a time. You draw arrows (transitions) between states and give each arrow a rule, like \"go to Fall when not Grounded\". When the rule becomes true, it smoothly blends to the next state. This lets you build a full jump-fall-land system without writing the switching logic in code.",
+  "analogy": "It is like a board game path: you are always on one square, and arrows show which squares you can move to next and what you need (like rolling a 6) to move there.",
+  "keyPoints": [
+    "Add one with right-click, Insert Node, State Machine, then click Open and use Create State to add states like `Locomotion`, `Fall`, and `LandIdle`.",
+    "Back in the graph, connect an animation node to each state's input, and connect the state machine output to Graph Output's Pose.",
+    "Drag from (Entry) to the state that should play first when the graph starts.",
+    "Transitions with Wait For set to Expression switch when a rule is true, like `not Grounded` or `Speed >= 12`.",
+    "Transitions with Wait For set to Finished switch when the current animation ends, or with When set to BeforeFinished, start blending a little before it ends.",
+    "Clips like falling and landing should use Play Mode OnceAndHold so they hold their last pose.",
+    "If several rules are true at once, the transition with the highest Priority (0 to 65,535) wins; ties are random.",
+    "Duration is the blend time in seconds (default 0.15), and Curve is Linear (default) or CubicV2. Update parameters like `Grounded` from your script."
+  ],
+  "terms": {
+    "state machine": "A system that is always in exactly one state and moves between states when rules are met.",
+    "state": "One named mode, like Idle or Fall, that plays a certain animation.",
+    "transition": "An arrow from one state to another, with a rule for when to switch.",
+    "entry state": "The state that starts playing when the graph begins.",
+    "expression": "A short formula that gives true or false, like `Speed >= 12`, used as a transition rule.",
+    "Boolean": "A value that is only `true` or `false`, like `Grounded`.",
+    "OnceAndHold": "Play the clip one time, then freeze on its last pose instead of looping.",
+    "BeforeFinished": "Start blending to the next state before the current one ends. With a 0.2-second length, the blend starts in the last 0.2 seconds.",
+    "priority": "A number that decides which transition wins if several are ready at once. Higher wins.",
+    "Any transition": "A transition with no From state set, so it can start from any state.",
+    "locomotion": "Normal moving around, like idle, walk, and run blended by speed."
+  },
+  "example": {
+    "title": "Tell the graph if the character is on the ground",
+    "place": "LocalScript in StarterCharacterScripts (graph loaded on this character, AuthorityMode Automatic)",
+    "code": "local RunService = game:GetService(\"RunService\")\n\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal animator = humanoid:WaitForChild(\"Animator\")\n\n-- Load your published graph (replace the ID)\nlocal animation = Instance.new(\"Animation\")\nanimation.AnimationId = \"rbxassetid://123456789\"\nlocal graphTrack = animator:LoadAnimation(animation)\ngraphTrack:Play()\n\nRunService.Stepped:Connect(function()\n\t-- FloorMaterial is Air when nothing is under the character\n\tlocal grounded = humanoid.FloorMaterial ~= Enum.Material.Air\n\tgraphTrack:SetParameter(\"Grounded\", grounded)\n\t-- Also feed speed for the idle/run blend\n\tgraphTrack:SetParameter(\"Speed\", humanoid.MoveDirection.Magnitude * humanoid.WalkSpeed)\nend)",
+    "explain": [
+      "We load and play the published graph on the character's `Animator`.",
+      "Every frame, we check `FloorMaterial`. If it is `Air`, the character is not standing on anything.",
+      "We send `Grounded` as true or false. When it turns false, the Locomotion to Fall rule `not Grounded` becomes true.",
+      "When the character lands, `Grounded` becomes true again, so Fall switches to LandIdle, which then blends back to Locomotion.",
+      "We also send `Speed` so the Locomotion state can blend idle and run."
+    ]
+  },
+  "watchOut": [
+    "State names must match the input names on the state machine node exactly.",
+    "Forgetting the (Entry) arrow. The machine needs to know which state to start in.",
+    "Two transitions that can both be true with the same Priority. Give them different priorities so the result is not random.",
+    "Leaving falling or landing clips on a looping play mode. Use OnceAndHold so they hold the last pose.",
+    "Never updating `Grounded` from a script. The graph cannot know you jumped unless your code tells it."
+  ]
+}

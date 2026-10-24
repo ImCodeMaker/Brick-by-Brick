@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/input/mobile.md",
+  "simple": "Most Roblox players play on phones and tablets, so your game needs to work well with touch. This page covers how to check what input a player is using, how to control whether the screen is sideways (landscape) or tall (portrait), and how to make the phone buzz with haptic feedback. Getting these right makes your game feel good in a player's hands.",
+  "analogy": "Screen orientation is like choosing to hold a book open sideways or upright. Haptic feedback is like a friend tapping your shoulder when something happens.",
+  "keyPoints": [
+    "More Roblox sessions happen on mobile than anywhere else, so design for touch from the start.",
+    "Use the Input Action System for actions with on-screen buttons, and `PreferredInput` to see if a player switched to a gamepad or keyboard.",
+    "Mobile devices also support swipe and pinch gestures, plus accelerometer and gyroscope on devices that have them.",
+    "Games are landscape by default, using `LandscapeSensor`, which flips left or right as the phone turns.",
+    "Set the default orientation in `StarterGui.ScreenOrientation`: `LandscapeSensor`, `Sensor`, `LandscapeLeft`, `LandscapeRight`, or `Portrait`.",
+    "Change orientation during play with `PlayerGui.ScreenOrientation`, like locking to `Portrait` for a minigame.",
+    "Read `PlayerGui.CurrentScreenOrientation` to see which way the screen is actually showing.",
+    "Make the device vibrate with a `HapticEffect`, set its `Type`, and call `Play()`."
+  ],
+  "terms": {
+    "orientation": "Which way the screen is turned: sideways (landscape) or tall (portrait).",
+    "landscape": "The screen is wider than it is tall, like a TV.",
+    "portrait": "The screen is taller than it is wide, like a phone held normally.",
+    "sensor mode": "The phone uses its motion sensor to keep the game right-side up as you turn it.",
+    "locked mode": "The game stays in one orientation no matter how the phone is turned.",
+    "haptic feedback": "A small buzz or vibration from the device's motor that you can feel.",
+    "accelerometer": "A sensor that measures how the device is moving or tilting.",
+    "gyroscope": "A sensor that measures how the device is rotating.",
+    "gesture": "A touch movement like a swipe (sliding a finger) or a pinch (two fingers moving together or apart)."
+  },
+  "example": {
+    "title": "Lock to portrait and buzz the phone",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal player = Players.LocalPlayer\nlocal playerGui = player:WaitForChild(\"PlayerGui\")\n\n-- Print whenever the real screen orientation changes\nplayerGui:GetPropertyChangedSignal(\"CurrentScreenOrientation\"):Connect(function()\n\tprint(\"Screen is now\", playerGui.CurrentScreenOrientation)\nend)\n\n-- After 5 seconds, switch to portrait for a minigame\ntask.wait(5)\nplayerGui.ScreenOrientation = Enum.ScreenOrientation.Portrait\n\n-- Give a little buzz to show something happened\nlocal effect = Instance.new(\"HapticEffect\")\neffect.Type = Enum.HapticEffectType.UINotification\neffect.Parent = workspace\neffect:Play()",
+    "explain": [
+      "We get the player's `PlayerGui`, which controls their screen.",
+      "We listen to `CurrentScreenOrientation` so we know whenever the screen actually turns.",
+      "After 5 seconds, we ask for `Portrait`, so the game shows tall like a normal phone.",
+      "We make a `HapticEffect` with the `UINotification` type and play it, so phones that support haptics give a short buzz."
+    ]
+  },
+  "watchOut": [
+    "Forcing portrait mode for your whole game when most of it is designed for landscape. Lock it only when it makes sense.",
+    "Expecting every device to vibrate. Haptics only work on devices that support them.",
+    "Placing buttons where thumbs cannot reach or where the home bar sits. Test on a real phone or Studio's device emulator."
+  ]
+}

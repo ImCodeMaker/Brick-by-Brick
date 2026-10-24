@@ -1,0 +1,91 @@
+{
+  "name": "TweenService",
+  "simple": "TweenService makes things change smoothly over time instead of all at once. You tell it what object to change, what the property should end up as, and how long it should take. It then slides the value there for you, frame by frame. It is great for doors that slide open, buttons that grow, or colors that fade.",
+  "analogy": "TweenService is like a flip-book artist. You draw the first page and the last page, and it draws all the pages in between so the movement looks smooth.",
+  "whenToUse": [
+    "Slide a door, platform or elevator from one spot to another",
+    "Fade a part or a GUI in or out by changing `Transparency`",
+    "Smoothly change a color, size or rotation",
+    "Make menu buttons grow or bounce when hovered",
+    "Get a nice smooth curve number with `GetValue` for your own animations"
+  ],
+  "where": "Server and client. Get it with game:GetService(\"TweenService\"). Tweens made on the server are seen by everyone; tweens made in a LocalScript are only seen by that one player (and look smoother for them).",
+  "terms": {
+    "tween": "Short for \"in-between\". The game smoothly fills in all the in-between steps so a change looks like a slide instead of a jump.",
+    "interpolate": "To fill in the values between a start and an end. Going from 0 to 10 in 1 second, halfway through you are at 5.",
+    "property": "A setting on an object, like a part's `Position`, `Color`, `Size` or `Transparency`.",
+    "TweenInfo": "A small settings package that says HOW the tween moves: how long it takes, which easing style and direction, how many times it repeats, whether it plays backwards, and how long to wait before starting.",
+    "easing style": "The shape of the speed change during the tween. `Linear` keeps the same speed the whole time. `Quad`, `Cubic`, `Quart`, `Quint` and `Exponential` speed up or slow down, each one more sharply than the last. `Sine` is extra gentle. `Back` goes a little too far then comes back. `Bounce` bounces like a dropped ball. `Elastic` wobbles like a rubber band.",
+    "easing direction": "Which end of the tween gets the easing. `In` = starts slow, ends fast (like a car pulling away). `Out` = starts fast, ends slow (like a car braking to park). `InOut` = slow at both the start and the end, fast in the middle. The default is `Out`.",
+    "alpha": "A number from 0 to 1 that means \"how far along\". 0 is the start, 0.5 is halfway, 1 is the end.",
+    "instance": "Any object in your game, like a Part, a Sound, or a GUI button.",
+    "client": "The player's own computer or phone. LocalScripts run here.",
+    "server": "Roblox's computer that runs the game for everyone. Scripts in ServerScriptService run here.",
+    "goal table": "The table you give to `Create` that lists each property name and the value it should end at, like `{Position = Vector3.new(0, 10, 0), Transparency = 0.5}`.",
+    "velocity": "How fast something is moving and in which direction.",
+    "tuple": "When a function hands back more than one value at once, like `local a, b = myFunction()`.",
+    "delta time (dt)": "How many seconds passed since the last frame, usually a tiny number like 0.016 (one sixtieth of a second)."
+  },
+  "examples": [
+    {
+      "title": "Slide a part up and make it see-through",
+      "place": "Script inside a Part (in Workspace)",
+      "code": "local TweenService = game:GetService(\"TweenService\")\n\nlocal part = script.Parent\npart.Anchored = true -- anchored so gravity does not fight the tween\n\n-- HOW to move: 2 seconds, Quad easing, slow down at the end (Out)\nlocal info = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)\n\n-- WHAT to change: end 10 studs higher and half see-through\nlocal goal = {\n    Position = part.Position + Vector3.new(0, 10, 0),\n    Transparency = 0.5,\n}\n\nlocal tween = TweenService:Create(part, info, goal)\ntween:Play()\n\ntween.Completed:Wait() -- pause this script until the tween finishes\nprint(\"Done moving!\")",
+      "explain": [
+        "We get TweenService and the part this script is inside.",
+        "`TweenInfo.new(2, ...)` says: take 2 seconds, use the Quad easing style, with the Out direction (start fast, gently slow down at the end).",
+        "The goal table lists the END values. If the part starts at (0, 5, 0) it will end at (0, 15, 0), because we added (0, 10, 0).",
+        "`Create` builds the tween but does not start it. `Play` starts it.",
+        "`tween.Completed:Wait()` waits until it is finished, then we print."
+      ]
+    },
+    {
+      "title": "A door that opens and closes forever",
+      "place": "Script inside a Part named Door (in Workspace)",
+      "code": "local TweenService = game:GetService(\"TweenService\")\n\nlocal door = script.Parent\ndoor.Anchored = true\n\n-- 1.5 seconds, Sine easing, InOut (gentle start AND gentle stop)\n-- repeatCount -1 = repeat forever, reverses true = play backwards too\n-- delayTime 1 = wait 1 second before each run\nlocal info = TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true, 1)\n\nlocal tween = TweenService:Create(door, info, {\n    CFrame = door.CFrame * CFrame.new(5, 0, 0), -- 5 studs to the door's right\n})\ntween:Play()",
+      "explain": [
+        "`TweenInfo.new` has 6 settings in order: time, easing style, easing direction, repeat count, reverses, delay time.",
+        "A repeat count of -1 means it never stops repeating.",
+        "Reverses = true means after sliding open, it slides back closed.",
+        "`door.CFrame * CFrame.new(5, 0, 0)` means 5 studs to the right from the door's own point of view (its own right side), not the world's."
+      ]
+    },
+    {
+      "title": "Try every easing style side by side",
+      "place": "Script in ServerScriptService",
+      "code": "local TweenService = game:GetService(\"TweenService\")\n\nlocal styles = {\n    Enum.EasingStyle.Linear, Enum.EasingStyle.Sine, Enum.EasingStyle.Quad,\n    Enum.EasingStyle.Cubic, Enum.EasingStyle.Quart, Enum.EasingStyle.Quint,\n    Enum.EasingStyle.Exponential, Enum.EasingStyle.Circular,\n    Enum.EasingStyle.Back, Enum.EasingStyle.Bounce, Enum.EasingStyle.Elastic,\n}\n\nfor i, style in styles do\n    -- make one part per style, lined up in a row\n    local part = Instance.new(\"Part\")\n    part.Anchored = true\n    part.Size = Vector3.new(2, 2, 2)\n    part.Position = Vector3.new(i * 4, 5, 0)\n    part.Name = style.Name\n    part.Parent = workspace\n\n    -- all parts move 20 studs forward in 3 seconds, but with different styles\n    local info = TweenInfo.new(3, style, Enum.EasingDirection.Out, -1, true)\n    TweenService:Create(part, info, {Position = part.Position + Vector3.new(0, 0, 20)}):Play()\nend",
+      "explain": [
+        "We make 11 parts in a row, one for each easing style.",
+        "They all travel the same distance in the same time, so you can SEE the difference in how they speed up and slow down.",
+        "Change `Enum.EasingDirection.Out` to `In` or `InOut` and play again to see what direction does.",
+        "Watch `Back` overshoot a little, `Bounce` bounce at the end, and `Elastic` wobble."
+      ]
+    }
+  ],
+  "gotchas": [
+    "`TweenService:Create` does not start the tween. You must call `:Play()` on it.",
+    "Unanchored parts fall because of gravity while the tween moves them. Set `Anchored = true` on parts you tween.",
+    "If two tweens change the SAME property of the same object at once, the newer one wins and the older one is cancelled.",
+    "The goal table uses property names as text keys, like `{Transparency = 1}`. A misspelled name (`Transparancy`) causes an error.",
+    "Tweening a model: tween the PrimaryPart's CFrame only moves that one part unless the other parts are welded to it.",
+    "Only some value types can be tweened: numbers, booleans, CFrame, Rect, Color3, UDim, UDim2, Vector2, Vector2int16, Vector3 and EnumItem. Text (strings) cannot be tweened.",
+    "Easing styles `Bezier` and `Spring` cannot be used with `TweenInfo.new` or `GetValue`; they cause an error."
+  ],
+  "members": {
+    "TweenService:Create": {
+      "simple": "Makes a new Tween. You give it three things: the object to change, a TweenInfo (how long and what easing), and a goal table (which properties and their end values). It returns the Tween, which you start with `:Play()`.",
+      "example": "local TweenService = game:GetService(\"TweenService\")\nlocal part = workspace.Part -- a part named Part in Workspace\n\nlocal info = TweenInfo.new(1) -- 1 second, default easing (Quad, Out)\nlocal tween = TweenService:Create(part, info, {Color = Color3.fromRGB(255, 0, 0)})\ntween:Play() -- the part fades to red over 1 second",
+      "gotcha": "Each tween works on just one object. To tween 5 parts, call `Create` 5 times (once for each part)."
+    },
+    "TweenService:GetValue": {
+      "simple": "A math helper that turns a plain progress number (alpha, from 0 to 1) into an eased progress number, using an easing style and direction. Use it when you want to move something yourself (for example inside a loop) but still want that smooth tween feel.",
+      "example": "local TweenService = game:GetService(\"TweenService\")\n\n-- alpha 0.5 means halfway through the time\nlocal eased = TweenService:GetValue(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)\nprint(eased) -- 0.25: with Quad In, halfway through the time you are only 25% of the way there\n\nlocal linear = TweenService:GetValue(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.In)\nprint(linear) -- 0.5: Linear keeps a steady speed",
+      "gotcha": "Alpha numbers smaller than 0 or bigger than 1 get squeezed back into the 0 to 1 range. `Bezier` and `Spring` styles cause an error here."
+    },
+    "TweenService:SmoothDamp": {
+      "simple": "Moves a value a little bit toward a target each time you call it, like a soft spring that slows down as it arrives without bouncing. It returns two things: the new value and the new velocity (speed). Give that velocity back to the next call so the motion stays smooth. Works with numbers, Vector2, Vector3 and CFrame. Great for a part or camera that smoothly follows something.",
+      "example": "-- LocalScript in StarterPlayerScripts: a part smoothly follows a target part\nlocal RunService = game:GetService(\"RunService\")\nlocal TweenService = game:GetService(\"TweenService\")\n\nlocal follower = workspace:WaitForChild(\"Follower\")\nlocal target = workspace:WaitForChild(\"Target\")\nfollower.Anchored = true\n\nlocal velocity = Vector3.zero -- start with no speed\n\nRunService.PreRender:Connect(function(deltaTime)\n    -- smoothTime 0.3: reach the target in about 0.3 seconds\n    local newPos\n    newPos, velocity = TweenService:SmoothDamp(follower.Position, target.Position, velocity, 0.3, nil, deltaTime)\n    follower.Position = newPos\nend)",
+      "gotcha": "Always save the returned velocity and pass it into the next call. If you reset it to zero every frame, the motion will be jerky."
+    }
+  }
+}

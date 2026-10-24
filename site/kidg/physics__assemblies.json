@@ -1,0 +1,51 @@
+{
+  "path": "content/en-us/physics/assemblies.md",
+  "simple": "An assembly is a group of parts that are stuck together so the physics engine moves them as one single object. A lone block is an assembly of 1 part, your avatar is 1 assembly of 18 parts, and a ship can be 1 assembly of 179 parts. This matters because any push you give to one part moves the whole assembly, and anchoring one part can freeze the whole thing. Understanding assemblies helps you build vehicles, doors and machines that do not fall apart.",
+  "analogy": "A Lego spaceship you glued together is one assembly. If you push the wing, the whole ship slides, not just the wing. Gluing a single brick of the ship to the table holds the entire ship still.",
+  "keyPoints": [
+    "An assembly is one or more parts joined by WeldConstraints or by movable joints like Motor6Ds.",
+    "Physics treats an assembly as one rigid body: its parts cannot be pulled apart and they always move together.",
+    "A force or impulse on any part is applied to the whole assembly. `ApplyImpulse` pushes the assembly at its center of mass.",
+    "Assembly properties like `AssemblyMass`, `AssemblyLinearVelocity` and `AssemblyCenterOfMass` give the same value no matter which part of the assembly you read them from.",
+    "Every assembly has a root part. You cannot pick it directly, but an anchored part always wins, then non-massless parts, then higher `RootPriority`, then bigger parts (Seats and parts named HumanoidRootPart get a boost).",
+    "Anchoring one part of an assembly anchors the whole thing. Anchoring two or more parts splits it into separate assemblies and turns off the weld between them.",
+    "To anchor a whole assembly, anchor only its root part. Anchoring every part is slower because it creates more assemblies.",
+    "Joints only work in the Workspace (or another WorldModel). Welded parts stored in, say, ServerStorage are not acting as an assembly."
+  ],
+  "terms": {
+    "assembly": "Parts joined together that physics moves as one object. Two 4x1x2 blocks welded side by side are 1 assembly, not 2.",
+    "rigid body": "A solid object that cannot bend or come apart. However hard you hit it, the parts keep the same distance from each other.",
+    "WeldConstraint": "An invisible glue that locks two parts together in their current positions.",
+    "Motor6D": "A joint that holds two parts together but can be animated to turn, like an avatar's shoulder.",
+    "mass": "How heavy something is. In Roblox, mass = volume x density. A 4x1x2 Plastic block has volume 8 and Plastic density 0.7, so its mass is 5.6.",
+    "AssemblyMass": "All the parts' masses added up. Two 5.6 blocks welded together have an `AssemblyMass` of 11.2. If any part is anchored, the mass counts as infinite.",
+    "center of mass": "The balance point of the whole assembly. Push exactly there and it slides without spinning; push off to the side and it also starts to spin.",
+    "impulse": "A sudden one-time shove. The speed change equals impulse divided by mass: an impulse of 112 upward on a mass of 11.2 adds 10 studs per second of upward speed.",
+    "linear velocity": "Speed plus direction, in studs per second. `Vector3.new(0, 0, -20)` means moving 20 studs per second toward negative Z.",
+    "angular velocity": "How fast it spins and around which axis, in radians per second. About 6.28 radians is one full turn.",
+    "root part": "The one part that represents the assembly. It stays put when Motor6Ds animate other parts, and it is used for network ownership.",
+    "RootPriority": "A number you can set on a part to make it more (higher number) or less likely to be chosen as root part.",
+    "Massless": "When true, the part adds no weight to its assembly (as long as it is not the root part).",
+    "implicitly anchored": "Not anchored itself, but frozen anyway because it is welded to a part that is anchored.",
+    "WorldModel": "A special container (like the Workspace) where physics and joints actually run."
+  },
+  "example": {
+    "title": "Weld two blocks into one assembly and launch it",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal function makeBlock(position)\n\tlocal block = Instance.new(\"Part\")\n\tblock.Size = Vector3.new(4, 1, 2)        -- volume = 4 * 1 * 2 = 8\n\tblock.Material = Enum.Material.Plastic   -- density 0.7, so mass = 5.6\n\tblock.Position = position\n\tblock.Parent = Workspace\n\treturn block\nend\n\nlocal left = makeBlock(Vector3.new(0, 5, 0))\nlocal right = makeBlock(Vector3.new(4, 5, 0))  -- right next to the first one\n\n-- Glue them together so they become ONE assembly\nlocal weld = Instance.new(\"WeldConstraint\")\nweld.Part0 = left\nweld.Part1 = right\nweld.Parent = left\n\ntask.wait(1)\nprint(\"Mass of left alone:\", left.Mass)              -- about 5.6\nprint(\"Assembly mass:\", left.AssemblyMass)           -- about 11.2\nprint(\"Same from right:\", right.AssemblyMass)        -- also about 11.2\nprint(\"Root part:\", left.AssemblyRootPart.Name)\n\n-- Push only the LEFT part. The whole assembly flies up.\n-- Speed change = impulse / mass = 112 / 11.2 = 10 studs per second\nleft:ApplyImpulse(Vector3.new(0, 112, 0))",
+    "explain": [
+      "Each block is 4 x 1 x 2 = 8 cubic studs. Plastic has a density of 0.7, so each block's mass is 8 x 0.7 = 5.6.",
+      "The WeldConstraint joins the blocks, so the engine now sees one assembly with `AssemblyMass` 5.6 + 5.6 = 11.2. Reading it from either block gives the same number.",
+      "`AssemblyRootPart` tells you which block the engine picked as the root. Both are the same size and neither is anchored, so it could be either one.",
+      "`ApplyImpulse` on just the left block still moves both, because forces go to the whole assembly. An impulse of 112 divided by 11.2 mass adds 10 studs per second of upward speed.",
+      "If you change the impulse to 224, the upward speed change doubles to 20. If you add a third block (mass 16.8 total), the same 112 impulse only adds about 6.7."
+    ]
+  },
+  "watchOut": [
+    "Setting `AssemblyLinearVelocity` directly every frame can look jerky and unrealistic. Prefer `ApplyImpulse` for a one-time kick, or constraints like LinearVelocity or VectorForce for steady pushes.",
+    "Anchoring every part of a building is slower than anchoring just one root part. Weld the pieces and anchor one.",
+    "Anchoring two parts in the same assembly splits it, and the weld between them stops working. Do not be surprised if the middle pieces suddenly act separately.",
+    "Welds do not work while parts sit in ServerStorage or ReplicatedStorage. They only become an assembly once they are in the Workspace.",
+    "You cannot set the root part directly. If you need a specific one, use `RootPriority` or make other parts `Massless`."
+  ]
+}

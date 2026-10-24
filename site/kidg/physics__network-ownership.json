@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/physics/network-ownership.md",
+  "simple": "In a Roblox game, the physics work is shared between the server and the players' devices. Each loose part has a network owner, which is the computer in charge of working out how it moves. Parts near your character usually get owned by your device, so they react to you instantly without waiting for the server. This page explains how ownership is picked, how to set it yourself for things like cars, and why it can open the door to cheating.",
+  "analogy": "Picture a group project where each student is in charge of the pages closest to them. The student holding a page can edit it instantly, while everyone else sees the changes a moment later. The teacher (the server) can reassign pages, and always keeps the pages glued to the wall (anchored parts).",
+  "keyPoints": [
+    "Roblox uses distributed physics: the server and each player's device (client) each calculate physics for the parts they own.",
+    "Owning a part makes it feel more responsive for that player, because there is no delay waiting for the server, and it frees up the server.",
+    "The server owns all parts by default and always owns anchored parts. You cannot change who owns an anchored part.",
+    "The engine automatically gives unanchored parts to the player whose character is closest, depending on their device's power.",
+    "Server scripts can call `part:SetNetworkOwner(player)` to give a part to a player, `SetNetworkOwner(nil)` to keep it on the server, and `SetNetworkOwnershipAuto()` to hand control back to the engine.",
+    "For a car, give ownership to the driver so their controls feel instant, even if a passenger sat down first.",
+    "Turn on Network owners in the 3D viewport's Visualization Options to see colored outlines: green means your client owns it, red is a buffer zone, white or grey means someone else owns it, black means nobody does.",
+    "Clients can cheat with parts they own, like teleporting them or faking `Touched` events, so always double-check important things on the server."
+  ],
+  "terms": {
+    "server": "The Roblox computer running the game for everyone. It is the boss that keeps all players in agreement.",
+    "client": "One player's own device, like their phone, PC or console.",
+    "distributed physics": "Splitting physics work across many computers instead of making the server do it all.",
+    "network owner": "The single computer in charge of calculating a part's physics. If a ball's owner is Player A's PC, Player A's PC decides where it rolls and sends that to everyone else.",
+    "latency": "The delay for messages to travel across the internet. With 100 milliseconds of latency, a client-owned part reacts instantly for its owner, while a server-owned one reacts about a tenth of a second later.",
+    "responsive": "Reacting right away when you press a key or bump into something.",
+    "proximity": "How close something is. A crate 5 studs from your character is more likely to become yours than one 500 studs away.",
+    "assembly / mechanism": "An assembly is parts that move as one object. A mechanism is several assemblies connected by constraints, like a car body plus its wheels.",
+    "Occupant": "The property on a Seat or VehicleSeat that holds the Humanoid sitting in it, or nil when empty.",
+    "buffer zone": "An in-between state where your device is simulating a part it does not own yet. It might get ownership next, or be turned down.",
+    "exploit": "When a cheater changes what their own device sends to the server to break the rules."
+  },
+  "example": {
+    "title": "Give the driver control of the car",
+    "place": "Script inside the car's VehicleSeat (server Script)",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal vehicleSeat = script.Parent\n\nvehicleSeat:GetPropertyChangedSignal(\"Occupant\"):Connect(function()\n\tlocal humanoid = vehicleSeat.Occupant\n\tif humanoid then\n\t\t-- Someone sat down: find which player owns this character\n\t\tlocal player = Players:GetPlayerFromCharacter(humanoid.Parent)\n\t\tif player then\n\t\t\t-- The driver's device now runs the car's physics\n\t\t\tvehicleSeat:SetNetworkOwner(player)\n\t\tend\n\telse\n\t\t-- Seat is empty again: let the engine decide automatically\n\t\tvehicleSeat:SetNetworkOwnershipAuto()\n\tend\nend)",
+    "explain": [
+      "The script lives inside the VehicleSeat, so `script.Parent` is the seat. It must be a server Script, because only the server can set ownership.",
+      "`GetPropertyChangedSignal(\"Occupant\")` fires only when someone sits down or gets up.",
+      "If a Humanoid is sitting, we find its Player and call `SetNetworkOwner(player)`. Because the seat is welded to the car, the whole car assembly goes to that player.",
+      "Without this, a passenger who sat first could own the car, and the driver's steering would lag by several network cycles.",
+      "When the seat empties, `SetNetworkOwnershipAuto()` gives control back to the engine's automatic rules."
+    ]
+  },
+  "watchOut": [
+    "Trying to set the owner of an anchored part does not work, because anchored parts always belong to the server. You can call `part:CanSetNetworkOwnership()` first to check.",
+    "Calling `SetNetworkOwner(nil)` on lots of moving parts can make them look jittery for players. Only do it for gameplay-critical objects.",
+    "Never trust a `Touched` hit from a client-owned part for damage or rewards without checking on the server, for example by checking the distance between the two players.",
+    "Loose parts sitting on top of a vehicle should be given to the same player who drives it, or they may stutter."
+  ]
+}

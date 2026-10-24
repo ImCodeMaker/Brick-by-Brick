@@ -1,0 +1,27 @@
+{
+  "path": "content/en-us/animation/index.md",
+  "simple": "Animation means making things move in an expressive way, like a character waving, dancing, or swinging a sword. This page is a quick map of Roblox's animation tools. It explains which objects can be animated, and points you to the Animation Editor, inverse kinematics, and animation events. Start here to figure out which tool fits what you want to make.",
+  "analogy": "A rig is like an action figure with bendable joints. Animating it is like moving its arms and legs a little at a time for a stop-motion movie.",
+  "keyPoints": [
+    "Simple objects, like a single part, can only animate their position or rotation.",
+    "Rigs are groups of parts connected by joints (like `AnimationConstraint` or `Bone`), so they can bend at elbows, wrists, and other joints.",
+    "Standard and advanced R15 rigs can use Roblox's character animation library, whether they are players or non-player characters.",
+    "The Animation Editor lets you pose a rig at different times and smoothly animates between the poses.",
+    "Inverse kinematics can make poses automatically, like a head following a flying bird or a hand reaching for a door knob.",
+    "Animation events are markers on the timeline. A script can detect them with `AnimationTrack:GetMarkerReachedSignal()`, for example to play a footstep sound."
+  ],
+  "terms": {
+    "animation": "Planned movement for characters or objects, like a run cycle or a wave.",
+    "rig": "A model whose parts are linked by joints so they can move like a body.",
+    "joint": "The connection between two parts of a rig, like a shoulder or knee, where movement happens.",
+    "R15": "Roblox's standard character body made of 15 parts, such as upper arm, lower arm, and hand.",
+    "inverse kinematics": "Telling the hand or foot where to go, and letting Roblox figure out how the elbow and shoulder should bend to get there.",
+    "procedurally": "Made by code while the game runs, instead of drawn ahead of time by hand.",
+    "animation event": "A named marker at a moment in an animation, like at 0.5 seconds, that scripts can react to.",
+    "articulate": "Bend or move at a joint."
+  },
+  "watchOut": [
+    "Trying to make a bending animation on a single part. Only rigs with joints can bend; simple parts just move or turn.",
+    "Mixing up the tools. Use the Animation Editor for hand-made motions, inverse kinematics for motions that react to the world, and events to trigger code during an animation."
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "path": "content/en-us/parts/index.md",
+  "simple": "Parts are the basic building blocks of every Roblox world: blocks, balls, cylinders and wedges. This page shows how to add parts in Studio, select them, and move, resize and rotate them. It also covers important settings like Anchored, CanCollide, Transparency, color and material. If you learn parts well, you can build almost anything.",
+  "analogy": "Parts are like Lego bricks you can stretch to any size, paint any color and make out of any material, from wood to glowing neon.",
+  "keyPoints": [
+    "Basic parts come in five shapes: Block, Sphere, Cylinder, Wedge and Corner Wedge. A TrussPart is a climbable ladder beam you add through the Explorer.",
+    "Parts follow real-world physics by default: gravity, collisions and momentum all affect them.",
+    "Anchor most of your parts. An anchored part never moves because of gravity or bumps, and the shortcut is Alt+A (Option+A on Mac).",
+    "`CanCollide` decides if a part is solid. When false, players and objects pass right through it.",
+    "`Transparency` goes from 0 (fully visible) to 1 (invisible). Lots of see-through parts can slow your game down.",
+    "Use the Move (2), Scale (3) and Rotate (4) tools. Snapping moves in steps of studs or degrees, and holding Shift turns snapping off for a moment.",
+    "Ctrl+L (Cmd+L) switches between world directions and the part's own local directions.",
+    "Material changes how a part looks and how heavy it is. Concrete is heavier than Plastic and sinks faster in water."
+  ],
+  "terms": {
+    "part": "A basic 3D shape you build with. A new part starts as a gray Plastic block 4 studs wide, 1 tall and 2 deep.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "BasePart": "The family name for all parts, including Part, MeshPart and TrussPart.",
+    "primitive": "A simple basic shape, like a block or sphere.",
+    "anchored": "Frozen in place. An anchored part at height 20 stays at height 20 forever, even with nothing under it.",
+    "CanCollide": "Whether a part is solid. A wall with `CanCollide = false` is like a ghost wall you walk through.",
+    "Transparency": "How see-through a part is. 0 is solid, 0.5 is half see-through, 1 is invisible.",
+    "rigid body": "A solid object that never bends or squishes.",
+    "momentum": "The tendency of a moving thing to keep moving. A heavy ball rolling fast is hard to stop.",
+    "assembly": "Parts joined (for example with a WeldConstraint) so they move as one object.",
+    "world orientation vs local orientation": "World directions are the same for everything (Y is always straight up). Local directions belong to the part itself, so if a part is tilted 45 degrees, its own up arrow is tilted 45 degrees too.",
+    "snapping / increment": "Moving in fixed steps. With a 1 stud increment, dragging moves a part 1, 2, 3 studs, never 1.37.",
+    "pivot": "The point a part or model moves and rotates around.",
+    "normal (of a surface)": "The direction pointing straight out of a face. The top face of a flat floor has a normal pointing straight up.",
+    "RGB": "A way to write colors with three numbers for red, green and blue from 0 to 255. (255, 0, 0) is pure red.",
+    "material": "What a part is made of, like Wood, Glass or Neon. It changes the look and the physics, such as weight.",
+    "lock": "A locked part cannot be clicked in the 3D view, so you do not grab it by accident."
+  },
+  "example": {
+    "title": "Build a see-through, walk-through glowing gate",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal gate = Instance.new(\"Part\")\ngate.Name = \"GhostGate\"\ngate.Size = Vector3.new(10, 12, 1)        -- 10 wide, 12 tall, 1 thick\ngate.Position = Vector3.new(0, 6, -20)    -- Y = 6 puts the bottom on the ground (12 / 2)\ngate.Anchored = true                      -- stays put, no falling\ngate.CanCollide = false                   -- players walk straight through\ngate.Transparency = 0.5                   -- half see-through\ngate.Material = Enum.Material.Neon        -- glows\ngate.Color = Color3.fromRGB(0, 170, 255)  -- bright blue\ngate.Parent = Workspace",
+    "explain": [
+      "The gate is 12 studs tall. A part's Position is its center, so putting the center at Y = 6 makes the bottom touch the ground at Y = 0.",
+      "`Anchored = true` stops gravity from knocking it over.",
+      "`CanCollide = false` makes it a walk-through gate, and `Transparency = 0.5` makes it half see-through.",
+      "Neon makes it glow, and `Color3.fromRGB(0, 170, 255)` paints it blue using red, green and blue numbers."
+    ]
+  },
+  "watchOut": [
+    "Pressing Play and watching your build collapse means you forgot to anchor. Select everything that should stay still and press Anchor.",
+    "A part's Position is its center, not its bottom. A 4-stud tall block at Y = 0 sinks 2 studs into the ground. Use Y = 2 instead.",
+    "Turning off `CanCollide` does not make a part invisible, and changing `Transparency` does not make it walk-through. They are separate settings.",
+    "If a rotation or move goes in an odd direction, check whether you are in world or local mode (look for the L indicator)."
+  ]
+}

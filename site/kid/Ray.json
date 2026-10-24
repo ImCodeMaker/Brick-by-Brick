@@ -1,0 +1,75 @@
+{
+  "name": "Ray",
+  "simple": "A Ray is a math object for an invisible line that starts at one point (the origin) and shoots off forever in one direction. It can tell you the closest point on that line to some other spot, and how far away that spot is. To actually find what a laser hits in the world, you use workspace:Raycast instead, which takes an origin and a direction directly.",
+  "analogy": "A Ray is like a flashlight beam drawn on a map: it starts at the flashlight and goes straight out in one direction. Ray can tell you how close a treasure on the map is to the beam, but it does not light anything up by itself.",
+  "whenToUse": [
+    "Finding the point on a line that is closest to something, like how close a player is to a laser beam",
+    "Measuring how far a spot is from a line",
+    "Getting a mouse ray from the camera with Camera:ScreenPointToRay, then using its Origin and Direction in workspace:Raycast"
+  ],
+  "where": "Works in any script. Make one with Ray.new(origin, direction). Note: workspace:Raycast does NOT take a Ray object, but you can pass ray.Origin and ray.Direction to it.",
+  "terms": {
+    "origin": "The starting point of the ray: where the laser beam comes out. A Vector3 position like (0, 10, 0).",
+    "direction": "Which way the ray goes AND how far. It is a Vector3 arrow. Vector3.new(0, -50, 0) means \"straight down, 50 studs long\".",
+    "magnitude": "The length of a Vector3 arrow. The magnitude of (0, -50, 0) is 50. For a raycast, this length is how far the ray checks: anything farther away is ignored.",
+    "Vector3": "Three numbers (X, Y, Z) that describe a position or an arrow in the 3D world. Y is up and down.",
+    "unit vector": "An arrow with a length of exactly 1. It only tells you which way, not how far. `.Unit` turns any arrow into one.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "project onto": "Slide a point sideways onto the line until it touches it, landing at the closest spot on the line."
+  },
+  "examples": [
+    {
+      "title": "How close is a point to a laser line?",
+      "place": "Script in ServerScriptService",
+      "code": "-- A line starting at (0, 5, 0) going along the X direction\nlocal ray = Ray.new(Vector3.new(0, 5, 0), Vector3.new(10, 0, 0))\n\n-- ClosestPoint and Distance need a unit ray (direction length 1)\nlocal unitRay = ray.Unit\n\nlocal spot = Vector3.new(4, 8, 0)\nprint(unitRay:ClosestPoint(spot)) --> 4, 5, 0\nprint(unitRay:Distance(spot))     --> 3",
+      "explain": [
+        "The ray starts at (0, 5, 0) and points along +X.",
+        "ray.Unit makes the same ray but with a direction of length 1, which ClosestPoint needs.",
+        "The spot (4, 8, 0) is 3 studs above the line. The closest place on the line is directly under it at (4, 5, 0).",
+        "Distance gives that gap: 3 studs."
+      ]
+    },
+    {
+      "title": "Turn a Ray into a real raycast",
+      "place": "Script in ServerScriptService",
+      "code": "local ray = Ray.new(Vector3.new(0, 50, 0), Vector3.new(0, -100, 0))\n\n-- workspace:Raycast wants the origin and direction separately\nlocal result = workspace:Raycast(ray.Origin, ray.Direction)\nif result then\n\tprint(\"Hit\", result.Instance.Name, \"at\", result.Position)\nelse\n\tprint(\"Hit nothing\")\nend",
+      "explain": [
+        "The Ray starts 50 studs up and points 100 studs straight down.",
+        "workspace:Raycast does the real work of checking parts in the world.",
+        "If something is in the way, result has information about the hit. If not, result is nil."
+      ]
+    }
+  ],
+  "gotchas": [
+    "ClosestPoint and Distance only work correctly on a unit ray. Use ray.Unit first.",
+    "A Ray by itself never hits parts. Use workspace:Raycast(origin, direction) for that.",
+    "Ray values cannot be changed after they are made. Make a new Ray instead."
+  ],
+  "members": {
+    "Ray.new": {
+      "simple": "Makes a Ray from an origin (start point) and a direction (which way it goes). The direction does not have to be length 1.",
+      "example": "local ray = Ray.new(Vector3.new(0, 10, 0), Vector3.new(0, -1, 0)) -- start 10 studs up, point down\nprint(ray.Origin, ray.Direction)"
+    },
+    "Ray.Unit": {
+      "simple": "A copy of this Ray whose direction has been shrunk or stretched to length exactly 1, still pointing the same way. A direction of (10, 0, 0) becomes (1, 0, 0).",
+      "example": "local ray = Ray.new(Vector3.zero, Vector3.new(10, 0, 0))\nprint(ray.Unit.Direction) --> 1, 0, 0"
+    },
+    "Ray.Origin": {
+      "simple": "The starting point of the Ray, as a Vector3 position.",
+      "example": "local ray = Ray.new(Vector3.new(0, 10, 0), Vector3.new(0, -1, 0))\nprint(ray.Origin) --> 0, 10, 0"
+    },
+    "Ray.Direction": {
+      "simple": "The arrow that says which way the Ray points (and how long the arrow is), as a Vector3.",
+      "example": "local ray = Ray.new(Vector3.new(0, 10, 0), Vector3.new(0, -5, 0))\nprint(ray.Direction) --> 0, -5, 0"
+    },
+    "Ray:ClosestPoint": {
+      "simple": "Gives the point on the Ray that is closest to the point you give it. If the point is behind the start of the Ray, you get the Ray's origin. The Ray must be a unit ray (use .Unit).",
+      "example": "local unitRay = Ray.new(Vector3.zero, Vector3.new(1, 0, 0))\nprint(unitRay:ClosestPoint(Vector3.new(7, 2, 0)))  --> 7, 0, 0\nprint(unitRay:ClosestPoint(Vector3.new(-5, 2, 0))) --> 0, 0, 0 (behind the start)",
+      "gotcha": "Using a ray that is not unit length gives wrong answers. Call .Unit first."
+    },
+    "Ray:Distance": {
+      "simple": "Tells you how far a point is from the closest spot on the Ray, in studs.",
+      "example": "local unitRay = Ray.new(Vector3.zero, Vector3.new(1, 0, 0))\nprint(unitRay:Distance(Vector3.new(7, 2, 0))) --> 2"
+    }
+  }
+}

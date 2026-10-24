@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/players/index.md",
+  "simple": "When someone joins your game, Roblox makes a `Player` object for them inside the `Players` service. This page explains the life of a player: joining, spawning their character, dying and respawning, and leaving. It also covers the four containers every player has, like their Backpack for tools and PlayerGui for on-screen buttons. Finally, it explains the rules for banning players who break your game's rules.",
+  "analogy": "A `Player` is like a student's file at school, with their name and info. Their character is the student walking around the hallways. If the student goes home sick and comes back (dies and respawns), the file stays the same, but they show up again in the hallway.",
+  "keyPoints": [
+    "Each person in your game gets a `Player` object inside the `Players` service, with info like their name and `UserId`.",
+    "`Players.PlayerAdded` fires when someone joins. It is a good time to load their saved data or put them on a team.",
+    "`Player.CharacterAdded` fires each time their avatar spawns. Scripts in StarterCharacterScripts get copied into the new character.",
+    "When the Humanoid dies, the character is removed after `Players.RespawnTime` seconds and `CharacterRemoving` fires.",
+    "`Players.PlayerRemoving` fires when someone leaves. Use it to save their data.",
+    "Each Player has four containers: `Backpack` (tools), `StarterGear` (their own gear), `PlayerGui` (screen UI), and `PlayerScripts` (client scripts).",
+    "StarterPack copies into Backpack, StarterGui copies into PlayerGui, and StarterPlayerScripts copies into PlayerScripts.",
+    "You can ban rule-breakers with the Bans dashboard or `Players:BanAsync()`, but your rules must follow Roblox's Community Standards and be posted where players can read them."
+  ],
+  "terms": {
+    "user": "The real person with a Roblox account.",
+    "Player": "The object that stands for a user while they are in your game.",
+    "character": "The avatar model that walks around the 3D world. It is different from the Player object.",
+    "lifecycle": "The stages something goes through, from joining to leaving.",
+    "spawn / despawn": "Appearing in the world / being removed from the world.",
+    "Humanoid": "The object inside a character that handles health, walking, and jumping.",
+    "RespawnTime": "How many seconds after dying before the character respawns. The default is 5 seconds.",
+    "data store": "Roblox's saving system for keeping things like coins and levels between play sessions.",
+    "pcall": "Runs a function safely and catches errors, so a failed save or load does not crash the script.",
+    "container": "An object that holds other objects, like a folder.",
+    "Backpack": "Holds a player's tools, shown as buttons at the bottom of the screen. It is replaced when the character dies.",
+    "PlayerGui": "Holds the screens, buttons, and labels a player sees.",
+    "PlayerScripts": "Holds a player's client scripts that are not tied to their character. The server cannot see it.",
+    "ban": "Blocking a user from joining your game, for a set time or forever.",
+    "device blocking": "An extra ban option that blocks the banned user's computer (Windows or Mac only) for 24 hours, so they cannot just make a new account."
+  },
+  "example": {
+    "title": "Welcome players and track their characters",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal function onCharacterAdded(character)\n\tlocal humanoid = character:WaitForChild(\"Humanoid\")\n\tprint(character.Name, \"spawned with\", humanoid.Health, \"health\")\n\thumanoid.Died:Connect(function()\n\t\tprint(character.Name, \"was knocked out and will respawn soon\")\n\tend)\nend\n\nlocal function onPlayerAdded(player)\n\tprint(\"Welcome,\", player.Name, \"UserId:\", player.UserId)\n\tplayer.CharacterAdded:Connect(onCharacterAdded)\n\t-- In case the character spawned before we connected\n\tif player.Character then\n\t\tonCharacterAdded(player.Character)\n\tend\nend\n\nlocal function onPlayerRemoving(player)\n\tprint(player.Name, \"left the game. Save their data here.\")\nend\n\nPlayers.PlayerAdded:Connect(onPlayerAdded)\nPlayers.PlayerRemoving:Connect(onPlayerRemoving)",
+    "explain": [
+      "When a player joins, `onPlayerAdded` prints a welcome with their name and UserId.",
+      "It connects `CharacterAdded`, so `onCharacterAdded` runs every time their avatar spawns.",
+      "`onCharacterAdded` finds the Humanoid and listens for `Died`.",
+      "When a player leaves, `onPlayerRemoving` runs. This is where you would save their data."
+    ]
+  },
+  "watchOut": [
+    "Mixing up the Player and the character. Tools and UI belong to the Player; health and position belong to the character.",
+    "Connecting `CharacterAdded` only once and expecting it to cover the current character. Check `player.Character` too, in case it already spawned.",
+    "Forgetting `pcall` around data store calls. Saving and loading can fail.",
+    "Trying to use PlayerScripts from a server Script. The server cannot access it.",
+    "Adding gear without testing. Gear can contain scripts that let players reach places or hurt others in ways you did not plan."
+  ]
+}

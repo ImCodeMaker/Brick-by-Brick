@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/animation/inverse-kinematics.md",
+  "simple": "Inverse kinematics (IK) lets you say \"put the hand here\" and Roblox figures out how the shoulder, elbow, and wrist should bend to get it there. In Roblox you do this with an `IKControl` object, so characters can reach for door handles, look at things, or plant feet on uneven ground while the game runs. You set what part should reach, what it reaches for, and how much of the body joins in. You can also add constraints so elbows and wrists only bend the way real ones do.",
+  "analogy": "It is like reaching for a cup on a table: you just think \"grab the cup\" and your arm automatically works out how to bend. You do not plan each joint yourself.",
+  "keyPoints": [
+    "Put an `IKControl` inside the character's `Humanoid` or `AnimationController`.",
+    "Set four key properties: `Type` (like `Transform` or `Position`), `EndEffector` (the part that reaches, like LeftHand), `Target` (what it reaches toward), and `ChainRoot` (where the bending chain starts).",
+    "`ChainRoot` decides how much of the body moves. LeftUpperArm moves the whole arm; LeftLowerArm moves only from the elbow down.",
+    "The `Target` can be anything with a world position, like an `Attachment` or a part.",
+    "You can add and change `IKControl` objects during a playtest to quickly see how they behave.",
+    "Constraints keep joints natural: a `HingeConstraint` makes the elbow bend in one direction, and a `BallSocketConstraint` with `LimitsEnabled` and `UpperAngle` of 80 limits the wrist.",
+    "For constraints to work with IK, their attachments must sit on the same parts and positions as the `Motor6D` joint, and share the same parent `Model` as the `IKControl`."
+  ],
+  "terms": {
+    "inverse kinematics": "Working backward from where the end (like a hand) should be to figure out how each joint bends.",
+    "procedurally": "Done by code while the game runs, rather than hand-animated ahead of time.",
+    "end effector": "The part at the end of the chain that tries to reach the target, like a hand or foot.",
+    "target": "The thing the end effector reaches or points at, like an `Attachment` on a doorknob.",
+    "chain root": "The first part in the chain that IK is allowed to move. With LeftUpperArm as root, the upper arm, lower arm, and hand can all move.",
+    "Motor6D": "The joint object that connects two body parts in a rig and lets animations rotate them.",
+    "C0 and C1": "Offsets stored in a `Motor6D` that say where the joint sits on each of its two parts.",
+    "constraint": "An object that limits how parts can move, like a door hinge that only swings one way.",
+    "HingeConstraint": "A constraint that lets parts rotate around one axis only, like an elbow or a door hinge.",
+    "BallSocketConstraint": "A constraint that lets parts rotate in many directions, like a shoulder; with limits on, only within a cone.",
+    "UpperAngle": "The maximum tilt allowed by a ball socket limit. `80` means up to 80 degrees from straight.",
+    "PrimaryAxis": "The yellow arrow on an attachment that shows the main direction the constraint uses.",
+    "attachment": "An invisible point stuck to a part, used as a target or as an anchor for constraints."
+  },
+  "example": {
+    "title": "Make your left hand reach for a floating ball",
+    "place": "LocalScript in StarterCharacterScripts (R15 character)",
+    "code": "local character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal leftHand = character:WaitForChild(\"LeftHand\")\nlocal leftUpperArm = character:WaitForChild(\"LeftUpperArm\")\nlocal rootPart = character:WaitForChild(\"HumanoidRootPart\")\n\n-- A small ball floating in front of the character to reach for\nlocal ball = Instance.new(\"Part\")\nball.Shape = Enum.PartType.Ball\nball.Size = Vector3.new(1, 1, 1)\nball.Anchored = true\nball.CanCollide = false\nball.Position = (rootPart.CFrame * CFrame.new(-1, 1, -3)).Position\nball.Parent = workspace\n\n-- Set up IK: the left hand reaches for the ball, the whole arm can bend\nlocal ik = Instance.new(\"IKControl\")\nik.Type = Enum.IKControlType.Position\nik.EndEffector = leftHand\nik.Target = ball\nik.ChainRoot = leftUpperArm\nik.Parent = humanoid",
+    "explain": [
+      "We get the character's `Humanoid`, `LeftHand`, `LeftUpperArm`, and root part.",
+      "We make an anchored ball 3 studs in front, 1 stud left, and 1 stud up from where the character stands.",
+      "We create an `IKControl` with `Type` set to `Position`, so the hand moves to the ball's position.",
+      "`EndEffector` is the hand, `Target` is the ball, and `ChainRoot` is the upper arm, so the shoulder, elbow, and wrist all help.",
+      "Parenting it to the `Humanoid` turns it on. Walk around and the arm keeps reaching for the ball."
+    ]
+  },
+  "watchOut": [
+    "Leaving `EndEffector`, `Target`, or `ChainRoot` empty. IK needs all of them set to work.",
+    "Picking a `ChainRoot` that is not connected to the `EndEffector` through the rig. It must be up the same limb.",
+    "Weird bent-backward elbows. Add a `HingeConstraint` so the elbow only bends one way.",
+    "A red arrow on a hinge constraint means the two attachments face different ways. Copy `CFrameOrientation` from Attachment0 to Attachment1.",
+    "Constraints in a different `Model` than the `IKControl`. Keep them in the same character model."
+  ]
+}

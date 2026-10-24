@@ -1,0 +1,33 @@
+{
+  "path": "content/en-us/chat/guidelines.md",
+  "simple": "This page lists the rules your game must follow if players can send messages to each other. Any real player-to-player conversation, like chat bubbles, direct messages, team chat, or the chat window, must go through Roblox's `TextChatService` and a `TextChannel`. That keeps messages filtered, reportable, and respectful of each player's privacy and parental settings. Other text players can see, like signs, must still be filtered and rate-limited.",
+  "analogy": "It is like the rules for passing notes at school: notes between students must go through the official mailbox so a teacher can check them, while posters the school itself puts up do not count as notes.",
+  "keyPoints": [
+    "Chat means a message from one user delivered to other users: bubbles, direct messages, chat window messages, and team messages.",
+    "Menu text, game status like \"Two minutes remaining!\", admin announcements, pet names, and audit logs are not chat. Comments become chat if people can reply to them.",
+    "Every game with player text chat must use `TextChatService`, and chat must go through a `TextChannel`.",
+    "Text players can edit and others can see, like signs or bulletin boards, needs a rate limit of at least 1 minute.",
+    "Any text that came from another user must be filtered before you show it.",
+    "Respect privacy settings: `TextChannel:SendAsync()` handles basic privacy and parental settings, and direct chat channels must be marked with `TextChannel:SetDirectChatRequester()`.",
+    "Use `TextChatService:CanUserChatAsync()`, `CanUsersChatAsync()`, and `CanUsersDirectChatAsync()` to check who is allowed to chat.",
+    "Messages must be reportable for abuse; `TextChannel` handles this for you. Players who keep breaking rules get warned and then temporarily blocked from chatting."
+  ],
+  "terms": {
+    "in-game text chat": "Messages one player writes that other players read inside your game.",
+    "TextChannel": "The official path chat messages travel through so they are filtered, private settings are respected, and moderators can see them.",
+    "text filtering": "Roblox checking text and hiding bad words or personal info before others see it.",
+    "rate limit": "A rule that limits how often something can happen. A 1-minute rate limit means a player can update a sign at most once per minute.",
+    "privacy settings": "Account settings (and parental controls) that decide who a player can chat with.",
+    "parental controls": "Settings parents use to limit what their child can do on Roblox, including chat.",
+    "direct chat": "Private messages between specific players, rather than everyone in the server.",
+    "community standards": "Roblox's rules for how everyone should behave and what content is allowed.",
+    "legacy chat": "Roblox's old chat system. Games must move to `TextChatService`."
+  },
+  "watchOut": [
+    "Building your own custom chat that skips `TextChatService`. That breaks Roblox's rules.",
+    "Letting players write on signs with no cooldown. Add at least a 1-minute rate limit and filter the text.",
+    "Showing another player's text without filtering it first.",
+    "Forgetting to mark private chat channels with `SetDirectChatRequester()`.",
+    "Assuming every player can chat. Check with `CanUserChatAsync` and related methods before offering chat features."
+  ]
+}

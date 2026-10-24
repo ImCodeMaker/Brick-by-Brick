@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/ui/in-experience-containers.md",
+  "simple": "Sometimes you want UI inside the 3D world instead of flat on the screen, like a scoreboard on a wall or a name floating over someone's head. A `SurfaceGui` sticks UI onto one face of a part, like a poster. A `BillboardGui` floats in the world and always turns to face the camera. This page shows how to attach them, size them, light them, and decide how far away they can be seen.",
+  "analogy": "A `SurfaceGui` is like a poster glued to a wall: walk around and you see it from the side. A `BillboardGui` is like a balloon with a smiley face that always turns to look at you.",
+  "keyPoints": [
+    "Parent a `SurfaceGui` to a part and set its `Face` (like Front or Top) to choose which side shows the UI.",
+    "Or keep the `SurfaceGui` in `StarterGui` and set its `Adornee` to the part; this is needed for buttons on it to be clickable.",
+    "For clickable `SurfaceGui` buttons, the part's `CanQuery` must also be true.",
+    "Use scale values for the size and position of UI inside a `SurfaceGui` so it fits any face size.",
+    "`AlwaysOnTop` makes the UI draw over 3D objects instead of being hidden behind them.",
+    "`Brightness` and `LightInfluence` control how the world's lighting affects the UI; `LightInfluence` 0 means lighting has no effect.",
+    "`MaxDistance` sets how far away the UI stops drawing; 0 means no limit.",
+    "For a `BillboardGui`, scale values in `Size` are measured in studs, and `StudsOffset` shifts it, for example up above a head."
+  ],
+  "terms": {
+    "SurfaceGui": "A container that shows UI flat on one side of a part.",
+    "BillboardGui": "A container that shows UI floating in the world, always turned toward the camera.",
+    "Face": "Which side of the part the `SurfaceGui` uses: Front, Back, Top, Bottom, Left, or Right.",
+    "Adornee": "The part (or attachment) the UI should appear on, even if the UI is stored somewhere else like `StarterGui`.",
+    "occluded": "Hidden behind something. A sign behind a wall is occluded unless `AlwaysOnTop` is on.",
+    "LightInfluence": "From 0 to 1. At 1 the UI gets darker at night like the rest of the world; at 0 it stays the same.",
+    "Brightness": "How strongly the UI glows, from 0 to 1000. It only matters when `LightInfluence` is below 1 and `AlwaysOnTop` is off.",
+    "StudsOffset": "Moves a billboard a set number of studs from its part. `Vector3.new(0, 3, 0)` lifts it 3 studs up.",
+    "scale vs. offset": "Scale is a fraction of the space (0.5 = half). Offset is an exact number of pixels.",
+    "ZOffset": "Decides which `SurfaceGui` draws on top when two are on the same face. It does not physically move it.",
+    "aspect ratio": "Width compared to height. A size of 10 by 2 studs is a 10:2 (or 5:1) ratio."
+  },
+  "example": {
+    "title": "Float a name tag over a part",
+    "place": "Script in ServerScriptService (with a part named Sign in Workspace)",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal part = Workspace:WaitForChild(\"Sign\")\n\nlocal billboard = Instance.new(\"BillboardGui\")\nbillboard.Size = UDim2.fromScale(6, 2) -- 6 studs wide, 2 studs tall\nbillboard.StudsOffset = Vector3.new(0, 3, 0) -- 3 studs above the part\nbillboard.MaxDistance = 100 -- hide when farther than 100 studs\nbillboard.Parent = part\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.fromScale(1, 1) -- fill the whole billboard\nlabel.BackgroundTransparency = 1 -- no background box\nlabel.Text = \"Welcome!\"\nlabel.TextScaled = true -- text grows and shrinks with the billboard\nlabel.Parent = billboard",
+    "explain": [
+      "We find the part called Sign.",
+      "We make a `BillboardGui` 6 by 2 studs and lift it 3 studs above the part with `StudsOffset`.",
+      "We stop drawing it beyond 100 studs to keep things tidy.",
+      "We add a `TextLabel` that fills the billboard and turn on `TextScaled` so the words fit as you move closer or farther."
+    ]
+  },
+  "watchOut": [
+    "Buttons on a `SurfaceGui` or `BillboardGui` that sits inside a part will not respond to clicks. Put the GUI in `StarterGui` and set `Adornee` instead.",
+    "Wrong side? Right-click the part and choose Show Orientation Indicator to see which way is Front.",
+    "Using offset (pixels) on a `SurfaceGui` can make UI too big or too small on different parts. Use scale.",
+    "If your sign is too dark at night, lower `LightInfluence` or turn on `AlwaysOnTop`."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "path": "content/en-us/projects/configure-games.md",
+  "simple": "After you publish a game, you change most of its settings on the Creator Dashboard, a website page where all your creations live. This page walks through the most useful settings: telling Roblox what content is in your game, limiting who can play by age or country, sharing a link to your game, giving teammates access, going back to older versions, letting others copy your game, and allowing strong language for older players. These settings decide who sees your game and how safe it is, so they matter as much as the game itself.",
+  "analogy": "The Creator Dashboard is like the settings menu on a phone. The phone (your game) works without touching it, but that menu is where you decide who can call you, which apps can see your photos, and what language it speaks.",
+  "keyPoints": [
+    "Fill out the Maturity & Compliance Questionnaire so Roblox knows what content is in your game and shows it to the right ages on the Home and Discover pages.",
+    "Under Audience > Access Settings you can set a minimum age and choose which regions can play, then click Save Changes.",
+    "To share your game, hover its thumbnail on the Creator Dashboard, click the three-dot button, and pick Copy URL. On the Roblox app, use the three-dot button and Share.",
+    "In a group, what each member can do depends on their role, but owners can give extra access to one specific game.",
+    "Roblox saves versions of every place automatically, and Version History lets you go back to an older one.",
+    "Games are copylocked by default. To let others download an editable copy, open the start place's Permissions and turn on Allow users to download a copy of this Place.",
+    "Allow Strong Language (under Audience > Communication Settings) relaxes the chat filter for older players and adds a warning tag to your game page. Your own assets, name, and description still cannot contain strong language."
+  ],
+  "terms": {
+    "Creator Dashboard": "The Roblox website page at create.roblox.com where you manage your games and their settings.",
+    "content descriptors": "Short labels that describe what is in your game, such as mild violence. They come from your answers to the questionnaire.",
+    "age gate": "A rule that blocks players below a certain age from joining.",
+    "region": "A country or area of the world. You can choose which ones can play your game.",
+    "landing page": "Your game's main page on Roblox with the big Play button. Also called the main details page.",
+    "collaborator": "Another person who helps build your game, like a teammate in your group.",
+    "role permissions": "The list of things a group role is allowed to do, such as edit or publish games.",
+    "version control": "Keeping old saved copies so you can compare or go back if something breaks.",
+    "revert": "Go back to an older saved version.",
+    "copylocked": "Locked so nobody except you or your group can get an editable copy of the place. This is the default.",
+    "uncopylock": "Unlock a game so anyone can open an editable copy of it in Studio. Useful for templates you want to share.",
+    "strong language": "Swear words and rude words. The setting is meant for older audiences only."
+  },
+  "watchOut": [
+    "Uncopylocking a game you care about. Anyone can then get an editable copy of your whole place, scripts included. Only do it for templates you want to share.",
+    "Thinking Allow Strong Language lets you put swear words in your game's name, description, or signs. It only affects player chat, and your game can be moderated for strong language in its assets or page.",
+    "Forgetting to click Save Changes at the bottom of a settings page. Your changes are not kept until you do."
+  ]
+}

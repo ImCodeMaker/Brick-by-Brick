@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/ui/frames.md",
+  "simple": "A `Frame` is a plain box that holds other UI, like labels and buttons. When you move or hide the frame, everything inside moves or hides with it. Frames are perfect for building menus and work well with layouts that line things up. You can also use a thin frame as a simple line to separate parts of your UI.",
+  "analogy": "A frame is like a tray: put your cups and plates on it, and when you carry the tray, everything on it comes along.",
+  "keyPoints": [
+    "Frames are containers for other UI objects; changing the frame changes what is inside it.",
+    "You can show frames on the screen or on a part's surface.",
+    "Frames can have a background color, transparency, a gradient, or a border.",
+    "A very thin, long frame makes a neat divider line.",
+    "By default, a frame clips its contents: anything sticking out past its edges is cut off. Set `ClipsDescendants` to false to let it show.",
+    "Clipping does not work for frames that are rotated or have rounded corners; use a `CanvasGroup` for that.",
+    "Set `Size` to the smallest size you want, then set `AutomaticSize` to X, Y, or XY so the frame grows to fit its contents.",
+    "Special frames exist too: scrolling frames, viewport frames, and video frames."
+  ],
+  "terms": {
+    "container": "Something that holds other objects inside it.",
+    "clip / ClipsDescendants": "Cutting off anything inside the frame that goes past its edges, like a window only showing part of the view.",
+    "descendants": "Everything inside an object, including things inside those things.",
+    "AutomaticSize": "Lets a frame grow by itself to fit what is inside. X grows the width, Y the height, XY both.",
+    "CanvasGroup": "A special frame that can clip even when rotated or rounded.",
+    "responsive layout": "UI that rearranges itself nicely when the screen or frame size changes."
+  },
+  "example": {
+    "title": "Make a menu panel that holds a title",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\n-- The frame is the panel\nlocal frame = Instance.new(\"Frame\")\nframe.AnchorPoint = Vector2.new(0.5, 0.5) -- measure position from its center\nframe.Position = UDim2.fromScale(0.5, 0.5) -- center of the screen\nframe.Size = UDim2.fromScale(0.4, 0.5) -- 40% wide, 50% tall\nframe.BackgroundColor3 = Color3.fromRGB(40, 40, 60)\nframe.Parent = screenGui\n\n-- A label inside the frame\nlocal title = Instance.new(\"TextLabel\")\ntitle.Size = UDim2.new(1, 0, 0, 40) -- full width, 40 pixels tall\ntitle.Text = \"Menu\"\ntitle.Parent = frame\n\n-- Hide the whole menu (frame and title) after 5 seconds\ntask.wait(5)\nframe.Visible = false",
+    "explain": [
+      "We make a `ScreenGui` in the player's `PlayerGui`.",
+      "We make a `Frame` centered on the screen at 40% of the screen width and 50% of the height.",
+      "We put a `TextLabel` inside the frame, so it belongs to the panel.",
+      "After 5 seconds we hide the frame, and the title disappears too because it is inside."
+    ]
+  },
+  "watchOut": [
+    "If part of a child is missing, it may be clipped by the frame's edges. Check `ClipsDescendants`.",
+    "Rounded corners (`UICorner`) do not clip contents. Use a `CanvasGroup` if you need that.",
+    "When using `AutomaticSize`, set `Size` to the minimum size, not 0, or the frame may look squished when empty."
+  ]
+}

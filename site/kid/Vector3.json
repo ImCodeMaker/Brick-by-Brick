@@ -1,0 +1,221 @@
+{
+  "name": "Vector3",
+  "simple": "A Vector3 is three numbers grouped together: X, Y and Z. Roblox uses it for anything in 3D: where a part is (Position), how big it is (Size), and which way something is moving or pointing. You can think of it as either a SPOT in the world or an ARROW (a direction with a length). You can add, subtract and multiply Vector3s, and they come with handy tools for distance and direction.",
+  "analogy": "A Vector3 is like directions to buried treasure: \"walk 3 steps east, climb 5 steps up, walk 2 steps north\". Those three numbers can tell you WHERE the treasure is, or HOW to get from one place to another.",
+  "whenToUse": [
+    "Setting or reading a part's Position or Size.",
+    "Finding the distance between two things: `(a - b).Magnitude`.",
+    "Getting a direction from one thing to another: `(target - start).Unit`.",
+    "Moving things: `part.Position + Vector3.new(0, 5, 0)` is 5 studs higher.",
+    "Checking if something is in front of or behind you with `Dot`.",
+    "Setting velocities and forces (how fast and which way things move)."
+  ],
+  "where": "Vector3 is a built-in data type, so it works in both Scripts (server) and LocalScripts (client). No game:GetService needed. Make one with `Vector3.new(x, y, z)`.",
+  "terms": {
+    "vector": "A group of numbers that can mean a spot, or an arrow with a direction and a length. A Vector3 has 3 numbers: X, Y, Z.",
+    "component": "One of the numbers inside a vector. A Vector3 has an X component, a Y component and a Z component.",
+    "X / Y / Z": "The three directions in Roblox. X is left/right, Y is up/down (Y is height), Z is forward/back.",
+    "stud": "Roblox's unit of distance. A Vector3 of (0, 10, 0) is 10 studs up.",
+    "magnitude": "The length of the arrow. For a position difference, it is the distance. (3, 4, 0) has a magnitude of 5.",
+    "unit vector": "An arrow with length exactly 1. It keeps only the direction. Getting one is called normalizing.",
+    "normalize": "To shrink or stretch a vector so its length is 1, keeping its direction. That is what `.Unit` does.",
+    "dot product": "A single number that tells how much two arrows point the same way. Big positive: same way. 0: at a right angle. Negative: opposite ways.",
+    "cross product": "A new arrow that sticks out at a right angle (90 degrees) from two other arrows, like the axle sticking out of a wheel.",
+    "perpendicular": "At a right angle (90 degrees), like the corner of a square.",
+    "right-hand rule": "A trick to know which way the cross product points: curl the fingers of your right hand from the first arrow toward the second; your thumb points the answer's way.",
+    "radians": "The angle unit Roblox math uses. 180 degrees is pi (about 3.1416) radians. Convert with `math.deg` and `math.rad`.",
+    "lerp / interpolate": "Find a spot part-way between two vectors. 0.5 means halfway.",
+    "epsilon": "A tiny amount of difference you are willing to ignore, like 0.00001.",
+    "NaN": "Short for Not a Number. A broken number you get from things like 0 divided by 0. A NaN position makes parts vanish.",
+    "floor / ceil": "Floor rounds DOWN to a whole number (2.7 becomes 2). Ceil rounds UP (2.1 becomes 3).",
+    "absolute value": "The number without its minus sign. The absolute value of -4 is 4.",
+    "constant": "A ready-made value that never changes, like `Vector3.zero`.",
+    "NormalId": "An Enum naming the six faces of a part: Top, Bottom, Front, Back, Left, Right."
+  },
+  "examples": [
+    {
+      "title": "Move a part up by 5 studs",
+      "place": "Script inside a Part in Workspace",
+      "code": "local part = script.Parent\npart.Anchored = true\n\n-- Add 5 to Y (height). X and Z stay the same.\npart.Position = part.Position + Vector3.new(0, 5, 0)",
+      "explain": [
+        "`Vector3.new(0, 5, 0)` means: 0 sideways, 5 up, 0 forward/back.",
+        "Adding two Vector3s adds each number to its partner: if the part was at (2, 3, 4) it ends up at (2, 8, 4)."
+      ]
+    },
+    {
+      "title": "How far is the player from a part?",
+      "place": "Script in ServerScriptService (needs a Part named Goal in Workspace)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal goal = workspace:WaitForChild(\"Goal\")\n\nwhile true do\n\tfor _, player in Players:GetPlayers() do\n\t\tlocal character = player.Character\n\t\tlocal root = character and character:FindFirstChild(\"HumanoidRootPart\")\n\t\tif root then\n\t\t\t-- Subtract to get the arrow from the goal to the player, then measure its length.\n\t\t\tlocal distance = (root.Position - goal.Position).Magnitude\n\t\t\tif distance < 10 then\n\t\t\t\tprint(player.Name .. \" is close to the goal! (\" .. math.floor(distance) .. \" studs)\")\n\t\t\tend\n\t\tend\n\tend\n\ttask.wait(1)\nend",
+      "explain": [
+        "`root.Position - goal.Position` gives an arrow that goes from the goal to the player.",
+        "`.Magnitude` is the length of that arrow, which is the distance in studs.",
+        "Example: goal at (0, 0, 0), player at (6, 0, 8): the arrow is (6, 0, 8) and its length is 10."
+      ]
+    },
+    {
+      "title": "Shoot a part toward a target",
+      "place": "Script in ServerScriptService (needs Parts named Cannon and Target in Workspace)",
+      "code": "local cannon = workspace:WaitForChild(\"Cannon\")\nlocal target = workspace:WaitForChild(\"Target\")\n\nlocal ball = Instance.new(\"Part\")\nball.Shape = Enum.PartType.Ball\nball.Size = Vector3.new(2, 2, 2)\nball.Position = cannon.Position + Vector3.new(0, 3, 0)\nball.Parent = workspace\n\n-- Direction from the ball to the target, as a 1-stud-long arrow\nlocal direction = (target.Position - ball.Position).Unit\n-- Make the ball move 80 studs per second that way\nball.AssemblyLinearVelocity = direction * 80",
+      "explain": [
+        "`(target - start)` is the full arrow from start to target. Its length is the distance.",
+        "`.Unit` shrinks it to length 1 so it only means \"which way\".",
+        "Multiplying by 80 makes an arrow 80 long, so the ball flies at 80 studs per second toward the target, no matter how far away it is."
+      ]
+    },
+    {
+      "title": "Can the guard see you? (Dot product)",
+      "place": "Script in ServerScriptService (needs a Part named Guard in Workspace)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal guard = workspace:WaitForChild(\"Guard\")\n\nwhile true do\n\tfor _, player in Players:GetPlayers() do\n\t\tlocal character = player.Character\n\t\tlocal root = character and character:FindFirstChild(\"HumanoidRootPart\")\n\t\tif root then\n\t\t\tlocal facing = guard.CFrame.LookVector                     -- which way the guard looks\n\t\t\tlocal toPlayer = (root.Position - guard.Position).Unit      -- which way the player is\n\t\t\tlocal dot = facing:Dot(toPlayer)\n\t\t\t-- 1 = straight ahead, 0 = exactly to the side, -1 = straight behind\n\t\t\tif dot > 0.5 then\n\t\t\t\tprint(\"The guard sees \" .. player.Name)\n\t\t\tend\n\t\tend\n\tend\n\ttask.wait(0.5)\nend",
+      "explain": [
+        "Both arrows are unit vectors (length 1), so the dot product is between -1 and 1.",
+        "1 means they point the exact same way: the player is straight in front.",
+        "0 means a right angle: the player is directly to the side.",
+        "-1 means opposite: the player is straight behind.",
+        "`dot > 0.5` means the player is within about 60 degrees of straight ahead, like a cone of vision."
+      ]
+    }
+  ],
+  "gotchas": [
+    "You cannot change one number in place: `part.Position.Y = 10` errors. Build a new one: `part.Position = Vector3.new(part.Position.X, 10, part.Position.Z)`.",
+    "Do not call `.Unit` on a zero vector (0, 0, 0). It gives NaN and parts can disappear. Check `.Magnitude > 0` first.",
+    "Y is up in Roblox, not Z.",
+    "Angles from `Angle` are in radians. Use `math.deg` to see degrees.",
+    "`Vector3 * Vector3` multiplies each number with its partner; it is NOT the dot or cross product. Use `:Dot` and `:Cross` for those.",
+    "Comparing with `==` can fail because of tiny rounding errors. Use `:FuzzyEq` to check \"almost equal\".",
+    "Part.Orientation is a Vector3 of DEGREES, but CFrame functions want radians."
+  ],
+  "members": {
+    "Vector3.new": {
+      "simple": "Makes a new Vector3 from three numbers: X (left/right), Y (up/down) and Z (forward/back). Any number you leave out is 0.",
+      "example": "local spot = Vector3.new(0, 10, -5) -- 10 studs up, 5 studs toward -Z\nlocal empty = Vector3.new()         -- 0, 0, 0\nworkspace.Part.Size = Vector3.new(4, 1, 2)"
+    },
+    "Vector3.FromNormalId": {
+      "simple": "Turns a face name (an `Enum.NormalId` like Top or Front) into a 1-stud arrow pointing out of that face, as if the part were not turned. Top gives (0, 1, 0), Front gives (0, 0, -1).",
+      "example": "print(Vector3.FromNormalId(Enum.NormalId.Top))   --> 0, 1, 0\nprint(Vector3.FromNormalId(Enum.NormalId.Right)) --> 1, 0, 0"
+    },
+    "Vector3.FromAxis": {
+      "simple": "Turns an `Enum.Axis` (X, Y or Z) into a 1-stud arrow along that axis. X gives (1, 0, 0), Y gives (0, 1, 0), Z gives (0, 0, 1).",
+      "example": "print(Vector3.FromAxis(Enum.Axis.Y)) --> 0, 1, 0"
+    },
+    "Vector3.zero": {
+      "simple": "A ready-made Vector3 of (0, 0, 0). Shorter than writing `Vector3.new(0, 0, 0)`. Good for \"no movement\" or \"no speed\".",
+      "example": "workspace.Part.AssemblyLinearVelocity = Vector3.zero -- stop the part"
+    },
+    "Vector3.one": {
+      "simple": "A ready-made Vector3 of (1, 1, 1). Handy for making a 1 by 1 by 1 size or scaling every number by the same amount.",
+      "example": "workspace.Part.Size = Vector3.one * 3 -- a 3 by 3 by 3 cube"
+    },
+    "Vector3.xAxis": {
+      "simple": "A ready-made Vector3 of (1, 0, 0): a 1-stud arrow pointing along +X.",
+      "example": "local part = workspace.Part\npart.Position += Vector3.xAxis * 4 -- slide 4 studs along +X"
+    },
+    "Vector3.yAxis": {
+      "simple": "A ready-made Vector3 of (0, 1, 0): a 1-stud arrow pointing straight up.",
+      "example": "local part = workspace.Part\npart.Position += Vector3.yAxis * 10 -- lift 10 studs"
+    },
+    "Vector3.zAxis": {
+      "simple": "A ready-made Vector3 of (0, 0, 1): a 1-stud arrow pointing along +Z.",
+      "example": "print(Vector3.zAxis * 2) --> 0, 0, 2"
+    },
+    "Vector3.X": {
+      "simple": "The first number: left/right. You can read it but not change it. A lowercase `.x` also works.",
+      "example": "local v = Vector3.new(3, 7, -2)\nprint(v.X) --> 3"
+    },
+    "Vector3.Y": {
+      "simple": "The second number: up/down (height).",
+      "example": "local part = workspace.Part\nprint(\"The part is \" .. part.Position.Y .. \" studs high\")"
+    },
+    "Vector3.Z": {
+      "simple": "The third number: forward/back in the world.",
+      "example": "local v = Vector3.new(3, 7, -2)\nprint(v.Z) --> -2"
+    },
+    "Vector3.Magnitude": {
+      "simple": "The LENGTH of the arrow. When you subtract two positions, the Magnitude of the result is the distance between them in studs. It is worked out with the Pythagorean theorem: square root of (X*X + Y*Y + Z*Z).",
+      "example": "print(Vector3.new(3, 4, 0).Magnitude) --> 5\n\nlocal a = Vector3.new(0, 0, 0)\nlocal b = Vector3.new(6, 0, 8)\nprint((b - a).Magnitude) --> 10  (they are 10 studs apart)"
+    },
+    "Vector3.Unit": {
+      "simple": "A copy of the arrow shrunk (or stretched) to length exactly 1, pointing the same way. Use it when you only care about DIRECTION, not distance.",
+      "example": "local v = Vector3.new(3, 4, 0)\nprint(v.Unit)            --> 0.6, 0.8, 0\nprint(v.Unit.Magnitude)  --> 1",
+      "gotcha": "The zero vector has no direction, so `Vector3.zero.Unit` gives NaN values. Check `v.Magnitude > 0` first."
+    },
+    "Vector3:Abs": {
+      "simple": "Makes every number positive (removes minus signs). (-2, 4, -6) becomes (2, 4, 6).",
+      "example": "print(Vector3.new(-2, 4, -6):Abs()) --> 2, 4, 6"
+    },
+    "Vector3:Ceil": {
+      "simple": "Rounds every number UP to the next whole number. (-2.6, 5.1, 8.8) becomes (-2, 6, 9).",
+      "example": "print(Vector3.new(-2.6, 5.1, 8.8):Ceil()) --> -2, 6, 9"
+    },
+    "Vector3:Floor": {
+      "simple": "Rounds every number DOWN to a whole number. (-2.6, 5.1, 8.8) becomes (-3, 5, 8). Useful for snapping things to a grid.",
+      "example": "local pos = Vector3.new(7.3, 2.9, -1.2)\nprint(pos:Floor()) --> 7, 2, -2\n\n-- Snap to a 4-stud grid\nlocal snapped = (pos / 4):Floor() * 4\nprint(snapped) --> 4, 0, -4"
+    },
+    "Vector3:Sign": {
+      "simple": "Replaces every number with -1 if it is negative, 0 if it is zero, or 1 if it is positive. (-2.6, 5.1, 0) becomes (-1, 1, 0).",
+      "example": "print(Vector3.new(-2.6, 5.1, 0):Sign()) --> -1, 1, 0"
+    },
+    "Vector3:Cross": {
+      "simple": "Gives a new arrow that points at a right angle (90 degrees) to BOTH arrows, like a flagpole sticking straight up out of a flat floor made by the two arrows. Swapping the order flips the answer to point the other way. If the two arrows point the same (or exactly opposite) way, the answer is (0, 0, 0).",
+      "example": "local right = Vector3.new(1, 0, 0)\nlocal up = Vector3.new(0, 1, 0)\nprint(right:Cross(up)) --> 0, 0, 1\nprint(up:Cross(right)) --> 0, 0, -1  (order matters!)"
+    },
+    "Vector3:Angle": {
+      "simple": "Tells you the angle between two arrows, in radians (0 to pi, which is 0 to 180 degrees). If you also give an `axis`, the answer gets a plus or minus sign to tell you which way around it turns.",
+      "example": "local a = Vector3.new(1, 0, 0)\nlocal b = Vector3.new(0, 1, 0)\nprint(math.deg(a:Angle(b)))                    --> 90\nprint(math.deg(b:Angle(a, Vector3.zAxis)))     --> -90 (turns the other way around Z)"
+    },
+    "Vector3:Dot": {
+      "simple": "Gives one number that tells how much two arrows point the same way. You multiply the matching numbers and add them up: a.X*b.X + a.Y*b.Y + a.Z*b.Z. With two 1-length arrows: 1 = exactly the same way, 0 = at a right angle, -1 = exactly opposite. Great for \"is it in front of me?\".",
+      "example": "local forward = Vector3.new(0, 0, -1)\nprint(forward:Dot(Vector3.new(0, 0, -1))) --> 1   same way\nprint(forward:Dot(Vector3.new(1, 0, 0)))  --> 0   to the side\nprint(forward:Dot(Vector3.new(0, 0, 1)))  --> -1  opposite way\n\nprint(Vector3.new(1, 2, 3):Dot(Vector3.new(4, 5, 6))) --> 32  (1*4 + 2*5 + 3*6)",
+      "gotcha": "Use `.Unit` on both arrows first if you want the simple -1 to 1 answer; otherwise the lengths make the number bigger."
+    },
+    "Vector3:FuzzyEq": {
+      "simple": "Checks if two Vector3s are ALMOST equal. Computers make tiny rounding errors, so `==` might say false for values that are basically the same. The optional `epsilon` sets how close counts (default 0.00001).",
+      "example": "local a = Vector3.new(1, 2, 3)\nlocal b = Vector3.new(1.000001, 2, 3)\nprint(a == b)               --> false\nprint(a:FuzzyEq(b))         --> true\nprint(a:FuzzyEq(b, 1e-8))   --> false (stricter)"
+    },
+    "Vector3:Lerp": {
+      "simple": "Finds a point part-way from this vector to `goal`. `alpha` 0 is the start, 1 is the goal, 0.5 is halfway. Great for smooth sliding.",
+      "example": "local a = Vector3.new(0, 0, 0)\nlocal b = Vector3.new(10, 20, 0)\nprint(a:Lerp(b, 0.5))  --> 5, 10, 0  (halfway)\nprint(a:Lerp(b, 0.1))  --> 1, 2, 0   (10 percent of the way)",
+      "gotcha": "`alpha` is not limited: 2 goes twice as far as the goal, and -1 goes backward past the start."
+    },
+    "Vector3:Max": {
+      "simple": "Builds a new Vector3 by picking the BIGGER number from each pair. (1, 2, 1) and (2, 1, 2) give (2, 2, 2).",
+      "example": "print(Vector3.new(1, 2, 1):Max(Vector3.new(2, 1, 2))) --> 2, 2, 2"
+    },
+    "Vector3:Min": {
+      "simple": "Builds a new Vector3 by picking the SMALLER number from each pair. (1, 2, 1) and (2, 1, 2) give (1, 1, 1).",
+      "example": "print(Vector3.new(1, 2, 1):Min(Vector3.new(2, 1, 2))) --> 1, 1, 1"
+    },
+    "op:Vector3+Vector3": {
+      "simple": "Adds each number to its partner: X+X, Y+Y, Z+Z. Use it to move a position by an offset.",
+      "example": "print(Vector3.new(1, 2, 3) + Vector3.new(4, 5, 6)) --> 5, 7, 9\n-- A part at (0, 5, 0) moved by an offset of (2, 0, 0) ends up at (2, 5, 0)"
+    },
+    "op:Vector3-Vector3": {
+      "simple": "Subtracts each number from its partner. `target - start` gives the arrow from start to target; its Magnitude is the distance.",
+      "example": "print(Vector3.new(5, 7, 9) - Vector3.new(1, 2, 3)) --> 4, 5, 6\nlocal distance = (Vector3.new(6, 0, 8) - Vector3.new(0, 0, 0)).Magnitude --> 10"
+    },
+    "op:Vector3*Vector3": {
+      "simple": "Multiplies each number with its partner (X*X, Y*Y, Z*Z). Handy to scale each direction differently, or to zero-out one direction.",
+      "example": "print(Vector3.new(1, 2, 3) * Vector3.new(2, 0, -1)) --> 2, 0, -3\n\n-- Remove the up/down part of a direction (keep it flat on the ground)\nlocal dir = Vector3.new(5, 3, 2)\nprint(dir * Vector3.new(1, 0, 1)) --> 5, 0, 2",
+      "gotcha": "This is NOT the dot or cross product."
+    },
+    "op:Vector3/Vector3": {
+      "simple": "Divides each number by its partner (X/X, Y/Y, Z/Z).",
+      "example": "print(Vector3.new(10, 20, 30) / Vector3.new(2, 4, 5)) --> 5, 5, 6"
+    },
+    "op:Vector3//Vector3": {
+      "simple": "Floor division: divides each number by its partner, then rounds DOWN to a whole number.",
+      "example": "print(Vector3.new(7, 9, 10) // Vector3.new(2, 4, 3)) --> 3, 2, 3\n-- 7/2 = 3.5 -> 3, 9/4 = 2.25 -> 2, 10/3 = 3.33 -> 3"
+    },
+    "op:Vector3*number": {
+      "simple": "Multiplies every number by the same amount. Makes an arrow longer or shorter without changing its direction. `number * Vector3` works too.",
+      "example": "print(Vector3.new(1, 2, 3) * 2) --> 2, 4, 6\n-- 10 studs in front of a part:\nlocal part = workspace.Part\nlocal ahead = part.Position + part.CFrame.LookVector * 10"
+    },
+    "op:Vector3/number": {
+      "simple": "Divides every number by the same amount. Dividing by 2 makes the arrow half as long. Dividing the sum of two positions by 2 finds the middle point.",
+      "example": "print(Vector3.new(10, 4, 6) / 2) --> 5, 2, 3\nlocal middle = (Vector3.new(0, 0, 0) + Vector3.new(10, 0, 0)) / 2 --> 5, 0, 0"
+    },
+    "op:Vector3//number": {
+      "simple": "Floor division by one number: divides each number, then rounds DOWN. Good for finding which grid square a position is in.",
+      "example": "print(Vector3.new(7, 8, 9) // 2) --> 3, 4, 4\n-- Which 4-stud grid cell is (13, 0, 5) in?\nprint(Vector3.new(13, 0, 5) // 4) --> 3, 0, 1"
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "name": "task",
+  "simple": "The task library controls WHEN code runs. `task.wait` pauses your script for some seconds. `task.spawn`, `task.defer` and `task.delay` start a function running on the side, so your main code keeps going without waiting for it. `task.cancel` stops something you scheduled.",
+  "analogy": "Think of a kitchen. `task.wait(5)` is you standing by the oven for 5 minutes. `task.spawn` is handing a job to a helper right now while you keep cooking. `task.defer` is a sticky note saying \"helper, do this as soon as I finish what I am doing right now\". `task.delay(5, ...)` is setting a kitchen timer that tells the helper to start in 5 minutes. `task.cancel` is tearing up the note before the helper starts.",
+  "whenToUse": [
+    "Pause between steps, like a countdown: `task.wait(1)`",
+    "Run a loop forever without freezing the rest of your script: `task.spawn`",
+    "Do something later without stopping now, like removing a power-up after 10 seconds: `task.delay`",
+    "Let the current code finish first, then run something: `task.defer`",
+    "Stop a scheduled job that is no longer needed: `task.cancel`"
+  ],
+  "where": "A built-in library, so there is nothing to get. Use `task.wait`, `task.spawn` and friends in any Script, LocalScript or ModuleScript, on the server or the client.",
+  "terms": {
+    "yield": "To pause. When code yields, it stops at that line and lets the rest of the game keep running, then continues later from the same line. `task.wait` yields.",
+    "thread": "One line of work that the game is doing. Your script is a thread. `task.spawn` makes a new thread that runs alongside yours, like a second worker.",
+    "scheduler": "The part of the engine that decides which thread runs next and when to wake up paused ones.",
+    "frame": "One picture the game draws, about 60 per second. Each frame, the game also wakes up threads that are done waiting.",
+    "Heartbeat": "The moment at the end of every frame when waiting threads wake up. See RunService.Heartbeat.",
+    "coroutine": "A function that can pause in the middle and be continued later. `task` functions can take one (a thread) instead of a plain function.",
+    "throttle": "To slow things down on purpose. The old `wait()` did this when the game was busy; `task.wait` does not.",
+    "parallel / serial": "Serial means one thing at a time, in order. Parallel means many things truly at the same time on different processor cores. Parallel Luau is an advanced feature that needs an `Actor` object.",
+    "Actor": "A special container object. Scripts inside an Actor can run some code in parallel."
+  },
+  "examples": [
+    {
+      "title": "Yielding: wait pauses YOUR script",
+      "place": "Script in ServerScriptService",
+      "code": "print(\"3\")\ntask.wait(1) -- this script pauses here for about 1 second\nprint(\"2\")\ntask.wait(1)\nprint(\"1\")\ntask.wait(1)\nprint(\"Go!\")",
+      "explain": [
+        "`task.wait(1)` yields: this script stops at that line for about 1 second.",
+        "While it waits, the rest of the game (other scripts, physics, players) keeps running normally.",
+        "After the time is up, the script continues on the next line."
+      ]
+    },
+    {
+      "title": "spawn vs defer vs delay: who prints first?",
+      "place": "Script in ServerScriptService",
+      "code": "print(\"A: start\")\n\ntask.delay(2, function()\n    print(\"E: delay - runs about 2 seconds later\")\nend)\n\ntask.defer(function()\n    print(\"D: defer - runs after the current code is finished\")\nend)\n\ntask.spawn(function()\n    print(\"B: spawn - runs right away\")\n    task.wait(1) -- only pauses THIS spawned function, not the main script\n    print(\"F (after 1 second): spawn continues\")\nend)\n\nprint(\"C: main script keeps going, it did not wait\")",
+      "explain": [
+        "The output order is A, B, C, D, then F after 1 second, then E after 2 seconds.",
+        "`task.spawn` runs its function immediately, until that function yields (here, `task.wait(1)`). Then the main script continues.",
+        "`task.defer` waits politely: it runs once the current bit of code (the rest of this script) is done, still in the same frame.",
+        "`task.delay(2, ...)` runs the function after 2 seconds, and the main script does not wait for it.",
+        "The `task.wait(1)` inside the spawned function only pauses that function. The main script is a different thread and is not paused."
+      ]
+    },
+    {
+      "title": "A loop that runs forever without blocking the rest",
+      "place": "Script in ServerScriptService",
+      "code": "local part = workspace:WaitForChild(\"Lamp\")\n\n-- this loop never ends, so we run it in its own thread\ntask.spawn(function()\n    while true do\n        part.Color = Color3.fromRGB(255, 0, 0) -- red\n        task.wait(0.5)\n        part.Color = Color3.fromRGB(0, 0, 255) -- blue\n        task.wait(0.5)\n    end\nend)\n\n-- without task.spawn, this line would never run\nprint(\"Lamp is flashing, and I can keep doing other things\")",
+      "explain": [
+        "A `while true do` loop never finishes. If it was in the main script, any code after it would never run.",
+        "Putting it inside `task.spawn` gives it its own thread, so the print below still runs.",
+        "Every loop that runs forever MUST have a `task.wait` inside, or the game freezes."
+      ]
+    },
+    {
+      "title": "A speed boost that ends after 5 seconds, and can be cancelled",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAdded:Connect(function(character)\n        local humanoid = character:WaitForChild(\"Humanoid\")\n        humanoid.WalkSpeed = 32 -- boost!\n\n        -- schedule the boost to end in 5 seconds, without pausing this function\n        local resetThread = task.delay(5, function()\n            humanoid.WalkSpeed = 16 -- back to normal\n        end)\n\n        -- if the player dies first, cancel the scheduled reset\n        humanoid.Died:Connect(function()\n            task.cancel(resetThread)\n        end)\n    end)\nend)",
+      "explain": [
+        "When a character spawns, we double their walking speed.",
+        "`task.delay` sets up the reset for 5 seconds later and gives back the thread it made.",
+        "If the player dies before then, `task.cancel` throws away the reset so it never runs."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Use `task.wait`, not the old `wait`. The old one can wait longer than asked when the game is busy.",
+    "A `while true do` loop with no `task.wait` inside freezes the game (and Studio). Always wait inside endless loops.",
+    "`task.wait` only pauses the script (thread) it is in. It does not pause other scripts or a function you started with `task.spawn`.",
+    "`task.wait(0.1)` waits AT LEAST 0.1 seconds. It wakes on the next frame after the time is up, so it may be a tiny bit longer. It returns the real time that passed.",
+    "Code inside `task.spawn` or `task.delay` runs separately. If it errors, your main script keeps going, but the spawned function stops.",
+    "Do not forget the comma: `task.delay(3, myFunction)`, and pass the function itself (`myFunction`), not the result of calling it (`myFunction()`)."
+  ],
+  "members": {
+    "task.spawn": {
+      "simple": "Runs a function (or resumes a thread) RIGHT NOW as its own separate thread. If that function yields (for example with `task.wait`), your code carries on instead of waiting for it. Any extra values you pass go into the function. It gives back the thread it made.",
+      "example": "local function greet(name)\n    task.wait(2) -- pauses only this greet thread\n    print(\"Hello, \" .. name)\nend\n\ntask.spawn(greet, \"Alex\") -- starts now; \"Alex\" is passed to name\nprint(\"This prints first, before Hello, Alex\")"
+    },
+    "task.defer": {
+      "simple": "Like `task.spawn`, but it does not run immediately. It waits until the code that is running right now reaches its next pause point (finishes or yields), and then runs, still in the same frame. Use it when something should happen \"right after this\".",
+      "example": "task.defer(function()\n    print(\"2: deferred\")\nend)\nprint(\"1: this finishes first\")"
+    },
+    "task.delay": {
+      "simple": "Schedules a function to run after a number of seconds, without pausing your code now. Extra values after the function are passed into it. It gives back a thread, which you can stop with `task.cancel`.",
+      "example": "local part = workspace:WaitForChild(\"Bomb\")\n\ntask.delay(3, function()\n    part:Destroy() -- after 3 seconds, the bomb disappears\nend)\nprint(\"The countdown has started\") -- runs right away",
+      "gotcha": "`task.delay(0, f)` runs `f` on the very next frame (next Heartbeat), not instantly."
+    },
+    "task.desynchronize": {
+      "simple": "Advanced (Parallel Luau). Switches the script into parallel mode so it can run at the same time as other scripts on other processor cores. Only works for scripts inside an `Actor`; otherwise it errors. If you are already in parallel mode, it does nothing.",
+      "example": "-- Script inside an Actor (advanced)\ntask.desynchronize()\n-- heavy math here can run in parallel with other Actors\nlocal total = 0\nfor i = 1, 1000000 do total += i end\ntask.synchronize() -- go back before changing parts in Workspace",
+      "gotcha": "In parallel mode you cannot change most things in the game world. Call `task.synchronize()` first."
+    },
+    "task.synchronize": {
+      "simple": "Advanced (Parallel Luau). Switches the script back to normal one-at-a-time (serial) mode, where it is safe to change the game world. Only for scripts inside an `Actor`. If you are already in serial mode, it does nothing.",
+      "example": "-- Script inside an Actor (advanced)\ntask.desynchronize()\nlocal result = 2 + 2 -- parallel-safe work\ntask.synchronize()\nworkspace.Part.Name = tostring(result) -- safe to change the world now"
+    },
+    "task.wait": {
+      "simple": "Pauses (yields) the current script for the number of seconds you give, then continues on the next frame after that time has passed. It returns how many seconds really passed. With no number, it waits just one frame.",
+      "example": "print(\"Waiting...\")\nlocal actual = task.wait(2) -- pause this script for about 2 seconds\nprint(\"Waited\", actual, \"seconds\") -- e.g. 2.008\n\ntask.wait() -- wait just one frame (about 0.016 seconds)",
+      "gotcha": "It never waits LESS than you asked, but it can be a little more because it wakes on the next frame."
+    },
+    "task.cancel": {
+      "simple": "Stops a thread so it never runs (or never continues). Use it with the thread you got back from `task.delay`, `task.spawn` or `task.defer` when you change your mind.",
+      "example": "local thread = task.delay(5, function()\n    print(\"You will never see this\")\nend)\n\ntask.cancel(thread) -- cancelled before the 5 seconds were up",
+      "gotcha": "You cannot cancel the thread that is calling `task.cancel` (the one running right now); that causes an error."
+    }
+  }
+}

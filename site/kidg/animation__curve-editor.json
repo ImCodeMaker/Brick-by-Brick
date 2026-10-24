@@ -1,0 +1,32 @@
+{
+  "path": "content/en-us/animation/curve-editor.md",
+  "simple": "The Curve Editor is a special view inside the Animation Editor that shows your animation as colored lines on a graph. Each line shows how one value, like a rotation around X, Y, or Z, changes over time. By bending these lines you control exactly how smooth, sharp, or bouncy the motion feels. It is a more advanced tool for when you want your animations to look extra polished.",
+  "analogy": "It is like a speed graph for a roller coaster ride: a steep part of the line means fast change, a flat part means the motion is barely changing at that moment.",
+  "keyPoints": [
+    "Switch to it by clicking the Curve Editor icon in the top-left of the timeline. Your `KeyframeSequence` clip converts to a `CurveAnimation` clip.",
+    "Before switching, pick your Default Rotation Type (Euler Angles or Quaternions) in the settings icon menu. Converting quaternions to Euler angles cannot be undone.",
+    "The position ruler on the left and rotation ruler on the right show values for your selected tracks.",
+    "Tangents are handles on the curve. Drag them to change how motion flows into and out of a keyframe; right-click and choose Set Tangent To Zero to reset one.",
+    "Interpolation modes are Linear (steady, the default), Constant (snaps), and Cubic (eases, and the only mode with tangents).",
+    "Bounce and Elastic are not normal modes here. Select two or more keyframes, right-click, and use Generate Curve to fake them.",
+    "Euler angles order (like XYZ or ZYX) sets which axis turns first. Changing it on an existing Euler track can change how the animation looks."
+  ],
+  "terms": {
+    "curve": "A line on the graph showing how one value changes over time.",
+    "dope sheet": "The normal Animation Editor timeline view that shows keyframes as dots on rows, without the curves.",
+    "Euler angles": "Rotation written as three angles: how much to turn around X, around Y, and around Z, like 0, 45, 0 for a 45 degree turn left.",
+    "quaternion": "A different math way to store rotation that always takes the shortest path and avoids certain glitches. Harder to read, but steady.",
+    "gimbal lock": "A glitch with Euler angles where two axes line up and you lose one direction of turning, which can make motion twist oddly.",
+    "interpolation": "Filling in the values between two keyframes so the rig moves smoothly instead of jumping.",
+    "tangent": "A handle on a keyframe that bends the curve. Pulling it changes how fast the motion starts or ends around that keyframe.",
+    "Cubic": "An interpolation mode that eases in and out smoothly, like a car speeding up and slowing down gently.",
+    "Euler angles order": "Which axis rotation is applied first. XYZ means the rig turns on Z first, then Y, then X.",
+    "axis": "One of the three directions: X (side to side), Y (up and down), Z (forward and back)."
+  },
+  "watchOut": [
+    "Opening the Curve Editor without checking the rotation type. Choose Quaternions first if you want the animation to stay exactly the same, since Euler conversion is permanent.",
+    "Trying to drag tangents on a Linear or Constant keyframe. Only Cubic keyframes have tangents.",
+    "Looking for Bounce and Elastic in the interpolation menu. Use Generate Curve instead.",
+    "Changing the Euler angles order on finished Euler tracks. It can change the motion, so pick the order early."
+  ]
+}

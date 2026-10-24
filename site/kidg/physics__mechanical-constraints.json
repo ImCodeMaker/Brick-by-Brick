@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/physics/mechanical-constraints.md",
+  "simple": "Mechanical constraints are physics connections that work like real machine parts: hinges, springs, ropes, rods, sliders and more. You use them to build doors that swing, bridges that sway, cars with suspension and wrecking balls on chains. This page lists all of them and shows how to create one by connecting two attachments. Once you get the attachment idea, every constraint works the same way.",
+  "analogy": "Constraints are like the hardware in a toolbox. A hinge, a spring and a piece of rope can all join the same two boards, but each one lets the boards move in a very different way.",
+  "keyPoints": [
+    "The mechanical constraints are BallSocket, Hinge, Prismatic, Cylindrical, Spring, TorsionSpring, Universal, Rope, Rod, Plane, Weld, Rigid and NoCollision.",
+    "Most constraints connect two attachments (or bones): `Attachment0` on one part and `Attachment1` on the other.",
+    "WeldConstraint and NoCollisionConstraint are different: they link two parts directly with `Part0` and `Part1`, no attachments.",
+    "In Studio, pick a constraint from the Model tab, then click on two parts to drop attachments and connect them. Or insert one in the Explorer and set Attachment0 and Attachment1 in Properties.",
+    "If a constraint uses Bones, it follows their animated position and rotation.",
+    "Show Welds (Alt+W) and Show Constraint Details (Alt+D) in the View menu draw constraints in the 3D view. The Mechanisms visualization outlines parts that are simulated together.",
+    "Switch the toolbar from Geometric to Physical mode to drag parts around while obeying constraints, like a rope pulling the other part along."
+  ],
+  "terms": {
+    "constraint": "A physics rule that connects parts and limits how they can move relative to each other.",
+    "mechanical constraint": "A constraint that behaves like a real mechanical connection, such as a hinge or spring.",
+    "mover constraint": "A different family of constraints that push, spin or line up assemblies with force.",
+    "attachment": "A Roblox object you put inside a part to mark one exact point on it. Its Position is measured from the part's center, so an attachment at (-2, 0, 0) sits 2 studs toward the part's own left side.",
+    "Attachment0 / Attachment1": "The two ends of a constraint. A rope with Attachment0 on a ceiling and Attachment1 on a ball hangs the ball from the ceiling.",
+    "bone": "A joint inside an animated mesh. Constraints attached to bones move as the animation plays.",
+    "assembly": "Parts joined together that physics moves as one object.",
+    "mechanism": "A group of assemblies connected by constraints that the engine simulates together, like a car body plus its 4 wheels.",
+    "Geometric vs Physical mode": "In Geometric mode, dragging a part ignores physics. In Physical mode, dragging obeys constraints and collisions."
+  },
+  "example": {
+    "title": "Hang a ball from a ceiling with a rope",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal ceiling = Instance.new(\"Part\")\nceiling.Size = Vector3.new(6, 1, 6)\nceiling.Position = Vector3.new(0, 30, 0)\nceiling.Anchored = true\nceiling.Parent = Workspace\n\nlocal ball = Instance.new(\"Part\")\nball.Shape = Enum.PartType.Ball\nball.Size = Vector3.new(3, 3, 3)\nball.Position = Vector3.new(8, 20, 0)   -- off to the side, so it will swing\nball.Parent = Workspace\n\n-- One attachment on each part. Positions are measured from each part's center.\nlocal topAttachment = Instance.new(\"Attachment\")\ntopAttachment.Position = Vector3.new(0, -0.5, 0)  -- bottom face of the 1-stud-thick ceiling\ntopAttachment.Parent = ceiling\n\nlocal ballAttachment = Instance.new(\"Attachment\")\nballAttachment.Parent = ball  -- (0, 0, 0) = center of the ball\n\n-- The constraint links the two attachments\nlocal rope = Instance.new(\"RopeConstraint\")\nrope.Attachment0 = topAttachment\nrope.Attachment1 = ballAttachment\nrope.Length = 15\nrope.Visible = true\nrope.Parent = ceiling",
+    "explain": [
+      "The ceiling is anchored so it holds still. The ball is not, so gravity pulls it.",
+      "The ceiling's attachment is at (0, -0.5, 0) from its center. The ceiling is 1 stud thick, so that is exactly its bottom face, at world height 29.5.",
+      "The ball's attachment is at its center. The rope's two ends are `Attachment0` and `Attachment1`.",
+      "The ball starts about 12 studs from the ceiling point (8 sideways and 9.5 down), less than the 15-stud rope, so it falls until the rope goes tight and then swings.",
+      "Change `rope.Length` to 5 and the ball swings on a much shorter, faster arc."
+    ]
+  },
+  "watchOut": [
+    "A constraint with an empty Attachment0 or Attachment1 does nothing. Make sure both are set.",
+    "If both parts are anchored, nothing will move. At least one side must be unanchored.",
+    "Do not look for Attachment0 on a WeldConstraint or NoCollisionConstraint. Those use Part0 and Part1.",
+    "Attachments face a direction, and many constraints care about it. If something rotates or slides the wrong way, turn on Show Constraint Details and check the arrows."
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "name": "PrismaticConstraint",
+  "simple": "PrismaticConstraint lets two parts slide along one straight line but never twist. The attachments' X arrows form the sliding track. You can let it slide freely, power it like a motor, or make it slide to an exact spot like a servo. Most of its settings come from SlidingBallConstraint.",
+  "analogy": "PrismaticConstraint is like a drawer in a desk or a sliding door: it only moves in and out along one track.",
+  "whenToUse": [
+    "Elevators and lifts",
+    "Sliding doors and drawers",
+    "Pistons and crushers in an obby"
+  ],
+  "where": "Make it with Instance.new(\"PrismaticConstraint\"), set Attachment0 and Attachment1 (one in each part) and put it in workspace. The sliding line is along the attachments' X arrows. Its settings (ActuatorType, TargetPosition, LimitsEnabled...) come from SlidingBallConstraint.",
+  "terms": {
+    "constraint": "An invisible rule or connector that the physics engine follows, like 'these two parts must stay stuck together' or 'push this part upward'.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "axis": "An imaginary line something turns around or slides along. An attachment's X axis is its main arrow.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "force": "A push or pull. In Roblox it is measured in Roblox force units (mass x studs per second per second). A bigger number is a harder push.",
+    "actuator": "The part of a constraint that powers movement by itself, like a motor. ActuatorType picks None (no power), Motor (keep spinning/moving at a speed) or Servo (move to a target spot and stop).",
+    "motor (ActuatorType)": "Keeps turning or sliding at a set speed, like a fan or a car wheel.",
+    "servo (ActuatorType)": "Moves to a set target angle or position and holds there, like a robot arm or an automatic door.",
+    "limits": "Stops that keep a joint from moving too far, like a door that can only swing 90 degrees.",
+    "restitution": "Bounciness, from 0 (no bounce, just stops) to 1 (bounces back as hard as it hit).",
+    "stud": "Roblox's unit of length. A default baseplate grid square is 1 stud; a classic character is about 5 studs tall.",
+    "SlidingBallConstraint": "The parent class that PrismaticConstraint gets all its sliding settings from, like Velocity, TargetPosition and LowerLimit.",
+    "collinear": "Lying on the same straight line. The sliding track is the line along the attachments' X arrows."
+  },
+  "examples": [
+    {
+      "title": "A simple elevator",
+      "place": "Script in ServerScriptService",
+      "code": "local shaft = workspace:WaitForChild(\"Shaft\")       -- anchored\nlocal platform = workspace:WaitForChild(\"Platform\") -- unanchored\n\n-- Point both attachments' X arrows straight up (the sliding track)\nlocal upward = CFrame.Angles(0, 0, math.rad(90))\nlocal a0 = Instance.new(\"Attachment\")\na0.Parent = shaft\na0.WorldCFrame = CFrame.new(platform.Position) * upward\nlocal a1 = Instance.new(\"Attachment\")\na1.Parent = platform\na1.WorldCFrame = a0.WorldCFrame\n\nlocal slider = Instance.new(\"PrismaticConstraint\")\nslider.Attachment0 = a0\nslider.Attachment1 = a1\nslider.ActuatorType = Enum.ActuatorType.Servo\nslider.ServoMaxForce = 100000 -- strong enough to lift players\nslider.Speed = 8              -- studs per second\nslider.TargetPosition = 0     -- start at the bottom\nslider.Parent = shaft\n\nwhile true do\n\ttask.wait(4)\n\tslider.TargetPosition = 20 -- go up 20 studs\n\ttask.wait(4)\n\tslider.TargetPosition = 0  -- come back down\nend",
+      "explain": [
+        "Rotating the attachments 90 degrees around Z makes their X arrows point up, so the track is vertical.",
+        "Servo mode slides to TargetPosition (a distance in studs along the track) and holds there.",
+        "Speed controls how fast it slides; ServoMaxForce must beat the weight of the platform plus riders.",
+        "The loop sends it up 20 studs and back down every 4 seconds."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The track runs along the attachments' X arrows. If it slides sideways, rotate the attachments.",
+    "Lifting needs enough force to beat gravity: at least mass x 196.2 for the platform and everything on it.",
+    "The sliding settings live on SlidingBallConstraint; look there for full details on each one."
+  ],
+  "members": {}
+}

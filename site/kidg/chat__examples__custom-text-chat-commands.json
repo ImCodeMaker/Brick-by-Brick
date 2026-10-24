@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/chat/examples/custom-text-chat-commands.md",
+  "simple": "Chat commands are special messages that start with a slash, like `/mute`, that make something happen. Roblox has some built-in ones, and you can make your own with `TextChatCommand`. This example makes `/super` double your character's size and `/mini` halve it. It is the safe, modern way to add commands to your game.",
+  "analogy": "It is like a secret password at a clubhouse. When someone says the exact word, the door opens and something special happens.",
+  "keyPoints": [
+    "Turn on Roblox's built-in commands by setting `TextChatService.CreateDefaultCommands` to true in the Properties window.",
+    "Add your own command by inserting a `TextChatCommand` inside `TextChatService`.",
+    "Set `PrimaryAlias` and `SecondaryAlias` to the words that trigger it, like `/super` and `/mini`.",
+    "Connect to the command's `Triggered` event in a Script in ServerScriptService. It gives you the `TextSource` (who typed it) and the message.",
+    "Use `string.split(message, \" \")` to break the message into words and check the first one.",
+    "The example scales the character by changing the `NumberValue` children of the Humanoid, like body height and width."
+  ],
+  "terms": {
+    "alias": "Another name for the same thing. `/super` and `/mini` are two aliases for the same command object.",
+    "PrimaryAlias": "The main word that triggers the command, like `/super`.",
+    "SecondaryAlias": "A second word that triggers the same command, like `/mini`.",
+    "Triggered": "The event that fires when a player sends one of the command's aliases.",
+    "TextSource": "Represents the player who typed the command. Use its `UserId` to find the `Player`.",
+    "string.split": "Breaks text into pieces. `string.split(\"/super now\", \" \")` gives `{\"/super\", \"now\"}`.",
+    "NumberValue": "An object that holds one number. Humanoids have some that control body scale, so doubling them doubles the size."
+  },
+  "example": {
+    "title": "Make /super and /mini commands",
+    "place": "Script in ServerScriptService (with a TextChatCommand named SizeCommand inside TextChatService, PrimaryAlias `/super`, SecondaryAlias `/mini`)",
+    "code": "local TextChatService = game:GetService(\"TextChatService\")\nlocal Players = game:GetService(\"Players\")\n\nlocal sizeCommand: TextChatCommand = TextChatService:WaitForChild(\"SizeCommand\")\n\nsizeCommand.Triggered:Connect(function(textSource, message)\n\t-- Work out how much to scale by\n\tlocal scaleMult = 1\n\tlocal words = string.split(message, \" \")\n\tif words[1] == \"/super\" then\n\t\tscaleMult = 2\n\telseif words[1] == \"/mini\" then\n\t\tscaleMult = 0.5\n\tend\n\n\t-- Find the player and their Humanoid\n\tlocal player = Players:GetPlayerByUserId(textSource.UserId)\n\tlocal character = player and player.Character\n\tlocal humanoid = character and character:FindFirstChildWhichIsA(\"Humanoid\")\n\tif not humanoid then\n\t\treturn\n\tend\n\n\t-- Multiply every scale value on the Humanoid\n\tfor _, child in humanoid:GetChildren() do\n\t\tif child:IsA(\"NumberValue\") then\n\t\t\tchild.Value *= scaleMult\n\t\tend\n\tend\nend)",
+    "explain": [
+      "We wait for the `SizeCommand` object you added in Studio.",
+      "When a player types `/super` or `/mini`, `Triggered` runs with who typed it and what they typed.",
+      "We split the message into words and check the first word to pick 2 (bigger) or 0.5 (smaller).",
+      "We find the player's Humanoid, stopping early if anything is missing.",
+      "We multiply each scale `NumberValue` on the Humanoid. A height scale of 1 becomes 2 with `/super`."
+    ]
+  },
+  "watchOut": [
+    "Spelling the alias without the slash. Set it to `/super`, not `super`.",
+    "Naming the command object something other than SizeCommand while the script waits for SizeCommand. The script will wait forever.",
+    "Spamming `/super` multiplies again each time: 1, then 2, then 4, then 8. Add a limit if you do not want giant players."
+  ]
+}

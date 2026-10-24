@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/environment/lighting.md",
+  "simple": "The `Lighting` service has settings that control the light for your whole game world. You can tint everything a color, make the sun brighter, turn shadows on or off, choose a realistic or soft style, and set the time of day. These settings change the whole mood of your game, from a sunny beach to a spooky night. You can change them in the Properties window or with a script.",
+  "analogy": "The Lighting service is like the master light switchboard in a theater. One panel controls the color of the stage lights, how bright they are, how sharp the shadows look, and whether it looks like morning or night.",
+  "keyPoints": [
+    "Lighting properties fall into five groups: color, intensity, shadows, appearance, and environment.",
+    "`Ambient` tints the whole game, indoors and outdoors. `OutdoorAmbient` tints only outdoor areas.",
+    "`ColorShift_Top` tints surfaces facing the sun or moon; `ColorShift_Bottom` tints surfaces facing away.",
+    "`Brightness` sets how strong the light is, and `ExposureCompensation` makes the whole picture darker (negative) or brighter (positive), like a camera setting.",
+    "`GlobalShadows` turns shadows on or off. `ShadowSoftness` goes from 0 (sharp edges) to 1 (blurry edges) and only works with the Realistic style.",
+    "`LightingStyle` can be `Realistic` for advanced lighting or `Soft` for a flatter, classic Roblox look.",
+    "`ClockTime` (a number from 0 to 24) and `TimeOfDay` (text like \"17:00:00\") both set the time. Changing one changes the other.",
+    "Time does not move by itself. To make a day-night cycle, change `ClockTime` with a script."
+  ],
+  "terms": {
+    "global lighting": "Lighting settings that affect the entire world at once.",
+    "hue / tint": "A color added on top of everything, like looking through orange sunglasses.",
+    "Ambient": "The base light color everywhere, even in places the sun does not reach. [0, 0, 0] means no extra tint.",
+    "RGB color": "A color made from red, green, and blue amounts from 0 to 255. [255, 150, 50] is a warm orange.",
+    "intensity": "How strong the light is.",
+    "exposure": "How much light reaches the camera. 0 is normal, -1 is darker, 1.25 is brighter.",
+    "shadow softness": "How blurry shadow edges are. 0 is a crisp edge; 1 is a soft, fuzzy edge.",
+    "LightingStyle": "The overall look of lighting: `Realistic` or `Soft`.",
+    "ClockTime": "Time of day as a number of hours. 6.3 is 6:18 AM, because 0.3 of an hour is 18 minutes.",
+    "TimeOfDay": "The same time of day written as text, like \"06:18:00\".",
+    "GeographicLatitude": "How far north or south your world pretends to be, in degrees. It changes where the sun and moon sit in the sky, but not the clock.",
+    "diffuse light": "Soft light bouncing in from all around. `EnvironmentDiffuseScale` sets how much comes from the sky and surroundings.",
+    "specular light": "Shiny reflections. `EnvironmentSpecularScale` near 1 makes metal and smooth objects reflect the environment better."
+  },
+  "example": {
+    "title": "Simple day-night cycle",
+    "place": "Script in ServerScriptService",
+    "code": "local Lighting = game:GetService(\"Lighting\")\n\nlocal MINUTES_PER_DAY = 4 -- one full game day lasts 4 real minutes\nlocal hoursPerSecond = 24 / (MINUTES_PER_DAY * 60)\n\nLighting.ClockTime = 6 -- start at sunrise\n\nwhile true do\n\tlocal deltaTime = task.wait(0.1) -- how long we really waited\n\t-- Move the clock forward; % 24 wraps 24 back around to 0\n\tLighting.ClockTime = (Lighting.ClockTime + hoursPerSecond * deltaTime) % 24\nend",
+    "explain": [
+      "A full day is set to take 4 real minutes, which is 240 seconds.",
+      "`hoursPerSecond` is 24 divided by 240, which is 0.1 game hours each real second.",
+      "The loop runs about 10 times a second and adds a bit of time based on how long it really waited.",
+      "`% 24` makes the clock wrap from 24 back to 0, so midnight comes around again.",
+      "Because this is a server Script, every player sees the same time."
+    ]
+  },
+  "watchOut": [
+    "Expecting the sun to move on its own. Time only changes if a script changes it.",
+    "Changing `ShadowSoftness` while `LightingStyle` is `Soft`. It only works with `Realistic`.",
+    "Making `Ambient` too bright. It lights up shadows everywhere, so indoor areas lose their depth.",
+    "Thinking `GeographicLatitude` changes the clock. It only moves where the sun and moon appear."
+  ]
+}

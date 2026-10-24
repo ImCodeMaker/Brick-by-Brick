@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/scripting/events/index.md",
+  "simple": "Events are signals that something just happened, like a player joining or a part being touched. Roblox is 'event-driven', which means most of your code waits for events and then reacts. You hook a function to an event with `:Connect()`, and that function runs every time the event fires. You can also stop listening with `:Disconnect()`, listen just once with `:Once()`, or pause until it happens with `:Wait()`.",
+  "analogy": "An event is like a doorbell: you do not stand at the door all day, you just wait for the ring, and then you go answer it.",
+  "keyPoints": [
+    "Many objects have built-in events, like `Touched` on parts and `PlayerAdded` on the Players service.",
+    "Use `event:Connect(myFunction)` to run `myFunction` every time the event fires.",
+    "Most events pass information to your function, like which part touched or which player joined.",
+    "You can connect an anonymous function written right inside `Connect(function(...) end)`.",
+    "`Connect` returns a connection. Call `connection:Disconnect()` to stop listening.",
+    "`event:Once(fn)` runs the function only the first time, then stops automatically.",
+    "`event:Wait()` pauses the script until the event fires, then gives back its values.",
+    "When an object is destroyed, its (non-deferred) connections are disconnected automatically."
+  ],
+  "terms": {
+    "event": "A signal that something happened in the game.",
+    "fire": "When an event happens and tells everyone listening. 'The Touched event fired.'",
+    "event-driven": "A style where code mostly waits for events and reacts, instead of checking things every frame.",
+    "connect": "Hook a function to an event so it runs when the event fires.",
+    "argument": "A piece of information passed into a function, like the `player` who joined.",
+    "anonymous function": "A function without a name, written right where you use it.",
+    "RBXScriptConnection": "The object `Connect` gives back. You use it to `Disconnect` later.",
+    "disconnect": "Stop a function from listening to an event.",
+    "yield": "Pause the script and wait. `Wait()` yields until the event fires.",
+    "parent scope": "The code area around your function, whose variables your anonymous function can still use."
+  },
+  "example": {
+    "title": "Welcome a player only the first time they touch a pad",
+    "place": "Script inside a Part named WelcomePad in Workspace",
+    "code": "local Players = game:GetService(\"Players\")\nlocal pad = script.Parent\n\nlocal welcomed = {} -- remembers who we already greeted\n\npad.Touched:Connect(function(otherPart)\n\tlocal character = otherPart.Parent\n\tlocal player = Players:GetPlayerFromCharacter(character)\n\tif player and not welcomed[player] then\n\t\twelcomed[player] = true\n\t\tprint(\"Welcome, \" .. player.Name .. \"!\")\n\tend\nend)\n\n-- Forget players who leave, so the table does not grow forever\nPlayers.PlayerRemoving:Connect(function(player)\n\twelcomed[player] = nil\nend)",
+    "explain": [
+      "`pad.Touched:Connect(...)` runs our function every time something touches the pad.",
+      "The event gives us `otherPart`, the part that touched. For a player, its parent is their character.",
+      "`GetPlayerFromCharacter` turns the character into a Player, or gives `nil` if it was not a player.",
+      "We use a table to greet each player only once.",
+      "We connect to `PlayerRemoving` to clean up the table when players leave."
+    ]
+  },
+  "watchOut": [
+    "Write `part.Touched:Connect(onTouched)`, not `part.Touched:Connect(onTouched())`. The extra `()` calls the function right away instead of connecting it.",
+    "`Touched` can fire many times in a row. Use a cooldown or a table like above to avoid repeats.",
+    "Connections you make inside other events (like inside `PlayerAdded`) pile up. Disconnect them when you are done, or use `Once` for one-time actions.",
+    "`event:Wait()` stops the rest of the script until the event fires. Do not put it where other code needs to keep running."
+  ]
+}

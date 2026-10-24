@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/sound/dynamic-effects.md",
+  "simple": "Dynamic effects change how an older `Sound` or a whole `SoundGroup` sounds. You add one by inserting it inside the sound or group in the Explorer, then tweaking its properties. They let you make a big hall echo, muffle sound underwater, or make a voice sound robotic. This is the legacy version; newer audio effects work with the newer audio objects.",
+  "analogy": "Dynamic effects are like voice changer toys: the person talks normally, but what comes out has echo, a deeper voice, or a robot buzz.",
+  "keyPoints": [
+    "Insert an effect inside a `Sound` to change just that sound, or inside a `SoundGroup` to change every sound in the group.",
+    "Each effect has its own properties to adjust in the Properties window.",
+    "`EqualizerSoundEffect` changes the low, middle, and high parts of a sound, for example to muffle things underwater.",
+    "`CompressorSoundEffect` keeps volume more even and can be used for ducking.",
+    "`ReverbSoundEffect` makes sound bounce like in a gym or stadium, and `EchoSoundEffect` repeats the sound with fading volume.",
+    "`ChorusSoundEffect` and `FlangeSoundEffect` layer changed copies of the sound for robotic or sci-fi feels.",
+    "`DistortionSoundEffect` adds fuzz, `PitchShiftSoundEffect` changes pitch without changing speed, and `TremoloSoundEffect` makes the volume wobble."
+  ],
+  "terms": {
+    "dynamic effect": "An object that changes the sound as it plays, without changing the audio file.",
+    "frequency range": "A band of low, middle, or high sounds. Bass is low; a whistle is high.",
+    "dynamic range": "The gap between the quietest and loudest parts of a sound.",
+    "ducking": "Lowering one sound automatically while a more important sound plays.",
+    "clipping": "When sound is pushed too loud and the tops of it get cut off, making it crunchy.",
+    "pitch": "How high or low a sound is. Lower pitch can make a small sound feel big.",
+    "modulated": "Changed back and forth over time, like a wobble."
+  },
+  "example": {
+    "title": "Make a sound echo in a cave",
+    "place": "Script in ServerScriptService (with a Sound named CaveDrip in SoundService)",
+    "code": "local SoundService = game:GetService(\"SoundService\")\n\nlocal sound = SoundService:WaitForChild(\"CaveDrip\")\n\n-- Put a reverb effect inside the sound\nlocal reverb = Instance.new(\"ReverbSoundEffect\")\nreverb.DecayTime = 3 -- how long the bounce lasts, in seconds\nreverb.Parent = sound\n\nsound:Play()",
+    "explain": [
+      "We find the `Sound` called CaveDrip.",
+      "We create a `ReverbSoundEffect` and make its bounce last longer with `DecayTime`.",
+      "We parent the effect to the sound, which is all it takes to apply it.",
+      "We play the sound, and it now sounds like it is in a big cave."
+    ]
+  },
+  "watchOut": [
+    "An effect only works when it is inside a `Sound` or `SoundGroup`. Leaving it somewhere else does nothing.",
+    "Strong settings can sound harsh. Change one property at a time and playtest.",
+    "For new projects, look at the newer audio effects like `AudioReverb`, which offer more control."
+  ]
+}

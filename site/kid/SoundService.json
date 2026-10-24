@@ -1,0 +1,120 @@
+{
+  "name": "SoundService",
+  "simple": "SoundService is the control room for sound in your game. Its settings change how all Sounds behave, like echo, how fast 3D sounds fade with distance, and where the player's \"ears\" are. It is also a handy place to keep music and SoundGroups, and it can play a sound that only one player hears.",
+  "analogy": "SoundService is like the sound mixing desk at a concert. It does not sing itself, but it controls the echo, the volume rules, and where the microphones are for everyone.",
+  "whenToUse": [
+    "Play a sound only for one player with `PlayLocalSound` (from a LocalScript)",
+    "Add an echo to the whole game, like a cave or big hall, with `AmbientReverb`",
+    "Store background music and SoundGroups",
+    "Change where the player hears 3D sounds from (the listener)"
+  ],
+  "where": "Server and client. Get it with game:GetService(\"SoundService\"). You can also see it in the Explorer and change its settings in the Properties window.",
+  "terms": {
+    "listener": "The player's \"ears\" in the game world. By default it is the camera, so sounds are heard from where the camera is.",
+    "reverb": "Echo. The way sound bounces off walls, like in a bathroom, cave or gym.",
+    "Doppler effect": "When a moving sound changes pitch, like a siren sounding higher coming toward you and lower going away.",
+    "attenuate / roll off": "To get quieter with distance.",
+    "spatialized (3D) sound": "A sound that comes from a place in the world (it is inside a part or attachment), so its volume and left/right side change as you move.",
+    "advanced audio system": "Roblox's newer set of audio objects (AudioPlayer, AudioEmitter, AudioListener and more) that you wire together. Some SoundService settings only affect these, others only affect the older Sound object.",
+    "occlusion": "When sound is muffled because a wall is in the way.",
+    "replicate": "To be copied from one player's device to the server and other players.",
+    "filtering": "Here, a safety rule that stops a sound played by one player's LocalScript from being heard by everyone.",
+    "stud": "Roblox's unit of length."
+  },
+  "examples": [
+    {
+      "title": "Make the whole game sound like a cave",
+      "place": "Script in ServerScriptService",
+      "code": "local SoundService = game:GetService(\"SoundService\")\n\n-- every Sound now has a big echo\nSoundService.AmbientReverb = Enum.ReverbType.Cave",
+      "explain": [
+        "`AmbientReverb` adds an echo to every Sound in the game.",
+        "Other choices include `Hangar`, `Bathroom`, `Arena` and `NoReverb` (no echo)."
+      ]
+    },
+    {
+      "title": "Click sound only you can hear",
+      "place": "LocalScript inside a TextButton in StarterGui (with a Sound named Click inside the button)",
+      "code": "local SoundService = game:GetService(\"SoundService\")\n\nlocal button = script.Parent\nlocal click = button:WaitForChild(\"Click\")\n\nbutton.Activated:Connect(function()\n    SoundService:PlayLocalSound(click) -- only this player hears it\nend)",
+      "explain": [
+        "`Activated` fires when the player clicks or taps the button.",
+        "`PlayLocalSound` plays a copy of the sound just for this player."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Several properties (`AmbientReverb`, `DistanceFactor`, `DopplerScale`, `RolloffScale`, `ListenerType`) only affect the older Sound objects, not the newer AudioPlayer/AudioEmitter system.",
+    "If `RespectFilteringEnabled` is true (the default), sounds started in a LocalScript are only heard by that player. That is usually what you want.",
+    "Setting `ListenerObject` to nil means 3D sounds cannot be heard at all."
+  ],
+  "members": {
+    "SoundService.AcousticSimulationEnabled": {
+      "simple": "Turns on realistic sound effects for the newer audio system (AudioEmitters and AudioListeners): muffled sound through walls, sound bending around corners, and echoes off walls. If false, these are off everywhere.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nSoundService.AcousticSimulationEnabled = true"
+    },
+    "SoundService.AmbientReverb": {
+      "simple": "Adds an echo style to every Sound in the game, like `Cave`, `Hangar`, `Bathroom` or `NoReverb`.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nSoundService.AmbientReverb = Enum.ReverbType.Hangar -- big empty hall echo"
+    },
+    "SoundService.CharacterSoundsUseNewApi": {
+      "simple": "Chooses whether the built-in character sounds (footsteps, jumping and so on) use the newer audio objects or the older Sound objects. Only changeable in Studio's Properties window, not from game scripts.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nprint(SoundService.CharacterSoundsUseNewApi) -- read-only for game scripts"
+    },
+    "SoundService.DefaultListenerLocation": {
+      "simple": "A Studio setting for where Roblox places the newer AudioListener (the \"ears\") by default. Normal game scripts cannot read or change it; set it in the Properties window."
+    },
+    "SoundService.DistanceFactor": {
+      "simple": "How many studs count as one meter for the Doppler effect. The default is 3.33. Only change it if your game's objects are a very different size from normal.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nSoundService.DistanceFactor = 3.33"
+    },
+    "SoundService.DopplerScale": {
+      "simple": "How strong the Doppler effect is (pitch changing when sounds move toward or away from you). 1 is normal, 0 turns it off, bigger numbers exaggerate it.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nSoundService.DopplerScale = 0 -- no pitch change from movement"
+    },
+    "SoundService.ListenerCFrame": {
+      "simple": "When `ListenerType` is set to CFrame, this is the exact spot and direction the player hears 3D sounds from.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nSoundService:SetListener(Enum.ListenerType.CFrame, CFrame.new(0, 10, 0))\nprint(SoundService.ListenerCFrame)"
+    },
+    "SoundService.ListenerObject": {
+      "simple": "When `ListenerType` is ObjectPosition or ObjectCFrame, this is the object (like a part) whose position is used as the player's ears.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nprint(SoundService.ListenerObject)"
+    },
+    "SoundService.ListenerType": {
+      "simple": "Where the player's ears are for 3D sounds: the `Camera` (default), a fixed `CFrame`, or an object (`ObjectPosition` / `ObjectCFrame`). Change it with `SetListener`.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nprint(SoundService.ListenerType) -- Enum.ListenerType.Camera"
+    },
+    "SoundService.RespectFilteringEnabled": {
+      "simple": "If true (the default), a sound played by a LocalScript is only heard by that player. If false, other players hear it too.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nprint(SoundService.RespectFilteringEnabled) -- true"
+    },
+    "SoundService.RolloffScale": {
+      "simple": "How quickly 3D sounds get quieter with distance, for every Sound. Bigger numbers fade faster; smaller numbers carry further. 1 is normal.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nSoundService.RolloffScale = 0.5 -- sounds carry further"
+    },
+    "SoundService.VolumetricAudio": {
+      "simple": "A Studio-only setting: makes a sound inside a Part seem to come from the whole part instead of just its center. Scripts cannot change it; use the Properties window."
+    },
+    "SoundService:GetListener": {
+      "simple": "Tells you where the player's ears are: it returns two things, the listener type and the object or CFrame it uses.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nlocal listenerType, listener = SoundService:GetListener()\nprint(listenerType, listener)"
+    },
+    "SoundService:GetMixerTime": {
+      "simple": "Gives a very precise audio clock, in seconds, that keeps counting up as audio plays. Use it to start or stop newer AudioPlayers at an exact moment, for music timing.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\nlocal player = workspace:WaitForChild(\"AudioPlayer\") -- an AudioPlayer object\nplayer:Play(SoundService:GetMixerTime() + 1) -- start exactly 1 second from now"
+    },
+    "SoundService:OpenAttenuationCurveEditor": {
+      "simple": "For Studio plugins only: opens the editor for how AudioEmitters and AudioListeners fade with distance. Not usable in games."
+    },
+    "SoundService:OpenDirectionalCurveEditor": {
+      "simple": "For Studio plugins only: opens the editor for how direction changes AudioEmitter and AudioListener volume. Not usable in games."
+    },
+    "SoundService:PlayLocalSound": {
+      "simple": "Plays a copy of a Sound that only the player running this code hears, no matter where the Sound is. Use it from a LocalScript for menu clicks and personal effects.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\n-- LocalScript\nlocal ding = SoundService:WaitForChild(\"Ding\") -- a Sound stored in SoundService\nSoundService:PlayLocalSound(ding)",
+      "gotcha": "The copy does not loop even if the original is Looped."
+    },
+    "SoundService:SetListener": {
+      "simple": "Changes where the player's ears are for 3D sounds: the camera, a fixed CFrame, or an object.",
+      "example": "local SoundService = game:GetService(\"SoundService\")\n-- LocalScript: hear 3D sounds from the character's head instead of the camera\nlocal player = game:GetService(\"Players\").LocalPlayer\nlocal head = (player.Character or player.CharacterAdded:Wait()):WaitForChild(\"Head\")\nSoundService:SetListener(Enum.ListenerType.ObjectCFrame, head)"
+    }
+  }
+}

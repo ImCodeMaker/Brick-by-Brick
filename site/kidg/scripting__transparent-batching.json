@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/scripting/transparent-batching.md",
+  "simple": "Some Roblox functions have to ask Roblox's servers on the internet for information, like the price of a product. If you ask many questions at the same time, Roblox can quietly bundle them into just a few trips instead of one trip per question. This is called transparent batching. You get it for free, as long as you start your calls at the same time instead of one after another.",
+  "analogy": "If you need 20 things from the store, it is much faster to go once with a full shopping list than to drive there 20 times for one item each. Starting your requests together lets Roblox make one trip with a list.",
+  "keyPoints": [
+    "Transparent batching means the engine combines many calls to the same API into fewer internet requests for you.",
+    "You do not need a special function or extra settings. You just start the calls at the same time.",
+    "If each call waits for the last one to finish, nothing gets batched and every call makes its own request.",
+    "Use `task.spawn` to start several calls at once.",
+    "Fewer requests means faster results and less chance of hitting rate limits.",
+    "Supported methods include `MarketplaceService:GetProductInfoAsync`, `MarketplaceService:UserOwnsGamePassAsync`, `AvatarEditorService:GetItemDetailsAsync`, and `AssetService:GetBundleDetailsAsync`.",
+    "Wrap each call in `pcall` because internet requests can fail.",
+    "Do not try to group requests yourself. Let the engine pick the best batch size."
+  ],
+  "terms": {
+    "HTTP request": "A message your game sends over the internet to a Roblox server to ask for or send information.",
+    "batching": "Grouping many small jobs into one bigger job. 20 product lookups might become just 1 or 2 requests.",
+    "transparent": "Here it means it happens automatically behind the scenes, so you do not have to see or manage it.",
+    "concurrent": "Happening at the same time. Five concurrent calls are all started together, not one after another.",
+    "serial": "One after another. Each call waits for the previous one to finish before starting.",
+    "rate limit": "A cap on how many requests you can make in a short time. Go over it and some requests slow down or fail.",
+    "latency": "The delay between asking for something and getting the answer.",
+    "throttled": "Slowed down or blocked because too many requests were sent too fast.",
+    "pcall": "Short for protected call. It runs a function and catches errors so one failure does not crash your whole script.",
+    "cache": "A saved copy of an earlier answer, so asking again can skip the internet trip."
+  },
+  "example": {
+    "title": "Look up several products at once",
+    "place": "Script in ServerScriptService",
+    "code": "local MarketplaceService = game:GetService(\"MarketplaceService\")\n\n-- Replace these with your own developer product IDs\nlocal productIds = { 1111111, 2222222, 3333333 }\n\nlocal results = {}\nlocal remaining = #productIds\n\nlocal function fetch(productId)\n\t-- pcall catches errors so one bad lookup does not stop the rest\n\tlocal success, info = pcall(function()\n\t\treturn MarketplaceService:GetProductInfoAsync(productId, Enum.InfoType.Product)\n\tend)\n\tif success then\n\t\tresults[productId] = info\n\telse\n\t\twarn(\"Failed:\", productId, info)\n\tend\n\tremaining -= 1\nend\n\n-- Start every lookup at the same time so the engine can batch them\nfor _, productId in productIds do\n\ttask.spawn(fetch, productId)\nend\n\n-- Wait until all lookups have finished\nwhile remaining > 0 do\n\ttask.wait()\nend\n\nfor id, info in results do\n\tprint(id, info.Name)\nend",
+    "explain": [
+      "`productIds` is the list of products you want to know about.",
+      "`remaining` counts how many lookups are still running.",
+      "`fetch` asks for one product's info inside `pcall`, saves it, and lowers the counter by 1.",
+      "`task.spawn(fetch, productId)` starts every lookup right away, all together, so Roblox can bundle them.",
+      "The `while` loop waits a frame at a time until `remaining` reaches 0.",
+      "Finally, the script prints each product's name."
+    ]
+  },
+  "watchOut": [
+    "Calling the API inside a plain `for` loop. Each call waits for the last, so nothing batches. Use `task.spawn` for each call.",
+    "Forgetting `pcall`. One failed request can stop your whole script without it.",
+    "Starting calls far apart in time. Only calls that start close together get batched.",
+    "Expecting every API to batch. Only the methods listed on the page support it."
+  ]
+}

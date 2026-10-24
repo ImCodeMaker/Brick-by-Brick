@@ -1,0 +1,40 @@
+{
+  "path": "content/en-us/input/gamepad.md",
+  "simple": "Roblox works with game controllers like Xbox and PlayStation gamepads. This page explains which buttons players expect to do what, how to make the controller rumble, and how to test without a real controller. Following the usual button layout makes your game feel familiar to console players right away.",
+  "analogy": "Most cars put the gas pedal on the right and the brake on the left, so anyone can drive any car. Common gamepad layouts work the same way: A to jump, left stick to move.",
+  "keyPoints": [
+    "Use the Input Action System to bind gamepad buttons to actions alongside keyboard and touch.",
+    "`PreferredInput` tells you if the player is mainly using a gamepad, even on a PC.",
+    "You can also use `UserInputService.GamepadEnabled` and the `GamepadConnected` and `GamepadDisconnected` events.",
+    "ButtonA usually accepts or jumps. ButtonB usually cancels or does a dodge, roll, or sprint.",
+    "Thumbstick1 (left) moves the character. Thumbstick2 (right) moves the camera.",
+    "L2 and R2 triggers are for main actions like shooting. L1, R1, X, and Y are for extra actions like reload or inventory.",
+    "Make the controller rumble with a `HapticEffect` and `Play()`. It works on PlayStation, Xbox, and Quest Touch controllers.",
+    "Test in Studio with the Controller Emulator if you do not have a controller."
+  ],
+  "terms": {
+    "gamepad": "A handheld game controller with buttons, triggers, and thumbsticks.",
+    "thumbstick": "A small joystick you push with your thumb. Gamepads have a left one and a right one.",
+    "trigger": "The springy buttons on the back of the controller, like L2 and R2.",
+    "bumper": "The flat buttons above the triggers, like L1 and R1.",
+    "control schema": "The plan for which button does what.",
+    "haptic feedback": "Rumble or vibration in the controller you can feel.",
+    "emulator": "A tool that pretends to be a device, so you can test without owning it."
+  },
+  "example": {
+    "title": "Rumble when the A button is pressed",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local UserInputService = game:GetService(\"UserInputService\")\n\n-- One rumble effect we can play many times\nlocal effect = Instance.new(\"HapticEffect\")\neffect.Type = Enum.HapticEffectType.GameplayCollision\neffect.Parent = workspace\n\nUserInputService.InputBegan:Connect(function(input, gameProcessed)\n\tif gameProcessed then\n\t\treturn\n\tend\n\n\tif input.KeyCode == Enum.KeyCode.ButtonA then\n\t\tprint(\"A pressed!\")\n\t\teffect:Play() -- buzz the controller\n\tend\nend)\n\nUserInputService.GamepadConnected:Connect(function(gamepad)\n\tprint(\"Controller connected:\", gamepad.Name)\nend)",
+    "explain": [
+      "We create one `HapticEffect` with a collision-style rumble and keep it ready.",
+      "`InputBegan` fires when any button is pressed. We skip inputs already used by menus or chat.",
+      "If the button was `ButtonA`, we print a message and play the rumble.",
+      "`GamepadConnected` prints a message when a player plugs in a controller."
+    ]
+  },
+  "watchOut": [
+    "Making up your own unusual button layout. Players expect A to confirm or jump and B to cancel.",
+    "Only testing with a keyboard. Use a real gamepad or the Controller Emulator.",
+    "Overusing rumble. Save it for moments that matter, like hits or explosions."
+  ]
+}

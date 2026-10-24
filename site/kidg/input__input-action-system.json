@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/input/input-action-system.md",
+  "simple": "The Input Action System lets you describe what players can do, like Sprint or Shoot, and then connect each action to a keyboard key, a gamepad button, and an on-screen touch button. Your script only listens to the action, not to each device. Contexts let you switch whole groups of controls on and off, like gameplay controls versus menu controls. This is the easiest way to make your game work on PC, phone, and console at the same time.",
+  "analogy": "Think of a light in your house with switches by both doors and a smart-speaker command. The action is \"turn on the light\". The bindings are the switches and the voice command. A context is like the power to that room: switch it off and none of those controls work.",
+  "keyPoints": [
+    "Make a `Folder` named `Inputs` in `ReplicatedStorage`, and put an `InputContext` like `PlayContext` inside it.",
+    "Inside the context, add an `InputAction` for each thing the player can do, such as `CharacterSprint`.",
+    "Set the action's `Type`: `Bool` for on/off (jump, sprint), `Direction1D` for a 0 to 1 amount (gas pedal), `Direction2D` or `Direction3D` for directions, and `ViewportPosition` for a screen point.",
+    "Inside each action, add `InputBinding` objects: one for keyboard/mouse (`KeyCode`), one for gamepad, and one for touch (`UIButton` linked to an on-screen button).",
+    "Listen to `Pressed` and `Released` for `Bool` actions, or `StateChanged` for any type. For steady inputs like a held thumbstick, read `GetState()` every frame.",
+    "Turn a context on or off with its `Enabled` property. Higher `Priority` contexts go first, and `Sink` stops their keys from reaching lower contexts.",
+    "Show players which button to press with an `InputActionLabel` (no code), or by reading `InputAction.PreferredBinding` in your own UI.",
+    "The Input Action Manager (Window > Input) is a grid where you can build contexts, actions, and bindings and spot missing or duplicate bindings."
+  ],
+  "terms": {
+    "InputContext": "A group of related actions, like all gameplay controls or all menu controls. You can switch the whole group on or off.",
+    "InputAction": "One thing the player can do, like Jump or Sprint, no matter which device they use.",
+    "InputBinding": "A link from one real button, key, or screen button to an action. For example, Left Shift to Sprint.",
+    "Bool": "A true or false value. A `Bool` action is either pressed (`true`) or not (`false`).",
+    "Direction2D": "An action that gives a `Vector2` direction between `(-1, -1)` and `(1, 1)`. Pushing a thumbstick fully right gives `(1, 0)`.",
+    "analog": "An input that can be partly pressed, like a trigger halfway down giving `0.5`.",
+    "threshold": "How far an analog trigger must be pressed to count. With a pressed threshold of `0.5`, pressing it 60% counts as pressed.",
+    "Priority": "A number that decides which context gets input first. A context with `2000` goes before one with `1000`.",
+    "Sink": "When on, a context swallows the keys it uses so lower-priority contexts never see them.",
+    "RunContext": "A Script setting that decides where it runs. `Client` makes a regular Script run on the player's device, like a LocalScript.",
+    "delta time": "The seconds since the last frame, like `0.016` at 60 frames per second. Multiplying by it keeps speed the same on fast and slow devices.",
+    "PreferredBinding": "The binding that matches the device the player is using right now, used to show the right button hint.",
+    "BindableEvent": "An object that lets one script send a message to another script on the same side (client to client)."
+  },
+  "example": {
+    "title": "Sprint with Shift, gamepad Y, or a touch button",
+    "place": "Script with RunContext set to Client, inside ReplicatedStorage > Inputs > PlayContext > CharacterSprint (an InputAction with Bool type and its three InputBindings)",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal player = Players.LocalPlayer\nlocal inputAction = script.Parent -- the CharacterSprint action\n\nlocal SPRINT_MULTIPLIER = 2\n\nlocal function getHumanoid()\n\tlocal character = player.Character\n\treturn character and character:FindFirstChildWhichIsA(\"Humanoid\")\nend\n\nlocal normalSpeed = 16 -- Roblox's default walk speed\n\ninputAction.Pressed:Connect(function()\n\tlocal humanoid = getHumanoid()\n\tif humanoid then\n\t\tnormalSpeed = humanoid.WalkSpeed\n\t\thumanoid.WalkSpeed = normalSpeed * SPRINT_MULTIPLIER\n\tend\nend)\n\ninputAction.Released:Connect(function()\n\tlocal humanoid = getHumanoid()\n\tif humanoid then\n\t\thumanoid.WalkSpeed = normalSpeed\n\tend\nend)",
+    "explain": [
+      "This script sits inside the `CharacterSprint` action, so `script.Parent` is the action.",
+      "The action has three bindings set up in Studio: Left Shift for keyboard, ButtonY for gamepad, and a `SprintButton` for touch.",
+      "When any of those is pressed, `Pressed` fires. We save the current walk speed and double it.",
+      "When it is let go, `Released` fires and we set the speed back.",
+      "`getHumanoid()` looks up the current character each time, so sprinting still works after the player respawns."
+    ]
+  },
+  "watchOut": [
+    "Only adding a keyboard binding. Each action should have keyboard/mouse, gamepad, and touch bindings, or some players cannot use it.",
+    "Using `StateChanged` for a thumbstick held still. It fires only when the value changes, so read `GetState()` every frame instead.",
+    "Using a regular Script without setting `RunContext` to `Client`. Input only happens on the player's device.",
+    "Binding the same key to two actions in the same context. The Input Action Manager shows this as a red warning.",
+    "Forgetting to turn a context back on after a menu closes, which leaves the player unable to move."
+  ]
+}

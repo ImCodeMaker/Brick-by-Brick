@@ -1,0 +1,58 @@
+{
+  "name": "Enum",
+  "simple": "An Enum is a fixed list of named choices that Roblox gives you, like Enum.Material (Plastic, Wood, Grass, ...) or Enum.KeyCode (every keyboard key). Each choice in the list is an EnumItem. Using Enums instead of typing words avoids typos.",
+  "analogy": "An Enum is like a menu at a restaurant. Enum.Material is the menu of materials, and each dish on it (Wood, Grass, Ice) is an EnumItem. You can only order what is on the menu.",
+  "whenToUse": [
+    "Listing every option in a list with GetEnumItems",
+    "Turning a saved name like \"Wood\" back into Enum.Material.Wood with FromName",
+    "Turning a saved number back into an EnumItem with FromValue"
+  ],
+  "where": "Available everywhere. Get one by name from the global `Enum`, like Enum.Material or Enum.KeyCode.",
+  "terms": {
+    "enum": "Short for enumeration: a fixed list of named options.",
+    "EnumItem": "One option inside an enum, like Enum.Material.Wood.",
+    "nil": "Lua's word for \"nothing\". FromName and FromValue give nil if there is no match.",
+    "array": "A list in Lua, numbered 1, 2, 3, and so on."
+  },
+  "examples": [
+    {
+      "title": "Give a part a random shape",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Anchored = true\npart.Size = Vector3.new(4, 4, 4)\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = workspace\n\nlocal shapes = Enum.PartType:GetEnumItems() -- Ball, Block, Cylinder, ...\nlocal rng = Random.new()\n\nwhile true do\n\tlocal pick = shapes[rng:NextInteger(1, #shapes)]\n\tpart.Shape = pick\n\tprint(\"Now I am a\", pick.Name)\n\ttask.wait(2)\nend",
+      "explain": [
+        "Enum.PartType is the enum (the whole menu of part shapes).",
+        "GetEnumItems gives a list of every shape in it.",
+        "Every 2 seconds we pick a random shape from the list and give it to the part.",
+        "pick.Name is the shape's name as text, like \"Ball\"."
+      ]
+    },
+    {
+      "title": "Save a material as text and load it back",
+      "place": "Script in ServerScriptService",
+      "code": "local saved = Enum.Material.Grass.Name -- \"Grass\" (easy to store)\n\n-- Later, turn the text back into an EnumItem\nlocal material = Enum.Material:FromName(saved)\nif material then\n\tprint(\"Loaded:\", material) --> Enum.Material.Grass\nend",
+      "explain": [
+        "You cannot save an EnumItem directly in a DataStore, but you can save its Name (a string).",
+        "FromName looks up the item with that name in Enum.Material.",
+        "If the name does not exist, FromName gives nil, so we check before using it."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Enum.Material (the list) and Enum.Material.Wood (one item) are different things. Properties want the item.",
+    "FromName and FromValue give nil when nothing matches. Always check before using the result."
+  ],
+  "members": {
+    "Enum:GetEnumItems": {
+      "simple": "Gives a list of every option (EnumItem) in this enum.",
+      "example": "for _, item in Enum.PartType:GetEnumItems() do\n\tprint(item.Name) -- Ball, Block, Cylinder, ...\nend"
+    },
+    "Enum:FromName": {
+      "simple": "Finds the option in this enum with the name you give, like \"Wood\". Gives nil if there is no option with that name.",
+      "example": "local wood = Enum.Material:FromName(\"Wood\")\nprint(wood) --> Enum.Material.Wood\nprint(Enum.Material:FromName(\"Chocolate\")) --> nil"
+    },
+    "Enum:FromValue": {
+      "simple": "Finds the option in this enum with the number value you give. Every EnumItem has a number; for example Enum.Material.Plastic is 256. Gives nil if no option has that number.",
+      "example": "local plastic = Enum.Material:FromValue(256)\nprint(plastic) --> Enum.Material.Plastic"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "path": "content/en-us/physics/constraints/weld.md",
+  "simple": "A WeldConstraint glues two parts together so they always keep the same position and rotation relative to each other. Welded parts become one assembly and move as a single object, even if they are not touching. It is how you build things like cars, swords and furniture out of many parts that should not fall apart. Watch out for one surprise: moving a welded part with Position and with CFrame behave differently.",
+  "analogy": "It is like super glue between two Lego bricks. Move one brick and the other comes along, staying in exactly the same spot next to it.",
+  "keyPoints": [
+    "WeldConstraint connects two BaseParts directly using `Part0` and `Part1`, not attachments.",
+    "The two parts keep their current offset and rotation from each other, even if they are not touching.",
+    "Studio's weld tool: with nothing selected, click two parts. With one selected, click one more. With several selected, all touching or overlapping ones get welded.",
+    "Setting a welded part's `Position` moves only that part. The weld then remembers the new offset.",
+    "Setting a welded part's `CFrame` moves that part and everything welded to it, keeping the original offsets.",
+    "To connect two attachments or bones instead of two parts, use a RigidConstraint."
+  ],
+  "terms": {
+    "weld": "A connection that locks two parts together so they move as one.",
+    "BasePart": "Any kind of part, including Part and MeshPart.",
+    "Part0 / Part1": "The two parts the weld connects.",
+    "relative position": "Where one part is compared to the other. If a handle is 3 studs below a blade, it stays 3 studs below even when the sword is swung.",
+    "offset": "The distance and direction from one part to the other, like \"3 studs down and 0 sideways\".",
+    "CFrame": "A position and a rotation stored together. Setting a part's CFrame moves and turns it in one go.",
+    "assembly": "Welded parts become one assembly that physics treats as a single object."
+  },
+  "example": {
+    "title": "Weld a handle to a blade, then see Position vs CFrame",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal blade = Instance.new(\"Part\")\nblade.Size = Vector3.new(1, 4, 0.2)\nblade.Position = Vector3.new(0, 10, 0)\nblade.Anchored = true\nblade.Parent = Workspace\n\nlocal handle = Instance.new(\"Part\")\nhandle.Size = Vector3.new(0.5, 1.5, 0.5)\nhandle.Position = Vector3.new(0, 7.25, 0)  -- just below the blade\nhandle.Parent = Workspace\n\nlocal weld = Instance.new(\"WeldConstraint\")\nweld.Part0 = blade\nweld.Part1 = handle\nweld.Parent = blade\n\ntask.wait(2)\n-- CFrame moves BOTH parts: blade goes to height 20, handle follows to 17.25\nblade.CFrame = CFrame.new(0, 20, 0)\nprint(\"Handle after CFrame move:\", handle.Position.Y)    -- 17.25\n\ntask.wait(2)\n-- Position moves ONLY the blade. The handle stays where it is\n-- and the weld now remembers a new, bigger gap.\nblade.Position = Vector3.new(0, 30, 0)\nprint(\"Handle after Position move:\", handle.Position.Y)  -- still 17.25",
+    "explain": [
+      "The blade's center is at 10 and the handle's center is at 7.25, so the handle is 2.75 studs below the blade. The weld locks in that offset.",
+      "The blade is anchored, so the welded handle cannot fall either.",
+      "Setting `blade.CFrame` to height 20 moves the whole welded group. The handle follows to 20 - 2.75 = 17.25.",
+      "Setting `blade.Position` to height 30 moves only the blade. The handle stays at 17.25 and the weld now keeps a 12.75 stud gap.",
+      "So to move a welded object as a whole, set CFrame (or use `PivotTo` on its model)."
+    ]
+  },
+  "watchOut": [
+    "Using `Position` to move a welded object leaves the other parts behind. Use `CFrame` instead.",
+    "Welding to an anchored part freezes the whole assembly. Only anchor the parts that really should never move.",
+    "Welds do not work while the parts are stored in ServerStorage or ReplicatedStorage. They start working once the parts are in the Workspace.",
+    "Clicking the same part twice with the weld tool does not create a weld."
+  ]
+}

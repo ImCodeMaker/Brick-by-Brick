@@ -1,0 +1,128 @@
+{
+  "name": "string",
+  "simple": "A string is a piece of text, like \"Hello\" or a player's name. The string library is a toolbox for working with text: making it UPPERCASE, cutting out a piece, finding a word, replacing words, splitting text into parts, and building text with numbers inside.",
+  "analogy": "If a string is a strip of paper with letters on it, the string library is your scissors, glue, highlighter and stamp set for that paper.",
+  "whenToUse": [
+    "Show a nice message with numbers, like \"Coins: 150\" or \"Time: 01:05\" (`string.format`)",
+    "Check a chat command like \"/fly\" (`string.sub`, `string.lower`, `string.split`)",
+    "Find or replace words in text (`string.find`, `string.gsub`)",
+    "Pull numbers out of text (`string.match`)"
+  ],
+  "where": "A built-in library, so there is nothing to get. Works in any script. You can also call these on a string directly with a colon: `name:upper()` is the same as `string.upper(name)`.",
+  "terms": {
+    "string": "Text in your code, written inside quotes, like \"Hello\" or 'Hi'.",
+    "character": "One letter, digit, space or symbol in a string. \"Hi!\" has 3 characters.",
+    "index (position)": "A character's place number, starting at 1. In \"Roblox\", R is at 1 and x is at 6. Negative numbers count from the end: -1 is the last character.",
+    "substring": "A smaller piece cut out of a string. \"Rob\" is a substring of \"Roblox\".",
+    "pattern": "A special search code. `%d` means any digit, `%a` any letter, `%s` any space, and `+` means \"one or more\". So `%d+` finds a whole number like 42.",
+    "capture": "Parts of a pattern inside parentheses `( )`. Whatever they match is handed back to you separately.",
+    "byte": "A small number (0 to 255) that the computer uses to store one character. \"A\" is stored as 65.",
+    "ASCII": "The basic set of English letters, digits and symbols. Functions like `upper` and `lower` only change the plain A to Z letters.",
+    "concatenate": "To join strings together. In Luau you use `..`, like \"Hello \" .. name.",
+    "iterator": "A function that gives you the next item each time it is called, used in a `for` loop.",
+    "binary": "Data stored as raw bytes instead of readable text. Used for packing data tightly."
+  },
+  "examples": [
+    {
+      "title": "Show a nice timer and score",
+      "place": "Script in ServerScriptService",
+      "code": "local seconds = 125\nlocal minutes = math.floor(seconds / 60) -- 2\nlocal leftover = seconds % 60            -- 5\n\n-- %02d means: a whole number, at least 2 digits, pad with 0\nlocal timerText = string.format(\"%02d:%02d\", minutes, leftover)\nprint(timerText) -- 02:05\n\n-- %s puts in any text, %.1f a decimal number with 1 digit after the dot\nprint(string.format(\"%s has %d coins and %.1f%% health\", \"Alex\", 150, 87.26))\n-- Alex has 150 coins and 87.3% health",
+      "explain": [
+        "`string.format` builds text from a template. Each `%` code is a slot filled by the next value.",
+        "`%d` is a whole number, `%02d` a whole number padded to 2 digits, `%s` any text, `%.1f` a decimal rounded to 1 place.",
+        "`%%` means a real percent sign."
+      ]
+    },
+    {
+      "title": "A simple chat command",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.Chatted:Connect(function(message)\n        -- \"/Speed 50\" -> {\"/Speed\", \"50\"}\n        local parts = string.split(message, \" \")\n        local command = string.lower(parts[1]) -- \"/speed\"\n\n        if command == \"/speed\" then\n            local amount = tonumber(parts[2]) -- turn \"50\" into the number 50\n            local character = player.Character\n            if amount and character then\n                character.Humanoid.WalkSpeed = math.clamp(amount, 0, 100)\n            end\n        end\n    end)\nend)",
+      "explain": [
+        "`string.split` cuts the message at every space and gives back a table of pieces.",
+        "`string.lower` makes the command lowercase so \"/SPEED\" and \"/speed\" both work.",
+        "`tonumber` turns the text \"50\" into the number 50 (or nil if it is not a number)."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Positions start at 1, not 0.",
+    "Strings never change in place. `string.upper(name)` gives back a NEW string; `name` itself stays the same. Save the result: `name = name:upper()`.",
+    "In `find`, `match`, `gsub` and `gmatch`, some symbols are special pattern codes: `( ) . % + - * ? [ ] ^ $`. To search for a real dot, write `%.`. Or pass `true` for the plain option in `string.find`.",
+    "Emojis and accented letters take more than one byte, so `string.len`, `string.sub` and `string.reverse` can split them strangely. Use the `utf8` library for those.",
+    "Use a colon to call on a string: `text:upper()`. With a dot you must pass the string yourself: `string.upper(text)`."
+  ],
+  "members": {
+    "string.byte": {
+      "simple": "Gives the number code (byte) for a character, or several characters. \"A\" is 65, \"a\" is 97. The opposite of `string.char`.",
+      "example": "print(string.byte(\"A\"))        -- 65\nprint(string.byte(\"Hi\", 1, 2))  -- 72 105"
+    },
+    "string.char": {
+      "simple": "Builds a string from number codes (0 to 255). The opposite of `string.byte`.",
+      "example": "print(string.char(72, 105)) -- Hi",
+      "gotcha": "Numbers outside 0 to 255 cause an error."
+    },
+    "string.find": {
+      "simple": "Searches for some text (or a pattern) and gives back the start and end positions of the first match, or nil if it is not found. An optional 3rd value says where to start; a 4th value of true means \"search for these exact characters, no pattern codes\".",
+      "example": "local s = \"Hello, world!\"\nprint(string.find(s, \"world\"))      -- 8 12\nprint(string.find(s, \"pizza\"))      -- nil\nprint(string.find(\"a.b\", \".\", 1, true)) -- 2 2 (a real dot, not \"any character\")",
+      "gotcha": "Without `plain = true`, a `.` means \"any character\", so `string.find(\"abc\", \".\")` finds position 1."
+    },
+    "string.format": {
+      "simple": "Builds text from a template with slots. `%d` = whole number, `%s` = text, `%.2f` = decimal with 2 digits after the dot, `%02d` = pad with zeros to 2 digits, `%x` = hexadecimal, `%%` = a real percent sign.",
+      "example": "print(string.format(\"Level %d\", 5))           -- Level 5\nprint(string.format(\"Price: %.2f\", 3.5))      -- Price: 3.50\nprint(string.format(\"%s scored %d\", \"Mia\", 9)) -- Mia scored 9"
+    },
+    "string.gmatch": {
+      "simple": "Lets you loop over every match of a pattern in a string, one at a time, using a `for` loop.",
+      "example": "for word in string.gmatch(\"Hello Roblox world\", \"%a+\") do\n    print(word) -- Hello, then Roblox, then world\nend"
+    },
+    "string.gsub": {
+      "simple": "Replaces every match of a pattern with something else, and gives back the new string plus how many replacements it made. The replacement can be text, a table, or a function. An optional 4th number limits how many to replace.",
+      "example": "local newText, count = string.gsub(\"I like cats and cats\", \"cats\", \"dogs\")\nprint(newText) -- I like dogs and dogs\nprint(count)   -- 2",
+      "gotcha": "It returns TWO values. If you put it straight into another function call, the count goes in too; wrap it in parentheses `(string.gsub(...))` to keep only the text."
+    },
+    "string.len": {
+      "simple": "Counts how many bytes are in a string, which for normal English text is the number of characters. Same as writing `#text`.",
+      "example": "print(string.len(\"Roblox\")) -- 6\nprint(#\"Roblox\")           -- 6, the same thing"
+    },
+    "string.lower": {
+      "simple": "Gives back a copy with all A to Z letters made lowercase. Great for comparing text without caring about capitals.",
+      "example": "print(string.lower(\"HeLLo\")) -- hello\nif string.lower(\"YES\") == \"yes\" then print(\"match\") end"
+    },
+    "string.match": {
+      "simple": "Finds the first part of a string that matches a pattern and gives it back (or nil). If the pattern has captures in ( ), it gives back just those parts.",
+      "example": "print(string.match(\"I have 42 cats\", \"%d+\"))   -- 42\nlocal name, age = string.match(\"Sam:12\", \"(%a+):(%d+)\")\nprint(name, age) -- Sam 12"
+    },
+    "string.pack": {
+      "simple": "Advanced. Squeezes numbers and text into a compact binary string using a format code, for saving space. Use `string.unpack` to read it back.",
+      "example": "local packed = string.pack(\"i4\", 1000) -- a 4-byte whole number\nprint(#packed) -- 4"
+    },
+    "string.packsize": {
+      "simple": "Advanced. Tells you how many bytes `string.pack` will use for a format.",
+      "example": "print(string.packsize(\"i4i4\")) -- 8"
+    },
+    "string.rep": {
+      "simple": "Repeats a string a number of times. 0 or less gives an empty string.",
+      "example": "print(string.rep(\"ha\", 3))  -- hahaha\nprint(string.rep(\"-\", 10))  -- ----------"
+    },
+    "string.reverse": {
+      "simple": "Gives back the string backwards.",
+      "example": "print(string.reverse(\"Roblox\")) -- xolboR"
+    },
+    "string.split": {
+      "simple": "Cuts a string into pieces at every separator and gives back a table (list) of the pieces. The separator defaults to a comma.",
+      "example": "local parts = string.split(\"red,green,blue\", \",\")\nprint(parts[1], parts[2], parts[3]) -- red green blue",
+      "gotcha": "Two separators next to each other give an empty piece: \"a,,b\" splits into \"a\", \"\" and \"b\". Spaces are kept."
+    },
+    "string.sub": {
+      "simple": "Cuts out a piece of a string, from position i to position j (both included). Negative numbers count from the end: -1 is the last character.",
+      "example": "local s = \"Hello, world!\"\nprint(string.sub(s, 1, 5))  -- Hello\nprint(string.sub(s, -6))    -- world!\nprint(string.sub(s, 8, 8))  -- w"
+    },
+    "string.unpack": {
+      "simple": "Advanced. Reads values back out of a binary string made by `string.pack`, using the same format code.",
+      "example": "local packed = string.pack(\"i4\", 1000)\nprint(string.unpack(\"i4\", packed)) -- 1000 5 (the value, then the next read position)"
+    },
+    "string.upper": {
+      "simple": "Gives back a copy with all a to z letters made UPPERCASE.",
+      "example": "print(string.upper(\"hello\")) -- HELLO"
+    }
+  }
+}

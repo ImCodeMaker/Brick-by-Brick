@@ -1,0 +1,41 @@
+{
+  "name": "Weld",
+  "simple": "Weld is the older way to hold two parts together. Unlike WeldConstraint, you tell it exactly where Part1 should sit compared to Part0 using two CFrames called C0 and C1. The parts then stay in that exact spot together, even if they are not touching.",
+  "analogy": "A Weld is like a LEGO plate with exact instructions: 'put the second brick 3 studs above the first one and turned 90 degrees'. The parts snap to those instructions, not to where they happened to be.",
+  "whenToUse": [
+    "When you need to say exactly where one part sits on another, like a sword in a hand at a precise angle",
+    "Older games and models that already use Welds",
+    "For most new building, WeldConstraint or RigidConstraint is simpler"
+  ],
+  "where": "Make it with Instance.new(\"Weld\"), usually placed inside Part0. Set Part0, Part1, and C0/C1 (properties it gets from JointInstance). Works on server and client.",
+  "terms": {
+    "CFrame": "A position plus a rotation in one value. It says where something is and which way it faces.",
+    "assembly": "A group of parts that are rigidly joined (for example by welds) so they move as one solid object. A force on any part moves the whole group.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "parent": "The object something is placed inside in the Explorer. Setting `x.Parent = part` puts x inside part.",
+    "Part0 / Part1": "The two parts a joint connects. Part0 is the first part, Part1 is the second.",
+    "C0 / C1": "Two CFrames that say where the joint sits inside Part0 (C0) and inside Part1 (C1). The joint keeps Part1.CFrame * C1 equal to Part0.CFrame * C0.",
+    "offset": "How far (and how turned) one thing is from another. If part B sits 3 studs above part A, B's offset from A is (0, 3, 0).",
+    "rigid joint": "A connection that does not bend at all. The joined parts act like one solid object.",
+    "root part": "The one part in an assembly that the others are measured from. When you change a weld, the root part stays where it is and the others move."
+  },
+  "examples": [
+    {
+      "title": "Put a part exactly 3 studs above another",
+      "place": "Script in ServerScriptService",
+      "code": "local base = Instance.new(\"Part\")\nbase.Size = Vector3.new(4, 1, 4)\nbase.Position = Vector3.new(0, 5, 0)\nbase.Anchored = true\nbase.Parent = workspace\n\nlocal topper = Instance.new(\"Part\")\ntopper.Size = Vector3.new(1, 1, 1)\ntopper.Parent = workspace\n\nlocal weld = Instance.new(\"Weld\")\nweld.Part0 = base\nweld.Part1 = topper\n-- C0: the joint point is 3 studs above base's center, turned 45 degrees\nweld.C0 = CFrame.new(0, 3, 0) * CFrame.Angles(0, math.rad(45), 0)\n-- C1 left as default (no offset): topper's center sits on the joint point\nweld.Parent = base",
+      "explain": [
+        "The rule is: topper.CFrame * C1 = base.CFrame * C0. With C1 as the default (no offset), topper's CFrame becomes base.CFrame * C0.",
+        "base is at (0, 5, 0), and C0 says 'go up 3 and turn 45 degrees', so topper ends up at (0, 8, 0), turned 45 degrees.",
+        "We never had to place topper ourselves; the Weld moved it into position."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A Weld snaps Part1 to the C0/C1 positions, ignoring where it was. If C0 and C1 are both default, Part1 jumps to the exact same spot as Part0.",
+    "If you just want to glue parts where they already are, WeldConstraint is easier.",
+    "When you change C0 or C1, the root part of the assembly stays still and the others move."
+  ],
+  "members": {}
+}

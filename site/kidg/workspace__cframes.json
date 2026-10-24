@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/workspace/cframes.md",
+  "simple": "A `CFrame` (Coordinate Frame) stores where an object is and which way it is turned, all in one value. Every part has a `CFrame` property, and changing it moves and rotates the part instantly. This page shows how to place things, spin them, point them at other things, and position them in front of or beside a player. CFrames are how most building and movement scripts work.",
+  "analogy": "A CFrame is like giving someone directions with a pointing finger: 'stand on this exact spot, and face that way'. It covers both the where and the which way.",
+  "keyPoints": [
+    "`CFrame.new(x, y, z)` makes a CFrame at that position with no rotation. `CFrame.new()` alone is at (0, 0, 0).",
+    "Rotate with `CFrame.fromEulerAnglesXYZ(x, y, z)`. The angles are in radians, so use `math.rad(45)` for 45 degrees.",
+    "`CFrame.lookAt(fromPosition, targetPosition)` makes the object's front face point at a target.",
+    "Add a `Vector3` to move a CFrame along the world axes: `CFrame.new(part.Position) + Vector3.new(0, 2, 0)` is 2 studs straight up.",
+    "`someCFrame:ToWorldSpace(offset)` moves or turns relative to that object's own facing, not the world's. Great for 'in front of the player'.",
+    "You can chain steps: point the front at something, then rotate -90 degrees on X so the top faces it instead.",
+    "`a:Lerp(b, 0.7)` finds a CFrame 70% of the way from `a` to `b`."
+  ],
+  "terms": {
+    "CFrame": "Short for Coordinate Frame. A value that holds a position (X, Y, Z) and a rotation together.",
+    "coordinates": "Three numbers that say where something is. (-2, 2, 4) means 2 studs left on X, 2 up on Y, 4 along Z from the world center.",
+    "Vector3": "Three numbers (X, Y, Z) used for positions, directions, and offsets.",
+    "radians": "Another way to measure angles. 180 degrees is about 3.14 radians. `math.rad(90)` turns 90 degrees into radians for you.",
+    "offset": "An amount to shift by. An offset of (0, 2, 0) means move 2 studs up from where you started.",
+    "world space": "Directions measured using the world's fixed axes. World up (Y) always points to the sky.",
+    "relative to an object": "Directions measured using that object's own axes. If a cube is tipped on its side, 2 studs 'up' relative to the cube is 2 studs out of its tipped top, not toward the sky.",
+    "constructor": "A function that builds a new value, like `CFrame.new()`.",
+    "method": "A function you call on a value with a colon, like `blueCube.CFrame:ToWorldSpace(...)`.",
+    "lerp": "Short for linear interpolation: finding a point part way between two others. 0 is the start, 1 is the end, 0.5 is halfway."
+  },
+  "example": {
+    "title": "Put a floating gem 5 studs in front of a player",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(function(character)\n\t\tlocal root = character:WaitForChild(\"HumanoidRootPart\")\n\n\t\tlocal gem = Instance.new(\"Part\")\n\t\tgem.Size = Vector3.new(1, 1, 1)\n\t\tgem.Anchored = true\n\t\tgem.CanCollide = false\n\t\tgem.BrickColor = BrickColor.new(\"Bright violet\")\n\n\t\t-- In a CFrame, forward is the negative Z direction.\n\t\t-- This offset means: 5 studs in front of the player, 1 stud up\n\t\tlocal offset = CFrame.new(0, 1, -5)\n\t\tgem.CFrame = root.CFrame:ToWorldSpace(offset)\n\t\tgem.Parent = workspace\n\tend)\nend)",
+    "explain": [
+      "When a player's character spawns, we get its `HumanoidRootPart`, which knows where the player is and which way they face.",
+      "We build a small anchored gem part.",
+      "`CFrame.new(0, 1, -5)` is an offset: 1 stud up and 5 studs forward. In Roblox, a CFrame's front points along negative Z.",
+      "`ToWorldSpace` applies that offset using the player's own facing, so the gem appears in front of them no matter where they look."
+    ]
+  },
+  "watchOut": [
+    "`CFrame.fromEulerAnglesXYZ` and `CFrame.Angles` use radians. Typing 90 instead of `math.rad(90)` gives a weird spin.",
+    "Adding a `Vector3` moves along world axes. If you want 'in front of the object', use `ToWorldSpace` instead.",
+    "Setting `Position` alone does not rotate a part. Use `CFrame` when you need to turn it too.",
+    "Moving a part by setting its `CFrame` does not fire `Touched` events, because it is not a physics movement."
+  ]
+}

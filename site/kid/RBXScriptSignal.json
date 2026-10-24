@@ -1,0 +1,68 @@
+{
+  "name": "RBXScriptSignal",
+  "simple": "RBXScriptSignal is the official name for an event in Roblox, like `Touched`, `PlayerAdded` or `Activated`. An event is something that can happen. You attach a function to it with `:Connect`, and Roblox runs your function every time it happens.",
+  "analogy": "A signal is like a doorbell. `:Connect` is you saying 'every time the doorbell rings, I will go open the door'. `:Once` is 'I will answer it just the next time'. `:Wait` is standing by the door doing nothing else until it rings.",
+  "whenToUse": [
+    "Any time you want code to run when something happens: a part is touched, a player joins, a button is clicked.",
+    "Waiting for something to happen before continuing (`:Wait`).",
+    "Running something only the first time an event happens (`:Once`)."
+  ],
+  "where": "Signals are found on objects, like `part.Touched` or `Players.PlayerAdded`. Use them with a dot to get the event and a colon to call its method: `part.Touched:Connect(...)`. Works in Scripts and LocalScripts.",
+  "terms": {
+    "event / signal": "Something that can happen in the game, like a touch or a click. Roblox 'fires' the event when it happens.",
+    "fire": "When the event happens and Roblox runs all the connected functions.",
+    "connect": "Attaching your function to an event so it runs each time the event fires.",
+    "connection": "The object you get back from `:Connect`. You can keep it and call `:Disconnect()` later to stop listening.",
+    "callback / handler": "The function you connect to an event. Roblox calls it for you when the event fires.",
+    "yield": "To pause your script and wait. `:Wait()` pauses until the event fires.",
+    "Actor / parallel": "An advanced way to run code on several CPU cores at once. Only scripts inside an Actor object can use `ConnectParallel`. Beginners can skip it."
+  },
+  "examples": [
+    {
+      "title": "Do something when a part is touched",
+      "place": "Script inside a Part in Workspace",
+      "code": "local part = script.Parent\n\n-- Touched is a signal. Connect a function to it.\npart.Touched:Connect(function(otherPart)\n\tprint(otherPart.Name .. \" touched me!\")\nend)",
+      "explain": [
+        "`part.Touched` is the event (signal).",
+        "`:Connect(function(otherPart) ... end)` attaches our function.",
+        "Every time something touches the part, Roblox runs the function and tells us what touched it."
+      ]
+    },
+    {
+      "title": "Connect, Once and Wait side by side",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\n-- Runs for EVERY player who joins\nPlayers.PlayerAdded:Connect(function(player)\n\tprint(\"Welcome, \" .. player.Name)\nend)\n\n-- Runs only for the FIRST player who joins\nPlayers.PlayerAdded:Once(function(player)\n\tprint(player.Name .. \" was the first one here!\")\nend)\n\n-- Pauses this script until someone joins, then continues\nlocal firstPlayer = Players.PlayerAdded:Wait()\nprint(\"Game can start now that \" .. firstPlayer.Name .. \" is here\")",
+      "explain": [
+        "`:Connect` keeps listening forever (until disconnected).",
+        "`:Once` listens one time, then stops by itself.",
+        "`:Wait` pauses the script and gives back what the event sent."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Use a dot to get the event and a colon to use it: `part.Touched:Connect(...)`, not `part:Touched:Connect`.",
+    "Connections keep running until you disconnect them or the object is destroyed. Disconnect ones you no longer need to avoid slowdowns.",
+    "`:Wait()` stops the whole script until the event fires. If it never fires, the code after it never runs.",
+    "Pass a function to `:Connect`, not the result of calling one: `:Connect(onTouch)`, not `:Connect(onTouch())`."
+  ],
+  "members": {
+    "RBXScriptSignal:Connect": {
+      "simple": "Attaches a function to the event. Every time the event fires, your function runs and gets whatever the event passes (like the part that touched). Returns a connection you can disconnect later.",
+      "example": "-- LocalScript inside a TextButton in StarterGui\nlocal button = script.Parent\n\nlocal connection = button.Activated:Connect(function()\n\tprint(\"Button clicked!\")\nend)"
+    },
+    "RBXScriptSignal:ConnectParallel": {
+      "simple": "An advanced version of `Connect` that runs your function in parallel (on another CPU core) for speed. Only works in scripts placed inside an Actor. Most games never need it.",
+      "example": "-- Script inside an Actor in Workspace\nlocal RunService = game:GetService(\"RunService\")\n\nRunService.Heartbeat:ConnectParallel(function()\n\t-- heavy math can go here, running in parallel\n\tlocal total = 0\n\tfor i = 1, 1000 do\n\t\ttotal += i\n\tend\nend)",
+      "gotcha": "In parallel mode you cannot change most things in the game. Call `task.synchronize()` before changing parts."
+    },
+    "RBXScriptSignal:Once": {
+      "simple": "Like `Connect`, but your function runs only the next time the event fires, then disconnects automatically.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- Only greet on their first spawn\n\tplayer.CharacterAdded:Once(function(character)\n\t\tprint(player.Name .. \" spawned for the first time\")\n\tend)\nend)"
+    },
+    "RBXScriptSignal:Wait": {
+      "simple": "Pauses your script until the event fires, then gives back what the event sent. Handy for 'wait until X happens'.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\n-- Use the current character, or wait for one to spawn\nlocal character = player.Character or player.CharacterAdded:Wait()\nprint(\"My character is ready:\", character.Name)",
+      "gotcha": "If the event never fires, your script waits forever."
+    }
+  }
+}

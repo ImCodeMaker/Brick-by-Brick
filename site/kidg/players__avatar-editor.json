@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/players/avatar-editor.md",
+  "simple": "`AvatarEditorService` lets your game look at and change a player's real Roblox avatar. With the player's permission, you can see items they own, search the Marketplace, save a new look to their account, and save outfits. This lets you build a dressing room or outfit shop right inside your game.",
+  "analogy": "It is like a clothing store with a fitting room. The store has to ask before looking in your closet, you can try on anything, but you only take home clothes you already own or buy.",
+  "keyPoints": [
+    "Before reading a player's inventory, ask permission with `PromptAllowInventoryReadAccess()` once per session.",
+    "Check the answer with the `PromptAllowInventoryReadAccessCompleted` event. `Enum.AvatarPromptResult.Success` means yes.",
+    "`GetInventory()` returns the items the player owns, filtered by asset types like back or shoulder accessories.",
+    "`SearchCatalog()` searches the Marketplace using a `CatalogSearchParams` object with filters like price, keyword, and creator.",
+    "`PromptSaveAvatar()` saves a `HumanoidDescription` as the player's current avatar. `PromptCreateOutfit()` saves it as an outfit without replacing their avatar.",
+    "Players do not get items they do not own just by saving an outfit. Check with `MarketplaceService:PlayerOwnsAsset()` and offer `PromptPurchase()`.",
+    "If you do not want to sell items, you can let players favorite them with `PromptSetFavorite()` instead."
+  ],
+  "terms": {
+    "inventory": "All the avatar items a player owns on their Roblox account.",
+    "Marketplace": "Roblox's shop of avatar items, also called the catalog.",
+    "prompt": "A pop-up window that asks the player to agree to something, like letting the game see their items.",
+    "HumanoidDescription": "An object that lists everything about how a character looks: body parts, colors, clothes, and accessories.",
+    "outfit": "A saved look on a player's account that they can switch to later.",
+    "asset type": "The kind of item, like `BackAccessory` or `ShoulderAccessory`.",
+    "pages object": "Results that come in pages, like a book. `GetCurrentPage()` gives you the items on the page you are looking at.",
+    "yield": "Pause the script until something finishes. `PromptSaveAvatar()` does not yield, so you listen to an event to get the result.",
+    "RigType": "Whether the character body is R15 or R6.",
+    "commission": "Robux your game earns when a player buys an item inside it."
+  },
+  "example": {
+    "title": "Save the player's current look as an outfit",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local AvatarEditorService = game:GetService(\"AvatarEditorService\")\nlocal Players = game:GetService(\"Players\")\n\nlocal player = Players.LocalPlayer\nlocal character = player.Character or player.CharacterAdded:Wait()\nlocal humanoid = character:WaitForChild(\"Humanoid\")\n\n-- Read what the character is wearing right now\nlocal description = humanoid:GetAppliedDescription()\n\n-- Ask the player if they want to save it as an outfit\nAvatarEditorService:PromptCreateOutfit(description, humanoid.RigType)\n\n-- Wait for their answer\nlocal result = AvatarEditorService.PromptCreateOutfitCompleted:Wait()\nif result == Enum.AvatarPromptResult.Success then\n\tprint(\"Outfit saved!\")\nelse\n\tprint(\"Outfit not saved\")\nend",
+    "explain": [
+      "We wait for the player's character and its `Humanoid`.",
+      "`GetAppliedDescription()` copies the character's current look into a `HumanoidDescription`.",
+      "`PromptCreateOutfit()` shows a pop-up asking the player to save that look as an outfit.",
+      "We wait for `PromptCreateOutfitCompleted` and check if the result is `Success`."
+    ]
+  },
+  "watchOut": [
+    "Calling `GetInventory()` before the player says yes to the access prompt. Always ask first and check the result.",
+    "Thinking saving an outfit gives players free items. They only get items they already own, so offer a purchase for the rest.",
+    "Expecting `PromptSaveAvatar()` to return the answer right away. Listen to `PromptSaveAvatarCompleted` instead."
+  ]
+}

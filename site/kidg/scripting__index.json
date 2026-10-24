@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/scripting/index.md",
+  "simple": "Scripts are text files full of code that make your game do things: open doors, give points, spawn enemies, save data, and more. Roblox scripts are written in a language called Luau, which is based on Lua. This page shows the basics of Luau and walks you through making your first script. It also gives tips for setting up Studio so coding is more comfortable.",
+  "analogy": "A script is like a recipe card for your game: it lists step-by-step instructions, and Roblox follows them exactly, in order.",
+  "keyPoints": [
+    "Roblox uses Luau, a faster, upgraded version of Lua 5.1. Any Lua 5.1 code also works in Luau.",
+    "You do not have to say what type a variable is. `type()` tells you what kind of value something is.",
+    "Use `local` when making variables and functions. It is almost always the better choice.",
+    "`nil` means 'nothing', and it counts as false in an `if` check.",
+    "`--` starts a one-line comment and `--[[ ]]` makes a multi-line comment. Comments are notes the computer ignores.",
+    "Tables hold lists (arrays) or named values (dictionaries). Lists start at 1, not 0.",
+    "You can loop over a table with `for key, value in myTable do` without needing `pairs` or `ipairs`.",
+    "Your first script: add a Script to ServerScriptService, write code, open the Output window, and press Play. A script in ReplicatedStorage will not run, which the next page explains."
+  ],
+  "terms": {
+    "script": "A file of code that tells the game what to do.",
+    "Luau": "The programming language Roblox uses. It is based on Lua with extra features and speed.",
+    "variable": "A named box that stores a value, like `local coins = 10`.",
+    "local": "A keyword that keeps a variable or function usable only inside the area where you made it.",
+    "scope": "The area of code where a variable can be used.",
+    "type": "What kind of value something is, like a string (text), number, or table.",
+    "string": "Text in quotes, like \"hello\".",
+    "nil": "A special value meaning nothing or no value.",
+    "comment": "A note in your code for humans. The computer skips it.",
+    "table": "Luau's container for many values, in a list or with names.",
+    "array": "A table that is a numbered list. In {\"chips\", \"salsa\"}, item 1 is \"chips\".",
+    "dictionary": "A table where each value has a name, like `snack = \"chips\"`.",
+    "iterate / loop": "Go through every item one at a time.",
+    "Output window": "The Studio panel where `print` messages and errors appear."
+  },
+  "example": {
+    "title": "Your first script",
+    "place": "Script in ServerScriptService",
+    "code": "local helloArray = {\"h\", \"e\", \"l\", \"l\", \"o\"}\nlocal worldArray = {\"w\", \"o\", \"r\", \"l\", \"d\"}\n\n-- Print each letter of hello on its own line\nfor index, value in helloArray do\n\tprint(value)\nend\n\n-- Join the world letters into one word and print it\nprint(table.concat(worldArray))",
+    "explain": [
+      "We make two arrays, each holding letters.",
+      "The `for` loop goes through `helloArray` and prints each letter on its own line.",
+      "`table.concat` glues all the letters of `worldArray` into one string, `world`.",
+      "Press Play and look at the Output window to see the result."
+    ]
+  },
+  "watchOut": [
+    "Forgetting `local` makes a global variable, which can cause hard-to-find bugs. Use `local` by default.",
+    "Lists start at 1. `myArray[0]` is `nil`, not the first item.",
+    "A Script placed in ReplicatedStorage does not run by default. Put server scripts in ServerScriptService.",
+    "Keep the Output window open. Errors show up there in red."
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/scripting/events/bindable.md",
+  "simple": "Bindable events and bindable functions let scripts on the same side talk to each other, like two server scripts. A `BindableEvent` sends a one-way message, like 'the round started!', and any number of scripts can listen. A `BindableFunction` asks a question and waits for an answer, like 'what is 2 + 4?'. They are handy for round-based games, though ModuleScripts are often a better way to share data.",
+  "analogy": "A BindableEvent is like a school announcement over the loudspeaker: everyone who is listening hears it, and the speaker does not wait for replies. A BindableFunction is like asking one friend a question and waiting for their answer.",
+  "keyPoints": [
+    "Bindables only work between scripts on the same side: server to server, or client to client. For server-to-client, use remote events.",
+    "Put them in ServerScriptService for server scripts, or ReplicatedStorage for client scripts.",
+    "`BindableEvent:Fire(...)` sends a message without waiting. Listeners use `bindableEvent.Event:Connect(...)`.",
+    "Many functions can listen to one BindableEvent, but they run in no particular order. Combine them into one function if order matters.",
+    "`BindableFunction:Invoke(...)` waits for a reply. The other script sets `bindableFunction.OnInvoke = someFunction`, and its return value is sent back.",
+    "A BindableFunction has only one `OnInvoke` at a time; setting it again replaces the old one. If none is set, `Invoke` waits forever.",
+    "Tables you send are copied: non-string keys turn into strings, mixed number-and-name tables can lose items, and metatables are lost."
+  ],
+  "terms": {
+    "BindableEvent": "An object for sending a one-way message between scripts on the same side.",
+    "BindableFunction": "An object for asking another script on the same side to run a function and send back an answer.",
+    "same side": "Both scripts on the server, or both on the same player's device.",
+    "asynchronous": "Does not wait. The script that fires keeps running right away.",
+    "synchronous": "Waits for the answer before moving on.",
+    "invoke": "Call a BindableFunction (or RemoteFunction) and wait for its answer.",
+    "callback": "The function that runs when something is invoked, set with `OnInvoke`.",
+    "yield": "Pause and wait. `Invoke` yields until it gets the answer.",
+    "thread": "A separate line of work. Each listener runs in its own thread, so one error does not stop the others.",
+    "metatable": "A hidden table that adds extra behavior to another table. It does not survive being sent through a bindable.",
+    "table identity": "Which exact table something is. A sent table arrives as a copy, so it is not the same table, even if it has the same contents."
+  },
+  "example": {
+    "title": "Announce when a round starts",
+    "place": "BindableEvent named RoundStarted in ServerScriptService, plus two Scripts in ServerScriptService",
+    "code": "-- Script 1 (ServerScriptService): listens for the round to start\nlocal ServerScriptService = game:GetService(\"ServerScriptService\")\nlocal roundStarted = ServerScriptService:WaitForChild(\"RoundStarted\")\n\nroundStarted.Event:Connect(function(roundNumber)\n\tprint(\"Starting timer for round \" .. roundNumber)\nend)\n\n--[[ Script 2 (ServerScriptService, separate script): starts rounds\nlocal ServerScriptService = game:GetService(\"ServerScriptService\")\nlocal roundStarted = ServerScriptService:WaitForChild(\"RoundStarted\")\n\nfor round = 1, 3 do\n\troundStarted:Fire(round) -- tell every listener\n\ttask.wait(30) -- each round lasts 30 seconds\nend\n]]",
+    "explain": [
+      "Both scripts find the same `BindableEvent` called RoundStarted.",
+      "Script 1 connects to `RoundStarted.Event` so it hears every announcement.",
+      "Script 2 calls `Fire(round)` to send the round number, then waits 30 seconds before the next round.",
+      "Each time Script 2 fires, Script 1 prints the round number. More scripts could listen too, like one to show a leaderboard."
+    ]
+  },
+  "watchOut": [
+    "Bindables do not cross between the server and players. A server script firing a BindableEvent will not reach a LocalScript. Use a RemoteEvent for that.",
+    "If no script sets `OnInvoke`, calling `Invoke` freezes that script forever.",
+    "Do not send tables that mix numbered items and named keys. Send a pure list or a pure dictionary.",
+    "If the `OnInvoke` function has no `return`, the caller gets `nil`."
+  ]
+}

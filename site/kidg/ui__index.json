@@ -1,0 +1,30 @@
+{
+  "path": "content/en-us/ui/index.md",
+  "simple": "UI (user interface) is everything players see and click that is not the 3D world itself: health bars, shop menus, buttons, name tags, and more. This page is a map of all the UI tools Roblox gives you. UI can sit flat on the player's screen or live inside the 3D world, like a sign on a wall. Most UI is built from a few basic pieces: frames, labels, buttons, and text boxes.",
+  "analogy": "Building UI is like making a poster with stickers: frames are the boards, labels are the text and pictures you stick on, and buttons are stickers you can press.",
+  "keyPoints": [
+    "On-screen UI goes in a `ScreenGui` and shows on the player's screen; it lives and runs on the player's device (the client).",
+    "In-world UI uses a `SurfaceGui` (stuck to a part's face) or a `BillboardGui` (floats and always faces the camera).",
+    "`Frame` holds other UI, `TextLabel`/`ImageLabel` show text or pictures, `TextButton`/`ImageButton` can be clicked, and `TextBox` lets players type.",
+    "`Position`, `Size`, `AnchorPoint`, and `ZIndex` control where UI goes, how big it is, and what sits on top.",
+    "Tweening smoothly animates UI from one look or spot to another.",
+    "Layouts like `UIListLayout` and grids line items up for you, and modifiers like `UIStroke` and `UIGradient` add outlines and color fades.",
+    "Universal styling lets you set looks in one place and apply them everywhere, a bit like CSS on websites.",
+    "Proximity prompts, UI drag detectors, and 3D drag detectors add ready-made ways for players to interact."
+  ],
+  "terms": {
+    "UI / GUI": "User interface or graphical user interface. The menus, buttons, and text on top of or inside your game.",
+    "GuiObject": "Any 2D UI piece you can place, such as a frame, label, button, or text box.",
+    "container": "An object that holds UI so it can be shown, like `ScreenGui`, `SurfaceGui`, or `BillboardGui`.",
+    "client": "The player's own device (computer, phone, console). On-screen UI is handled there, not on the server.",
+    "AnchorPoint": "The spot on a UI object that its `Position` refers to. (0, 0) is the top-left corner; (0.5, 0.5) is the center.",
+    "ZIndex": "A number that decides which UI is drawn on top. A higher ZIndex covers a lower one.",
+    "tweening": "Smoothly changing a property over time, like sliding a menu in over 0.5 seconds instead of popping it in.",
+    "stylesheet": "A list of style rules (colors, fonts, sizes) you write once and apply to lots of UI."
+  },
+  "watchOut": [
+    "On-screen UI is controlled by the client, so change it from a `LocalScript`, not a server `Script`.",
+    "Do not cram everything into one big frame. Use frames and layouts to keep UI tidy and easy to move.",
+    "Remember players use phones too. Test your UI in different screen sizes."
+  ]
+}

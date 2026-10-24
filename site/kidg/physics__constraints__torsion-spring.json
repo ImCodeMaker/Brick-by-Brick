@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/physics/constraints/torsion-spring.md",
+  "simple": "A TorsionSpringConstraint is a twisting spring. Instead of pulling two points together, it twists two parts back so their directions line up again. The classic use is a saloon or screen door that you push open and that swings itself shut. Like a normal spring, you can set its strength, how fast the swinging calms down, and a maximum angle.",
+  "analogy": "A mousetrap or a clothespin spring: twist it open and it snaps back to its closed position.",
+  "keyPoints": [
+    "A torsion spring twists two parts to bring two axes back into line.",
+    "It lines up the orange SecondaryAxis arrows of the two attachments. For a swinging door, those arrows must be perpendicular to the hinge line.",
+    "It works great together with a HingeConstraint to make doors that spring shut.",
+    "`Stiffness` is how hard it twists back. Higher means stronger.",
+    "`Damping` is how quickly the swinging dies down. 0 swings forever.",
+    "Turn on `LimitsEnabled` to set `MaxAngle`, which limits the twist to a cone, and `Restitution` for bounciness at that limit."
+  ],
+  "terms": {
+    "torsion": "Twisting. A torsion spring stores energy when you twist it.",
+    "torque": "A twisting force, the turning version of a push.",
+    "relative angle": "How far one part is turned compared to the other. A door opened 60 degrees has a relative angle of 60 degrees to its frame.",
+    "relative angular velocity": "How fast one part is turning compared to the other.",
+    "SecondaryAxis": "The orange arrow on an attachment (its Y direction). The torsion spring tries to make both attachments' orange arrows point the same way.",
+    "perpendicular": "At a right angle (90 degrees). A vertical door hinge needs flat, sideways orange arrows.",
+    "damping": "How quickly the swinging calms down. A screen door with damping 0 would flap back and forth forever.",
+    "MaxAngle": "The most it can twist, in degrees. With MaxAngle 80, the door cannot open more than 80 degrees.",
+    "restitution": "How bouncy it is when it hits MaxAngle. 0 stops dead, 1 bounces back hard."
+  },
+  "example": {
+    "title": "A saloon door that swings shut by itself",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal post = Instance.new(\"Part\")\npost.Size = Vector3.new(0.5, 5, 0.5)\npost.Position = Vector3.new(10, 3.5, 0)\npost.Anchored = true\npost.CanCollide = false\npost.Parent = Workspace\n\nlocal door = Instance.new(\"Part\")\ndoor.Size = Vector3.new(3, 4, 0.3)\ndoor.Position = Vector3.new(11.5, 3.5, 0)  -- left edge touches the post at X = 10\ndoor.Parent = Workspace\n\n-- Orientation (0, 0, 90): yellow Axis points UP (the hinge line)\n-- and orange SecondaryAxis points sideways, flat, perpendicular to it\nlocal postAtt = Instance.new(\"Attachment\")\npostAtt.Orientation = Vector3.new(0, 0, 90)\npostAtt.Parent = post\n\nlocal doorAtt = Instance.new(\"Attachment\")\ndoorAtt.Position = Vector3.new(-1.5, 0, 0)  -- the door's left edge\ndoorAtt.Orientation = Vector3.new(0, 0, 90)\ndoorAtt.Parent = door\n\n-- The hinge lets it swing around the vertical line\nlocal hinge = Instance.new(\"HingeConstraint\")\nhinge.Attachment0 = postAtt\nhinge.Attachment1 = doorAtt\nhinge.Parent = post\n\n-- The torsion spring twists it back to closed\nlocal closer = Instance.new(\"TorsionSpringConstraint\")\ncloser.Attachment0 = postAtt\ncloser.Attachment1 = doorAtt\ncloser.Stiffness = 200\ncloser.Damping = 10\ncloser.LimitsEnabled = true\ncloser.MaxAngle = 80   -- cannot open more than 80 degrees\ncloser.Parent = post",
+    "explain": [
+      "The hinge and the torsion spring share the same two attachments.",
+      "Orientation (0, 0, 90) points each attachment's yellow arrow up, which is the hinge line. Their orange arrows lie flat, at 90 degrees to that line, which is what a torsion spring needs.",
+      "When the door is closed, both orange arrows point the same way, so the spring is relaxed. Walk through and push the door 60 degrees open, and the spring twists it back toward 0.",
+      "`Damping = 10` stops it from flapping back and forth too many times. `MaxAngle = 80` keeps it from swinging all the way around.",
+      "Try `Stiffness = 50` for a lazy door or `2000` for one that slams shut."
+    ]
+  },
+  "watchOut": [
+    "If the door will not spring back, the orange SecondaryAxis arrows are probably parallel to the hinge line instead of perpendicular. Show Constraint Details to check.",
+    "Too much stiffness with little damping makes the door slam and shake. Raise damping.",
+    "A torsion spring alone does not hold the door on. Use it with a hinge (or another constraint) to keep the door attached in one spot."
+  ]
+}

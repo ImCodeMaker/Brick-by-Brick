@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/scripting/module.md",
+  "simple": "A `ModuleScript` is a script that holds code you want to use in many places. Instead of copying the same function into ten scripts, you write it once in a module and load it with `require`. Modules in ReplicatedStorage can even be shared by the server and players' devices. This page shows how to build modules and some smart ways to use them.",
+  "analogy": "A ModuleScript is like a shared toolbox in a classroom: instead of every student bringing their own hammer, everyone borrows the same one from the box whenever they need it.",
+  "keyPoints": [
+    "Every ModuleScript starts as `local module = {}` and `return module`. Whatever it returns is what other scripts get.",
+    "A module can return anything except `nil`, but usually returns a table full of functions or data.",
+    "Load a module with `require(...)`. Use `WaitForChild` on the client so you do not try to load it before it has arrived.",
+    "A module only runs once per side. Every later `require` gets the exact same table, so changes to it are shared.",
+    "The server and the client each get their own separate copy of the module's result.",
+    "Two modules that `require` each other cause a 'required recursively' error. Avoid circles.",
+    "Common uses: storing settings data (like gun stats), creating custom events, and wrapping messy code (like networking) behind simple functions."
+  ],
+  "terms": {
+    "ModuleScript": "A script that does not run by itself. It runs when another script `require`s it, and gives back a value.",
+    "require": "A function that loads a ModuleScript and returns what it returns.",
+    "return value": "The thing a module hands back, such as a table of functions.",
+    "reference": "A pointer to the same thing, not a copy. If two scripts hold a reference to one table and one changes it, both see the change.",
+    "client-server boundary": "The line between the server and players' devices. Each side runs its own copy of code.",
+    "circular require": "When module A requires module B and B requires A. Roblox stops this with an error.",
+    "WaitForChild": "Waits until a child with that name exists, then returns it. Useful because things might not be loaded yet.",
+    "BindableEvent": "An object that lets scripts on the same side send signals to each other.",
+    "encapsulation": "Hiding complicated details inside a module and giving other scripts a simple function to call instead.",
+    "configuration data": "Settings like `MagazineSize = 20` or `Damage = 50` that many scripts need to read."
+  },
+  "example": {
+    "title": "Share a pickup bonus calculator",
+    "place": "ModuleScript named PickupManager in ReplicatedStorage, plus a Script in ServerScriptService",
+    "code": "-- ModuleScript named \"PickupManager\" in ReplicatedStorage\nlocal PickupManager = {}\n\nlocal defaultMultiplier = 1.25\nlocal rarityMultipliers = {\n\tcommon = 10,\n\tuncommon = 20,\n\trare = 50,\n\tlegendary = 100,\n}\n\nfunction PickupManager.getPickupBonus(rarity)\n\treturn rarityMultipliers[rarity] * defaultMultiplier\nend\n\nreturn PickupManager\n\n--[[ Script in ServerScriptService (separate script):\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal PickupManager = require(ReplicatedStorage:WaitForChild(\"PickupManager\"))\n\nprint(PickupManager.getPickupBonus(\"legendary\")) --> 125\n]]",
+    "explain": [
+      "The module makes a table called `PickupManager`.",
+      "It stores how much each rarity is worth, like `legendary = 100`.",
+      "`getPickupBonus` looks up the rarity and multiplies it by 1.25, so legendary gives 100 x 1.25 = 125.",
+      "The module returns the table so other scripts can use it.",
+      "Any script (server or client) can `require` it and call `PickupManager.getPickupBonus`."
+    ]
+  },
+  "watchOut": [
+    "Forgetting `return` at the end of a module causes an error when you require it.",
+    "Modules run only once. Do not expect code at the top of a module to run again each time you require it.",
+    "Do not make two modules require each other. Move the shared part into a third module.",
+    "Modules in ServerScriptService or ServerStorage cannot be required by the client. Use ReplicatedStorage for shared code."
+  ]
+}

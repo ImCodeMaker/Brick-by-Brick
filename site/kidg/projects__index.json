@@ -1,0 +1,35 @@
+{
+  "path": "content/en-us/projects/index.md",
+  "simple": "A Roblox project is everything that makes up one game: its places, its assets, its settings, and more. Roblox saves your project online, so you and your friends can work on it together and go back to older versions. This page explains the main pieces of a project so you know what each one is for. Knowing these words makes every other guide much easier to follow.",
+  "analogy": "A project is like a board game box. The places are the different game boards inside, the assets are the cards and pieces, and the settings are the rule sheet on the lid that says who can play and how.",
+  "keyPoints": [
+    "A game is made of one or more places, like different maps or levels. Each place has its own world, parts, scripts, and UI.",
+    "Every place is described by a data model, a tree of objects that tells the Roblox Engine what the place looks like and how it works.",
+    "Images, meshes, and sounds are stored online as assets. Each one gets an asset ID, like `rbxassetid://7229442422`, that you use to point to it.",
+    "Assets are private to your game by default, but you can share them with everyone on the Creator Store.",
+    "Packages are groups of objects you can reuse in many places. Change the package once and every copy can update.",
+    "Game settings (name, permissions, monetization, languages, avatar options, and more) live on the Creator Dashboard or in Studio.",
+    "A newly published game is only open to you and people you give access to, until you release it to the public.",
+    "Studio has built-in tools to build together in real time and to test on PC, phone, VR, and other devices without any app store approval."
+  ],
+  "terms": {
+    "project": "Everything that belongs to one game: places, assets, settings, and other resources, all saved online by Roblox.",
+    "place": "One map or level inside a game. A game with a lobby and three worlds could have four places.",
+    "data model": "The tree of objects (Workspace, Lighting, scripts, and so on) that describes everything in a place. You see it in Studio's Explorer window.",
+    "source of truth": "The one official copy everyone trusts. The engine reads the data model to know what the place should look like right now.",
+    "cloud": "Roblox's computers on the internet. Saving to the cloud means your work is stored there, not only on your computer.",
+    "asset ID": "A unique number Roblox gives to each uploaded image, sound, or mesh. For example, `rbxassetid://9125402735` points to one specific sound.",
+    "Creator Store": "A place where creators share models, images, sounds, and more for others to use in their games.",
+    "package": "A reusable group of objects. If a tree is a package and you place it 50 times, you can change its texture once and all 50 trees can update.",
+    "graybox": "Plain, simple placeholder shapes you build first to test a layout, before you add final art.",
+    "version control": "Keeping a history of saved versions so you can see changes and go back to an older one if something breaks.",
+    "playtesting": "Playing your own game inside Studio to check that it works.",
+    "device emulation": "A Studio tool that pretends your screen is a phone or tablet, so you can see how controls and UI look there.",
+    "Creator Dashboard": "The Roblox website page where you manage your games, their settings, and their stats."
+  },
+  "watchOut": [
+    "Thinking a game is only one map. Big games often use several places, and each one is its own separate world.",
+    "Expecting players to find your game right after publishing. New games are private until you release them in the Permissions settings.",
+    "Copying the same model by hand many times. If you will reuse it, turn it into a package so one edit updates every copy."
+  ]
+}

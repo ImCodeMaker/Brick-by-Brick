@@ -1,0 +1,59 @@
+{
+  "name": "LayerCollector",
+  "simple": "LayerCollector is the family name for the 'canvases' that hold UI: ScreenGui (on your screen), BillboardGui (floating in the world, facing you) and SurfaceGui (stuck on a part's face). It gives all of them three settings: Enabled (show or hide everything), ResetOnSpawn (rebuild the UI when the player respawns?) and ZIndexBehavior (how layering works). You never make a LayerCollector yourself.",
+  "analogy": "A LayerCollector is like a picture frame. The frame itself can be on your wall (ScreenGui), on a sign post that always turns to face you (BillboardGui), or glued onto a box (SurfaceGui). Whatever you put in the frame is your UI.",
+  "whenToUse": [
+    "Turning a whole menu on or off at once (Enabled)",
+    "Keeping UI from resetting when the player dies (ResetOnSpawn)",
+    "Changing how ZIndex layering works for all the UI inside (ZIndexBehavior)"
+  ],
+  "where": "It is a base class, so you use ScreenGui, BillboardGui or SurfaceGui instead. Those usually live in StarterGui (copied into each player's PlayerGui). Control them from a LocalScript.",
+  "terms": {
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts, because each player has their own copy of the UI.",
+    "client": "The player's own device: their computer, phone, tablet or console.",
+    "server": "Roblox's computer that runs the game for everyone at once.",
+    "StarterGui": "A folder in Explorer. UI you put here is copied to every player when they spawn.",
+    "PlayerGui": "Each player's own personal UI folder (inside their Player object). Only UI in here actually shows on their screen.",
+    "descendant": "Anything inside an object: children, grandchildren, and so on.",
+    "base class": "A 'parent type' other types are built from. You can't create it directly, but its properties appear on every type built from it.",
+    "respawn": "When your character comes back to life after dying or resetting.",
+    "ZIndex": "A layer number on each UI object. Higher numbers are drawn on top.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "deprecated": "Old and replaced by something better. Don't use it in new code."
+  },
+  "examples": [
+    {
+      "title": "Keep a score display from resetting when you die",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal scoreGui = Instance.new(\"ScreenGui\")\nscoreGui.Name = \"ScoreGui\"\nscoreGui.ResetOnSpawn = false -- keep this UI when the character respawns\nscoreGui.Parent = playerGui\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.fromOffset(200, 50)\nlabel.Text = \"Score: 0\"\nlabel.Parent = scoreGui\n\ntask.wait(5)\nscoreGui.Enabled = false -- hide the whole thing at once",
+      "explain": [
+        "We make a ScreenGui (a kind of LayerCollector) and put it straight into this player's PlayerGui.",
+        "ResetOnSpawn = false means it won't be deleted and rebuilt every time the character respawns.",
+        "After 5 seconds, Enabled = false hides the whole ScreenGui and everything inside it in one step."
+      ]
+    }
+  ],
+  "gotchas": [
+    "ResetOnSpawn is true by default. If your UI 'forgets' things after the player dies, this is usually why.",
+    "ResetOnSpawn = false only works if the Gui is DIRECTLY inside StarterGui, not inside a Folder in StarterGui.",
+    "With Enabled = false, nothing inside is drawn or clickable, and it stops updating."
+  ],
+  "members": {
+    "LayerCollector.Enabled": {
+      "simple": "Shows (true) or hides (false) the whole UI canvas and everything inside it. When false, nothing inside is drawn, clicked, or updated.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nlocal shop = playerGui:WaitForChild(\"ShopGui\")\nshop.Enabled = true -- open the shop"
+    },
+    "LayerCollector.ResetOnSpawn": {
+      "simple": "When true (default), the UI is deleted and copied fresh from StarterGui every time the player's character respawns. Set false (and keep it directly in StarterGui) to copy it only once and keep it forever.",
+      "example": "local gui = script.Parent -- a ScreenGui directly inside StarterGui\ngui.ResetOnSpawn = false",
+      "gotcha": "A LocalScript inside a resetting Gui also restarts on every respawn."
+    },
+    "LayerCollector.ZIndexBehavior": {
+      "simple": "Decides how ZIndex works for everything inside. Sibling (default): children are always drawn on top of their parent, and ZIndex only sorts brothers and sisters. Global: everything is sorted by ZIndex together, so a child needs a ZIndex at least as high as its parent or it hides behind it.",
+      "example": "local gui = script.Parent -- a ScreenGui\ngui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling -- the easy, default way"
+    },
+    "LayerCollector:GetLayoutNodeTree": {
+      "simple": "Old — use nothing (this is an internal function you don't need) instead."
+    }
+  }
+}

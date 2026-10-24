@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/luau/comments.md",
+  "simple": "Comments are notes you write inside your code that Luau skips when the game runs. They help you and your teammates remember what code does and why. Some special comments starting with `--!` also turn on features like strict type checking. Good comments make your scripts much easier to fix later.",
+  "analogy": "Comments are like sticky notes on a recipe. The cook can read \"don't burn this!\" but the notes are not ingredients, so they never end up in the food.",
+  "keyPoints": [
+    "Start a single-line comment with `--`. Everything after it on that line is ignored.",
+    "Use `--[[ ... ]]` for a block comment that covers many lines.",
+    "Press Ctrl+/ (Cmd+/ on Mac) in the Script Editor to quickly comment or uncomment lines.",
+    "Put a block comment at the top of a script to explain what it is for, and before functions to explain what they do.",
+    "A block comment right before a declaration shows up as a tooltip when you hover over that name in Studio.",
+    "Directive comments start with `--!`, like `--!strict` for type checking or `--!native` for native code.",
+    "`--!optimize 0`, `1`, or `2` sets how much the compiler optimizes. The defaults are usually best.",
+    "Write `TODO` in a comment and Studio makes the next word bold, so you can track unfinished work."
+  ],
+  "terms": {
+    "comment": "Text in your script that Luau ignores. It is just for people reading the code.",
+    "parser": "The part of Luau that reads your code before running it.",
+    "runtime": "The time when the game is actually running your code.",
+    "single-line comment": "A comment that starts with `--` and ends at the end of the line.",
+    "block comment": "A comment that can span many lines, written between `--[[` and `]]`.",
+    "directive": "A special comment starting with `--!` that tells Luau to change how it treats the script.",
+    "linting": "Automatic checks that warn you about likely mistakes. `--!nolint` turns them off.",
+    "optimization": "Making code run faster. Level 0 is off, 1 is basic, and 2 is more (used in live games).",
+    "tooltip": "A small pop-up box that appears when you hover your mouse over something.",
+    "TODO": "A marker meaning \"still need to do this\"."
+  },
+  "example": {
+    "title": "A well-commented script",
+    "place": "Script in ServerScriptService",
+    "code": "--!strict\n--[[\n\tWelcome script\n\tPrints a greeting when each player joins.\n]]\n\nlocal Players = game:GetService(\"Players\")\n\n--[[\n\tBuilds the greeting text for a player.\n\tHover over greet below to see this note as a tooltip.\n]]\nlocal function greet(name: string): string\n\treturn `Welcome, {name}!` -- uses string interpolation\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n\tprint(greet(player.Name))\n\t-- TODO: show the greeting on screen instead of in Output\nend)",
+    "explain": [
+      "`--!strict` is a directive that turns on strict type checking for this script.",
+      "The first block comment explains what the whole script does.",
+      "The block comment above `greet` describes the function and appears as a hover tooltip.",
+      "`-- uses string interpolation` is a single-line note at the end of a code line.",
+      "The `TODO` comment reminds you of work still left to do."
+    ]
+  },
+  "watchOut": [
+    "Putting `--!strict` anywhere but the top of the script. Directives go on the first lines.",
+    "Writing comments that just repeat the code, like `x = 5 -- set x to 5`. Explain why instead.",
+    "Mixing this up with Studio's collaboration comments feature. That is a different thing."
+  ]
+}

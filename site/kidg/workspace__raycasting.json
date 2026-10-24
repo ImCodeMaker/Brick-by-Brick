@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/workspace/raycasting.md",
+  "simple": "Raycasting means shooting an invisible laser line from a point in a direction and seeing what it hits first. Games use it for guns, checking what is under a player's feet, line-of-sight checks, and placing objects on surfaces. You do it with `workspace:Raycast()`. If it hits something, you get back what it hit, where, and the surface details.",
+  "analogy": "It is like shining a laser pointer across a room: the red dot shows you the first thing the beam hits and exactly where.",
+  "keyPoints": [
+    "Call `workspace:Raycast(origin, direction)`, where both are `Vector3`s.",
+    "The direction's length is the ray's length. `Vector3.new(0, -100, 0)` goes straight down for 100 studs. The max is 15,000 studs.",
+    "To aim from point A to point B, use `direction = B - A`.",
+    "A `RaycastParams` object lets you exclude or include certain objects, ignore water, or use a collision group.",
+    "If nothing is hit, `Raycast` returns `nil`. Always check before using the result.",
+    "A hit result has `Instance` (what was hit), `Position` (where), `Distance`, `Material`, and `Normal` (which way the surface faces).",
+    "Set a part's `CanQuery` to false to make rays ignore it.",
+    "With streaming on, a player's device may not have far-away parts loaded, so rays from there might miss them."
+  ],
+  "terms": {
+    "ray": "An invisible straight line with a start point, a direction, and a length.",
+    "origin": "Where the ray starts, like (0, 10, 0), 10 studs above the world center.",
+    "direction": "Which way the ray goes and how far. (0, -100, 0) points down and is 100 studs long.",
+    "magnitude": "The length of a vector. The magnitude of (0, -100, 0) is 100.",
+    "destination": "Where you want the ray to end. Direction = destination minus origin. From (0, 0, 0) to (10, 0, 0), the direction is (10, 0, 0).",
+    "filter": "A rule for which objects the ray should notice or skip.",
+    "Exclude / Include": "Exclude ignores the listed objects (and everything inside them). Include only looks at the listed objects.",
+    "descendant": "Anything inside an object, including things inside those things. A character's arm is a descendant of the character model.",
+    "nil": "Lua's word for 'nothing'. `Raycast` returns nil when the ray hits nothing.",
+    "normal": "An arrow pointing straight out of the surface that was hit. Hitting a floor gives a normal of about (0, 1, 0), pointing up.",
+    "CanQuery": "A part property. If false, rays and spatial checks skip it.",
+    "streaming": "A setting where players only load nearby parts of the world, to save memory. Far parts might not exist on their device yet."
+  },
+  "example": {
+    "title": "Find what is under a part",
+    "place": "Script inside a Part in Workspace",
+    "code": "local part = script.Parent\n\nlocal params = RaycastParams.new()\nparams.FilterDescendantsInstances = { part } -- do not hit ourselves\nparams.FilterType = Enum.RaycastFilterType.Exclude\n\nlocal origin = part.Position\nlocal direction = Vector3.new(0, -50, 0) -- straight down, 50 studs long\n\nlocal result = workspace:Raycast(origin, direction, params)\nif result then\n\tprint(\"Below me is\", result.Instance.Name)\n\tprint(\"It is\", result.Distance, \"studs away\")\n\tprint(\"Its material is\", result.Material)\nelse\n\tprint(\"Nothing within 50 studs below\")\nend",
+    "explain": [
+      "We make `RaycastParams` and exclude our own part, otherwise the ray could hit the part it starts inside.",
+      "The ray starts at the part's position and points 50 studs straight down.",
+      "`workspace:Raycast` returns a result if it hits something, or `nil` if not.",
+      "We check `if result then` before reading its `Instance`, `Distance`, and `Material`."
+    ]
+  },
+  "watchOut": [
+    "A direction of (0, -1, 0) is only 1 stud long. Multiply by the distance you want, like `direction.Unit * 100`.",
+    "Using the result without checking for `nil` will error when the ray misses.",
+    "Rays starting inside a part often hit that part first. Exclude it with `RaycastParams`.",
+    "Invisible parts still block rays. Set `CanQuery = false` on them if rays should pass through."
+  ]
+}

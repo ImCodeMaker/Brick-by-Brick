@@ -1,0 +1,57 @@
+{
+  "name": "Rect",
+  "simple": "A Rect is a flat 2D rectangle, described by two corners: Min (top-left) and Max (bottom-right). It is mostly used in UI images, for example to say which middle part of an image is allowed to stretch (ImageLabel.SliceCenter).",
+  "analogy": "A Rect is like drawing a box on a piece of paper by putting one finger on the top-left corner and another on the bottom-right corner.",
+  "whenToUse": [
+    "ImageLabel.SliceCenter or ImageButton.SliceCenter for 9-slice images that stretch without blurry corners",
+    "Storing a rectangle area in your own UI code"
+  ],
+  "where": "Works in any script. Make one with Rect.new(), Rect.new(minVector2, maxVector2), or Rect.new(minX, minY, maxX, maxY).",
+  "terms": {
+    "Vector2": "Two numbers (X, Y) for a spot or size on a flat surface, like a screen or image.",
+    "Min": "The top-left corner (smallest X and smallest Y).",
+    "Max": "The bottom-right corner (biggest X and biggest Y). Remember, in 2D UI, Y gets bigger as you go DOWN.",
+    "9-slice": "A trick for stretching an image like a rounded button: the 4 corners stay the same size, the edges stretch one way, and the middle stretches both ways. SliceCenter says where the middle is.",
+    "pixel": "One tiny dot of an image or screen."
+  },
+  "examples": [
+    {
+      "title": "A stretchy rounded panel with 9-slice",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\nlocal panel = Instance.new(\"ImageLabel\")\npanel.Size = UDim2.fromScale(0.4, 0.3)\npanel.Position = UDim2.fromScale(0.3, 0.35)\npanel.Image = \"rbxassetid://0\" -- replace 0 with your own 100 x 100 pixel image ID\npanel.ScaleType = Enum.ScaleType.Slice\n-- The middle area is from pixel (10, 10) to pixel (90, 90) of the image\npanel.SliceCenter = Rect.new(10, 10, 90, 90)\npanel.Parent = screenGui",
+      "explain": [
+        "We make an ImageLabel and set ScaleType to Slice so it uses 9-slice stretching.",
+        "Rect.new(10, 10, 90, 90) says the middle of the image goes from (10, 10) to (90, 90).",
+        "So the 10-pixel border on each side (the corners and edges) does not get blurry when the panel grows.",
+        "Change the image ID to an image you uploaded."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Rect is for flat 2D areas. For a 3D box, use Region3 or a CFrame and Size.",
+    "If you give the corners in the wrong order, Rect fixes it for you: Min is always the smaller numbers.",
+    "Rect values cannot be changed after they are made. Make a new one."
+  ],
+  "members": {
+    "Rect.new": {
+      "simple": "Makes a Rect. With nothing, both corners are (0, 0). With two Vector2s, they are the two corners. With four numbers, they are minX, minY, maxX, maxY.",
+      "example": "local empty = Rect.new()                                   -- 0 by 0\nlocal a = Rect.new(Vector2.new(10, 10), Vector2.new(80, 80))\nlocal b = Rect.new(10, 10, 80, 80)                         -- same as a\nprint(a.Width, b.Height) --> 70 70"
+    },
+    "Rect.Width": {
+      "simple": "How wide the rectangle is: Max.X minus Min.X. Rect.new(10, 10, 80, 80) is 70 wide. Never negative.",
+      "example": "local r = Rect.new(10, 20, 110, 70)\nprint(r.Width) --> 100"
+    },
+    "Rect.Height": {
+      "simple": "How tall the rectangle is: Max.Y minus Min.Y. Never negative.",
+      "example": "local r = Rect.new(10, 20, 110, 70)\nprint(r.Height) --> 50"
+    },
+    "Rect.Min": {
+      "simple": "The top-left corner as a Vector2. It always has the smaller X and Y, even if you passed the corners in the other order.",
+      "example": "local r = Rect.new(Vector2.new(80, 80), Vector2.new(10, 10)) -- backwards on purpose\nprint(r.Min) --> 10, 10"
+    },
+    "Rect.Max": {
+      "simple": "The bottom-right corner as a Vector2. It always has the bigger X and Y.",
+      "example": "local r = Rect.new(10, 10, 80, 80)\nprint(r.Max) --> 80, 80"
+    }
+  }
+}

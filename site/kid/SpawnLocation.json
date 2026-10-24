@@ -1,0 +1,70 @@
+{
+  "name": "SpawnLocation",
+  "simple": "A SpawnLocation is a special part where players appear when they join and after they die. It can be open to everyone or only to one team. It also gives freshly spawned players a short-lived ForceField so nobody can attack them right away.",
+  "analogy": "A SpawnLocation is like a starting line in a race. Everyone (or every runner on a certain team) lines up there at the start, and again after they're knocked out.",
+  "whenToUse": [
+    "Choose where players appear in your world.",
+    "Make different start areas for different teams.",
+    "Make obby checkpoints: touch a spawn and you'll respawn there next time."
+  ],
+  "where": "In Workspace. Insert one from the Model tab in Studio, or with `Instance.new(\"SpawnLocation\")`. It is a kind of Part, so it has all the normal Part properties (Size, Color, Anchored...) too.",
+  "terms": {
+    "spawn": "Appearing in the world with a new character.",
+    "ForceField": "The sparkly bubble around a just-spawned player. It blocks explosions and TakeDamage while it lasts.",
+    "spawn killing": "Attacking players the moment they appear, before they can move. ForceFields help stop it.",
+    "neutral": "Not tied to any team. A neutral spawn can be used by anyone.",
+    "TeamColor": "The BrickColor that links a spawn to the Team with the same color.",
+    "checkpoint": "A save point in an obby. After falling, you start from the last checkpoint instead of the beginning."
+  },
+  "examples": [
+    {
+      "title": "Team-only spawns",
+      "place": "Set up in Studio (no script needed)",
+      "code": "-- 1. In Teams, add a Team. Name it \"Blue Team\", set TeamColor to Bright blue.\n-- 2. In Workspace, add a SpawnLocation.\n-- 3. On the SpawnLocation: untick Neutral, set TeamColor to Bright blue.\n-- Now only Blue Team players spawn here.\n\n-- Same setup done by script (Script in ServerScriptService):\nlocal spawn = Instance.new(\"SpawnLocation\")\nspawn.Anchored = true\nspawn.Size = Vector3.new(6, 1, 6)\nspawn.Position = Vector3.new(0, 0.5, 40)\nspawn.Neutral = false\nspawn.TeamColor = BrickColor.new(\"Bright blue\")\nspawn.Parent = workspace",
+      "explain": [
+        "Neutral = false means 'only one team can use this spawn'.",
+        "TeamColor must exactly match the Team's TeamColor.",
+        "If more than one spawn fits a player, Roblox picks one at random.",
+        "SpawnLocation.TeamColor is about which team can use it. The part's BrickColor/Color is just how it looks."
+      ]
+    },
+    {
+      "title": "Obby checkpoints",
+      "place": "Studio setup plus a Script in ServerScriptService",
+      "code": "-- For each checkpoint: make a Team (e.g. \"Stage 1\", \"Stage 2\") with its own TeamColor,\n-- and a SpawnLocation with the same TeamColor, Neutral off, and AllowTeamChangeOnTouch on.\n-- Only the Stage 1 team should have AutoAssignable on, so new players start there.\n\n-- Optional: a simpler checkpoint without teams, using RespawnLocation\nlocal Players = game:GetService(\"Players\")\nlocal checkpoint = workspace:WaitForChild(\"Checkpoint2\") -- a SpawnLocation (Neutral on)\n\ncheckpoint.Touched:Connect(function(hit)\n    local player = Players:GetPlayerFromCharacter(hit.Parent)\n    if player then\n        player.RespawnLocation = checkpoint -- next respawn happens here\n    end\nend)",
+      "explain": [
+        "With AllowTeamChangeOnTouch, touching the spawn switches you to its team, so you'll respawn on it next time.",
+        "The second way skips teams: Player.RespawnLocation picks which SpawnLocation the player uses next time.",
+        "RespawnLocation only works if the spawn is Neutral or matches the player's TeamColor."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Set the spawn's Anchored to true, or it may fall or be pushed away.",
+    "TeamColor is not the same as the part's visible Color or BrickColor.",
+    "If no spawn fits a player (for example all are locked to other teams), they won't spawn where you expect.",
+    "ForceFields only stop damage that respects them (explosions and Humanoid:TakeDamage). Setting Health directly ignores them."
+  ],
+  "members": {
+    "SpawnLocation.AllowTeamChangeOnTouch": {
+      "simple": "If true, a player who touches this spawn switches to its team (their TeamColor becomes the spawn's TeamColor, and Neutral matches the spawn's Neutral). Used for checkpoints. Does nothing if Enabled is false.",
+      "example": "spawn.AllowTeamChangeOnTouch = true"
+    },
+    "SpawnLocation.Duration": {
+      "simple": "How many seconds the spawn ForceField lasts on players who appear here. Default 10. 0 means no ForceField at all.",
+      "example": "spawn.Duration = 3 -- short protection"
+    },
+    "SpawnLocation.Enabled": {
+      "simple": "If false, nobody can spawn here and touching it won't change teams. The easiest way to turn a spawn off.",
+      "example": "spawn.Enabled = false"
+    },
+    "SpawnLocation.Neutral": {
+      "simple": "If true, any player of any team can spawn here. If false, only players whose TeamColor matches the spawn's TeamColor can.",
+      "example": "spawn.Neutral = false"
+    },
+    "SpawnLocation.TeamColor": {
+      "simple": "Which team this spawn belongs to (by color). Only matters when Neutral is false. Must match the Team's TeamColor.",
+      "example": "spawn.TeamColor = BrickColor.new(\"Bright red\")"
+    }
+  }
+}

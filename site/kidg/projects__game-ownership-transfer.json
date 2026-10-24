@@ -1,0 +1,33 @@
+{
+  "path": "content/en-us/projects/game-ownership-transfer.md",
+  "simple": "You can move a game you own into a Roblox group where you are allowed to publish. Groups have extra tools, like giving each teammate a role and splitting earnings, so this is handy when your project grows into a team. This page explains what to prepare, how to send the transfer, how the group accepts it, and what changes afterward. The big thing to know is that the game goes private and its servers close during the move, so you must release it again after.",
+  "analogy": "It is like moving your lemonade stand from your own driveway into a club you are part of. The stand keeps its name and spot, but now the club runs it, can assign jobs, and shares the money. While you move it, the stand is closed for a bit.",
+  "keyPoints": [
+    "You can only transfer a game to a group you are allowed to publish games to.",
+    "Before transferring, verify your email and upload any private ModuleScripts and InsertService assets the game uses to the new group.",
+    "Packages owned by a person (not a group) may need to be remade or replaced with group-owned packages.",
+    "To send: Creations > your game > Publish Settings > Game details > Initiate ownership transfer, pick the group, type the game name, and click Initiate transfer.",
+    "To receive: open the game page from the notification, read and accept the details, type the game name, and click Accept transfer.",
+    "When the transfer is accepted, the game is made private and all its servers close. After it finishes, set permissions and release the game again.",
+    "The game keeps its game ID, place ID, and URL. Requests expire after 7 days, and a received game cannot be transferred again for 30 days.",
+    "Saved credit card information is removed, and changes you make during the active transfer are not kept."
+  ],
+  "terms": {
+    "transfer": "Moving ownership of the game from one owner to another. Here, from you to a group.",
+    "group": "A team account on Roblox that can own games and items. Members get roles that decide what they can do.",
+    "publish access": "Permission to publish games for a group. You need it to transfer a game to that group.",
+    "ModuleScript": "A script that holds code other scripts can load. If yours is private to your account, the group needs its own copy.",
+    "InsertService": "A service that loads assets into the game while it runs. Those assets must belong to the new owner for it to keep working.",
+    "package": "A reusable group of objects that can update everywhere at once. Its owner matters when the game changes hands.",
+    "Open Cloud API key": "A secret key that lets outside programs talk to your game. Its powers depend on the person who last made it, so it can stop working if that person loses access.",
+    "revoke public access": "Make the game private again so the public cannot join.",
+    "revenue splitting": "Sharing the money a game earns between group members or other groups by set percentages.",
+    "private server subscriptions": "Monthly payments players make to have their own server. Existing ones go to the new group without revenue splitting."
+  },
+  "watchOut": [
+    "Forgetting to release the game again after the transfer. It stays private until someone in the group releases it.",
+    "Making edits while the transfer is in progress. Those changes are not carried over, so wait until it finishes.",
+    "Not moving private ModuleScripts or person-owned packages first. Parts of the game can break because the group cannot load them.",
+    "Renaming the game around the transfer. Search is only unaffected if the title stays the same."
+  ]
+}

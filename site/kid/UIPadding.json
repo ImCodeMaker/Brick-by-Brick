@@ -1,0 +1,58 @@
+{
+  "name": "UIPadding",
+  "simple": "A UIPadding adds empty space inside the edges of its parent, so the stuff inside doesn't touch the borders. You can set the space for the top, bottom, left and right separately, in pixels or as a percentage of the parent's size.",
+  "analogy": "UIPadding is like the margin on notebook paper. You don't write right up to the edge; there's a little empty border all around.",
+  "whenToUse": [
+    "Keeping text from touching the edge of its box",
+    "Adding a border of space inside a menu panel so buttons aren't squished to the edges",
+    "Spacing the items in a list or grid away from the container's sides"
+  ],
+  "where": "Put it inside the UI object (Frame, TextLabel, ScrollingFrame...) that needs inner spacing. Create in Studio or with Instance.new in a LocalScript.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "padding": "Empty space between the edge of a box and what's inside it."
+  },
+  "examples": [
+    {
+      "title": "Give a menu panel some breathing room",
+      "place": "LocalScript inside a Frame (in a ScreenGui in StarterGui)",
+      "code": "local panel = script.Parent\n\nlocal padding = Instance.new(\"UIPadding\")\npadding.PaddingTop = UDim.new(0, 12)    -- 12 pixels\npadding.PaddingBottom = UDim.new(0, 12)\npadding.PaddingLeft = UDim.new(0.05, 0) -- 5% of the panel's width\npadding.PaddingRight = UDim.new(0.05, 0)\npadding.Parent = panel",
+      "explain": [
+        "Everything inside the panel now starts 12 pixels below the top and stops 12 pixels above the bottom.",
+        "Left and right use Scale: on a 400-pixel-wide panel, 0.05 x 400 = 20 pixels of space on each side.",
+        "Children using Scale sizes now measure against the smaller inner area. A child with Size (1, 0, 1, 0) fills the panel minus the padding."
+      ]
+    }
+  ],
+  "gotchas": [
+    "UIPadding pushes the CHILDREN inward; it doesn't make the parent bigger.",
+    "Scale padding for left/right is based on the parent's width, and top/bottom on its height.",
+    "For a TextLabel, padding keeps the text away from the edges too."
+  ],
+  "members": {
+    "UIPadding.PaddingBottom": {
+      "simple": "Empty space at the bottom inside the parent, as a UDim. UDim.new(0, 10) = 10 pixels. UDim.new(0.1, 0) = 10% of the parent's height.",
+      "example": "local padding = script.Parent -- a UIPadding\npadding.PaddingBottom = UDim.new(0, 10)"
+    },
+    "UIPadding.PaddingLeft": {
+      "simple": "Empty space on the left side inside the parent, as a UDim. Scale is a fraction of the parent's width.",
+      "example": "local padding = script.Parent\npadding.PaddingLeft = UDim.new(0, 10)"
+    },
+    "UIPadding.PaddingRight": {
+      "simple": "Empty space on the right side inside the parent, as a UDim. Scale is a fraction of the parent's width.",
+      "example": "local padding = script.Parent\npadding.PaddingRight = UDim.new(0, 10)"
+    },
+    "UIPadding.PaddingTop": {
+      "simple": "Empty space at the top inside the parent, as a UDim. Scale is a fraction of the parent's height.",
+      "example": "local padding = script.Parent\npadding.PaddingTop = UDim.new(0, 10)"
+    }
+  }
+}

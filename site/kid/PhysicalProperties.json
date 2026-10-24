@@ -1,0 +1,80 @@
+{
+  "name": "PhysicalProperties",
+  "simple": "PhysicalProperties describes how a part acts in physics: how heavy it is for its size (Density), how grippy or slippery it is (Friction), and how bouncy it is (Elasticity). You set it on a part's CustomPhysicalProperties to make ice floors, bouncy balls, or super-heavy blocks.",
+  "analogy": "It is like choosing what a ball is made of. A bowling ball is heavy (high Density). A hockey puck on ice slides (low Friction). A rubber ball bounces (high Elasticity).",
+  "whenToUse": [
+    "Making a slippery ice floor",
+    "Making a super-bouncy ball or trampoline",
+    "Making a part very heavy or very light so it is harder or easier to push",
+    "Making a room echo less with AcousticAbsorption"
+  ],
+  "where": "Works in any script. Make one with PhysicalProperties.new(...) and set part.CustomPhysicalProperties to it. Set part.CustomPhysicalProperties = nil to go back to the material's normal values.",
+  "terms": {
+    "density": "How heavy something is for its size. A small block of lead is heavier than a big block of foam. Range 0.0001 to 100.",
+    "friction": "How much two surfaces grip when they rub. High friction = sticky, like rubber. Low friction = slippery, like ice. Range 0 to 2.",
+    "elasticity": "How bouncy something is. 0 = no bounce (thud). 1 = bounces back with all its energy. Range 0 to 1.",
+    "weight (in FrictionWeight / ElasticityWeight)": "Not how heavy the part is. It means \"how much this part's value counts\" when two parts touch. The part with the bigger weight gets more say.",
+    "clamped": "Pushed back inside the allowed range. A Friction of 5 becomes 2, because 2 is the most allowed.",
+    "acoustic simulation": "Roblox working out how sound echoes and gets muffled by surfaces around it.",
+    "reverb": "The echo you hear in a big empty room or a cave.",
+    "Enum.Material": "The list of materials a part can be made of, like Plastic, Wood, Ice, and Metal."
+  },
+  "examples": [
+    {
+      "title": "A slippery ice floor",
+      "place": "Script in ServerScriptService",
+      "code": "local floor = Instance.new(\"Part\")\nfloor.Size = Vector3.new(40, 1, 40)\nfloor.Anchored = true\nfloor.Position = Vector3.new(0, 0.5, 0)\nfloor.Color = Color3.fromRGB(170, 220, 255)\nfloor.Parent = workspace\n\nfloor.CustomPhysicalProperties = PhysicalProperties.new(\n\t0.9,  -- density: about normal\n\t0,    -- friction: zero grip, super slippery\n\t0,    -- elasticity: no bounce\n\t100,  -- frictionWeight: MY friction wins when something touches me\n\t1     -- elasticityWeight: normal\n)",
+      "explain": [
+        "We make a big flat floor.",
+        "Friction 0 means nothing can grip it.",
+        "The other part touching the floor (like a player's foot) has its own friction too. frictionWeight 100 makes the floor's friction count much more, so the final friction is close to 0.",
+        "Walk on it and you will slide around."
+      ]
+    },
+    {
+      "title": "A super-bouncy ball",
+      "place": "Script in ServerScriptService",
+      "code": "local ball = Instance.new(\"Part\")\nball.Shape = Enum.PartType.Ball\nball.Size = Vector3.new(3, 3, 3)\nball.Position = Vector3.new(0, 30, 0)\nball.Parent = workspace\n\n-- density 1, friction 0.3, elasticity 1 (max bounce), frictionWeight 1, elasticityWeight 100\nball.CustomPhysicalProperties = PhysicalProperties.new(1, 0.3, 1, 1, 100)",
+      "explain": [
+        "The ball starts 30 studs up and falls.",
+        "Elasticity 1 is the bounciest allowed.",
+        "elasticityWeight 100 makes the ball's bounciness win over the floor's, so it keeps bouncing high."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Values outside the allowed ranges are clamped, not errors. Friction 10 quietly becomes 2.",
+    "When two parts touch, Roblox mixes their friction (and their elasticity) using the weights. If your bouncy ball barely bounces, raise its ElasticityWeight.",
+    "PhysicalProperties values cannot be edited after you make them. Make a new one and set it again."
+  ],
+  "members": {
+    "PhysicalProperties.new": {
+      "simple": "Makes a PhysicalProperties. You can give it a Material (to copy that material's normal values), or numbers in this order: density, friction, elasticity, then optionally frictionWeight and elasticityWeight, then optionally acousticAbsorption.",
+      "example": "local likeIce = PhysicalProperties.new(Enum.Material.Ice) -- copy Ice's values\nlocal basic = PhysicalProperties.new(1, 0.5, 0.2)          -- density, friction, elasticity\nlocal full = PhysicalProperties.new(1, 0.5, 0.2, 1, 1)     -- plus the two weights\nlocal withSound = PhysicalProperties.new(1, 0.5, 0.2, 1, 1, 0.8) -- plus acoustic absorption\n\nlocal part = Instance.new(\"Part\")\npart.CustomPhysicalProperties = basic\npart.Parent = workspace"
+    },
+    "PhysicalProperties.Density": {
+      "simple": "How heavy the part is for its size. Higher density = heavier = harder to push or launch. Range 0.0001 to 100. With acoustic simulation, denser parts also muffle sounds behind them more.",
+      "example": "local heavy = PhysicalProperties.new(50, 0.5, 0)\nprint(heavy.Density) --> 50"
+    },
+    "PhysicalProperties.Friction": {
+      "simple": "How grippy the part is when it rubs against another part. 0 is ice-slippery, 2 is the stickiest. Higher friction makes sliding things slow down faster.",
+      "example": "local slippery = PhysicalProperties.new(1, 0, 0)\nprint(slippery.Friction) --> 0"
+    },
+    "PhysicalProperties.Elasticity": {
+      "simple": "How bouncy the part is. 0 means it lands with a thud. 1 means it bounces back with the same energy it had. Range 0 to 1.",
+      "example": "local bouncy = PhysicalProperties.new(1, 0.3, 1)\nprint(bouncy.Elasticity) --> 1"
+    },
+    "PhysicalProperties.FrictionWeight": {
+      "simple": "How much this part's Friction counts when it rubs against another part. Roblox mixes both parts' friction, and the one with the bigger weight gets more say. Example: friction 0 with weight 100 against friction 1 with weight 1 gives about 0.01. Range 0 to 100.",
+      "example": "local props = PhysicalProperties.new(1, 0, 0, 100, 1)\nprint(props.FrictionWeight) --> 100"
+    },
+    "PhysicalProperties.ElasticityWeight": {
+      "simple": "How much this part's Elasticity counts when it hits another part. The part with the bigger weight decides more of how bouncy the hit is. Range 0 to 100.",
+      "example": "local props = PhysicalProperties.new(1, 0.3, 1, 1, 100)\nprint(props.ElasticityWeight) --> 100"
+    },
+    "PhysicalProperties.AcousticAbsorption": {
+      "simple": "How much sound this surface soaks up, from 0 to 1, when Roblox simulates echoes for AudioEmitters. Higher means less echo, like a room with soft carpets. It does not change how much sound goes THROUGH the part (Density does that).",
+      "example": "local carpet = PhysicalProperties.new(1, 0.5, 0, 1, 1, 0.9)\nprint(carpet.AcousticAbsorption) --> 0.9"
+    }
+  }
+}

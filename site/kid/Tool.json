@@ -1,0 +1,117 @@
+{
+  "name": "Tool",
+  "simple": "A Tool is an item a player can hold and use, like a sword, a flashlight or a magic wand. Tools sit in the player's Backpack (the bar at the bottom of the screen) and move into the character's hand when equipped. Scripts inside the tool react when the player clicks.",
+  "analogy": "A Tool is like an item in a video-game hotbar. It waits in your bag until you pick it, then you hold it in your hand and click to use it.",
+  "whenToUse": [
+    "Make weapons, wands, flashlights, keys or any item a player holds.",
+    "Give an item that responds when the player clicks or taps.",
+    "Put pickup items around the map that players can grab."
+  ],
+  "where": "Put a Tool in StarterPack to give it to everyone each time they spawn, in a player's StarterGear to give it to just them every spawn, straight into their Backpack for this life only, or in Workspace as a pickup. Keep reward tools in ServerStorage or ReplicatedStorage and clone them. When held, the Tool is moved inside the player's Character model.",
+  "terms": {
+    "equip": "Take the tool out of the Backpack and hold it. The tool moves into the character Model.",
+    "unequip": "Put the tool away. It goes back into the Backpack.",
+    "Handle": "The part named exactly `Handle` inside a tool. It's where the character's hand grabs it.",
+    "activate": "Use the tool, usually by clicking, tapping, or pressing the gamepad trigger.",
+    "Backpack": "The player's inventory folder. Tools in it show as buttons at the bottom of the screen.",
+    "StarterPack": "A service. Tools in it are copied to every player's Backpack each time they spawn.",
+    "CFrame": "A position plus a rotation stored together.",
+    "RemoteEvent": "A messenger object that lets a LocalScript tell the server something (or the server tell a player).",
+    "client": "The player's own device.",
+    "server": "The Roblox computer that runs the game for everyone and is trusted."
+  },
+  "examples": [
+    {
+      "title": "A tool that prints when used",
+      "place": "LocalScript inside a Tool in StarterPack",
+      "code": "local tool = script.Parent\n\ntool.Equipped:Connect(function()\n    print(tool.Name .. \" equipped\")\nend)\n\ntool.Activated:Connect(function()\n    print(tool.Name .. \" used!\") -- runs when the player clicks while holding it\nend)\n\ntool.Unequipped:Connect(function()\n    print(tool.Name .. \" put away\")\nend)",
+      "explain": [
+        "Put a Part named Handle inside the Tool so the character can hold it (or turn off RequiresHandle).",
+        "Equipped fires when the player picks the tool from their hotbar.",
+        "Activated fires when they click or tap while holding it.",
+        "Unequipped fires when they put it away or switch tools."
+      ]
+    },
+    {
+      "title": "A healing potion that works for everyone to see",
+      "place": "Script inside a Tool in StarterPack",
+      "code": "local tool = script.Parent\nlocal HEAL_AMOUNT = 30\nlocal COOLDOWN = 5 -- seconds\n\ntool.Activated:Connect(function()\n    -- When equipped, the tool is inside the character model\n    local character = tool.Parent\n    local humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n    if humanoid and tool.Enabled then\n        tool.Enabled = false -- turn off while cooling down\n        humanoid.Health = math.min(humanoid.Health + HEAL_AMOUNT, humanoid.MaxHealth)\n        task.wait(COOLDOWN)\n        tool.Enabled = true\n    end\nend)",
+      "explain": [
+        "This is a server Script, so the healing is real for everyone, not just on the player's screen.",
+        "While held, tool.Parent is the character, so we can find the Humanoid there.",
+        "math.min makes sure health never goes over MaxHealth.",
+        "Setting Enabled to false stops Activated from firing again until the cooldown ends."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A physical tool needs exactly one part named `Handle`, or it won't be held. For tools with nothing to hold, set RequiresHandle to false.",
+    "Don't anchor tool parts, or the player will get stuck when holding it.",
+    "Weld multi-part tools together, or the pieces fall off.",
+    "Tools in the Backpack are lost on death. Use StarterPack or StarterGear to give them back every spawn.",
+    "Anything only a LocalScript does (like damage) only happens on that player's screen. Do important things in a server Script, or send a RemoteEvent to the server."
+  ],
+  "members": {
+    "Tool.CanBeDropped": {
+      "simple": "If true, the player can drop the tool by pressing Backspace; it falls into Workspace. If false, Backspace does nothing.",
+      "example": "tool.CanBeDropped = false"
+    },
+    "Tool.Enabled": {
+      "simple": "If false, the tool can't be used: Activated and Deactivated won't fire. It stays in the Backpack. Great for cooldowns.",
+      "example": "tool.Enabled = false\ntask.wait(3) -- 3 second cooldown\ntool.Enabled = true"
+    },
+    "Tool.Grip": {
+      "simple": "A CFrame that sets where and how the tool sits in the hand, measured from the hand. Change its position to slide the tool in the hand and its rotation to tilt it. You usually tweak it until it looks right.",
+      "example": "tool.Grip = CFrame.new(0, -1, 0) -- hold the tool 1 stud further along its handle"
+    },
+    "Tool.GripForward": {
+      "simple": "Hidden. One piece of the Grip rotation. Just use Tool.Grip."
+    },
+    "Tool.GripPos": {
+      "simple": "Hidden. The position piece of Grip. Just use Tool.Grip."
+    },
+    "Tool.GripRight": {
+      "simple": "Hidden. One piece of the Grip rotation. Just use Tool.Grip."
+    },
+    "Tool.GripUp": {
+      "simple": "Hidden. One piece of the Grip rotation. Just use Tool.Grip."
+    },
+    "Tool.ManualActivationOnly": {
+      "simple": "If true, clicking does NOT activate the tool; only your script calling tool:Activate() does. If false (normal), clicks activate it.",
+      "example": "tool.ManualActivationOnly = true"
+    },
+    "Tool.RequiresHandle": {
+      "simple": "If true, the tool only works if it has a part named Handle. Set false for tools you don't hold, like a spell or a 'fly' power.",
+      "example": "tool.RequiresHandle = false -- a spell with nothing to hold"
+    },
+    "Tool.ToolTip": {
+      "simple": "The little text that appears when the mouse hovers over the tool in the hotbar.",
+      "example": "tool.ToolTip = \"Shovel - Use to dig\""
+    },
+    "Tool:Activate": {
+      "simple": "Uses the tool from a script, as if the player clicked. The tool must be equipped.",
+      "example": "tool:Activate()"
+    },
+    "Tool:Deactivate": {
+      "simple": "Acts like the player let go of the click. The tool must be equipped.",
+      "example": "tool:Deactivate()"
+    },
+    "Tool.Activated": {
+      "simple": "Fires when the player clicks (or taps) while holding the tool. Doesn't fire if Ctrl is held during the click.",
+      "example": "tool.Activated:Connect(function()\n    print(\"Swing!\")\nend)"
+    },
+    "Tool.Deactivated": {
+      "simple": "Fires when the player lets go of the click after activating. Good for charge-up attacks: measure the time between Activated and Deactivated.",
+      "example": "local startTime = 0\ntool.Activated:Connect(function()\n    startTime = os.clock()\nend)\ntool.Deactivated:Connect(function()\n    print(\"Charged for \" .. os.clock() - startTime .. \" seconds\")\nend)"
+    },
+    "Tool.Equipped": {
+      "simple": "Fires when the player takes the tool out and holds it. Gives you the player's Mouse.",
+      "example": "tool.Equipped:Connect(function(mouse)\n    print(\"Holding the tool\")\nend)",
+      "gotcha": "Won't fire if RequiresHandle is true but there's no Handle."
+    },
+    "Tool.Unequipped": {
+      "simple": "Fires when the player puts the tool away (back in the Backpack).",
+      "example": "tool.Unequipped:Connect(function()\n    print(\"Tool put away\")\nend)"
+    }
+  }
+}

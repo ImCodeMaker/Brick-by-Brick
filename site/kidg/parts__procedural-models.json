@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/parts/procedural-models.md",
+  "simple": "A procedural model is a model that builds itself from code. You write a small generator script and give it settings, like how many steps a staircase has. When you change a setting or resize the model, Roblox runs your code again and rebuilds the model automatically. This saves a lot of time when you want many versions of the same thing, like tables of different lengths with the right number of chairs.",
+  "analogy": "It is like a recipe instead of a cake. If you want a bigger cake, you do not carve the old one. You change the amounts in the recipe and bake a new one.",
+  "keyPoints": [
+    "A ProceduralModel uses a generator module (a ModuleScript) set in its `Generator` property.",
+    "The generator returns a table with `Attributes` (setting names and default values) and an `OnGenerate(params, targetContainer)` function.",
+    "`params` gives you `Size`, `Attributes` and a `Pause` method. Your code builds parts around the origin and parents them to `targetContainer`.",
+    "Changing `Size`, an attribute, the generator's code or its sandboxing marks the model dirty, and it regenerates later in the same frame.",
+    "Changing `Size` rebuilds new content. Changing `Scale` just stretches the existing result evenly.",
+    "Call `params:Pause()` often inside big loops, or the generator may be stopped with a Script Timeout error.",
+    "Procedural models from the Creator Store are sandboxed so they cannot make unwanted changes to your game.",
+    "Generation does not work inside Actors, these models cannot become packages, and joints made by Joint Surfaces are lost on regeneration."
+  ],
+  "terms": {
+    "procedural": "Made by following rules in code instead of placed by hand.",
+    "parameter": "An input setting that controls the result. A staircase with `StepCount = 5` gets 5 steps; change it to 8 and it rebuilds with 8.",
+    "attribute": "A custom named value you attach to an object, like `StepCount = 5`. They show in the Properties window.",
+    "generator module": "The ModuleScript holding the code that builds the model.",
+    "ModuleScript": "A script that holds reusable code and returns a table other code can use.",
+    "OnGenerate": "The function Roblox calls to build the model's contents.",
+    "targetContainer": "A temporary folder you put the new parts into. Roblox then moves them into the model.",
+    "origin": "The point (0, 0, 0). You build centered on it, and Roblox moves the result to the model's real location.",
+    "non-destructive": "You can change it again later without losing work, because it just rebuilds from settings.",
+    "dirty": "Marked as needing a rebuild. The rebuild happens soon after, not instantly.",
+    "yield / Pause": "To pause your code for a moment so the game can keep running. `params:Pause()` lets long work be spread over several frames.",
+    "frame": "One single update of the game screen, usually about 60 per second.",
+    "normalize / scale": "If the model's Scale is 2 and its Size is (8, 8, 8), your code sees Size (4, 4, 4). Roblox scales the result back up by 2 afterward.",
+    "sandboxed": "Running with limited permissions so the code cannot do dangerous things to the rest of your game.",
+    "edit time vs runtime": "Edit time is while you build in Studio. Runtime is while the game is actually being played."
+  },
+  "example": {
+    "title": "A staircase that rebuilds when you change StepCount",
+    "place": "ModuleScript used as the ProceduralModel's Generator (the template module inside a new ProceduralModel)",
+    "code": "local Staircase = {}\n\n-- Settings that show up as attributes on the model, with default values\nStaircase.Attributes = {\n\tStepCount = 5,\n}\n\nfunction Staircase.OnGenerate(params, targetContainer)\n\tlocal size = params.Size                     -- e.g. Vector3.new(4, 10, 10)\n\tlocal count = params.Attributes.StepCount    -- e.g. 5\n\n\tlocal stepHeight = size.Y / count            -- 10 / 5 = 2 studs tall\n\tlocal stepDepth = size.Z / count             -- 10 / 5 = 2 studs deep\n\n\tfor i = 1, count do\n\t\tparams:Pause() -- let the engine breathe during big loops\n\n\t\tlocal step = Instance.new(\"Part\")\n\t\tstep.Anchored = true\n\t\tstep.Size = Vector3.new(size.X, stepHeight * i, stepDepth)\n\t\t-- Build centered on the origin: start at -size / 2\n\t\tstep.Position = Vector3.new(\n\t\t\t0,\n\t\t\t-size.Y / 2 + (stepHeight * i) / 2,\n\t\t\t-size.Z / 2 + stepDepth * (i - 0.5)\n\t\t)\n\t\tstep.Parent = targetContainer\n\tend\nend\n\nreturn Staircase",
+    "explain": [
+      "`Attributes` creates a `StepCount` setting on the model, starting at 5.",
+      "With a model Size of (4, 10, 10) and 5 steps, each step is 10 / 5 = 2 studs deep and rises 2 studs higher than the one before.",
+      "Step 1 is 2 studs tall, step 2 is 4 tall, up to step 5 at 10 tall. Each block reaches from the floor up, so the stairs are solid underneath.",
+      "Positions start at `-size / 2` because the model's box goes from -5 to +5 around the origin. Step 1's center is at Z = -5 + 2 x 0.5 = -4.",
+      "Change `StepCount` to 10 in the Properties window and the model rebuilds with 10 steps, each 1 stud tall and 1 deep, without you touching any parts."
+    ]
+  },
+  "watchOut": [
+    "Do not parent parts straight into the Workspace or change other things in your game from `OnGenerate`. Only put results in `targetContainer`.",
+    "Build around the origin, not at the model's world position. Roblox places the result for you with `PivotTo`.",
+    "A big loop without `params:Pause()` can hit a Script Timeout. Adding it at the top of loops is cheap.",
+    "If you weld parts by hand inside a procedural model, those joints disappear the next time it regenerates. Create joints in the generator code instead."
+  ]
+}

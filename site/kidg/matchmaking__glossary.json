@@ -1,0 +1,29 @@
+{
+  "path": "content/en-us/matchmaking/glossary.md",
+  "simple": "This page is a word list for matchmaking. It explains the special terms used in the other matchmaking pages, like signal, weight, and attribute. Keep it open while you read about scoring and custom matchmaking. Most terms build on each other: attributes become signals, signals get weights, and weights add up to a server score.",
+  "analogy": "It is like the glossary at the back of a science textbook. You flip to it whenever a word in a chapter does not make sense.",
+  "keyPoints": [
+    "The joining player is the player being matched to a server right now.",
+    "An attribute is a raw fact used for scoring, a number or a string. It can describe a player or a server.",
+    "A signal is an attribute turned into a score between 0 and 1.",
+    "A weight is a non-negative number that says how much a signal matters.",
+    "A weighted signal score is a signal score times its weight. The weighted sum adds them all up.",
+    "The server score is that weighted sum, and players go to the server with the highest one.",
+    "Numerical custom signals compare the player's value to the server's average. Categorical custom signals check how common the player's value is in the server."
+  ],
+  "terms": {
+    "joining player": "The player who is about to be placed into a server.",
+    "common device": "The device type the joining player shares with players already in the server, like mobile, desktop, laptop, tablet, or console.",
+    "common language": "The language the joining player shares with players already in the server.",
+    "RCC instance": "One Roblox game server program running somewhere. Each one hosts a copy of a place.",
+    "universe-level": "Applies to your whole game, every place in it, not just one place.",
+    "custom attribute": "A fact you define yourself, like preferred game mode. It can be a player attribute or a server attribute.",
+    "player attribute": "A fact about a player, like their skill level.",
+    "server attribute": "A fact about a server, like its active game mode.",
+    "non-negative": "Zero or bigger. Weights can be 0, 2, or 15, but never -1."
+  },
+  "watchOut": [
+    "Mixing up signal score and weighted signal score. The signal score is always 0 to 1. The weighted one can be bigger, like 0.75 x 2 = 1.5.",
+    "Thinking a Roblox matchmaking attribute is the same as an instance attribute set with `SetAttribute`. In matchmaking, an attribute means a fact used for scoring."
+  ]
+}

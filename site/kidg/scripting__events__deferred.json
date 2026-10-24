@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/scripting/events/deferred.md",
+  "simple": "This page explains 'deferred' events, a newer way Roblox runs event handlers. Normally (Immediate mode), when an event fires, its handler runs right away, even in the middle of other code. With Deferred mode, handlers wait in a line and run a little later at set moments. This makes games faster and avoids strange bugs, but some old code patterns behave differently.",
+  "analogy": "Immediate events are like a friend who interrupts you mid-sentence every time they think of something. Deferred events are like a friend who writes their thoughts on sticky notes and hands you the stack when you pause.",
+  "keyPoints": [
+    "`Workspace.SignalBehavior` picks Immediate or Deferred. Default currently acts like Immediate but will switch to Deferred; template places already use Deferred.",
+    "In Immediate mode, an event that fires another event runs the second handler right away.",
+    "In Deferred mode, the second handler goes to the back of a queue and runs later. Total time is the same; only the order changes.",
+    "Deferred mode avoids weird bugs (like a 'removed' event firing before an 'added' one) and helps performance.",
+    "Deferred handlers run at resumption points, like after input, during `RunService` steps such as `Heartbeat`, and when `task.wait()` resumes.",
+    "Code that fires an event and immediately checks if the handler ran will not work in Deferred mode; the handler has not run yet.",
+    "Handlers for `Destroying` or property changes run after the change, so the object is already destroyed or changed by then.",
+    "For 'only the first time' handlers, use `Once()`. `Disconnect()` drops any handler calls still waiting in line."
+  ],
+  "terms": {
+    "deferred": "Put off until later. A deferred handler runs a bit after the event, not instantly.",
+    "immediate": "Right away, in the middle of whatever code caused the event.",
+    "event handler": "The function you connected to an event.",
+    "queue": "A waiting line. First in, first out.",
+    "resumption point": "A set moment in each frame when Roblox runs the waiting handlers, like during `Heartbeat`.",
+    "re-entrancy": "When events trigger each other over and over. Roblox stops this after a depth of 10.",
+    "yield": "Pause the script to let other things happen, like with `task.wait()`.",
+    "ancestry": "Which object something is inside of (its parent, its parent's parent, and so on).",
+    "SignalBehavior": "A Workspace setting that chooses Immediate or Deferred events."
+  },
+  "example": {
+    "title": "React to the first touch safely",
+    "place": "Script inside a Part in Workspace",
+    "code": "local part = script.Parent\n\n-- Once() runs the function only for the first touch,\n-- and works the same in Immediate and Deferred modes.\npart.Touched:Once(function(otherPart)\n\tprint(\"First touched by\", otherPart.Name)\n\tpart.BrickColor = BrickColor.new(\"Bright red\")\nend)",
+    "explain": [
+      "In Deferred mode, several touch events may line up before your handler runs.",
+      "If you used `Connect` and then disconnected inside the handler, extra queued calls could slip through in some cases.",
+      "`Once` is the simple, safe way to only react to the first time an event fires.",
+      "The part turns red after its first touch, and later touches do nothing."
+    ]
+  },
+  "watchOut": [
+    "Do not fire an event and then instantly check a variable your handler sets. In Deferred mode, the handler has not run yet. Wait for it, for example with `task.wait()`.",
+    "In a `Destroying` handler, the object is already gone in Deferred mode. Save any info you need before calling `Destroy()`.",
+    "Calling `Destroy()` to stop a listener still runs handler calls that were already waiting. Use `Disconnect()` if you want those dropped."
+  ]
+}

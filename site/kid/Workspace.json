@@ -1,0 +1,284 @@
+{
+  "name": "Workspace",
+  "simple": "Workspace is the 3D world of your game. Anything inside it (parts, models, characters, the Terrain) is drawn on screen and follows physics like gravity. If a part is NOT inside Workspace, nobody can see it and it cannot be touched. Workspace also holds world-wide settings, like how strong gravity is.",
+  "analogy": "Workspace is like the stage in a theater. Only actors and props ON the stage are seen by the audience. Things waiting backstage (ReplicatedStorage, ServerStorage) exist, but nobody sees them until they walk on stage.",
+  "whenToUse": [
+    "Put parts and models into the world by setting their Parent to Workspace.",
+    "Change world settings like `Gravity` for a moon level.",
+    "Get the player's camera with `Workspace.CurrentCamera` (in a LocalScript).",
+    "Get a time that is the same on the server and all players with `GetServerTimeNow`.",
+    "Search the world with raycasts and box checks (those methods come from WorldRoot, which Workspace is part of)."
+  ],
+  "where": "A service that exists on both the server and every client. Get it with `game:GetService(\"Workspace\")`. The shortcut `workspace` (lowercase) also works.",
+  "terms": {
+    "service": "A special built-in object at the top of the game, like Workspace or Players. Get one with `game:GetService(\"Name\")`.",
+    "render": "To draw something on the screen.",
+    "physics": "The built-in rules for gravity, falling, bouncing, and pushing.",
+    "stud": "Roblox's unit of distance. A default Part is 4 studs long.",
+    "server / client": "The server is Roblox's computer running the game for everyone. A client is one player's own device.",
+    "replicate": "To copy changes between the server and players' devices so everyone sees the same world.",
+    "streaming": "Sending only the nearby parts of a big map to each player, and loading more as they move, instead of sending the whole map at once.",
+    "Terrain": "The special object that holds smooth landscape like grass hills, water, and rock.",
+    "Unix time": "A clock that counts seconds since January 1, 1970. It is the same number everywhere in the world, no matter the time zone.",
+    "FPS": "Frames per second: how many times per second something updates.",
+    "joint": "Something that connects two parts so they move together, like a weld.",
+    "aerodynamic": "About how air pushes on things moving through it, like wind on a kite.",
+    "rollout setting": "A switch for a new Roblox feature that is being turned on gradually. Default means \"follow whatever Roblox currently recommends\".",
+    "deprecated": "Old and replaced by something newer."
+  },
+  "examples": [
+    {
+      "title": "Moon gravity",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\nprint(\"Normal gravity:\", Workspace.Gravity) --> 196.2\n\n-- About one sixth of normal, like the Moon. Players jump much higher!\nWorkspace.Gravity = 196.2 / 6",
+      "explain": [
+        "Gravity is measured in studs per second, per second. The default is 196.2.",
+        "Dividing by 6 gives about 32.7, so everything falls slower and jumps go higher.",
+        "Because a server Script changed it, every player gets moon gravity."
+      ]
+    },
+    {
+      "title": "Make sure a part is in the world",
+      "place": "Script in ServerScriptService",
+      "code": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 10, 0)\n\npart.Parent = ReplicatedStorage\nprint(part:IsDescendantOf(Workspace)) --> false (backstage: invisible)\n\npart.Parent = Workspace\nprint(part:IsDescendantOf(Workspace)) --> true (on stage: visible!)",
+      "explain": [
+        "While the part is in ReplicatedStorage it exists, but is not drawn and has no physics.",
+        "Moving it into Workspace puts it on stage, so players see it at (0, 10, 0)."
+      ]
+    },
+    {
+      "title": "A timer that matches for every player",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\n-- Every client gets nearly the same number, no matter their own clock\nwhile true do\n\tlocal seconds = math.floor(Workspace:GetServerTimeNow())\n\tprint(\"Even or odd second?\", seconds % 2 == 0 and \"even\" or \"odd\")\n\ttask.wait(1)\nend",
+      "explain": [
+        "`GetServerTimeNow` gives the server's clock in seconds, so all players get almost the same value.",
+        "Using it, every player sees events (like a light blinking every other second) happen at the same moment."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Parts that fall below `FallenPartsDestroyHeight` (-500 by default) are removed automatically. If your falling part vanishes, that is why.",
+    "Find the camera with `Workspace.CurrentCamera`, not by looking for a child named \"Camera\".",
+    "Many Workspace settings can only be changed in Studio's Properties window, not by scripts. They are marked below.",
+    "With StreamingEnabled on, far-away parts may not exist yet on a player's device. Use `WaitForChild` in LocalScripts."
+  ],
+  "members": {
+    "Workspace.AirDensity": {
+      "simple": "How thick the air is at ground level (Y = 0). Only used when the experimental air forces (`FluidForces`) are on. Thicker air pushes harder on moving parts.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nWorkspace.AirDensity = 0.01"
+    },
+    "Workspace.AirTurbulenceIntensity": {
+      "simple": "How gusty and swirly the wind is, from 0 (smooth, no turbulence) to 1 (very gusty). Affects air forces when they are on.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nWorkspace.AirTurbulenceIntensity = 0.5"
+    },
+    "Workspace.AllowThirdPartySales": {
+      "simple": "If true, your game can sell items (like game passes or developer products) that were made by other creators. Off by default.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(Workspace.AllowThirdPartySales)"
+    },
+    "Workspace.AuthorityMode": {
+      "simple": "An internal setting for how much the server is in charge (server authority). Normal scripts cannot read or change it."
+    },
+    "Workspace.AvatarUnificationMode": {
+      "simple": "Studio-only setting (scripts cannot read or change it). When on, players with newer R15 avatars can join games built for the older R6 avatars, and still move and look like R6."
+    },
+    "Workspace.ClientAnimatorThrottling": {
+      "simple": "Whether a player's device may play animations of far-away or off-screen characters less often to run faster.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nWorkspace.ClientAnimatorThrottling = Enum.ClientAnimatorThrottlingMode.Enabled"
+    },
+    "Workspace.CurrentCamera": {
+      "simple": "The Camera this player is looking through. Use it in a LocalScript to read or move the player's view.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nprint(\"Camera is at\", camera.CFrame.Position)",
+      "gotcha": "Each player has their own camera, so this is mostly useful in LocalScripts. Setting it to a new Camera destroys other cameras sitting directly in Workspace."
+    },
+    "Workspace.DistributedGameTime": {
+      "simple": "How many seconds the game has been running. On the server, it is how long the server has been up; on a client, how long that player has been connected.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(\"Running for\", math.floor(Workspace.DistributedGameTime), \"seconds\")"
+    },
+    "Workspace.EnableSLIMAvatars": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Whether far-away avatars are drawn with a simpler, lighter version (SLIM) to help speed."
+    },
+    "Workspace.FallenPartsDestroyHeight": {
+      "simple": "If a part falls below this height (Y position), Roblox removes it automatically, so falling junk does not pile up forever. The default is -500.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(Workspace.FallenPartsDestroyHeight) --> -500\n-- Note: only plugins/Studio can change it; scripts can read it"
+    },
+    "Workspace.FallHeightEnabled": {
+      "simple": "If true (default), parts below `FallenPartsDestroyHeight` are removed. Scripts can read it, but only Studio or plugins can change it.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(Workspace.FallHeightEnabled)"
+    },
+    "Workspace.FilteringEnabled": {
+      "simple": "Old — this safety setting is now always on. You do not need it."
+    },
+    "Workspace.FluidForces": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Turns on the experimental air forces, so parts with `EnableFluidForces` get pushed by air like gliders and kites."
+    },
+    "Workspace.GlobalWind": {
+      "simple": "The direction and strength of wind across the world, as a Vector3. It sways terrain grass, moves dynamic clouds, and blows particles.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\n-- wind blowing 20 studs per second along +X\nWorkspace.GlobalWind = Vector3.new(20, 0, 0)"
+    },
+    "Workspace.Gravity": {
+      "simple": "How strongly things are pulled down, in studs per second per second. The default is 196.2. Lower it for floaty space levels, raise it for heavy worlds.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nWorkspace.Gravity = 50 -- floaty!"
+    },
+    "Workspace.IKControlConstraintSupport": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Whether IKControls (which bend arms and legs to reach targets) respect physics constraints."
+    },
+    "Workspace.ImprovedAnimationConstraint": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Turns on improved behavior for AnimationConstraints."
+    },
+    "Workspace.ImprovedPhysicsReplication": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Turns on Roblox's improved way of sending physics movement between server and players."
+    },
+    "Workspace.InsertPoint": {
+      "simple": "Studio helper: the spot in the world where new things from the Toolbox get placed. Not useful during a game.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(Workspace.InsertPoint)"
+    },
+    "Workspace.InterpolationThrottling": {
+      "simple": "Old — no longer used."
+    },
+    "Workspace.LayeredClothingCacheOptimizations": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Lets Roblox reuse saved data for layered clothing to run faster when there are lots of characters."
+    },
+    "Workspace.LuauTypeCheckMode": {
+      "simple": "How strictly Studio checks your code for type mistakes (like using a number where text is expected). It only affects warnings in the editor.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(Workspace.LuauTypeCheckMode)"
+    },
+    "Workspace.MeshPartHeadsAndAccessories": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Whether character heads and accessories are loaded as MeshParts."
+    },
+    "Workspace.MeshStreamingAndImprovedLods": {
+      "simple": "Studio-only setting (scripts cannot read or change it). When on, meshes load a simple version first and get more detailed over time, so the game appears faster."
+    },
+    "Workspace.ModelStreamingBehavior": {
+      "simple": "Studio-only setting (scripts cannot read or change it). With streaming on, decides how Models are sent to players."
+    },
+    "Workspace.NextGenerationReplication": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Turns on a newer system for sending property changes to players. When on, do not count on changes and remote events arriving in a fixed order."
+    },
+    "Workspace.NextGenerationReplicationAlias": {
+      "simple": "Internal Roblox setting. Not usable by scripts."
+    },
+    "Workspace.PathfindingUseImprovedSearch": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Makes PathfindingService (which finds walking routes for NPCs) use an improved search."
+    },
+    "Workspace.PhysicsSteppingMethod": {
+      "simple": "Studio-only setting (scripts cannot read or change it). How the physics engine moves time forward: Adaptive (faster, adjusts as needed) or Fixed (always the most accurate)."
+    },
+    "Workspace.PlayerCharacterDestroyBehavior": {
+      "simple": "Studio-only setting (scripts cannot read or change it). When on, a player's old character is properly destroyed when they respawn, and their Player object is destroyed when they leave, which frees memory."
+    },
+    "Workspace.PlayerScriptsUseInputActionSystem": {
+      "simple": "Internal Roblox setting for whether the built-in player controls use the Input Action System. Normal scripts cannot read or change it."
+    },
+    "Workspace.PlayerScriptsUseInputActionSystemAlias": {
+      "simple": "Internal Roblox setting. Not usable by scripts."
+    },
+    "Workspace.PredictiveStreamingMode": {
+      "simple": "Studio-only setting (scripts cannot read or change it). With streaming on, lets Roblox guess where a player is about to go and load that area early."
+    },
+    "Workspace.PrimalPhysicsSolver": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Turns on an experimental, more accurate physics solver for complicated machines."
+    },
+    "Workspace.RejectCharacterDeletions": {
+      "simple": "Studio-only setting (scripts cannot read or change it). When on, the server ignores attempts from players' devices to delete characters, which blocks a type of cheating."
+    },
+    "Workspace.RenderingCacheOptimizations": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Lets the renderer skip redoing work for things that do not move, to raise frame rate."
+    },
+    "Workspace.ReplicateInstanceDestroySetting": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Chooses how `Destroy()` on the server is sent to players' devices. Enabled uses an improved method."
+    },
+    "Workspace.Retargeting": {
+      "simple": "Whether animations are adjusted to fit characters with different body sizes and shapes, so one animation works on many avatars.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(Workspace.Retargeting)"
+    },
+    "Workspace.SandboxedInstanceMode": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Turns on the experimental script capabilities (sandboxing) feature."
+    },
+    "Workspace.SignalBehavior": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Decides when your event functions run: Immediate (right when the event happens) or Deferred (a tiny moment later, all together). Deferred is the modern default and is better for performance."
+    },
+    "Workspace.SignalBehaviorAlias": {
+      "simple": "Internal Roblox setting. Not usable by scripts."
+    },
+    "Workspace.StreamingEnabled": {
+      "simple": "If true, players only get the parts of the map near them and more loads as they move. Big worlds load faster this way. Set it in Studio's Properties window.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(Workspace.StreamingEnabled)",
+      "gotcha": "With streaming on, LocalScripts must use `WaitForChild` because far-away parts might not exist on that device yet."
+    },
+    "Workspace.StreamingEnabledAlias": {
+      "simple": "Internal Roblox setting. Not usable by scripts."
+    },
+    "Workspace.StreamingIntegrityMode": {
+      "simple": "Studio-only setting (scripts cannot read or change it). With streaming on, can pause a player for a moment if they walk into an area that has not loaded yet, so they do not fall through missing floors."
+    },
+    "Workspace.StreamingMinRadius": {
+      "simple": "Studio-only setting (scripts cannot read or change it). With streaming on, the distance around the player (64 studs by default) that loads first and most urgently."
+    },
+    "Workspace.StreamingTargetRadius": {
+      "simple": "Studio-only setting (scripts cannot read or change it). With streaming on, the farthest distance around the player (1024 studs by default) that Roblox tries to load."
+    },
+    "Workspace.StreamOutBehavior": {
+      "simple": "Studio-only setting (scripts cannot read or change it). With streaming on, decides when far-away parts are unloaded from a player's device: when memory runs low, or when they go past the streaming distance."
+    },
+    "Workspace.Terrain": {
+      "simple": "A shortcut to the Terrain object, which holds the smooth landscape like hills, water, and grass.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal terrain = Workspace.Terrain\n-- fill a 20-stud ball of water at (0, 10, 0)\nterrain:FillBall(Vector3.new(0, 10, 0), 20, Enum.Material.Water)"
+    },
+    "Workspace.TouchesUseCollisionGroups": {
+      "simple": "Studio-only setting (scripts cannot read or change it). If true, parts in collision groups that are set to not collide also do not fire Touched on each other. Off by default."
+    },
+    "Workspace.UseFixedSimulation": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Turns on a fixed-speed simulation step, which makes `RunService:BindToSimulation()` work and makes `time()` use the fixed step time."
+    },
+    "Workspace.UseFixedSimulationAlias": {
+      "simple": "Internal Roblox setting. Not usable by scripts."
+    },
+    "Workspace.UseNewLuauTypeSolver": {
+      "simple": "Studio-only setting (scripts cannot read or change it). Turns on the newer, more accurate type checker in the script editor."
+    },
+    "Workspace:ApplyRecommendedStreamingSettings": {
+      "simple": "Plugin-only. Changes the streaming settings to the ones Roblox recommends. Gives true when done."
+    },
+    "Workspace:BreakJoints": {
+      "simple": "Old — plugin-only and no longer needed."
+    },
+    "Workspace:GetNumAwakeParts": {
+      "simple": "Gives how many parts are currently \"awake\", meaning physics is actively moving or checking them. Parts that have been still for a while go to sleep to save work.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(\"Awake parts:\", Workspace:GetNumAwakeParts())"
+    },
+    "Workspace:GetPhysicsThrottling": {
+      "simple": "Gives a number from 0 to 100: what percent of normal speed physics is running at. Below 100 means the game has too much physics and is slowing it down.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(\"Physics speed:\", Workspace:GetPhysicsThrottling(), \"%\")"
+    },
+    "Workspace:GetRealPhysicsFPS": {
+      "simple": "Gives how many times per second physics is updating right now. Can help spot cheaters who speed up their own physics.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(\"Physics FPS:\", Workspace:GetRealPhysicsFPS())"
+    },
+    "Workspace:GetServerTimeNow": {
+      "simple": "Gives the server's current time as Unix time (seconds since 1970). Every player gets nearly the same number, so it is great for countdowns and events that must happen at the same moment for everyone.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal endTime = Workspace:GetServerTimeNow() + 30 -- 30 seconds from now\nwhile Workspace:GetServerTimeNow() < endTime do\n\tprint(math.ceil(endTime - Workspace:GetServerTimeNow()), \"seconds left\")\n\ttask.wait(1)\nend"
+    },
+    "Workspace:JoinToOutsiders": {
+      "simple": "Joins the parts in your list to any parts they are touching, based on the parts' surface types and the joint mode you choose. An older way of gluing builds together; WeldConstraints are the modern way.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal parts = { Workspace:WaitForChild(\"Wall\") }\nWorkspace:JoinToOutsiders(parts, Enum.JointCreationMode.All)"
+    },
+    "Workspace:MakeJoints": {
+      "simple": "Old — plugin-only and no longer needed. Use WeldConstraints instead."
+    },
+    "Workspace:PGSIsEnabled": {
+      "simple": "Gives true if the game uses the PGS physics solver, which is the normal modern one.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nprint(Workspace:PGSIsEnabled())"
+    },
+    "Workspace:UnjoinFromOutsiders": {
+      "simple": "Breaks the joints between the parts in your list and any other parts, but keeps joints among the listed parts themselves.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal car = Workspace:WaitForChild(\"Car\")\nWorkspace:UnjoinFromOutsiders(car:GetChildren())"
+    },
+    "Workspace:ZoomToExtents": {
+      "simple": "Plugin-only. Moves the Studio camera so you can see every part in Workspace at once."
+    },
+    "Workspace.PersistentLoaded": {
+      "simple": "Fires (with streaming on) when a player has received all the persistent models, which are models marked to always stay loaded for them.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nWorkspace.PersistentLoaded:Connect(function(player)\n\tprint(player.Name, \"has all persistent models\")\nend)"
+    }
+  }
+}

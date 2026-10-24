@@ -1,0 +1,187 @@
+{
+  "name": "RunService",
+  "simple": "A game does not run smoothly like a movie in real life. It draws a new picture, called a frame, about 60 times every second. RunService lets your code run once every frame, so you can make smooth motion, timers and checks. It also tells you WHERE your code is running: on the server, on a player's device, or in Studio.",
+  "analogy": "RunService is like the drummer in a band. Every beat (frame), it hits the drum and everyone who is listening (your connected functions) does their next little step. It also tells you how long it has been since the last beat, so you can keep in time even if the drummer speeds up or slows down.",
+  "whenToUse": [
+    "Move or spin something smoothly every frame",
+    "Make a camera or object follow something (use `PreRender` in a LocalScript)",
+    "Run a check over and over very quickly, like a timer or health regeneration (use `Heartbeat`)",
+    "Change forces or velocity just before physics runs (use `PreSimulation`)",
+    "Find out if code is running on the server, the client, or in Studio (`IsServer`, `IsClient`, `IsStudio`)"
+  ],
+  "where": "Server and client. Get it with game:GetService(\"RunService\"). `PreRender`, `RenderStepped` and `BindToRenderStep` only work on the client (a LocalScript), because only players' devices draw pictures.",
+  "terms": {
+    "frame": "One picture the game draws on your screen. Roblox tries to draw about 60 frames each second. Each frame, the game also moves physics, plays animations and runs waiting scripts.",
+    "frame rate (FPS)": "How many frames are drawn each second. 60 FPS means a new frame about every 0.0167 seconds. A slow phone might only manage 30 FPS, and some fast computers do more.",
+    "delta time (deltaTime, dt)": "How many seconds passed since the last frame. At 60 FPS it is about 0.0167. At 30 FPS it is about 0.033. Multiply your speed by it so things move at the same speed on fast and slow devices.",
+    "physics simulation": "The part of the engine that makes unanchored things fall, bounce, roll and bump into each other.",
+    "render": "To draw the picture on the screen.",
+    "client": "The player's own computer, phone or console. LocalScripts run here.",
+    "server": "Roblox's computer that runs the game for everyone at once. Scripts in ServerScriptService run here.",
+    "event": "A signal that something happened. You `:Connect` a function and it runs every time the event fires.",
+    "connection": "What you get back from `:Connect`. Call `:Disconnect()` on it to stop your function from running.",
+    "bind": "To attach your function to a moment in the frame so the engine calls it for you.",
+    "priority": "A number that sets the order. Lower numbers run first.",
+    "Studio": "Roblox Studio, the program you use to build games.",
+    "ModuleScript": "A script that holds shared code other scripts can load with `require`.",
+    "prediction / server authority": "An advanced setup where the player's device guesses (predicts) what will happen and the server later says what really happened. If the guess was wrong (a misprediction), the device rewinds (rolls back) and replays (resimulates). Most games do not need this.",
+    "Hz (hertz)": "Times per second. 30 Hz means 30 times every second."
+  },
+  "examples": [
+    {
+      "title": "Move a part smoothly using deltaTime",
+      "place": "Script in ServerScriptService (needs an anchored Part named MovingPart in Workspace)",
+      "code": "local RunService = game:GetService(\"RunService\")\n\nlocal part = workspace:WaitForChild(\"MovingPart\")\npart.Anchored = true\n\nlocal SPEED = 10 -- studs per SECOND (not per frame!)\n\nRunService.Heartbeat:Connect(function(deltaTime)\n    -- distance this frame = speed x time since last frame\n    -- at 60 FPS: 10 x 0.0167 = about 0.167 studs this frame\n    -- at 30 FPS: 10 x 0.033  = about 0.33 studs this frame\n    -- either way, after 1 second the part has moved 10 studs\n    part.Position = part.Position + Vector3.new(SPEED * deltaTime, 0, 0)\nend)",
+      "explain": [
+        "`Heartbeat` fires once every frame and gives us `deltaTime`, the seconds since the last frame.",
+        "We want the part to move 10 studs every second, so each frame we move it `SPEED * deltaTime` studs along the X direction.",
+        "A fast computer has more frames but smaller steps; a slow one has fewer frames but bigger steps. Both end up moving 10 studs per second, so the game is fair for everybody.",
+        "If you just added 0.5 every frame instead, a 120 FPS computer would move the part 4 times faster than a 30 FPS phone. That is why we use deltaTime."
+      ]
+    },
+    {
+      "title": "Spin a coin smoothly on the player's screen",
+      "place": "LocalScript in StarterPlayerScripts (needs an anchored Part named Coin in Workspace)",
+      "code": "local RunService = game:GetService(\"RunService\")\n\nlocal coin = workspace:WaitForChild(\"Coin\")\nlocal TURN_SPEED = math.rad(180) -- half a turn per second, turned into radians\n\nRunService.PreRender:Connect(function(deltaTime)\n    -- rotate a little around the coin's up axis each frame\n    coin.CFrame = coin.CFrame * CFrame.Angles(0, TURN_SPEED * deltaTime, 0)\nend)",
+      "explain": [
+        "`PreRender` runs right before each frame is drawn, so changes look perfectly smooth on screen. It only works on the client, so this is a LocalScript.",
+        "`math.rad(180)` turns 180 degrees into radians, the angle unit Roblox uses (a full circle is about 6.28 radians).",
+        "Each frame we turn the coin by speed times deltaTime, so it turns exactly half a circle every second on any device.",
+        "Because a LocalScript changed it, only this player sees the coin spin. That is fine for decoration."
+      ]
+    },
+    {
+      "title": "A simple countdown timer that you can stop",
+      "place": "Script in ServerScriptService",
+      "code": "local RunService = game:GetService(\"RunService\")\n\nlocal timeLeft = 10 -- seconds\nlocal connection\n\nconnection = RunService.Heartbeat:Connect(function(deltaTime)\n    timeLeft -= deltaTime -- take away the time that passed\n    if timeLeft <= 0 then\n        print(\"Time is up!\")\n        connection:Disconnect() -- stop running every frame\n    end\nend)",
+      "explain": [
+        "We store the connection so we can stop it later.",
+        "Each frame we subtract deltaTime, so after 10 real seconds `timeLeft` reaches 0 no matter the frame rate.",
+        "`connection:Disconnect()` stops the function from being called again. Always disconnect frame loops you no longer need."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Forgetting deltaTime: moving by a fixed amount each frame makes speed depend on the player's FPS. Always multiply by deltaTime.",
+    "Heavy code inside frame events runs 60 times a second and can make the game laggy. Keep it short.",
+    "`PreRender`, `RenderStepped` and `BindToRenderStep` only work in client code (LocalScripts). Using them on the server will not work.",
+    "Use `PreRender` and `PreSimulation` in new code. `RenderStepped` and `Stepped` are older names that still work but have been replaced.",
+    "Changing a part in a LocalScript only changes it for that player. Other players will not see it.",
+    "Frame connections keep running until you `:Disconnect()` them or the script is destroyed.",
+    "In frame order: PreRender (draw prep), then PreAnimation, then PreSimulation, then physics runs, then PostSimulation, then Heartbeat."
+  ],
+  "members": {
+    "RunService.RunState": {
+      "simple": "Tells you if the game's simulation is Stopped, Running or Paused. Only plugins can change it; normal scripts can only read it.",
+      "example": "local RunService = game:GetService(\"RunService\")\nprint(RunService.RunState) -- Enum.RunState.Running while you play"
+    },
+    "RunService:BindToAnimation": {
+      "simple": "An advanced tool for physics prediction games. It calls your function a fixed number of times per second (default 30), no matter the frame rate, right before animations update. It returns a connection you can disconnect. Most games do not need this.",
+      "example": "-- LocalScript (advanced; most games do not need this)\nlocal RunService = game:GetService(\"RunService\")\nlocal connection = RunService:BindToAnimation(function(deltaTime)\n    -- adjust animation-related values here, 30 times per second\nend, Enum.StepFrequency.Hz30)\n-- later: connection:Disconnect()",
+      "gotcha": "Inside the bound function you may only touch properties that are kept in sync for prediction; touching others causes an error."
+    },
+    "RunService:BindToRenderStep": {
+      "simple": "Attaches your function to the moment just before each frame is drawn, with a name and a priority number that controls the order. Lower numbers run first. Player input runs at 100 and the camera at 200, so you can run code right before or after the camera moves. Client only.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal RunService = game:GetService(\"RunService\")\n\nlocal function beforeCamera(deltaTime)\n    -- runs every frame, just before the default camera updates\nend\n\n-- .Value turns the enum into its number (Camera = 200, so this is 199)\nRunService:BindToRenderStep(\"MyBeforeCamera\", Enum.RenderPriority.Camera.Value - 1, beforeCamera)\n\n-- to stop it later:\n-- RunService:UnbindFromRenderStep(\"MyBeforeCamera\")",
+      "gotcha": "Pass a number, not the enum itself: use `Enum.RenderPriority.Camera.Value`. Keep the code fast, because the frame cannot be drawn until it finishes."
+    },
+    "RunService:BindToSimulation": {
+      "simple": "An advanced tool for physics prediction. It calls your function a fixed number of times per second (default 30), separate from the frame rate. Only works when `Workspace.UseFixedSimulation` is turned on. Returns a connection to disconnect it.",
+      "example": "-- Advanced: requires Workspace.UseFixedSimulation to be enabled\nlocal RunService = game:GetService(\"RunService\")\nlocal connection = RunService:BindToSimulation(function(deltaTime)\n    -- push a vehicle, for example, 60 times per second\nend, Enum.StepFrequency.Hz60)",
+      "gotcha": "Reading or writing properties that are not kept in sync for prediction inside this function causes an error."
+    },
+    "RunService:GetPredictionStatus": {
+      "simple": "Advanced, client only. Tells you whether an object is currently being predicted (guessed ahead by the player's device) in a server authority game. Useful for debugging.",
+      "example": "-- LocalScript (advanced)\nlocal RunService = game:GetService(\"RunService\")\nprint(RunService:GetPredictionStatus(workspace.Car))"
+    },
+    "RunService:IsClient": {
+      "simple": "Returns true if this code is running on a player's device (a LocalScript, or a ModuleScript loaded by one). Handy inside ModuleScripts that both sides use.",
+      "example": "local RunService = game:GetService(\"RunService\")\nif RunService:IsClient() then\n    print(\"I am running on a player's device\")\nend"
+    },
+    "RunService:IsEdit": {
+      "simple": "Returns true when you are in Studio building (edit mode) and the game is not running. Mostly useful for plugins.",
+      "example": "local RunService = game:GetService(\"RunService\")\nprint(RunService:IsEdit()) -- false while playtesting"
+    },
+    "RunService:IsResimulating": {
+      "simple": "Advanced. Returns true while the player's device is replaying physics steps because its guess was wrong (server authority). Use it to avoid doing things twice, like playing a sound again.",
+      "example": "local RunService = game:GetService(\"RunService\")\nlocal sound = workspace:WaitForChild(\"Ding\") -- a Sound in Workspace\nif not RunService:IsResimulating() then\n    sound:Play() -- only play once, not again during a replay\nend"
+    },
+    "RunService:IsRunMode": {
+      "simple": "Returns true if Studio is in a Run test (the kind with no player character). It is false for a normal Play test.",
+      "example": "local RunService = game:GetService(\"RunService\")\nprint(RunService:IsRunMode())"
+    },
+    "RunService:IsRunning": {
+      "simple": "Returns true if the game is currently running (playing), false in edit mode or while paused.",
+      "example": "local RunService = game:GetService(\"RunService\")\nprint(RunService:IsRunning()) -- true in a live game"
+    },
+    "RunService:IsServer": {
+      "simple": "Returns true if this code is running on the server (a Script, or a ModuleScript loaded by one).",
+      "example": "local RunService = game:GetService(\"RunService\")\nif RunService:IsServer() then\n    print(\"I am on the server, I can use ServerStorage\")\nend"
+    },
+    "RunService:IsStudio": {
+      "simple": "Returns true if the game is running inside Roblox Studio. Use it for test-only code, like giving yourself extra coins while testing.",
+      "example": "local RunService = game:GetService(\"RunService\")\nif RunService:IsStudio() then\n    print(\"Testing in Studio: debug messages on\")\nend"
+    },
+    "RunService:Pause": {
+      "simple": "Pauses physics and scripts. Only plugins can use this; normal game scripts cannot.",
+      "example": "-- Plugin only\ngame:GetService(\"RunService\"):Pause()"
+    },
+    "RunService:Reset": {
+      "simple": "Old — do not use it."
+    },
+    "RunService:Run": {
+      "simple": "Starts the game's simulation (physics and scripts). Only plugins can use this.",
+      "example": "-- Plugin only\ngame:GetService(\"RunService\"):Run()"
+    },
+    "RunService:SetPredictionMode": {
+      "simple": "Advanced, client only. Chooses whether the player's device should predict (guess ahead) the movement of an object in a server authority game.",
+      "example": "-- LocalScript (advanced)\nlocal RunService = game:GetService(\"RunService\")\nRunService:SetPredictionMode(workspace.Car, Enum.PredictionMode.Automatic)"
+    },
+    "RunService:Stop": {
+      "simple": "Stops the simulation. Only plugins can use this. Unlike Studio's Stop button, it does not undo changes made while running.",
+      "example": "-- Plugin only\ngame:GetService(\"RunService\"):Stop()"
+    },
+    "RunService:UnbindFromRenderStep": {
+      "simple": "Removes a function you added with `BindToRenderStep`, using the same name. If no binding has that name, nothing happens (no error).",
+      "example": "local RunService = game:GetService(\"RunService\")\nRunService:BindToRenderStep(\"Spin\", 300, function(dt) end)\ntask.wait(5)\nRunService:UnbindFromRenderStep(\"Spin\") -- stop after 5 seconds"
+    },
+    "RunService.Heartbeat": {
+      "simple": "Fires every frame, at the END of the frame, after physics has moved everything. Gives you deltaTime (seconds since the last frame). This is the most common frame event and works on both server and client. Waiting scripts (like `task.wait`) also wake up at this moment.",
+      "example": "local RunService = game:GetService(\"RunService\")\nlocal humanoid = nil -- set this to a player's Humanoid\n\nRunService.Heartbeat:Connect(function(deltaTime)\n    -- regenerate 2 health per second\n    if humanoid and humanoid.Health < humanoid.MaxHealth then\n        humanoid.Health = math.min(humanoid.Health + 2 * deltaTime, humanoid.MaxHealth)\n    end\nend)"
+    },
+    "RunService.Misprediction": {
+      "simple": "Advanced. In a server authority game, fires when the server says the player's device guessed wrong. It gives details (time, which objects, stats) so you can build debugging tools.",
+      "example": "-- LocalScript (advanced)\nlocal RunService = game:GetService(\"RunService\")\nRunService.Misprediction:Connect(function(time, instances, stats)\n    print(\"Misprediction! Objects affected:\", #instances)\nend)"
+    },
+    "RunService.PostSimulation": {
+      "simple": "Fires every frame right AFTER physics has finished moving things. Good for final fixes to where physics put things. Gives the physics step time (deltaTimeSim). Heartbeat comes right after this.",
+      "example": "local RunService = game:GetService(\"RunService\")\nlocal ball = workspace:WaitForChild(\"Ball\")\n\nRunService.PostSimulation:Connect(function(deltaTimeSim)\n    -- keep the ball from flying above height 100\n    if ball.Position.Y > 100 then\n        ball.AssemblyLinearVelocity = Vector3.zero\n    end\nend)"
+    },
+    "RunService.PreAnimation": {
+      "simple": "Fires every frame just before animations are moved forward. Useful for changing animation things like their speed. Gives deltaTimeSim, the time this frame moves animations by.",
+      "example": "local RunService = game:GetService(\"RunService\")\nRunService.PreAnimation:Connect(function(deltaTimeSim)\n    -- e.g. adjust an AnimationTrack's speed here\nend)"
+    },
+    "RunService.PreRender": {
+      "simple": "Fires every frame just BEFORE the picture is drawn on the player's screen. Best for things the player looks at: camera movement, smooth visual effects, objects that follow the mouse. Client only. It replaces the older `RenderStepped`.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal RunService = game:GetService(\"RunService\")\nlocal part = workspace:WaitForChild(\"Floaty\")\nlocal startY = part.Position.Y\nlocal t = 0\n\nRunService.PreRender:Connect(function(deltaTime)\n    t += deltaTime\n    -- bob up and down by 1 stud using a sine wave\n    part.Position = Vector3.new(part.Position.X, startY + math.sin(t * 2), part.Position.Z)\nend)",
+      "gotcha": "The screen waits for your code to finish before drawing, so slow code here makes the game choppy."
+    },
+    "RunService.PreSimulation": {
+      "simple": "Fires every frame just BEFORE physics runs. Best for changing velocity or forces so physics uses your new values right away. Gives deltaTimeSim, how much time physics will move forward this frame. It replaces the older `Stepped`.",
+      "example": "local RunService = game:GetService(\"RunService\")\nlocal ball = workspace:WaitForChild(\"Ball\")\n\nRunService.PreSimulation:Connect(function(deltaTimeSim)\n    -- keep pushing the ball forward at 20 studs per second\n    ball.AssemblyLinearVelocity = Vector3.new(20, ball.AssemblyLinearVelocity.Y, 0)\nend)"
+    },
+    "RunService.RenderStepped": {
+      "simple": "The older version of `PreRender`. Fires every frame before the frame is drawn, client only, and gives deltaTime. It still works, but use `PreRender` for new code.",
+      "example": "-- LocalScript (prefer PreRender in new code)\nlocal RunService = game:GetService(\"RunService\")\nRunService.RenderStepped:Connect(function(deltaTime)\n    print(\"frame took\", deltaTime, \"seconds\")\nend)"
+    },
+    "RunService.Rollback": {
+      "simple": "Advanced. In a server authority game, fires after the player's device rewinds because it guessed wrong, but before it replays. Use it to rewind your own saved game data too.",
+      "example": "-- LocalScript (advanced)\nlocal RunService = game:GetService(\"RunService\")\nRunService.Rollback:Connect(function(time)\n    print(\"Rewound to time\", time)\nend)"
+    },
+    "RunService.Stepped": {
+      "simple": "The older version of `PreSimulation`. Fires every frame before physics runs. It gives two numbers: the total time the game has run, and deltaTime. Still works, but use `PreSimulation` for new code.",
+      "example": "local RunService = game:GetService(\"RunService\")\nRunService.Stepped:Connect(function(totalTime, deltaTime)\n    print(totalTime, deltaTime)\nend)",
+      "gotcha": "The FIRST value is total time, not deltaTime. Many people mix these up."
+    }
+  }
+}

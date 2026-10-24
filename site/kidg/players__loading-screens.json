@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/players/loading-screens.md",
+  "simple": "When someone joins your game, Roblox shows a plain loading screen while things download. You can swap it for your own screen with your game's name, colors, or a spinning logo. This page shows how to build one with a LocalScript in `ReplicatedFirst`, how to remove the default one, and how to animate yours with `TweenService`. A good loading screen makes your game feel polished from the very first second.",
+  "analogy": "It is like the curtain in a theater. While the stage crew sets up behind it, the audience looks at a nice curtain with the show's name on it instead of a messy stage.",
+  "keyPoints": [
+    "Put a LocalScript in `ReplicatedFirst`. Things in `ReplicatedFirst` reach the player's device before anything else, so your screen shows up first.",
+    "You can build the `ScreenGui` in code, or design it ahead of time and keep it in `ReplicatedFirst`.",
+    "Parent your screen to the player's `PlayerGui` and set `IgnoreGuiInset = true` so it covers the whole screen, including the top bar area.",
+    "Call `ReplicatedFirst:RemoveDefaultLoadingScreen()` so only your screen shows.",
+    "Wait until `game:IsLoaded()` is true, or wait for `game.Loaded`, then destroy your screen.",
+    "Add a `task.wait()` if you want your screen to stay up for a minimum time, like 5 seconds.",
+    "Use `TweenService` to fade in text or spin an image to show that loading is happening.",
+    "You can design the screen in `StarterGui` to preview it, then move it to `ReplicatedFirst` when done.",
+    "This page is about joining. Teleport loading screens are set up differently, with `SetTeleportGui()`."
+  ],
+  "terms": {
+    "ReplicatedFirst": "A special container whose contents get copied to the player's device before anything else in the game.",
+    "replicate": "Copy from the server to a player's device so it exists there too.",
+    "ScreenGui": "The container that holds 2D things drawn on the screen, like labels and images.",
+    "PlayerGui": "The folder inside each player that holds the screens they can currently see.",
+    "IgnoreGuiInset": "When `true`, the screen also covers the strip at the top where Roblox's buttons are, so there is no gap.",
+    "UDim2": "A size or position for 2D UI. `UDim2.new(1, 0, 1, 0)` means 100% of the width and 100% of the height, plus 0 extra pixels each.",
+    "tween": "A smooth change from one value to another over time, like fading transparency from `1` (invisible) to `0` (fully visible) in 1 second.",
+    "TweenInfo": "Settings for a tween: how long it takes, its easing style, and how many times it repeats. A repeat count of `-1` means repeat forever.",
+    "Transparency": "How see-through something is. `0` is solid and `1` is fully invisible.",
+    "game.Loaded": "An event that fires once everything in the game has finished loading on the player's device."
+  },
+  "example": {
+    "title": "A simple custom loading screen",
+    "place": "LocalScript in ReplicatedFirst",
+    "code": "local Players = game:GetService(\"Players\")\nlocal ReplicatedFirst = game:GetService(\"ReplicatedFirst\")\n\nlocal player = Players.LocalPlayer\nlocal playerGui = player:WaitForChild(\"PlayerGui\")\n\n-- Make a screen that covers everything\nlocal loadingScreen = Instance.new(\"ScreenGui\")\nloadingScreen.IgnoreGuiInset = true\nloadingScreen.Parent = playerGui\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.new(1, 0, 1, 0) -- full width and height\nlabel.BackgroundColor3 = Color3.fromRGB(0, 20, 40)\nlabel.TextColor3 = Color3.new(1, 1, 1)\nlabel.Text = \"Loading my game...\"\nlabel.TextSize = 32\nlabel.Parent = loadingScreen\n\n-- Hide Roblox's default loading screen\nReplicatedFirst:RemoveDefaultLoadingScreen()\n\ntask.wait(3) -- show our screen for at least 3 seconds\n\nif not game:IsLoaded() then\n\tgame.Loaded:Wait() -- wait until everything has loaded\nend\n\nloadingScreen:Destroy()",
+    "explain": [
+      "The script runs on the player's device very early because it lives in `ReplicatedFirst`.",
+      "It makes a `ScreenGui` and a full-screen `TextLabel` with dark blue background and white text.",
+      "`RemoveDefaultLoadingScreen()` hides the Roblox one, so only yours is visible.",
+      "It waits at least 3 seconds, then waits for the game to finish loading if it has not yet.",
+      "Finally, `Destroy()` removes the loading screen and the player sees the game."
+    ]
+  },
+  "watchOut": [
+    "Putting the LocalScript somewhere other than `ReplicatedFirst`. It will run too late and players will see the default screen first.",
+    "Forgetting to destroy the loading screen. Players will be stuck staring at it forever.",
+    "Leaving out `IgnoreGuiInset = true`, which leaves a gap at the top of your screen.",
+    "Using a regular Script instead of a LocalScript. Loading screens run on the player's device."
+  ]
+}

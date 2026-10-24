@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/projects/collaboration.md",
+  "simple": "Making a good game takes many skills, like building, scripting, UI, and sound, so most games are made by teams. Roblox Studio has built-in tools, called Team Create, that let several people work on the same game, even at the same time. This page explains who you are allowed to work with based on age, how to give friends permission to edit, how to see what teammates are doing, how to leave comments, and how to write scripts together without breaking each other's work.",
+  "analogy": "Team Create is like a shared online document for your game. Everyone can type at once, you can see each person's colored cursor, you can leave sticky-note comments, and there is a history of every change.",
+  "keyPoints": [
+    "To collaborate with other people you must first complete an age check (ID or face age estimate). You can use Team Create alone without one.",
+    "By default you can only work with creators in nearby age groups. For example, if you are 13 to 15 you can collaborate with ages 9 to 17. To go outside that, become trusted friends or get a linked parent's permission.",
+    "Permission levels are Owner, Edit (which also includes Play), Play, and No Access. In games you own, you can only give Edit to Roblox friends, using the Collaborate button in Studio.",
+    "In group games, edit access comes from group roles, either for all group games or for one specific game.",
+    "Each collaborator gets a color. You can see what they have selected in the viewport, Explorer, and Script Editor, and click Join to jump to where they are working.",
+    "Press C or click Comment to pin a comment to a part, tag teammates with `@username`, and resolve it when done.",
+    "Live Scripting (on by default) lets everyone type in the same script at once. Drafts mode lets you edit and test scripts privately, then commit them, compare, and merge.",
+    "Studio auto-saves collaborative sessions to the cloud every 4 minutes. Right-click a script and choose View Script History to see or compare older versions."
+  ],
+  "terms": {
+    "collaboration": "Working together with other people on the same project.",
+    "Team Create": "The Studio feature that turns on collaboration so multiple people can edit a game.",
+    "collaborator": "A person who has permission to help build your game.",
+    "age check": "A way Roblox confirms your age, by government ID or by a face age estimate.",
+    "trusted friend": "A special friend level on Roblox for people you know well. It can unlock collaborating across age groups.",
+    "session": "A period when people are working in the game together in Studio.",
+    "mezzanine bar": "The strip of buttons near the top of Studio where Collaborate and Comment live.",
+    "viewport": "The main 3D view in Studio where you see and build your world.",
+    "resolve a comment": "Mark a comment as handled. It disappears from view but can be brought back.",
+    "live scripting": "Everyone editing the same script at the same time and seeing each other's typing.",
+    "draft": "Your own private version of a script that others cannot see until you commit it.",
+    "commit": "Send your draft changes into the shared version that everyone uses.",
+    "merge": "Combine your changes with a teammate's changes to the same script.",
+    "diff": "A view that shows what changed between two versions. New code is green and old or removed code is red.",
+    "revert": "Go back to an older version of the game."
+  },
+  "watchOut": [
+    "Reverting to an old version while teammates are still editing. Their auto-saves can overwrite your revert. Disable collaboration first.",
+    "Turning on Drafts mode and expecting it to work right away. Everyone must leave the session first for it to take effect.",
+    "Restoring a deleted script and not finding it where it was. Restored scripts go into Workspace, so move them back to the right place.",
+    "Expecting to give Edit access to anyone in your own game. You can only give Edit to Roblox friends; others can only get Play."
+  ]
+}

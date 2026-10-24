@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/chat/in-experience-text-chat.md",
+  "simple": "This page explains how Roblox's text chat works inside your game, run by `TextChatService`. It covers the chat parts you can customize (window, input bar, channel tabs, bubbles), the objects behind chat (channels, sources, messages, commands), and the path a message takes from one player to the server to everyone else. It also shows how to change how messages look, like colored names or tags, and how to move from the old legacy chat. Roblox filters chat for you, so you can focus on making it fun.",
+  "analogy": "Chat is like a school mail system: you drop a note in the outbox (send), the office checks it is allowed and safe (server and filter), then delivers copies to the right classrooms (other players).",
+  "keyPoints": [
+    "`TextChatService` manages chat, including filtering, moderation, and permissions, and gives you a default UI you can customize or hide.",
+    "UI parts are controlled by `ChatWindowConfiguration`, `ChatInputBarConfiguration`, `ChannelTabsConfiguration`, and `BubbleChatConfiguration`.",
+    "A `TextChannel` carries messages, a `TextSource` is one user in a channel, a `TextChatMessage` is one message, and a `TextChatCommand` runs an action when someone types a matching alias like `/dance`.",
+    "With default settings, Roblox makes two channels, `RBXGeneral` and `RBXSystem`. Avoid two channels with the same name.",
+    "Message path: the sender calls `SendAsync`, the server checks `ShouldDeliverCallback`, filters it, and then other players receive it through `MessageReceived`.",
+    "Use `ShouldDeliverCallback` (server only) to decide who gets a message, like proximity chat.",
+    "Use `OnIncomingMessage`, `OnBubbleAdded`, and `OnChatWindowAdded` (client only) to style messages with rich text, like colored names or tags.",
+    "Callbacks must not yield (wait). Chat messages are filtered automatically, so you do not filter them yourself."
+  ],
+  "terms": {
+    "TextChatService": "The service that runs Roblox's text chat in your game.",
+    "singleton": "There is only one of it. There is exactly one `TextChatService` per game.",
+    "channel": "A chat room inside your game, like General or Team.",
+    "TextSource": "One user's membership in a channel, including whether they can send messages there.",
+    "chat command": "A message like `/wave` that triggers an action instead of being shown as a normal message.",
+    "alias": "Another name that triggers a command. A command could have `/help` as its primary alias and `/h` as its secondary.",
+    "client-server model": "Each player's device (client) talks to Roblox's server, which passes things on to other clients.",
+    "callback": "A function you give Roblox that it calls at a certain moment, and it uses what you return.",
+    "yield": "Pause and wait. Waiting inside a chat callback freezes chat, so do not do it.",
+    "rich text": "Tags like `<font color='rgb(0,255,0)'>` that style parts of text.",
+    "legacy chat": "Roblox's older chat system. New games should use `TextChatService`.",
+    "platform-integrated chat": "A mode where chat connects with Roblox's platform; when on, custom chat must use Roblox's native systems and your code cannot read message text.",
+    "PrefixText": "The part before the message, usually the sender's name, like `Builderman:`."
+  },
+  "example": {
+    "title": "Add a gold [VIP] tag before VIP players' names",
+    "place": "LocalScript in StarterPlayerScripts (a server Script sets the `IsVIP` attribute on VIP players)",
+    "code": "local TextChatService = game:GetService(\"TextChatService\")\nlocal Players = game:GetService(\"Players\")\n\n-- Called on this player's device for each message before it shows\nTextChatService.OnIncomingMessage = function(message)\n\tlocal properties = Instance.new(\"TextChatMessageProperties\")\n\n\tlocal source = message.TextSource\n\tif source then\n\t\tlocal player = Players:GetPlayerByUserId(source.UserId)\n\t\tif player and player:GetAttribute(\"IsVIP\") == true then\n\t\t\t-- Rich text makes the tag gold\n\t\t\tproperties.PrefixText = \"<font color='#F5CD30'>[VIP]</font> \" .. message.PrefixText\n\t\tend\n\tend\n\n\treturn properties\nend",
+    "explain": [
+      "`OnIncomingMessage` is a client callback that runs for every message right before it is displayed.",
+      "We create a `TextChatMessageProperties` object to hold our changes.",
+      "`message.TextSource` tells us who sent it; we look up their `Player` by `UserId`.",
+      "If that player has the `IsVIP` attribute set to true, we put a gold `[VIP]` tag in front of their name.",
+      "We return the properties, and chat shows the message with our change. We never wait inside the callback."
+    ]
+  },
+  "watchOut": [
+    "Defining client callbacks like `OnIncomingMessage` in a server Script. They belong in a LocalScript; only `ShouldDeliverCallback` goes on the server.",
+    "Using `task.wait` or other waiting calls inside a callback. It blocks chat.",
+    "Making two `TextChannel` objects with the same name. It can confuse the default chat window.",
+    "Putting `TextChannel` or `TextChatCommand` somewhere other than inside `TextChatService`. They only work there.",
+    "Trying to read message text with platform-integrated chat on. It is not available in code then."
+  ]
+}

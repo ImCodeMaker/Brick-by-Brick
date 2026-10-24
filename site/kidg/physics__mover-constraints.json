@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/physics/mover-constraints.md",
+  "simple": "Mover constraints are physics tools that push, spin or steer assemblies. They can set a speed (LinearVelocity, AngularVelocity), pull something to a spot or rotation (AlignPosition, AlignOrientation), or apply a steady push or twist (VectorForce, Torque, LineForce). They are how you make hovering platforms, rockets, homing missiles and custom vehicles. This page also explains which modern movers replace the old Body movers like BodyVelocity.",
+  "analogy": "Mechanical constraints are like the hinges and ropes on a machine. Mover constraints are like the engine, thrusters and steering wheel that actually make it go.",
+  "keyPoints": [
+    "The mover constraints are LinearVelocity, AngularVelocity, AlignPosition, AlignOrientation, VectorForce, Torque, LineForce and AnimationConstraint.",
+    "Most use one or two attachments. AlignPosition and AlignOrientation line up Attachment0 with Attachment1 by default, and LineForce needs two attachments.",
+    "Create them from the Model tab's constraint picker or by inserting one in the Explorer and setting Attachment0 (and Attachment1 if needed).",
+    "Old Body movers are deprecated. BodyPosition becomes AlignPosition, BodyGyro becomes AlignOrientation, BodyVelocity becomes LinearVelocity, BodyAngularVelocity becomes AngularVelocity, and BodyForce or BodyThrust become VectorForce.",
+    "RocketPropulsion is replaced by LineForce (to chase a target) plus AlignOrientation (to face it).",
+    "AlignOrientation's PrimaryAxisLookAt mode always points Attachment0 at Attachment1, which is great for security cameras or guided missiles.",
+    "`RelativeTo` settings choose whether a force is measured in world directions or in an attachment's own directions."
+  ],
+  "terms": {
+    "mover constraint": "A constraint that adds force or torque to move assemblies.",
+    "attachment": "A Roblox object you put inside a part to mark one exact point on it. Its Position is measured from the part's center, so an attachment at (0, 3, 0) sits 3 studs above the center of its part.",
+    "force": "A push or pull in a direction. To hold up a mass of 5.6 against gravity (196.2), you need an upward force of 5.6 x 196.2 = about 1099.",
+    "torque": "A twisting force that makes things spin.",
+    "velocity": "Speed with a direction, in studs per second. (0, 0, -10) means 10 studs per second toward negative Z.",
+    "align": "To pull something into a matching position or rotation.",
+    "assembly": "Parts joined together that physics moves as one object.",
+    "deprecated / legacy": "Old features that still exist but should not be used for new work. Roblox recommends the newer replacements.",
+    "RelativeTo / ActuatorRelativeTo": "Which directions a force uses. World means the world's X, Y, Z (Y is always up). Attachment0 means the attachment's own arrows, so the force turns when the part turns, like a rocket's thrust.",
+    "ForceLimitMode": "Whether the maximum force is one total limit (Magnitude) or a separate limit for each of X, Y and Z (PerAxis).",
+    "VelocityConstraintMode": "Whether LinearVelocity controls speed along a line (1 direction), a plane (2 directions) or a full vector (all 3).",
+    "center of mass": "The balance point of the assembly. A force there pushes it without making it spin."
+  },
+  "example": {
+    "title": "A hover block that floats up slowly with VectorForce",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal block = Instance.new(\"Part\")\nblock.Size = Vector3.new(4, 1, 2)       -- volume 8, Plastic: mass 5.6\nblock.Position = Vector3.new(0, 5, 40)\nblock.Parent = Workspace\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = block\n\nlocal thruster = Instance.new(\"VectorForce\")\nthruster.Attachment0 = attachment\nthruster.RelativeTo = Enum.ActuatorRelativeTo.World  -- \"up\" always means world up\nthruster.ApplyAtCenterOfMass = true                   -- push without spinning it\n\n-- Weight = mass x gravity = 5.6 x 196.2 = about 1098.7\nlocal weight = block.AssemblyMass * Workspace.Gravity\n\n-- 100% of the weight: it floats in place\nthruster.Force = Vector3.new(0, weight, 0)\nthruster.Parent = block\n\ntask.wait(3)\n-- 120% of the weight: the extra 20% makes it rise\nthruster.Force = Vector3.new(0, weight * 1.2, 0)",
+    "explain": [
+      "The block is 4 x 1 x 2 = 8 cubic studs of Plastic (density 0.7), so its mass is 5.6.",
+      "Gravity is 196.2 studs per second squared, so its weight is 5.6 x 196.2, about 1098.7. We calculate it with `AssemblyMass * Workspace.Gravity` so it still works if you change the size.",
+      "An upward force equal to the weight cancels gravity, so the block hovers.",
+      "At 120% of the weight, the extra force is about 219.7. Divided by the mass of 5.6, that speeds the block up by about 39.2 studs per second, every second, so it rises faster and faster.",
+      "`RelativeTo = World` keeps the force pointing straight up even if the block tips. `ApplyAtCenterOfMass` pushes at the balance point so it does not start spinning."
+    ]
+  },
+  "watchOut": [
+    "Do not use BodyVelocity, BodyPosition, BodyGyro or BodyForce in new games. Use the modern movers listed above.",
+    "A VectorForce never stops pushing. A force bigger than the weight keeps speeding the part up forever. For a steady speed, use LinearVelocity instead.",
+    "Forgetting `ApplyAtCenterOfMass` (or putting the attachment off-center) can make the part flip and spin.",
+    "If the part moves the wrong way after it rotates, check `RelativeTo`: World directions never turn, attachment directions turn with the part."
+  ]
+}

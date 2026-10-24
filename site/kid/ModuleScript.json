@@ -1,0 +1,45 @@
+{
+  "name": "ModuleScript",
+  "simple": "A ModuleScript is a script that does not run by itself. Instead, other scripts load it with `require()`, and it hands back one value, usually a table full of functions and settings. This lets you write code once and use it from many scripts.",
+  "analogy": "A ModuleScript is like a recipe book on a shelf. It does not cook anything by itself, but any chef (script) can take it down with `require` and use its recipes.",
+  "whenToUse": [
+    "Share the same functions between many scripts instead of copying and pasting.",
+    "Store game settings in one place, like walk speeds or prices.",
+    "Share code between the server and clients by putting the module in ReplicatedStorage."
+  ],
+  "where": "Can live almost anywhere. It runs on whichever side requires it: on the server when a Script requires it, on the client when a LocalScript requires it. Put it in ReplicatedStorage to share with both sides, in ServerScriptService or ServerStorage for server-only code, or in StarterPlayerScripts for client-only code.",
+  "terms": {
+    "server": "Roblox's computer that runs the one shared copy of the game for everyone in the server. What happens here is the truth everyone sees.",
+    "client": "One player's own device (computer, phone, tablet, or console). Each player has their own client.",
+    "require": "The built-in function that loads a ModuleScript and gives you the value it returns: `local M = require(path.To.Module)`.",
+    "return": "The word at the end of a module that says which value to hand back to whoever requires it.",
+    "table": "A Luau container that holds many values, like a list or a set of named things.",
+    "yield": "To pause and wait. If a module pauses while loading, the script that required it waits too."
+  },
+  "examples": [
+    {
+      "title": "Share a math helper between scripts",
+      "place": "ModuleScript named MathHelper in ReplicatedStorage, plus a Script in ServerScriptService",
+      "code": "-- ===== ModuleScript \"MathHelper\" in ReplicatedStorage =====\nlocal MathHelper = {}\n\n-- Adds a bonus percentage to a number of coins\nfunction MathHelper.addBonus(coins, percent)\n\treturn coins + coins * percent / 100\nend\n\nMathHelper.MAX_COINS = 1000\n\nreturn MathHelper -- hand this table to whoever requires us\n\n-- ===== Script in ServerScriptService =====\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal MathHelper = require(ReplicatedStorage:WaitForChild(\"MathHelper\"))\n\nprint(MathHelper.addBonus(200, 10)) --> 220\nprint(MathHelper.MAX_COINS)          --> 1000",
+      "explain": [
+        "The module makes an empty table, adds a function and a setting to it, and returns it at the end.",
+        "The Script calls `require` with the module and gets that table back.",
+        "Now it can call `MathHelper.addBonus(200, 10)`: 10 percent of 200 is 20, so it gives 220."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A module runs only once per side. Every later `require` gets the exact same table back, so changes one script makes to it are seen by others on that same side.",
+    "The server and each client get their OWN separate copy. Changing a module's table on the server does not change it on clients.",
+    "If module A requires module B and B requires A, the scripts get stuck forever with no error. Avoid loops like that.",
+    "A module must return exactly one value. Forgetting `return` causes an error when required."
+  ],
+  "members": {
+    "ModuleScript.LinkedSource": {
+      "simple": "Old — use Packages instead to share code between places."
+    },
+    "ModuleScript.Source": {
+      "simple": "The text of the module's code, which you edit in Studio's script editor. Normal game scripts cannot change it; plugins can read it, and should use ScriptEditorService to edit an open script."
+    }
+  }
+}

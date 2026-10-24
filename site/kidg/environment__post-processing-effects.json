@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/environment/post-processing-effects.md",
+  "simple": "Post-processing effects are filters applied to the whole picture on screen, like filters on a photo app. They can make bright things glow, blur the world, change colors and mood, or add sun rays. Put them in `Lighting` and every player sees them. Put them in the player's `Camera` and only that one player sees them, which is great for things like a red screen when health is low.",
+  "analogy": "Post-processing is like putting colored glass or a soft-focus lens in front of a camera. The scene itself does not change; only how it looks through the lens does.",
+  "keyPoints": [
+    "Effects inside `Lighting` show for all players. Effects inside the `Camera` show only for one player.",
+    "To add one in Studio: hover over Lighting or Camera in the Explorer, click the plus button, and pick an effect.",
+    "If an effect does not appear, raise Editor Quality Level in Studio Settings, under Rendering.",
+    "`BloomEffect` makes bright, light-colored parts glow.",
+    "`BlurEffect` blurs the whole 3D view, like when a menu is open. `DepthOfFieldEffect` blurs only things out of focus.",
+    "`ColorCorrectionEffect` changes `Brightness`, `Contrast`, `Saturation`, and `TintColor`, for example tinting the screen red at low health.",
+    "`SunRaysEffect` adds rays of light around the sun that move with the time of day.",
+    "`ColorGradingEffect` with `TonemapperPreset` set to `Retro` gives a pre-2019 Roblox look; `Default` gives vivid, high-contrast colors."
+  ],
+  "terms": {
+    "post-processing": "Changing the final picture after the 3D scene is drawn, like editing a photo after you take it.",
+    "filter": "An effect laid over the whole screen that changes how everything looks.",
+    "Camera": "The object that decides what each player sees. Each player has their own camera.",
+    "bloom": "A glow around bright lights, like squinting at a lamp.",
+    "Gaussian blur": "A smooth, even blur over the whole view.",
+    "depth of field": "Keeping one distance sharp while closer or farther things are blurry, like a phone's portrait mode.",
+    "contrast": "How different darks and lights are. High contrast makes darks darker and brights brighter.",
+    "saturation": "How strong colors are. 0 change is normal; lower looks washed out; higher looks extra colorful.",
+    "tint": "A color laid over the screen. A red tint makes everything look reddish.",
+    "tone mapper": "The step that turns the game's light values into colors your screen can show.",
+    "rendering quality": "How detailed the graphics are. Some effects only show at higher quality."
+  },
+  "example": {
+    "title": "Red screen when health is low",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal player = Players.LocalPlayer\nlocal camera = Workspace.CurrentCamera\n\n-- This effect is in the Camera, so only this player sees it\nlocal lowHealthTint = Instance.new(\"ColorCorrectionEffect\")\nlowHealthTint.TintColor = Color3.fromRGB(255, 120, 120)\nlowHealthTint.Saturation = -0.3\nlowHealthTint.Enabled = false\nlowHealthTint.Parent = camera\n\nlocal function onCharacterAdded(character)\n\tlocal humanoid = character:WaitForChild(\"Humanoid\")\n\tlowHealthTint.Enabled = false\n\thumanoid.HealthChanged:Connect(function(health)\n\t\t-- Turn the tint on below 30 percent health\n\t\tlowHealthTint.Enabled = health < humanoid.MaxHealth * 0.3\n\tend)\nend\n\nif player.Character then\n\tonCharacterAdded(player.Character)\nend\nplayer.CharacterAdded:Connect(onCharacterAdded)",
+    "explain": [
+      "The LocalScript creates a `ColorCorrectionEffect` and puts it in this player's camera.",
+      "`TintColor` makes the screen reddish and the negative `Saturation` makes colors a bit duller.",
+      "It starts turned off with `Enabled = false`.",
+      "Whenever health changes, the tint turns on if health is under 30 percent of max health, and off otherwise.",
+      "It reconnects each time the character respawns."
+    ]
+  },
+  "watchOut": [
+    "Putting a personal effect like a menu blur in Lighting. Everyone would see it; use the player's Camera.",
+    "Thinking an effect is broken in Studio. Check that Editor Quality Level is set high.",
+    "Overdoing bloom or blur. Too much makes the game hard to see; use small values."
+  ]
+}

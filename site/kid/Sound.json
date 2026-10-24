@@ -1,0 +1,220 @@
+{
+  "name": "Sound",
+  "simple": "A Sound object plays audio, like music, a jump noise or an explosion. You set its SoundId to choose which audio file, then call `:Play()`. If you put it inside a part, the sound comes FROM that part and gets quieter as you walk away. If you put it somewhere else (like Workspace or SoundService), everyone hears it at the same volume everywhere.",
+  "analogy": "A Sound is like a speaker you can place in the world. Glue it to a part and it is a speaker on that part: louder up close, quieter far away. Leave it unattached and it is like the music playing in your headphones: the same everywhere.",
+  "whenToUse": [
+    "Play background music (put it in Workspace or SoundService and set `Looped = true`)",
+    "Play a sound effect from an object, like a ticking clock or a crackling fire (put it inside the part)",
+    "Make a noise when something happens, like collecting a coin",
+    "Change how fast, loud or long a sound plays"
+  ],
+  "where": "Server and client. Create it with Instance.new(\"Sound\") or add one in the Explorer. A sound started by the server is heard by everyone. A sound started by a LocalScript is only heard by that one player (unless SoundService.RespectFilteringEnabled is turned off).",
+  "terms": {
+    "SoundId": "The ID of the audio file, written like `rbxassetid://1234567890`. You find audio IDs in the Creator Store or your own uploads.",
+    "asset": "A file uploaded to Roblox, like an audio clip, image or model. Each has a number ID.",
+    "global sound": "A sound NOT inside a part or attachment. It plays at the same volume for the player wherever they are.",
+    "3D sound (positional sound)": "A sound inside a part or attachment. It comes from that spot, so it is louder when you are close and comes from the left or right depending on where it is.",
+    "listener": "The \"ears\" in the game. By default this is the camera, so sounds are as loud as they would be at the camera's spot.",
+    "roll off / attenuate": "When a 3D sound gets quieter as you move away from it.",
+    "stud": "Roblox's unit of length. A default character is about 5 studs tall.",
+    "Doppler effect": "When a moving sound changes pitch, like a race car sounding higher as it zooms toward you and lower as it zooms away.",
+    "pitch": "How high or low a sound is. A mouse squeak is high pitch; a lion roar is low pitch.",
+    "NumberRange": "Two numbers, a Min and a Max, like `NumberRange.new(2, 5)` meaning from 2 to 5.",
+    "SoundGroup": "A folder-like group of sounds that share a volume and effects. Turn down the \"Music\" group and every song in it gets quieter.",
+    "replicate": "To be copied automatically from the server to every player's device."
+  },
+  "examples": [
+    {
+      "title": "Background music that loops",
+      "place": "Script in ServerScriptService",
+      "code": "local SoundService = game:GetService(\"SoundService\")\n\nlocal music = Instance.new(\"Sound\")\nmusic.SoundId = \"rbxassetid://1234567890\" -- replace with your music's ID\nmusic.Looped = true   -- start again when it ends\nmusic.Volume = 0.3    -- 0 is silent, 0.5 is the default, 10 is the max\nmusic.Parent = SoundService -- not in a part, so everyone hears it everywhere\nmusic:Play()",
+      "explain": [
+        "We make a new Sound and pick which audio with `SoundId`.",
+        "`Looped = true` makes it repeat forever.",
+        "Because it is not inside a part, it is a global sound: same volume wherever the player is.",
+        "Because a server Script played it, every player hears it."
+      ]
+    },
+    {
+      "title": "A beep that comes from a part",
+      "place": "Script inside a Part (in Workspace)",
+      "code": "local part = script.Parent\n\nlocal beep = Instance.new(\"Sound\")\nbeep.SoundId = \"rbxassetid://9120386436\"  -- a horn sound\nbeep.RollOffMaxDistance = 60  -- can't be heard more than 60 studs away\nbeep.Parent = part            -- inside the part: it comes from the part\n\nwhile true do\n    beep:Play()\n    beep.Ended:Wait() -- wait until it finishes\n    task.wait(2)       -- then 2 seconds of quiet\nend",
+      "explain": [
+        "Putting the Sound inside a part makes it a 3D sound: walk closer and it gets louder.",
+        "`RollOffMaxDistance = 60` means players more than 60 studs away hear nothing.",
+        "`beep.Ended:Wait()` pauses the loop until the sound has finished playing."
+      ]
+    },
+    {
+      "title": "Play a coin sound only for the player who touched it",
+      "place": "LocalScript in StarterPlayerScripts (needs a Part named Coin with a Sound named Ding inside it)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal SoundService = game:GetService(\"SoundService\")\n\nlocal player = Players.LocalPlayer\nlocal coin = workspace:WaitForChild(\"Coin\")\nlocal ding = coin:WaitForChild(\"Ding\")\n\ncoin.Touched:Connect(function(otherPart)\n    -- only react when MY character touches it\n    if otherPart.Parent == player.Character then\n        SoundService:PlayLocalSound(ding) -- only I hear it\n    end\nend)",
+      "explain": [
+        "This runs in a LocalScript, so each player has their own copy.",
+        "We check that the part that touched the coin belongs to this player's character.",
+        "`PlayLocalSound` plays a copy of the sound that only this player hears."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A sound will not play until it has loaded. For important sounds, check `IsLoaded` or wait for `Loaded` first.",
+    "A sound inside a part is quieter the further away you are. If you cannot hear it, check `RollOffMaxDistance` and where your camera is.",
+    "`Ended` does not fire for looped sounds, and it does not fire when you call `Stop()`; use `Stopped` for that.",
+    "`Stop()` rewinds to the start; `Pause()` keeps your place so `Resume()` continues.",
+    "Sounds started by a LocalScript are only heard by that player.",
+    "Use `PlaybackSpeed` (not the old `Pitch`), and `RollOffMinDistance`/`RollOffMaxDistance` (not `MinDistance`/`MaxDistance`/`EmitterSize`)."
+  ],
+  "members": {
+    "Sound.AudioContent": {
+      "simple": "The audio file this Sound plays, using the newer Content type. It does the same job as `SoundId`.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.AudioContent = Content.fromUri(\"rbxassetid://1234567890\") -- your audio ID"
+    },
+    "Sound.EmitterSize": {
+      "simple": "Old — use `Sound.RollOffMinDistance` and `Sound.RollOffMaxDistance` instead."
+    },
+    "Sound.IsLoaded": {
+      "simple": "True when the audio has finished downloading and is ready to play. Read-only.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nif not sound.IsLoaded then\n    sound.Loaded:Wait() -- wait for it to finish loading\nend\nsound:Play()"
+    },
+    "Sound.IsPaused": {
+      "simple": "True when the sound is not playing (paused, stopped, or never played). Read-only; use `Pause()` or `Stop()` to change it.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nprint(sound.IsPaused) -- true before it has played"
+    },
+    "Sound.IsPlaying": {
+      "simple": "True while the sound is playing. Read-only; use `Play()` to start it.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound:Play()\nprint(sound.IsPlaying) -- true"
+    },
+    "Sound.isPlaying": {
+      "simple": "Old — use `Sound.IsPlaying` instead (with a capital I)."
+    },
+    "Sound.Looped": {
+      "simple": "If true, the sound starts again from the beginning every time it ends. Great for music and background noise.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.Looped = true\nsound:Play() -- plays over and over"
+    },
+    "Sound.LoopRegion": {
+      "simple": "Which part of the sound to repeat when looping, as a range of seconds (Min to Max). Needs `PlaybackRegionsEnabled` set to true. For example, (2, 6) loops just the bit from second 2 to second 6.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.PlaybackRegionsEnabled = true\nsound.Looped = true\nsound.LoopRegion = NumberRange.new(2, 6) -- repeat seconds 2 to 6\nsound:Play()"
+    },
+    "Sound.MaxDistance": {
+      "simple": "Old — use `Sound.RollOffMaxDistance` instead."
+    },
+    "Sound.MinDistance": {
+      "simple": "Old — use `Sound.RollOffMinDistance` instead."
+    },
+    "Sound.Pitch": {
+      "simple": "Old — use `Sound.PlaybackSpeed` instead."
+    },
+    "Sound.PlaybackLoudness": {
+      "simple": "How loud the sound is RIGHT NOW, from 0 (silent) to 1000. It changes constantly as the music plays, so you can make lights or bars bounce to the beat. Use it in a LocalScript.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\n-- in a LocalScript: make a part grow with the music\nlocal RunService = game:GetService(\"RunService\")\nlocal part = workspace:WaitForChild(\"Speaker\")\nRunService.PreRender:Connect(function()\n    local size = 2 + sound.PlaybackLoudness / 100\n    part.Size = Vector3.new(size, size, size)\nend)"
+    },
+    "Sound.PlaybackRegion": {
+      "simple": "Which part of the sound to play, as a range of seconds. For example (1, 4) starts at second 1 and stops at second 4. Needs `PlaybackRegionsEnabled` set to true.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.PlaybackRegionsEnabled = true\nsound.PlaybackRegion = NumberRange.new(1, 4) -- only play seconds 1 to 4\nsound:Play()"
+    },
+    "Sound.PlaybackRegionsEnabled": {
+      "simple": "Turn this on to use `PlaybackRegion` and `LoopRegion`, which let you play or loop only part of a sound.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.PlaybackRegionsEnabled = true"
+    },
+    "Sound.PlaybackSpeed": {
+      "simple": "How fast the sound plays. 1 is normal. 2 is twice as fast AND higher pitched (like a chipmunk). 0.5 is half speed and lower pitched.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.PlaybackSpeed = 1.5 -- faster and squeakier\nsound:Play()",
+      "gotcha": "Changing speed also changes pitch and how long the sound lasts."
+    },
+    "Sound.Playing": {
+      "simple": "Whether the sound is playing. You can also set it: true starts the sound playing, false stops it playing.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.Playing = true -- start (from where it was)\ntask.wait(2)\nsound.Playing = false -- pause"
+    },
+    "Sound.PlayOnRemove": {
+      "simple": "If true, the sound plays when it is removed from the game, like when it (or the part it is in) is destroyed. Perfect for explosion or pop sounds on things that disappear.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.PlayOnRemove = true\nsound.Parent:Destroy() -- the part disappears and the sound plays"
+    },
+    "Sound.RollOffMaxDistance": {
+      "simple": "For sounds inside a part or attachment: the furthest away (in studs) a player can be and still hear it.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.RollOffMaxDistance = 50 -- silent beyond 50 studs"
+    },
+    "Sound.RollOffMinDistance": {
+      "simple": "For sounds inside a part or attachment: within this many studs the sound is at full volume. Further away than this, it starts getting quieter.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.RollOffMinDistance = 10 -- full volume within 10 studs"
+    },
+    "Sound.RollOffMode": {
+      "simple": "How a 3D sound fades as you walk away: `Inverse` (fades fast at first, like real life), `Linear` (fades evenly until max distance), `LinearSquare`, or `InverseTapered` (a mix of the two).",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.RollOffMode = Enum.RollOffMode.Linear"
+    },
+    "Sound.SoundGroup": {
+      "simple": "Which SoundGroup this sound belongs to. The group's volume and effects also apply to this sound, which is handy for a \"Music volume\" setting.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nlocal musicGroup = game:GetService(\"SoundService\"):WaitForChild(\"Music\") -- a SoundGroup\nsound.SoundGroup = musicGroup"
+    },
+    "Sound.SoundId": {
+      "simple": "The ID of the audio file to play, written like `rbxassetid://1234567890`.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.SoundId = \"rbxassetid://9120386436\" -- a car horn\nsound:Play()"
+    },
+    "Sound.TimeLength": {
+      "simple": "How long the sound is, in seconds. It is 0 until the sound has loaded. Read-only.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nif not sound.IsLoaded then sound.Loaded:Wait() end\nprint(\"This sound lasts\", sound.TimeLength, \"seconds\")"
+    },
+    "Sound.TimePosition": {
+      "simple": "Where in the sound you are right now, in seconds, like the slider on a music player. You can set it to jump ahead or back.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.TimePosition = 30 -- skip to 30 seconds in\nsound:Play()"
+    },
+    "Sound.Volume": {
+      "simple": "How loud the sound is, from 0 (silent) to 10. The default is 0.5.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.Volume = 1 -- twice as loud as the default"
+    },
+    "Sound:Pause": {
+      "simple": "Pauses the sound and remembers where it stopped, so `Resume()` continues from that spot.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound:Pause()\ntask.wait(3)\nsound:Resume() -- carries on where it left off"
+    },
+    "Sound:pause": {
+      "simple": "Old — use `Sound:Pause` instead (with a capital P)."
+    },
+    "Sound:Play": {
+      "simple": "Starts playing the sound. It starts from the time a script last set in `TimePosition`, or from the beginning if none was set.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound:Play()",
+      "gotcha": "If the sound has not loaded yet, it may start late or not be heard. Check `IsLoaded`."
+    },
+    "Sound:play": {
+      "simple": "Old — use `Sound:Play` instead (with a capital P)."
+    },
+    "Sound:Resume": {
+      "simple": "Continues a paused sound from where it stopped.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound:Resume()"
+    },
+    "Sound:Stop": {
+      "simple": "Stops the sound and rewinds it to the beginning (TimePosition goes back to 0).",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound:Stop()"
+    },
+    "Sound:stop": {
+      "simple": "Old — use `Sound:Stop` instead (with a capital S)."
+    },
+    "Sound.DidLoop": {
+      "simple": "Fires every time a looped sound reaches the end and starts again. Tells you the SoundId and how many times it has looped.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.DidLoop:Connect(function(soundId, timesLooped)\n    print(\"Looped\", timesLooped, \"times\")\nend)"
+    },
+    "Sound.Ended": {
+      "simple": "Fires when the sound finishes playing all the way to the end. Often used to delete a sound once it is done.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound:Play()\nsound.Ended:Wait()\nsound:Destroy() -- clean up when done",
+      "gotcha": "Does not fire for looped sounds, or when you call `Stop()` early."
+    },
+    "Sound.Loaded": {
+      "simple": "Fires when the sound has finished loading. Check `IsLoaded` first, because if it already loaded, this event will not fire again.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nif not sound.IsLoaded then\n    sound.Loaded:Wait()\nend\nprint(\"Ready!\")"
+    },
+    "Sound.Paused": {
+      "simple": "Fires when the sound is paused with `Pause()`.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.Paused:Connect(function(soundId)\n    print(\"Paused\")\nend)"
+    },
+    "Sound.Played": {
+      "simple": "Fires when the sound is started with `Play()`.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.Played:Connect(function(soundId)\n    print(\"Started playing\")\nend)"
+    },
+    "Sound.Resumed": {
+      "simple": "Fires when the sound is continued with `Resume()`.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.Resumed:Connect(function(soundId)\n    print(\"Resumed\")\nend)"
+    },
+    "Sound.Stopped": {
+      "simple": "Fires when the sound is stopped with `Stop()`. Destroying a playing sound does not fire it.",
+      "example": "local sound = workspace:WaitForChild(\"MySound\") -- a Sound in Workspace\nsound.Stopped:Connect(function(soundId)\n    print(\"Stopped\")\nend)"
+    }
+  }
+}

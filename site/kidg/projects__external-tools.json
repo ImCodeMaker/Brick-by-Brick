@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/projects/external-tools.md",
+  "simple": "Normally everything in your game lives inside Roblox Studio and the Roblox cloud. This page is about tools some bigger teams use to keep their game as normal files on their own computer instead. A tool called Rojo copies those files into Studio automatically every time you save. This is an advanced setup, so most beginners can skip it, but it helps you understand how pro studios work.",
+  "analogy": "It is like writing your school essay in your favorite notebook app and having it copy itself into the class's shared folder every time you hit save, so you never have to copy and paste by hand.",
+  "keyPoints": [
+    "Using outside tools is really a syncing problem: your game has to exist as files on disk, and changes to those files have to flow back into Studio.",
+    "Rojo runs a small server on your computer and talks to a Rojo plugin in Studio, so saving a file in your text editor updates the game in Studio.",
+    "Rokit is a tool manager. You list tools and exact versions in a `rokit.toml` file, run `rokit install`, and everyone on the team gets the same versions.",
+    "The basic Rojo steps are: install the plugin, run `rojo init` to make a project, `rojo build` to make a `.rbxl` file, then `rojo serve` and connect from the plugin in Studio.",
+    "Wally is a package manager. You list community packages in `wally.toml`, run `wally install`, and add the `Packages` folder to Rojo so scripts can `require` them.",
+    "Keeping your game as plain text files lets you use version control like Git and sites like GitHub to track every change and review code.",
+    "Extra helpers include a linter (selene), a code formatter (StyLua) and a language server (Luau Language Server) for autocomplete.",
+    "None of this locks you in. You can stop using these tools at any time and go back to editing only in Studio."
+  ],
+  "terms": {
+    "third-party tool": "A program made by someone other than Roblox. Roblox does not maintain these, so they can change or stop working.",
+    "sync / syncing": "Keeping two copies of the same thing matching. If you change line 5 of a script file on your computer, syncing makes line 5 change in Studio too.",
+    "file system": "The folders and files on your own computer, like `Documents/my-game/src/Main.server.luau`.",
+    "cloud-first": "Roblox's normal way: your place is saved on Roblox's servers, not as separate files on your computer.",
+    "server (Rojo server)": "Here it means a small program running on your own computer that watches your files and sends changes to the Rojo plugin in Studio. It is not a Roblox game server.",
+    "plugin": "An add-on that gives Roblox Studio extra buttons and features.",
+    "toolchain manager": "A program that installs the right versions of your other tools. Rokit is one.",
+    "version": "A numbered release of a tool, like `7.6.1`. Bigger numbers are usually newer.",
+    "`.toml` file": "A simple settings text file made of lines like `rojo = \"rojo-rbx/rojo@7.6.1\"`.",
+    "package / package manager": "A package is ready-made code someone else wrote that you can reuse. A package manager (like Wally) downloads the exact packages and versions you list.",
+    "dependency": "A package your project needs in order to work.",
+    "`require`": "The Luau function that loads a ModuleScript so you can use the code inside it.",
+    "version control": "A system (like Git) that saves a history of every change, so you can see who changed what and go back to an older version.",
+    "repository": "A project folder tracked by version control, often stored online on a site like GitHub.",
+    "linter": "A tool that reads your code and warns you about likely mistakes, like a spell checker for code.",
+    "formatter": "A tool that tidies your code's spacing and layout automatically.",
+    "language server": "A helper that powers autocomplete and error checking inside a text editor.",
+    "conflict": "When two people changed the same part of the same file and the tools cannot tell whose change to keep."
+  },
+  "watchOut": [
+    "Do not feel you need this to make a good game. Studio alone is enough for most creators. If you only want an outside text editor, the page suggests Script Sync instead.",
+    "Different teammates running different Rojo versions causes strange problems. Pin exact versions in `rokit.toml` so everyone matches.",
+    "After `wally install`, packages are only on your computer. You must add the `Packages` folder in `default.project.json` or your scripts will not find them in Studio.",
+    "Rojo has its own rules for file names and folders. Read the Rojo docs before moving files around, or scripts may end up as the wrong type or in the wrong place."
+  ]
+}

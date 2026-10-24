@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/effects/beams.md",
+  "simple": "A `Beam` draws a picture stretched between two attachments, like a laser, rope of light, waterfall, or force field. You can color it, fade it, make it wider at one end, and even bend it into a curve. Beams are one of the easiest ways to make cool sci-fi or magic effects. The two attachments decide where it starts and ends.",
+  "analogy": "It is like a ribbon tied between two hooks: move the hooks and the ribbon moves with them, and you can choose the ribbon's pattern, color, and how wide each end is.",
+  "keyPoints": [
+    "A beam needs two attachments: `Attachment0` is the start and `Attachment1` is the end. Remove one and the beam disappears.",
+    "To build one: put an attachment in each of two parts, insert a Beam, then set its `Attachment0` and `Attachment1` properties.",
+    "`Texture` sets the picture, `Color` tints it (one color or a gradient), and `Transparency` can fade it along its length.",
+    "`Width0` and `Width1` set how wide each end is in studs. Values below 0 are reset to 0.",
+    "`TextureLength` and `TextureMode` decide how often the texture repeats along the beam.",
+    "`FaceCamera = true` keeps the flat beam turned toward the camera so it does not vanish when seen from the side.",
+    "Beams can curve. `CurveSize0` and `CurveSize1` bend it, using each attachment's facing direction.",
+    "Turn on Show Constraint Details in the View menu to see attachments while building."
+  ],
+  "terms": {
+    "attachment": "An invisible point in a part that marks where something connects. Beams start at one attachment and end at another.",
+    "texture": "The image drawn along the beam, like a striped laser pattern.",
+    "ColorSequence": "A color gradient. A beam can go from blue at the start to purple at the end.",
+    "NumberSequence": "A list of numbers that change along the beam, used to fade transparency from 0 at one end to 1 at the other.",
+    "opaque / transparent": "Opaque (0) means you cannot see through it; fully transparent (1) means invisible.",
+    "Width0 / Width1": "How wide the beam is at the start and at the end. Width0 = 0.5 and Width1 = 3 makes it flare out like a cone.",
+    "TextureMode": "How the image repeats. With Wrap or Static, a 20-stud beam with TextureLength 4 repeats the image 5 times. With Stretch, it repeats exactly TextureLength times.",
+    "segments": "The little pieces a beam is split into so it can bend smoothly. More segments make a smoother curve.",
+    "Bezier curve": "A smooth curve shaped by control points. The beam bends toward points that sit `CurveSize0` studs out from the start and `CurveSize1` studs out from the end.",
+    "2D projection": "Something flat drawn in a 3D world. Seen exactly edge-on, it can look invisible."
+  },
+  "example": {
+    "title": "Draw a glowing laser between two parts",
+    "place": "Script in ServerScriptService (with two parts named LaserStart and LaserEnd in Workspace)",
+    "code": "local startPart = workspace:WaitForChild(\"LaserStart\")\nlocal endPart = workspace:WaitForChild(\"LaserEnd\")\n\nlocal attach0 = Instance.new(\"Attachment\")\nattach0.Parent = startPart\nlocal attach1 = Instance.new(\"Attachment\")\nattach1.Parent = endPart\n\nlocal beam = Instance.new(\"Beam\")\nbeam.Attachment0 = attach0\nbeam.Attachment1 = attach1\nbeam.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0))\nbeam.Width0 = 0.3\nbeam.Width1 = 0.3\nbeam.FaceCamera = true -- always visible from any angle\nbeam.LightEmission = 1 -- glow\nbeam.Parent = startPart",
+    "explain": [
+      "We find the two parts and add an attachment to each one.",
+      "We create a `Beam` and tell it which attachment is the start and which is the end.",
+      "We make it red and 0.3 studs wide at both ends.",
+      "`FaceCamera` keeps it from disappearing when viewed from the side.",
+      "Parenting it into the game makes it show up. Move either part and the beam follows."
+    ]
+  },
+  "watchOut": [
+    "Setting both attachments to the same attachment draws nothing. They must be two different attachments.",
+    "If your beam vanishes at certain angles, turn on `FaceCamera`.",
+    "A beam that is unexpectedly curved probably has nonzero `CurveSize0` or `CurveSize1`. Set them to 0 for a straight line.",
+    "A beam is just a picture. It does not block or hurt players unless you script that."
+  ]
+}

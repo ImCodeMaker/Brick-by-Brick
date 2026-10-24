@@ -1,0 +1,29 @@
+{
+  "path": "content/en-us/creation.md",
+  "simple": "This page is a map of everything you can learn about making things on Roblox. It does not teach one skill. Instead, it points you to the guides for each big topic: the platform and its players, how games work inside, Roblox Studio, getting players and earning Robux, and making avatar items. If you are brand new, start here to see the whole picture before you dive into one area.",
+  "analogy": "It is like the map at the entrance of a theme park. It does not give you a ride, but it shows you where every ride is so you can pick where to go first.",
+  "keyPoints": [
+    "Roblox is free for both players and creators, and its players behave differently from people on other social apps, so it helps to learn about them first.",
+    "Games (also called experiences) are the 3D worlds you build and publish on Roblox.",
+    "Under the hood, a game is a project made of places, assets, and settings, and each place is described by something called the data model.",
+    "Games run on Roblox's servers in the cloud and on each player's device, which is called the client-server runtime.",
+    "Roblox Studio is the free all-in-one program you use to build, script, test, and publish games, and also to make characters and accessories.",
+    "There are guides on promoting your game so players find it, and on ways to earn money from it.",
+    "You can make avatar items in tools like Blender or Maya and sell them on the Marketplace."
+  ],
+  "terms": {
+    "experience": "Another name Roblox uses for a game. Both words mean the same thing.",
+    "platform": "The whole Roblox system: the app, the website, the servers, and all the people using it.",
+    "IDE": "Short for Integrated Development Environment. It is one program that has everything you need to make something, like building tools, a code editor, and a test button. Roblox Studio is an IDE.",
+    "data model": "The tree of objects (parts, scripts, folders, and so on) that describes everything in a place. You see it in the Explorer window in Studio.",
+    "client-server runtime": "How a game actually runs: a Roblox computer in the cloud (the server) runs the official game, and each player's device (a client) shows it and sends their actions.",
+    "3D workspace": "The part of your game that holds all the things players can see in the 3D world, like parts and models.",
+    "monetization": "Ways to earn money from your game, such as selling passes or items for Robux.",
+    "Marketplace": "The Roblox shop where people buy avatar items like hats, clothes, and accessories.",
+    "assets": "Files your game uses, such as images, sounds, and 3D meshes, stored online by Roblox."
+  },
+  "watchOut": [
+    "Trying to read everything at once. Pick one topic, like Roblox Studio or the first tutorial, and come back to the map later.",
+    "Skipping the client-server and data model guides. They explain why scripts sometimes work in one place but not another, which saves lots of confusion later."
+  ]
+}

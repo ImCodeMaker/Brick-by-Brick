@@ -1,0 +1,101 @@
+{
+  "name": "SurfaceGui",
+  "simple": "A SurfaceGui sticks UI flat onto one face (side) of a part, like a poster on a wall or a screen on a computer model. Put TextLabels, ImageLabels and even buttons inside it. Pick which side of the part with its Face property.",
+  "analogy": "A SurfaceGui is like a sticker or a TV screen glued onto one side of a box. Walk around the box and you see it from an angle, just like a real sticker.",
+  "whenToUse": [
+    "Signs, posters and scoreboards on walls",
+    "In-world computer screens or shop terminals with clickable buttons",
+    "Labels painted on objects like a 'DANGER' sign on a door"
+  ],
+  "where": "Parent it to a Part in Workspace and set Face, or put it in StarterGui and set Adornee to the part (needed for clickable buttons). The part's CanQuery must be true for buttons to get clicks. Set it up in Studio or with a Script/LocalScript.",
+  "terms": {
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts, because each player has their own copy of the UI.",
+    "client": "The player's own device: their computer, phone, tablet or console.",
+    "server": "Roblox's computer that runs the game for everyone at once.",
+    "StarterGui": "A folder in Explorer. UI you put here is copied to every player when they spawn.",
+    "PlayerGui": "Each player's own personal UI folder (inside their Player object). Only UI in here actually shows on their screen.",
+    "descendant": "Anything inside an object: children, grandchildren, and so on.",
+    "Face": "Which side of the part the UI goes on: Front, Back, Top, Bottom, Left or Right.",
+    "Adornee": "The part the SurfaceGui is shown on. It overrides the parent.",
+    "stud": "Roblox's unit of distance in the world.",
+    "pixels per stud": "How many UI pixels fit into one stud. 50 pixels per stud on a 4-stud-wide face gives a canvas 200 pixels wide.",
+    "canvas": "The flat drawing area of the SurfaceGui that covers the part's face.",
+    "occluded": "Hidden behind something else.",
+    "CanQuery": "A part setting. When true, mouse clicks and raycasts can detect the part.",
+    "Tool": "An item a character holds, like a sword."
+  },
+  "examples": [
+    {
+      "title": "Put a sign on a wall",
+      "place": "Script in ServerScriptService (with a Part named \"Wall\" in Workspace)",
+      "code": "local wall = workspace:WaitForChild(\"Wall\")\n\nlocal surfaceGui = Instance.new(\"SurfaceGui\")\nsurfaceGui.Face = Enum.NormalId.Front -- show on the front side\nsurfaceGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud\nsurfaceGui.PixelsPerStud = 50\nsurfaceGui.Parent = wall\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.fromScale(1, 1) -- cover the whole face\nlabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)\nlabel.TextColor3 = Color3.fromRGB(255, 255, 0)\nlabel.TextScaled = true\nlabel.Text = \"Welcome to the Obby!\"\nlabel.Parent = surfaceGui",
+      "explain": [
+        "Parenting the SurfaceGui to the wall and setting Face puts the UI on the wall's front side.",
+        "With PixelsPerStud = 50, a wall 10 studs wide and 5 studs tall becomes a 500 x 250 pixel canvas.",
+        "Size (1, 1) with Scale fills the whole face, whatever size the wall is. Using Scale is the best habit on SurfaceGuis.",
+        "Not seeing it? Right-click the part and choose Show Orientation Indicator to find which side is Front."
+      ]
+    },
+    {
+      "title": "A clickable button on a part",
+      "place": "LocalScript in StarterPlayerScripts (with a Part named \"Terminal\" in Workspace)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal surfaceGui = Instance.new(\"SurfaceGui\")\nsurfaceGui.Adornee = workspace:WaitForChild(\"Terminal\") -- show on this part\nsurfaceGui.Face = Enum.NormalId.Front\nsurfaceGui.Parent = playerGui -- MUST be in PlayerGui for buttons to work\n\nlocal button = Instance.new(\"TextButton\")\nbutton.Size = UDim2.fromScale(0.6, 0.3)\nbutton.AnchorPoint = Vector2.new(0.5, 0.5)\nbutton.Position = UDim2.fromScale(0.5, 0.5) -- centered on the face\nbutton.Text = \"Press me\"\nbutton.TextScaled = true\nbutton.Parent = surfaceGui\n\nbutton.Activated:Connect(function()\n\tbutton.Text = \"Thanks!\"\nend)",
+      "explain": [
+        "Buttons on a SurfaceGui only receive clicks when the SurfaceGui is in the player's PlayerGui.",
+        "Adornee tells it which part to appear on, even though it lives in PlayerGui.",
+        "AnchorPoint (0.5, 0.5) plus Position (0.5, 0.5) centers the button on the face.",
+        "The Terminal part needs CanQuery = true (the default) for the click to register."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Wrong side? The Face property picks the side. Use Show Orientation Indicator in Studio to see which side is Front.",
+    "Buttons don't work unless the SurfaceGui is in PlayerGui (use StarterGui + Adornee) and the part has CanQuery on.",
+    "Use Scale for Size and Position of things inside, since the face size depends on the part size and PixelsPerStud.",
+    "Text looks blurry? Raise PixelsPerStud, but very high values on huge parts can slow the game down."
+  ],
+  "members": {
+    "SurfaceGui.AlwaysOnTop": {
+      "simple": "When true, the SurfaceGui is drawn on top of everything, so other objects can't hide it, and lighting is ignored. When false (default), it can be hidden behind things like a real sticker.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.AlwaysOnTop = true"
+    },
+    "SurfaceGui.Brightness": {
+      "simple": "How brightly the UI glows when LightInfluence is 0. Default 1, up to 1000. Raise it to make an in-game TV glow in a dark room.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.LightInfluence = 0\nsurfaceGui.Brightness = 10",
+      "gotcha": "Does nothing if LightInfluence is 1 or AlwaysOnTop is true."
+    },
+    "SurfaceGui.CanvasSize": {
+      "simple": "The size of the SurfaceGui's pretend 'screen' in pixels, used when SizingMode is FixedSize. With CanvasSize (800, 600), the face acts like an 800x600 screen no matter how big the part is.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.SizingMode = Enum.SurfaceGuiSizingMode.FixedSize\nsurfaceGui.CanvasSize = Vector2.new(800, 600)"
+    },
+    "SurfaceGui.ClipsDescendants": {
+      "simple": "When true (default), UI inside that sticks out past the edge of the face is cut off. UI completely off the face is never drawn.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.ClipsDescendants = true"
+    },
+    "SurfaceGui.LightInfluence": {
+      "simple": "How much the world's lighting affects the SurfaceGui, from 0 to 1. 1 = fully affected (dark in shadow), 0 = not affected (always bright like a glowing screen).",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.LightInfluence = 0 -- glowing screen"
+    },
+    "SurfaceGui.MaxDistance": {
+      "simple": "How far away (in studs) the camera can be before the SurfaceGui stops showing. 0 means no limit. The default 1000 works for most games.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.MaxDistance = 200"
+    },
+    "SurfaceGui.PixelsPerStud": {
+      "simple": "How many UI pixels fit in one stud of the part's face, when SizingMode is PixelsPerStud (the default). A 4-stud-wide face at 50 pixels per stud is 200 pixels wide. Higher numbers make Offset-sized things look smaller and sharper.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.PixelsPerStud = 100 -- sharper text",
+      "gotcha": "Very high values on big parts can hurt performance."
+    },
+    "SurfaceGui.SizingMode": {
+      "simple": "How the canvas size is picked. PixelsPerStud (default): bigger part = bigger canvas. FixedSize: the canvas is always CanvasSize, stretched over the face.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud"
+    },
+    "SurfaceGui.ToolPunchThroughDistance": {
+      "simple": "If the character is closer than this many studs to the SurfaceGui, left-clicking works on the SurfaceGui instead of swinging or using the held Tool.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.ToolPunchThroughDistance = 10 -- within 10 studs, clicks go to the screen"
+    },
+    "SurfaceGui.ZOffset": {
+      "simple": "Decides which SurfaceGui is drawn on top when several are on the same face. Higher numbers are on top. It doesn't actually move it off the surface.",
+      "example": "local surfaceGui = script.Parent\nsurfaceGui.ZOffset = 1 -- draw above another SurfaceGui on this face"
+    }
+  }
+}

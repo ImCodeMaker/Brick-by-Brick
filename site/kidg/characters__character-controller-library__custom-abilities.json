@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/characters/character-controller-library/custom-abilities.md",
+  "simple": "This page walks you through making your own move for the Character Controller Library (CCL): a dash that shoots the character forward, then makes them wait 1 second before dashing again. You write the ability in a ModuleScript, then register it for every character from a server Script. Once you understand this one, you can build wall jumps, aiming, and other special moves the same way.",
+  "analogy": "Making an ability is like writing a recipe card (the ModuleScript) and then handing a copy to every cook in the kitchen (registering it on each character). The card says when to start, how long to cook, and how long to let the pan cool.",
+  "keyPoints": [
+    "Turn on CCL first in Beta Features and Avatar Settings.",
+    "Put a ModuleScript named `Dash` in a `CustomAbilities` folder in `ReplicatedStorage`, so the server and players can both use it.",
+    "The `AbilityDefinition` table sets `Name`, `Labels`, `StartsWhen`, `RunsWhile`, `Input`, and `TimedLabels`.",
+    "The dash loop: start on the ground when not cooling down, run while the 0.2-second `DashWindow` label lasts, then add a 1-second `DashCooldown` label.",
+    "`Input = { InputName = \"Dash\", Mode = \"Press\", ActionSlot = 5 }` starts the dash on a press of slot 5, which is the left mouse button or gamepad R2.",
+    "The `OnStart` callback does the actual push with `rootPart:ApplyImpulse()`, in the direction the character faces.",
+    "Register abilities on the server with `AvatarAbilities.addAbilityForCharacter(character, abilityModule)`. Pass the module itself, do not `require` it.",
+    "Callbacks run on both the player's device and the server, so keep them deterministic."
+  ],
+  "terms": {
+    "AbilityDefinition": "The table that describes one ability: its name, when it starts, what stops it, and its code.",
+    "ModuleScript": "A script that returns a value, like a table, so other scripts can use it.",
+    "register": "Add an ability to a character so the CCL starts checking and running it.",
+    "TimedLabels": "Labels that turn on for a set number of seconds and then turn off by themselves, like `DashWindow = 0.2`.",
+    "cooldown": "A waiting time before you can use the ability again, here 1 second.",
+    "impulse": "An instant shove. `ApplyImpulse` pushes a part once, like kicking a ball.",
+    "RootLookVector": "The direction the character is facing, as a `Vector3` of length 1.",
+    "AssemblyMass": "The total mass of all parts stuck together with the root part. Multiplying by it makes the push feel the same for heavy and light characters.",
+    "AbilityManagerActor": "An object inside the character that runs the ability system. The register script waits for it before adding abilities.",
+    "predicted client simulation": "The player's device guesses the result right away so movement feels instant, while the server does the official version.",
+    "deterministic": "Gives the same result every time from the same starting point, so the client's guess and the server agree."
+  },
+  "example": {
+    "title": "Register custom abilities on every character",
+    "place": "Script named RegisterCustomAbilities in ServerScriptService (with the Dash ModuleScript in ReplicatedStorage > CustomAbilities)",
+    "code": "local Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal AvatarAbilities = require(\"@rbx/AvatarAbilities\")\n\n-- List every custom ability module here\nlocal CUSTOM_ABILITIES = {\n\tReplicatedStorage.CustomAbilities.Dash,\n}\n\nlocal function onCharacterAdded(character)\n\t-- Wait for the ability system inside the character\n\tlocal actor = character:WaitForChild(\"AbilityManagerActor\", 10)\n\tif not actor then\n\t\treturn\n\tend\n\twhile not actor:IsDescendantOf(game) do\n\t\tactor.AncestryChanged:Wait()\n\tend\n\n\t-- Add each ability (pass the module, do not require it)\n\tfor _, abilityModule in CUSTOM_ABILITIES do\n\t\tAvatarAbilities.addAbilityForCharacter(character, abilityModule)\n\tend\nend\n\nlocal function onPlayerAdded(player)\n\tplayer.CharacterAdded:Connect(onCharacterAdded)\n\tif player.Character then\n\t\ttask.spawn(onCharacterAdded, player.Character)\n\tend\nend\n\nPlayers.PlayerAdded:Connect(onPlayerAdded)\nfor _, player in Players:GetPlayers() do\n\tonPlayerAdded(player)\nend",
+    "explain": [
+      "`CUSTOM_ABILITIES` lists the ModuleScripts to add. You can add more abilities to this list later.",
+      "When a character spawns, we wait up to 10 seconds for its `AbilityManagerActor`, then make sure it is really in the game.",
+      "`addAbilityForCharacter` gives that character the Dash ability.",
+      "Now pressing the left mouse button (slot 5) on the ground makes the character dash forward, then wait 1 second before dashing again."
+    ]
+  },
+  "watchOut": [
+    "Calling `require()` on the ability module in the register script. Pass the module object itself to `addAbilityForCharacter`.",
+    "Registering abilities from a LocalScript. Registration must happen on the server.",
+    "Adding `task.wait()` inside `OnStart` to time the dash. Callbacks must not yield, so use `TimedLabels` for timing.",
+    "Naming two ModuleScripts or abilities the same. Each needs a unique name."
+  ]
+}

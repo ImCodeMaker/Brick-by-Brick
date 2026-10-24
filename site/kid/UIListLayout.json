@@ -1,0 +1,74 @@
+{
+  "name": "UIListLayout",
+  "simple": "A UIListLayout automatically lines up all the UI objects next to it in a neat row or column, so you don't have to set each one's Position. Drop it inside a Frame, and every other UI object in that Frame gets stacked in order. It can also stretch items to fill space ('flex') and wrap onto new lines.",
+  "analogy": "A UIListLayout is like a teacher saying 'line up!' Everyone in the room (the frame) stands in one neat line, in order, with the same gap between them.",
+  "whenToUse": [
+    "A column of menu buttons (Play, Settings, Quit)",
+    "A row of tabs or icons",
+    "Lists inside a ScrollingFrame, like a shop or leaderboard",
+    "Toolbars where buttons should share space evenly (flex)"
+  ],
+  "where": "Put it inside the container (usually a Frame or ScrollingFrame) whose children you want lined up. It arranges its SIBLINGS. Works the same whether made in Studio or with Instance.new in a LocalScript.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "layout": "Automatic arranging of UI objects so you don't place them by hand.",
+    "FillDirection": "Which way the list goes: Vertical (top to bottom, default) or Horizontal (left to right). It comes from UIGridStyleLayout, the base of UIListLayout.",
+    "SortOrder": "How items are ordered: LayoutOrder (by each item's LayoutOrder number, default) or Name (alphabetical).",
+    "LayoutOrder": "A number on each UI object. With SortOrder LayoutOrder, lower numbers come first.",
+    "padding": "Empty space. In a list, the gap between items.",
+    "flex": "A mode where items stretch or spread out to fill the leftover space in the container.",
+    "cross-direction": "The other direction from the list. For a top-to-bottom list, the cross-direction is left-right.",
+    "wrap": "When items run out of room, continue on a new row or column."
+  },
+  "examples": [
+    {
+      "title": "A neat column of menu buttons",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal menu = Instance.new(\"Frame\")\nmenu.AnchorPoint = Vector2.new(0.5, 0.5)\nmenu.Position = UDim2.fromScale(0.5, 0.5)\nmenu.Size = UDim2.fromOffset(220, 200)\nmenu.BackgroundTransparency = 1\nmenu.Parent = screenGui\n\nlocal layout = Instance.new(\"UIListLayout\")\nlayout.FillDirection = Enum.FillDirection.Vertical\nlayout.SortOrder = Enum.SortOrder.LayoutOrder\nlayout.HorizontalAlignment = Enum.HorizontalAlignment.Center\nlayout.Padding = UDim.new(0, 10) -- 10 pixels between buttons\nlayout.Parent = menu\n\nlocal names = {\"Play\", \"Shop\", \"Settings\"}\nfor i, name in names do\n\tlocal button = Instance.new(\"TextButton\")\n\tbutton.Name = name\n\tbutton.Text = name\n\tbutton.Size = UDim2.fromOffset(200, 50)\n\tbutton.LayoutOrder = i * 100 -- 100, 200, 300\n\tbutton.Parent = menu\nend",
+      "explain": [
+        "The UIListLayout is inside menu, so it arranges menu's other children: the three buttons.",
+        "We never set the buttons' Position. The layout stacks them: first at y = 0, next at 50 + 10 = 60, next at 120.",
+        "LayoutOrder 100, 200, 300 sets the order. Gaps of 100 let you slip a new button in later (like 150).",
+        "Padding UDim.new(0, 10) is a 10-pixel gap. UDim.new(0.05, 0) would be 5% of the menu's height instead."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The layout controls Position, so changing a child's Position does nothing. Change LayoutOrder to reorder.",
+    "Children are sorted by LayoutOrder by default. If they all have the same LayoutOrder (0), they fall back to the order they were added.",
+    "Hidden children (Visible = false) are skipped, and the others close the gap.",
+    "Put the UIListLayout INSIDE the container, as a sibling of the items, not inside one of the items.",
+    "A UIAspectRatioConstraint or UISizeConstraint on an item overrides its size in the layout."
+  ],
+  "members": {
+    "UIListLayout.HorizontalFlex": {
+      "simple": "For a left-to-right list: how leftover sideways space is shared. None (default) = items keep their width. Fill = items stretch to fill the whole width. SpaceBetween = gaps only between items. SpaceAround = equal space on both sides of each item. SpaceEvenly = equal gaps between and around. In a top-to-bottom list, Fill makes every item as wide as the container.",
+      "example": "local layout = script.Parent -- a UIListLayout\nlayout.FillDirection = Enum.FillDirection.Horizontal\nlayout.HorizontalFlex = Enum.UIFlexAlignment.Fill -- buttons share the full width"
+    },
+    "UIListLayout.ItemLineAlignment": {
+      "simple": "In flex mode, lines items up across the list's direction within each line. Start = top (or left), Center, End = bottom (or right), Stretch = fill the whole line, Automatic (default) = follow HorizontalAlignment/VerticalAlignment.",
+      "example": "local layout = script.Parent\nlayout.FillDirection = Enum.FillDirection.Horizontal\nlayout.ItemLineAlignment = Enum.ItemLineAlignment.Center -- items centered up-and-down in the row"
+    },
+    "UIListLayout.Padding": {
+      "simple": "The gap between items, as a UDim. UDim.new(0, 10) is 10 pixels. UDim.new(0.05, 0) is 5% of the container's size in the list's direction (5% of a 400-pixel-tall frame = 20 pixels).",
+      "example": "local layout = script.Parent\nlayout.Padding = UDim.new(0, 8) -- 8 px between items"
+    },
+    "UIListLayout.VerticalFlex": {
+      "simple": "For a top-to-bottom list: how leftover up-and-down space is shared. None (default), Fill (items stretch to fill the height), SpaceBetween, SpaceAround or SpaceEvenly. In a left-to-right list, Fill makes every item as tall as the container.",
+      "example": "local layout = script.Parent\nlayout.FillDirection = Enum.FillDirection.Vertical\nlayout.VerticalFlex = Enum.UIFlexAlignment.SpaceEvenly -- spread items out evenly"
+    },
+    "UIListLayout.Wraps": {
+      "simple": "When true, items that don't fit continue on a new row (or column), like words wrapping in a sentence. When false (default), they keep going past the edge.",
+      "example": "local layout = script.Parent\nlayout.FillDirection = Enum.FillDirection.Horizontal\nlayout.Wraps = true -- make new rows when a row is full",
+      "gotcha": "Wrapping and flex need a little extra work from the game, so don't use them on huge lists if you don't need them."
+    }
+  }
+}

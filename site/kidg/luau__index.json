@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/luau/index.md",
+  "simple": "Luau is the language you write scripts in when you make games in Roblox Studio. It is based on an older language called Lua, but it is faster and safer. This page is a map of the Luau basics: the kinds of values you can use, a few handy ways to organize data, and the main features like variables, functions, and if statements. Start here to see what to learn next.",
+  "analogy": "Luau is like the language your game understands. Data types are the kinds of words (names, numbers, yes/no answers), and features like functions and if statements are the grammar that lets you make full sentences.",
+  "keyPoints": [
+    "Luau is Roblox's scripting language, built from Lua 5.1.",
+    "The Script Editor in Studio helps you with autocomplete, color highlighting, and warnings about mistakes.",
+    "Main data types: `nil` (nothing), booleans (`true`/`false`), numbers, strings (text), tables (lists and dictionaries), and enums (fixed lists of choices).",
+    "Luau is dynamically typed: a variable can hold any kind of value, so you do not have to label types.",
+    "You can still add type labels and turn on strict type checking to catch mistakes early.",
+    "Using tables, you can build stacks (last in, first out), queues (first in, first out), and metatables (tables with special powers).",
+    "Other key features: variables, scope, operators, control structures like `if` and loops, functions, and type coercion."
+  ],
+  "terms": {
+    "scripting language": "A language for writing instructions (scripts) that tell your game what to do.",
+    "data type": "The kind of value something is, like a number (5), a string (\"hi\"), or a boolean (true).",
+    "dynamically typed": "A variable can hold any type and even switch types. `x = 5` then `x = \"hi\"` is allowed.",
+    "gradually typed": "You can add type labels to some of your code and leave the rest without them.",
+    "type checking": "Studio looking over your code to warn you when you use the wrong kind of value.",
+    "linting": "Automatic checks that point out likely mistakes while you type.",
+    "autocompletion": "Studio suggesting the rest of a word or name as you type.",
+    "data structure": "A way to organize lots of values, like a list or a stack.",
+    "embeddable": "Built to live inside a bigger program, like how Luau runs inside Roblox."
+  },
+  "example": {
+    "title": "Try each basic data type",
+    "place": "Script in ServerScriptService",
+    "code": "-- nil means nothing\nlocal nothing = nil\n-- booleans are true or false\nlocal isGameOver = false\n-- numbers can be whole or have decimals\nlocal coins = 25\n-- strings are text\nlocal playerName = \"Builder\"\n-- tables hold many values\nlocal inventory = { \"Sword\", \"Shield\" }\n-- enums are fixed lists of choices\nlocal shape = Enum.PartType.Ball\n\nprint(nothing, isGameOver, coins, playerName, inventory[1], shape)\n-- Output: nil false 25 Builder Sword Enum.PartType.Ball",
+    "explain": [
+      "Each `local` line makes a variable holding a different type of value.",
+      "`inventory[1]` gets the first item in the table, \"Sword\".",
+      "`print` shows all of them in the Output window."
+    ]
+  },
+  "watchOut": [
+    "Expecting Luau to work exactly like other languages. For example, in Luau 0 and the empty string count as true.",
+    "Ignoring the Script Editor's underlines. They often point to real bugs; hover to read the warning."
+  ]
+}

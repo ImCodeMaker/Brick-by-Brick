@@ -1,0 +1,30 @@
+{
+  "path": "content/en-us/projects/activity-history.md",
+  "simple": "Activity History is a shared list of important changes made to your game. Each entry says what changed, who changed it, and when. It is handy on a team, because if something suddenly looks different, like the game's name or who can play it, you can see exactly who did it. This page shows how to open it and lists every kind of change it tracks.",
+  "analogy": "It is like the sign-in sheet and logbook at a front desk. Every time someone changes something important, a line gets added: what they did, their name, and the time.",
+  "keyPoints": [
+    "Open it in Studio from the Window menu > Activity History. The newest events are at the top.",
+    "You can filter the list by event type or by collaborator when there are lots of events.",
+    "The three-dot menu next to an event gives you a link to that setting in Studio or the Creator Hub.",
+    "Most events show in both Studio and the game's Activity History page on the Creator Dashboard, but a few only show in one.",
+    "It tracks place changes, like publishing or renaming a place. Adding or removing a place only shows on the Creator Hub.",
+    "Committed script drafts show only in Studio.",
+    "It tracks game settings like audience access, name, description, shutting down all servers, and playable devices.",
+    "It also tracks money settings (paid access, private servers and their prices), notification strings, and collaborator permission changes."
+  ],
+  "terms": {
+    "log": "A list of events written down in order as they happen.",
+    "chronological": "In time order. Here, the newest event is shown first.",
+    "event": "One recorded change, like \"Game name changed by Alex at 3:15 PM\".",
+    "filter": "Show only the entries you care about, like only changes made by one teammate.",
+    "collaborator": "Someone who has permission to work on your game.",
+    "commit": "Sending a script draft into the shared version so everyone uses it.",
+    "paid access": "Making players pay Robux to join the game.",
+    "private servers": "Servers a player can buy so only they and people they invite can play.",
+    "archived": "Taken out of use and hidden, but not fully deleted."
+  },
+  "watchOut": [
+    "Looking for every change in only one place. Some events, like adding a place, only appear on the Creator Hub, and committed drafts only appear in Studio.",
+    "Thinking Activity History lets you undo changes. It only shows what happened. To go back to an older version of a place, use Version History."
+  ]
+}

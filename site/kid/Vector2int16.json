@@ -1,0 +1,72 @@
+{
+  "name": "Vector2int16",
+  "simple": "Vector2int16 is like a Vector2 (X, Y), but each number must be a WHOLE number between -32,768 and 32,767. It uses less memory but has no handy tools like Magnitude. You will rarely need it; Vector2 is the normal choice.",
+  "analogy": "Vector2int16 is like a checkerboard square label: you can say \"column 3, row 5\", but never \"column 3.5\".",
+  "whenToUse": [
+    "Only when a Roblox API specifically asks for a Vector2int16.",
+    "Otherwise use Vector2."
+  ],
+  "where": "Built-in data type, works in Scripts and LocalScripts. Make one with `Vector2int16.new(x, y)`.",
+  "terms": {
+    "integer": "A whole number with no decimal part, like 3 or -40 (not 2.5).",
+    "16-bit signed integer": "A whole number stored in a small box of memory. It can only hold numbers from -32,768 to 32,767, and can be negative (that is what \"signed\" means).",
+    "overflow": "When a number is too big for its box and wraps around to the other end. Putting 32,768 into a 16-bit integer turns it into -32,768, like a car odometer rolling over.",
+    "rounded down": "Decimal parts are thrown away so you get a whole number, for example 3.9 becomes 3.",
+    "component": "One of the numbers inside the vector, like X or Y."
+  },
+  "examples": [
+    {
+      "title": "Make one and convert it to a Vector2",
+      "place": "Script in ServerScriptService",
+      "code": "local small = Vector2int16.new(4, 9)\nprint(small.X, small.Y) --> 4 9\n\n-- Convert by passing each number separately\nlocal normal = Vector2.new(small.X, small.Y)\nprint(normal.Magnitude) -- now you can use Vector2 tools",
+      "explain": [
+        "`Vector2int16.new` stores two whole numbers.",
+        "To use Vector2 tools like Magnitude, copy X and Y into `Vector2.new`."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Do not pass a whole Vector2int16 into `Vector2.new`; pass `.X` and `.Y` separately.",
+    "Decimals are dropped: `Vector2int16.new(2.9, 0).X` is 2.",
+    "Numbers past 32,767 wrap around to negative numbers (overflow)."
+  ],
+  "members": {
+    "Vector2int16.new": {
+      "simple": "Makes a new Vector2int16 from two whole numbers. Decimal parts are rounded down. Each number must be from -32,768 to 32,767.",
+      "example": "local v = Vector2int16.new(5, 8.6)\nprint(v.Y) --> 8",
+      "gotcha": "32,768 is one too big and wraps to -32,768."
+    },
+    "Vector2int16.X": {
+      "simple": "The X whole number.",
+      "example": "print(Vector2int16.new(4, 9).X) --> 4"
+    },
+    "Vector2int16.Y": {
+      "simple": "The Y whole number.",
+      "example": "print(Vector2int16.new(4, 9).Y) --> 9"
+    },
+    "op:Vector2int16+Vector2int16": {
+      "simple": "Adds matching numbers.",
+      "example": "print(Vector2int16.new(1, 2) + Vector2int16.new(10, 20)) --> 11, 22"
+    },
+    "op:Vector2int16-Vector2int16": {
+      "simple": "Subtracts matching numbers.",
+      "example": "print(Vector2int16.new(11, 22) - Vector2int16.new(1, 2)) --> 10, 20"
+    },
+    "op:Vector2int16*Vector2int16": {
+      "simple": "Multiplies matching numbers.",
+      "example": "print(Vector2int16.new(2, 3) * Vector2int16.new(5, 4)) --> 10, 12"
+    },
+    "op:Vector2int16/Vector2int16": {
+      "simple": "Divides matching numbers, keeping only whole-number answers.",
+      "example": "print(Vector2int16.new(10, 9) / Vector2int16.new(3, 2)) --> 3, 4"
+    },
+    "op:Vector2int16*number": {
+      "simple": "Multiplies both numbers by the same amount.",
+      "example": "print(Vector2int16.new(3, 5) * 2) --> 6, 10"
+    },
+    "op:Vector2int16/number": {
+      "simple": "Divides both numbers by the same amount; answers are rounded toward zero (decimals dropped).",
+      "example": "print(Vector2int16.new(9, 7) / 2) --> 4, 3"
+    }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "name": "LinearVelocity",
+  "simple": "LinearVelocity makes a part move at a steady speed that you choose. Instead of pushing a fixed amount like VectorForce, it pushes just enough (up to a limit) to keep the part at exactly that speed. It can control speed in all directions, along one line, or across a flat surface.",
+  "analogy": "LinearVelocity is like cruise control in a car. You pick 20 studs per second, and it presses the gas harder going uphill and softer going downhill to stay at 20.",
+  "whenToUse": [
+    "Moving platforms or elevators that travel at a steady speed",
+    "Conveyor belts that carry things along",
+    "Projectiles that fly straight at a fixed speed",
+    "Dashes and knockbacks that last a moment"
+  ],
+  "where": "Create with Instance.new(\"LinearVelocity\"), set Attachment0 to an attachment in the part to move, and put it in workspace. Usually from a Script on the server.",
+  "terms": {
+    "velocity": "Speed plus direction, written as a Vector3 in studs per second. Vector3.new(0, 0, 20) means 20 studs every second along the Z direction.",
+    "force": "A push or pull. In Roblox it is measured in Roblox force units (mass x studs per second per second). A bigger number is a harder push.",
+    "mass": "How much 'stuff' an object has, which decides how hard it is to push. A part's mass = its volume x its material density. A 4x1x2 Plastic part (volume 8, density 0.7) has mass 5.6.",
+    "gravity": "The pull that makes things fall. In Roblox it is `workspace.Gravity`, which is 196.2 studs per second per second by default.",
+    "Vector3": "Three numbers (X, Y, Z) bundled together. Used for positions, directions, forces and speeds. Y is up.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "assembly": "A group of parts that are rigidly joined (for example by welds) so they move as one solid object. A force on any part moves the whole group.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "world space": "Directions measured using the whole game world's fixed arrows: Y is always straight up toward the sky, no matter how a part is turned.",
+    "attachment space": "Directions measured using an attachment's own arrows. If the part tips over, 'up' for the attachment tips over too.",
+    "RelativeTo": "Chooses whose arrows the numbers use: World (the game world's fixed directions) or Attachment0/Attachment1 (that attachment's own directions, which turn when the part turns).",
+    "MaxForce": "A cap (upper limit) on how hard a constraint is allowed to push. It is a limit, not the amount it always pushes.",
+    "magnitude": "The length (size) of a vector, ignoring its direction. The magnitude of Vector3.new(3, 4, 0) is 5.",
+    "axis": "An imaginary line something turns around or slides along. An attachment's X axis is its main arrow.",
+    "Vector2": "Two numbers (X, Y) bundled together. Used here for a speed across a flat surface: one number for each of the two directions on that surface.",
+    "normalized / unit vector": "A direction arrow whose length is exactly 1. Vector3.new(1, 0, 0) is a unit vector pointing along X. Use `.Unit` on any Vector3 to get one.",
+    "VelocityConstraintMode": "Picks what to control: Vector (speed in all 3 directions), Line (speed along just one line) or Plane (speed across a flat surface, leaving the up/down free).",
+    "force limit": "The most force the constraint may use. If the limit is too small, the part may never reach the target speed (for example if it cannot beat gravity)."
+  },
+  "examples": [
+    {
+      "title": "A part that flies forward at 20 studs per second",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Size = Vector3.new(4, 1, 2)\npart.Position = Vector3.new(0, 10, 0)\npart.Anchored = false\npart.Parent = workspace\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal mover = Instance.new(\"LinearVelocity\")\nmover.Attachment0 = attachment\nmover.RelativeTo = Enum.ActuatorRelativeTo.World\nmover.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector\nmover.VectorVelocity = Vector3.new(0, 0, 20) -- 20 studs every second along Z\nmover.MaxForce = math.huge                   -- allowed to push as hard as needed\nmover.Parent = part",
+      "explain": [
+        "VectorVelocity (0, 0, 20) is the goal speed: 20 studs per second in the +Z direction, 0 up/down, 0 sideways.",
+        "Because the Y speed is 0, the constraint also fights gravity to keep the part from falling.",
+        "math.huge means 'no real limit', so it can always push hard enough. A small MaxForce might lose to gravity (a 5.6-mass part needs about 1098.7 just to stay up)."
+      ]
+    },
+    {
+      "title": "Slide along a line but let gravity work",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Size = Vector3.new(4, 1, 2)\npart.Position = Vector3.new(0, 10, 0)\npart.Anchored = false\npart.Parent = workspace\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal slide = Instance.new(\"LinearVelocity\")\nslide.Attachment0 = attachment\nslide.RelativeTo = Enum.ActuatorRelativeTo.World\nslide.VelocityConstraintMode = Enum.VelocityConstraintMode.Line\nslide.LineDirection = Vector3.new(1, 0, 0) -- only control movement along X\nslide.LineVelocity = 10                     -- 10 studs per second along X\nslide.MaxForce = 10000\nslide.Parent = part",
+      "explain": [
+        "In Line mode, only speed along LineDirection is controlled. Here that is the X direction.",
+        "The part moves 10 studs per second along X but can still fall or move freely in Y and Z, so gravity still pulls it down."
+      ]
+    }
+  ],
+  "gotchas": [
+    "If the part does not move, MaxForce may be too low. Remember gravity alone needs mass x 196.2. Try math.huge to test.",
+    "The part must be unanchored.",
+    "In Vector mode with Y = 0, the part will not fall, because 0 up/down speed is part of the goal.",
+    "With RelativeTo = Attachment0, the direction turns with the part. Use World if you want a fixed direction."
+  ],
+  "members": {
+    "LinearVelocity.ForceLimitMode": {
+      "simple": "How the force is limited (only when ForceLimitsEnabled is true). Magnitude: total push is capped by MaxForce. PerAxis: each direction gets its own cap from MaxAxesForce or MaxPlanarAxesForce.",
+      "example": "local mover = workspace.Platform.LinearVelocity\nmover.ForceLimitMode = Enum.ForceLimitMode.PerAxis\nmover.MaxAxesForce = Vector3.new(5000, 100000, 5000) -- strong up/down, gentle sideways"
+    },
+    "LinearVelocity.ForceLimitsEnabled": {
+      "simple": "If true, the force is capped by the limit settings. If false, the physics engine uses as much force as it takes to hit the target speed exactly.",
+      "example": "workspace.Platform.LinearVelocity.ForceLimitsEnabled = false -- always reach the speed"
+    },
+    "LinearVelocity.LineDirection": {
+      "simple": "In Line mode, the direction (a length-1 Vector3) that the speed is measured along.",
+      "example": "local mover = workspace.Platform.LinearVelocity\nmover.VelocityConstraintMode = Enum.VelocityConstraintMode.Line\nmover.LineDirection = Vector3.new(0, 1, 0) -- up and down, like an elevator"
+    },
+    "LinearVelocity.LineVelocity": {
+      "simple": "In Line mode, the target speed along LineDirection in studs per second. Negative goes the opposite way.",
+      "example": "local mover = workspace.Platform.LinearVelocity\nmover.LineVelocity = 5   -- go up at 5 studs/s\ntask.wait(4)\nmover.LineVelocity = -5  -- now come back down"
+    },
+    "LinearVelocity.MaxAxesForce": {
+      "simple": "In Vector mode with PerAxis limits on, the most force allowed in each of X, Y and Z separately.",
+      "example": "local mover = workspace.Platform.LinearVelocity\nmover.ForceLimitMode = Enum.ForceLimitMode.PerAxis\nmover.MaxAxesForce = Vector3.new(1000, 20000, 1000)"
+    },
+    "LinearVelocity.MaxForce": {
+      "simple": "The most total force the constraint may use to reach the target speed (when limits are on and ForceLimitMode is Magnitude). It is a cap, not the amount it always pushes.",
+      "example": "workspace.Platform.LinearVelocity.MaxForce = math.huge -- no limit",
+      "gotcha": "Too small and the part may never reach the speed, or may sag under gravity."
+    },
+    "LinearVelocity.MaxPlanarAxesForce": {
+      "simple": "In Plane mode with PerAxis limits on, the most force allowed along each of the two directions of the flat surface, as a Vector2.",
+      "example": "local mover = workspace.Puck.LinearVelocity\nmover.ForceLimitMode = Enum.ForceLimitMode.PerAxis\nmover.MaxPlanarAxesForce = Vector2.new(3000, 3000)"
+    },
+    "LinearVelocity.PlaneVelocity": {
+      "simple": "In Plane mode, the target speed across a flat surface as a Vector2: the first number is along PrimaryTangentAxis, the second along SecondaryTangentAxis. Movement off the surface (like falling) is left free.",
+      "example": "local mover = workspace.Puck.LinearVelocity\nmover.VelocityConstraintMode = Enum.VelocityConstraintMode.Plane\nmover.RelativeTo = Enum.ActuatorRelativeTo.World\nmover.PrimaryTangentAxis = Vector3.new(1, 0, 0)\nmover.SecondaryTangentAxis = Vector3.new(0, 0, 1)\nmover.PlaneVelocity = Vector2.new(10, 5) -- 10 along X, 5 along Z, gravity still works"
+    },
+    "LinearVelocity.PrimaryTangentAxis": {
+      "simple": "In Plane mode, the first direction across the flat surface. With RelativeTo = World you type it in world directions; with Attachment0 or Attachment1 it is that attachment's main (X) arrow.",
+      "example": "workspace.Puck.LinearVelocity.PrimaryTangentAxis = Vector3.new(1, 0, 0)"
+    },
+    "LinearVelocity.ReactionForceEnabled": {
+      "simple": "Matters when RelativeTo is Attachment1. If true (default), the Attachment1 part gets pushed back the opposite way too, so the two are linked. If false, only the Attachment0 part is pushed.",
+      "example": "local mover = workspace.Car.LinearVelocity\nmover.RelativeTo = Enum.ActuatorRelativeTo.Attachment1\nmover.ReactionForceEnabled = false -- do not push the other part back"
+    },
+    "LinearVelocity.RelativeTo": {
+      "simple": "Picks whose directions the velocity uses: World (fixed game directions), Attachment0 (turns with the moving part) or Attachment1 (speed is measured compared to the other attachment's part).",
+      "example": "local mover = workspace.Boat.LinearVelocity\nmover.RelativeTo = Enum.ActuatorRelativeTo.Attachment0\nmover.VectorVelocity = Vector3.new(0, 0, -15) -- forward along the boat's own front, wherever it faces"
+    },
+    "LinearVelocity.SecondaryTangentAxis": {
+      "simple": "In Plane mode, the second direction across the flat surface. With RelativeTo = World you type it in world directions; with an attachment it is that attachment's secondary (Y) arrow.",
+      "example": "workspace.Puck.LinearVelocity.SecondaryTangentAxis = Vector3.new(0, 0, 1)"
+    },
+    "LinearVelocity.VectorVelocity": {
+      "simple": "In Vector mode (the default), the target speed in all three directions as a Vector3, in studs per second.",
+      "example": "workspace.Bullet.LinearVelocity.VectorVelocity = Vector3.new(0, 0, 100) -- fast along Z"
+    },
+    "LinearVelocity.VelocityConstraintMode": {
+      "simple": "Picks what to control: Vector (default, all three directions), Line (one direction only) or Plane (two directions across a flat surface).",
+      "example": "workspace.Platform.LinearVelocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Line"
+    }
+  }
+}

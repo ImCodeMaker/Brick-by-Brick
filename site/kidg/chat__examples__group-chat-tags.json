@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/chat/examples/group-chat-tags.md",
+  "simple": "This example adds a `[VIP]` tag in front of a player's name in chat if they are in a certain Roblox group. A server script checks group membership when the player joins and saves the answer as an attribute. Then a LocalScript reads that attribute and adds the tag to their messages. Note that chat prefixes like this are not supported once platform-integrated chat is enabled.",
+  "analogy": "It is like a bouncer who checks your ticket once at the door and gives you a VIP wristband. After that, everyone just looks at the wristband instead of checking the ticket again.",
+  "keyPoints": [
+    "Chat tags show a player's role or status, like `[VIP]`, next to their name in the chat window.",
+    "Do not check group membership inside `OnIncomingMessage`. That callback must not wait, or chat can freeze.",
+    "Instead, check once in a server Script when the player joins, using `player:IsInGroupAsync(groupID)` inside `pcall`.",
+    "Save the result with `player:SetAttribute(\"IsVIP\", true)` so other scripts can reuse it, like for VIP-only doors.",
+    "A LocalScript sets `TextChatService.OnIncomingMessage` and returns a `TextChatMessageProperties` with a new `PrefixText`.",
+    "Return `nil` when you do not want to change a message."
+  ],
+  "terms": {
+    "group": "A Roblox community with its own ID number, like a fan club. Each group has an ID such as 123456.",
+    "attribute": "A custom labeled value you stick on an instance, like `IsVIP = true` on a player. Any script can read it later.",
+    "callback": "A function you give to Roblox that Roblox calls at the right time. `OnIncomingMessage` is called for every message.",
+    "yield": "To pause and wait, like waiting for a web request. Callbacks for chat must not yield.",
+    "non-yielding": "Finishes right away without waiting. Reading an attribute is non-yielding; asking Roblox about a group is not.",
+    "PrefixText": "The text shown before the message, usually the player's name. Setting it to `[VIP] ` plus the old prefix adds the tag.",
+    "pcall": "Runs code and catches errors so a failed web request does not crash your script."
+  },
+  "example": {
+    "title": "Mark group members as VIP",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\n-- Replace 123456 with your group's ID\nlocal GROUP_ID = 123456\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- Asking Roblox about groups can fail, so use pcall\n\tlocal success, isInGroup = pcall(function()\n\t\treturn player:IsInGroupAsync(GROUP_ID)\n\tend)\n\n\t-- Save the answer as an attribute other scripts can read\n\tplayer:SetAttribute(\"IsVIP\", success and isInGroup)\nend)",
+    "explain": [
+      "Every time a player joins, `PlayerAdded` runs our function.",
+      "`IsInGroupAsync` asks Roblox if the player is in the group. It can wait and can fail, so we wrap it in `pcall`.",
+      "`success and isInGroup` is true only if the check worked and the player is in the group.",
+      "We save that true or false as the `IsVIP` attribute. The chat LocalScript then reads it to add the tag."
+    ]
+  },
+  "watchOut": [
+    "Calling `IsInGroupAsync` inside `OnIncomingMessage`. It waits for the web, which can make chat hang. Check on join instead.",
+    "Forgetting to change `123456` to your real group ID.",
+    "Expecting tags to work with platform-integrated chat. `PrefixText` is not supported there, so the tag will not show."
+  ]
+}

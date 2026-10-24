@@ -1,0 +1,64 @@
+{
+  "name": "AngularVelocity",
+  "simple": "AngularVelocity makes a part spin at a steady speed that you choose. It twists just enough (up to MaxTorque) to keep the spin speed exactly where you set it. Spin speed is measured in radians per second, where about 6.28 is one full turn every second.",
+  "analogy": "AngularVelocity is like a record player or a ceiling fan set to one speed. It keeps the same spin no matter what, unless something is too heavy for its motor.",
+  "whenToUse": [
+    "Spinning coins, fans and windmills",
+    "Spinning obstacles in an obby",
+    "Wheels that should turn at a fixed rate"
+  ],
+  "where": "Create with Instance.new(\"AngularVelocity\"), set Attachment0 to an attachment in the part to spin, and put it in workspace. Usually from a Script on the server.",
+  "terms": {
+    "angular velocity": "How fast something spins, and around which axis, measured in radians per second. 2 x pi (about 6.28) radians per second is one full turn every second.",
+    "radians": "Another way to measure angles. A full circle is 2 x pi (about 6.28) radians, which is 360 degrees. `math.rad(90)` turns 90 degrees into radians.",
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "Vector3": "Three numbers (X, Y, Z) bundled together. Used for positions, directions, forces and speeds. Y is up.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "assembly": "A group of parts that are rigidly joined (for example by welds) so they move as one solid object. A force on any part moves the whole group.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "world space": "Directions measured using the whole game world's fixed arrows: Y is always straight up toward the sky, no matter how a part is turned.",
+    "attachment space": "Directions measured using an attachment's own arrows. If the part tips over, 'up' for the attachment tips over too.",
+    "RelativeTo": "Chooses whose arrows the numbers use: World (the game world's fixed directions) or Attachment0/Attachment1 (that attachment's own directions, which turn when the part turns).",
+    "magnitude": "The length (size) of a vector, ignoring its direction. The magnitude of Vector3.new(3, 4, 0) is 5.",
+    "MaxTorque": "The most twisting force the constraint may use. Too small and a heavy part will spin slower than you asked, or not at all.",
+    "reaction torque": "The 'twist back'. When one part is spun, the other part gets twisted the opposite way, like a motor between two objects."
+  },
+  "examples": [
+    {
+      "title": "A spinning obstacle that turns once per second",
+      "place": "Script inside an unanchored Part (keep it in place with a HingeConstraint or BallSocket to an anchored part)",
+      "code": "local part = script.Parent\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal spin = Instance.new(\"AngularVelocity\")\nspin.Attachment0 = attachment\nspin.RelativeTo = Enum.ActuatorRelativeTo.World\n-- One full turn per second around the up (Y) axis: 2 x pi radians/s\nspin.AngularVelocity = Vector3.new(0, math.pi * 2, 0)\nspin.MaxTorque = math.huge -- strong enough for any part\nspin.Parent = part",
+      "explain": [
+        "math.pi * 2 is about 6.28 radians, which is one full circle. Per second, that is one turn every second.",
+        "The Y in the vector means 'spin around the up-down line', like a merry-go-round.",
+        "MaxTorque = math.huge lets it twist as hard as needed to keep that speed, even when players bump into it."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The speed is in radians per second, not degrees and not turns. Use math.rad(degrees) to convert, or math.pi * 2 for one turn per second.",
+    "If MaxTorque is too small, heavy parts spin slowly or not at all.",
+    "AngularVelocity only controls spin, not position. A loose part will still fall; pin it with a hinge or another constraint.",
+    "Setting RelativeTo to Attachment0 makes no physical sense and gives strange results. Use World or Attachment1."
+  ],
+  "members": {
+    "AngularVelocity.AngularVelocity": {
+      "simple": "The target spin, as a Vector3 in radians per second. The direction is the spin axis and the length is the speed. (0, 3.14, 0) is half a turn per second around Y.",
+      "example": "local spin = workspace.Fan.AngularVelocity\nspin.AngularVelocity = Vector3.new(0, math.rad(180), 0) -- 180 degrees per second"
+    },
+    "AngularVelocity.MaxTorque": {
+      "simple": "The most twisting strength the constraint is allowed to use to reach the target spin.",
+      "example": "workspace.Fan.AngularVelocity.MaxTorque = 100000"
+    },
+    "AngularVelocity.ReactionTorqueEnabled": {
+      "simple": "Only matters when RelativeTo is Attachment1. If true, the other part gets twisted the opposite way too, so the constraint acts like a motor between the two parts. This is important if the two parts can bump into each other.",
+      "example": "local spin = workspace.Drill.AngularVelocity\nspin.RelativeTo = Enum.ActuatorRelativeTo.Attachment1\nspin.ReactionTorqueEnabled = true"
+    },
+    "AngularVelocity.RelativeTo": {
+      "simple": "Picks whose directions the spin uses. World (default): the vector is used as-is in game directions. Attachment1: the spin is measured compared to the other attachment, so if that part turns, the target turns with it. Attachment0 is allowed but behaves unpredictably.",
+      "example": "workspace.Fan.AngularVelocity.RelativeTo = Enum.ActuatorRelativeTo.World",
+      "gotcha": "Avoid Attachment0 here; the docs say it makes no physical sense."
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/environment/atmosphere.md",
+  "simple": "The `Atmosphere` object, placed inside `Lighting`, makes the air in your world look real. It controls how much stuff is floating in the air, how hazy the distance looks, the color of the sky glow, and the glare around the sun. With a few numbers you can make a clear sunny day, a foggy swamp, or a smoky alien planet.",
+  "analogy": "Atmosphere is like the air on a real day. On a clear day you can see mountains far away. On a misty morning, far-off trees fade into gray, and at sunset the whole sky glows orange around the sun.",
+  "keyPoints": [
+    "Put an `Atmosphere` object inside the `Lighting` service to use these effects.",
+    "`Density` sets how many particles are in the air. Higher values hide far-away objects and terrain more.",
+    "`Offset` controls how light travels between the camera and the sky. Higher values make a clear horizon outline; lower values blend far objects into the sky.",
+    "Balance `Offset` and `Density`. Too low an offset can let the skybox show through objects.",
+    "`Haze` adds a hazy look above the horizon and in the distance. Pair it with `Color` for moods like a smoky or foggy tint.",
+    "`Glare` adds a glow around the sun, but only shows if `Haze` is above 0.",
+    "`Decay` is the sky color away from the sun, fading from `Color`. It only shows when both `Haze` and `Glare` are above 0."
+  ],
+  "terms": {
+    "atmosphere": "The air in your game world and how it affects light and how far you can see.",
+    "particles": "Tiny bits like dust or water drops floating in the air. More particles make it harder to see far.",
+    "density": "How packed something is. Atmosphere `Density` 0 is perfectly clear; 0.35 is noticeably hazy.",
+    "offset": "Here it means how much the far distance blends into the sky. 0 blends far objects into the sky; 1 gives a sharper horizon outline.",
+    "silhouette": "A dark outline shape against a brighter background, like mountains against a sunset.",
+    "horizon": "The line far away where the ground seems to meet the sky.",
+    "haze": "A soft, misty look in the distance.",
+    "glare": "The bright glow around the sun.",
+    "decay": "The color the sky fades toward as you look away from the sun.",
+    "hue": "A color tint, like pink or blue, given as RGB numbers such as [255, 200, 255].",
+    "skybox": "The big background image of the sky surrounding your world."
+  },
+  "example": {
+    "title": "Switch the weather to foggy",
+    "place": "Script in ServerScriptService",
+    "code": "local Lighting = game:GetService(\"Lighting\")\n\n-- Find the Atmosphere, or make one if it does not exist\nlocal atmosphere = Lighting:FindFirstChildOfClass(\"Atmosphere\")\nif not atmosphere then\n\tatmosphere = Instance.new(\"Atmosphere\")\n\tatmosphere.Parent = Lighting\nend\n\n-- Clear day\natmosphere.Density = 0.3\natmosphere.Haze = 0\natmosphere.Glare = 0\n\ntask.wait(10)\n\n-- Foggy and gray-blue\natmosphere.Density = 0.6\natmosphere.Haze = 2.8\natmosphere.Color = Color3.fromRGB(180, 200, 220)",
+    "explain": [
+      "The script finds the Atmosphere inside Lighting, or creates one.",
+      "First it sets a fairly clear day with low density and no haze or glare.",
+      "After 10 seconds it raises `Density` and `Haze` so far-off things fade away.",
+      "The gray-blue `Color` makes the fog feel cold and gloomy."
+    ]
+  },
+  "watchOut": [
+    "Turning up `Glare` with `Haze` at 0. You will see nothing; raise `Haze` first.",
+    "Setting `Decay` without `Haze` and `Glare` above 0. It has no visible effect.",
+    "Putting the Atmosphere somewhere other than inside `Lighting`.",
+    "Using a very low `Offset` with low `Density`. The sky can show through your terrain and buildings."
+  ]
+}

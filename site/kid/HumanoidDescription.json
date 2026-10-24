@@ -1,0 +1,240 @@
+{
+  "name": "HumanoidDescription",
+  "simple": "A HumanoidDescription is a list that describes how a character looks: body parts, clothes, accessories, skin colors, body sizes, animations and emotes. It doesn't change anything by itself. You apply it to a Humanoid to dress the character exactly as the list says.",
+  "analogy": "A HumanoidDescription is like an outfit recipe card. It lists the hat, the shirt, the skin color and how tall to be. Handing the card to a character (ApplyDescriptionAsync) makes them get dressed to match it.",
+  "whenToUse": [
+    "Change how a player's character looks (bigger, smaller, new hat, new colors).",
+    "Make everyone wear a team uniform.",
+    "Build an NPC or statue that looks like a real user.",
+    "Set which emotes a character can use."
+  ],
+  "where": "Create one with `Instance.new(\"HumanoidDescription\")`, copy a character's current look with `humanoid:GetAppliedDescription()`, or load one with `Players:GetHumanoidDescriptionFromUserIdAsync()`. Apply it on the server with `humanoid:ApplyDescriptionAsync(description)`. Each character also has one inside its Humanoid.",
+  "terms": {
+    "asset ID": "The number that identifies an item on Roblox, like a hat or a shirt. You find it in the item's web address.",
+    "apply": "Use the description to actually change a character. Done with Humanoid:ApplyDescriptionAsync.",
+    "accessory": "Something a character wears that's attached to its body: hats, hair, glasses, backpacks, belts.",
+    "layered clothing": "3D clothes like jackets and sweaters that wrap around the body and stack in an order.",
+    "rigid accessory": "A normal accessory that doesn't bend, like a hat.",
+    "scale": "A size multiplier. 1 means normal size, 2 means twice as big, 0.5 means half as big.",
+    "Color3": "A color made from red, green and blue amounts, like Color3.fromRGB(255, 0, 0) for red.",
+    "emote": "A short animation a player can do on command, like waving or dancing, from the emote wheel.",
+    "comma-separated": "Several values in one piece of text with commas between them, like \"111,222,333\".",
+    "R15": "The modern 15-part character body. Most scale settings only work on R15.",
+    "Dynamic Head": "A head that can move its face (blink, smile) with animations."
+  },
+  "examples": [
+    {
+      "title": "Make every player a giant with green skin",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nlocal function onCharacterAppearanceLoaded(character)\n    local humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n    if not humanoid then\n        return\n    end\n\n    -- Copy the character's current look so we keep their clothes\n    local description = humanoid:GetAppliedDescription()\n\n    description.HeightScale = 1.5   -- 50% taller\n    description.WidthScale = 1.3    -- 30% wider\n    description.HeadColor = Color3.fromRGB(80, 200, 80)\n    description.TorsoColor = Color3.fromRGB(80, 200, 80)\n\n    humanoid:ApplyDescriptionAsync(description)\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAppearanceLoaded:Connect(onCharacterAppearanceLoaded)\nend)",
+      "explain": [
+        "We wait for CharacterAppearanceLoaded so the player's own clothes are already on.",
+        "GetAppliedDescription gives a copy of the current look. Changing the copy doesn't do anything yet.",
+        "Scales are multipliers: 1 is normal, 1.5 is one and a half times as big.",
+        "ApplyDescriptionAsync makes the real character match the changed copy."
+      ]
+    },
+    {
+      "title": "Add a hat and set emotes",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAppearanceLoaded:Connect(function(character)\n        local humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n        local description = humanoid:GetAppliedDescription()\n\n        -- Add one more hat to whatever they already wear (comma-separated list)\n        local NEW_HAT_ID = \"4819740796\" -- replace with any hat's asset ID\n        if description.HatAccessory == \"\" then\n            description.HatAccessory = NEW_HAT_ID\n        else\n            description.HatAccessory = description.HatAccessory .. \",\" .. NEW_HAT_ID\n        end\n\n        -- Give two emotes and put them on the emote wheel\n        description:SetEmotes({\n            Salute = { 3360689775 },\n            Agree = { 4849487550 },\n        })\n        description:SetEquippedEmotes({ \"Salute\", \"Agree\" })\n\n        humanoid:ApplyDescriptionAsync(description)\n    end)\nend)",
+      "explain": [
+        "Accessory properties are text lists of IDs with commas between them, so we add a comma and the new ID.",
+        "SetEmotes gives the character emotes by name. Each name has a list of emote asset IDs.",
+        "SetEquippedEmotes puts emotes on the emote wheel, in order, by name.",
+        "Nothing changes until ApplyDescriptionAsync runs."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Changing a HumanoidDescription does nothing until you call humanoid:ApplyDescriptionAsync(description).",
+    "Apply descriptions on the server. Client changes won't be seen by others.",
+    "Accessory properties are strings like \"123,456\", not numbers.",
+    "Asset IDs must be the right kind: Shirt needs a shirt asset, Face needs a face asset, not a Decal or Image.",
+    "Scale properties only work on R15 characters."
+  ],
+  "members": {
+    "HumanoidDescription.AccessoryBlob": {
+      "simple": "Hidden from scripts. Text (JSON) storing the layered clothing list. Use SetAccessories and GetAccessories instead."
+    },
+    "HumanoidDescription.BackAccessory": {
+      "simple": "A list of accessory asset IDs, separated by commas, to put on the character when the description is applied. Usually for things worn on the back, like capes or backpacks. Example: \"1234567,7654321\". No duplicates allowed."
+    },
+    "HumanoidDescription.BodyTypeScale": {
+      "simple": "Blends the body shape from the standard R15 shape (0) to a taller, slimmer shape (1). Values outside 0 to 1 are cut to fit.",
+      "example": "description.BodyTypeScale = 0.5 -- halfway between"
+    },
+    "HumanoidDescription.ClimbAnimation": {
+      "simple": "The asset ID of the animation the character plays while climbing ladders and trusses, once the description is applied. 0 means use the default."
+    },
+    "HumanoidDescription.DepthScale": {
+      "simple": "How thick the body is from front to back, as a multiplier. 1 is normal, 2 is twice as thick. Also scales accessories not on the head.",
+      "example": "description.DepthScale = 1.2"
+    },
+    "HumanoidDescription.Face": {
+      "simple": "The asset ID of the face (a Face asset, not a Decal) to put on the head.",
+      "example": "description.Face = 0 -- 0 means default face"
+    },
+    "HumanoidDescription.FaceAccessory": {
+      "simple": "A list of accessory asset IDs, separated by commas, to put on the character when the description is applied. Usually for things worn on the face, like glasses. Example: \"2535420239\". No duplicates allowed."
+    },
+    "HumanoidDescription.FallAnimation": {
+      "simple": "The asset ID of the animation the character plays while falling through the air, once the description is applied. 0 means use the default."
+    },
+    "HumanoidDescription.FrontAccessory": {
+      "simple": "A list of accessory asset IDs, separated by commas, to put on the character when the description is applied. Usually for things worn on the front of the torso, like medals or ties. Example: \"1234567\". No duplicates allowed."
+    },
+    "HumanoidDescription.GraphicTShirt": {
+      "simple": "The asset ID of a T-Shirt (the picture on the front of the torso). Must be a T-Shirt asset, not a Decal.",
+      "example": "description.GraphicTShirt = 0 -- no t-shirt"
+    },
+    "HumanoidDescription.HairAccessory": {
+      "simple": "A list of accessory asset IDs, separated by commas, to put on the character when the description is applied. Usually for things worn as hair on the head. Example: \"1234567\". No duplicates allowed."
+    },
+    "HumanoidDescription.HatAccessory": {
+      "simple": "A comma-separated list of hat asset IDs to put on the head when applied.",
+      "example": "description.HatAccessory = \"4819740796\""
+    },
+    "HumanoidDescription.Head": {
+      "simple": "The asset ID of the head body part (its 3D shape) to use when the description is applied. 0 means the default head."
+    },
+    "HumanoidDescription.HeadColor": {
+      "simple": "The Color3 used for the Head when the description is applied.",
+      "example": "description.HeadColor = Color3.fromRGB(255, 200, 150)"
+    },
+    "HumanoidDescription.HeadScale": {
+      "simple": "How big the head is, as a multiplier. Hats and hair grow with it. 1 is normal.",
+      "example": "description.HeadScale = 2 -- bobblehead!"
+    },
+    "HumanoidDescription.HeightScale": {
+      "simple": "How tall the body is, as a multiplier. 1 is normal, 1.5 is 50% taller, 0.5 is half as tall.",
+      "example": "description.HeightScale = 1.5"
+    },
+    "HumanoidDescription.IdleAnimation": {
+      "simple": "The asset ID of the animation the character plays while standing still, once the description is applied. 0 means use the default."
+    },
+    "HumanoidDescription.JumpAnimation": {
+      "simple": "The asset ID of the animation the character plays when jumping, once the description is applied. 0 means use the default."
+    },
+    "HumanoidDescription.LeftArm": {
+      "simple": "The asset ID of the left arm body part (its 3D shape) to use when the description is applied. 0 means the default left arm."
+    },
+    "HumanoidDescription.LeftArmColor": {
+      "simple": "The Color3 used for the Left Arm when the description is applied. On R15 it colors the upper arm, lower arm and hand.",
+      "example": "description.LeftArmColor = Color3.fromRGB(255, 200, 150)"
+    },
+    "HumanoidDescription.LeftLeg": {
+      "simple": "The asset ID of the left leg body part (its 3D shape) to use when the description is applied. 0 means the default left leg."
+    },
+    "HumanoidDescription.LeftLegColor": {
+      "simple": "The Color3 used for the Left Leg when the description is applied. On R15 it colors the upper leg, lower leg and foot.",
+      "example": "description.LeftLegColor = Color3.fromRGB(255, 200, 150)"
+    },
+    "HumanoidDescription.MoodAnimation": {
+      "simple": "The asset ID of a mood animation that gives a Dynamic Head a lasting face expression, like a smile. 0 means a neutral face."
+    },
+    "HumanoidDescription.NeckAccessory": {
+      "simple": "A list of accessory asset IDs, separated by commas, to put on the character when the description is applied. Usually for things worn around the neck, like scarves. Example: \"1234567\". No duplicates allowed."
+    },
+    "HumanoidDescription.Pants": {
+      "simple": "The asset ID of the Pants clothing to wear. Must be a Pants asset.",
+      "example": "description.Pants = 0 -- no pants item"
+    },
+    "HumanoidDescription.ProportionScale": {
+      "simple": "How wide (0) or narrow (1) the body's proportions are. Only matters when BodyTypeScale is above 0.",
+      "example": "description.ProportionScale = 1"
+    },
+    "HumanoidDescription.RightArm": {
+      "simple": "The asset ID of the right arm body part (its 3D shape) to use when the description is applied. 0 means the default right arm."
+    },
+    "HumanoidDescription.RightArmColor": {
+      "simple": "The Color3 used for the Right Arm when the description is applied. On R15 it colors the upper arm, lower arm and hand.",
+      "example": "description.RightArmColor = Color3.fromRGB(255, 200, 150)"
+    },
+    "HumanoidDescription.RightLeg": {
+      "simple": "The asset ID of the right leg body part (its 3D shape) to use when the description is applied. 0 means the default right leg."
+    },
+    "HumanoidDescription.RightLegColor": {
+      "simple": "The Color3 used for the Right Leg when the description is applied. On R15 it colors the upper leg, lower leg and foot.",
+      "example": "description.RightLegColor = Color3.fromRGB(255, 200, 150)"
+    },
+    "HumanoidDescription.RunAnimation": {
+      "simple": "The asset ID of the animation the character plays while running, once the description is applied. 0 means use the default."
+    },
+    "HumanoidDescription.Shirt": {
+      "simple": "The asset ID of the Shirt clothing to wear. Must be a Shirt asset.",
+      "example": "description.Shirt = 0 -- no shirt item"
+    },
+    "HumanoidDescription.ShouldersAccessory": {
+      "simple": "A list of accessory asset IDs, separated by commas, to put on the character when the description is applied. Usually for things worn on the shoulders, like a pet parrot. Example: \"1234567\". No duplicates allowed."
+    },
+    "HumanoidDescription.StaticFacialAnimation": {
+      "simple": "If true, a Dynamic Head keeps a still face (its mood pose) instead of moving its face. Default false.",
+      "example": "description.StaticFacialAnimation = true"
+    },
+    "HumanoidDescription.SwimAnimation": {
+      "simple": "The asset ID of the animation the character plays while swimming, once the description is applied. 0 means use the default."
+    },
+    "HumanoidDescription.Torso": {
+      "simple": "The asset ID of the torso body part (its 3D shape) to use when the description is applied. 0 means the default torso."
+    },
+    "HumanoidDescription.TorsoColor": {
+      "simple": "The Color3 used for the Torso when the description is applied.",
+      "example": "description.TorsoColor = Color3.fromRGB(255, 200, 150)"
+    },
+    "HumanoidDescription.UseAvatarSettings": {
+      "simple": "If true, your game's Avatar Settings (set in Studio) are also applied when this description is used. Default false.",
+      "example": "description.UseAvatarSettings = true"
+    },
+    "HumanoidDescription.WaistAccessory": {
+      "simple": "A list of accessory asset IDs, separated by commas, to put on the character when the description is applied. Usually for things worn around the waist, like belts. Example: \"1234567\". No duplicates allowed."
+    },
+    "HumanoidDescription.WalkAnimation": {
+      "simple": "The asset ID of the animation the character plays while walking slowly, once the description is applied. 0 means use the default."
+    },
+    "HumanoidDescription.WidthScale": {
+      "simple": "How wide the body is from left to right, as a multiplier. 1 is normal.",
+      "example": "description.WidthScale = 0.8 -- a bit skinnier"
+    },
+    "HumanoidDescription:AddEmote": {
+      "simple": "Adds one emote under a name you choose, using its asset ID.",
+      "example": "description:AddEmote(\"Salute\", 3360689775)"
+    },
+    "HumanoidDescription:GetAccessories": {
+      "simple": "Gives a list of the layered clothing on this description. Pass true to also include normal (rigid) accessories like hats.",
+      "example": "for _, info in description:GetAccessories(true) do\n    print(info.AssetId, info.AccessoryType)\nend"
+    },
+    "HumanoidDescription:GetEmotes": {
+      "simple": "Gives a table of all emotes: each name maps to a list of emote IDs.",
+      "example": "for name, ids in description:GetEmotes() do\n    print(name .. \" has \" .. #ids .. \" emote(s)\")\nend"
+    },
+    "HumanoidDescription:GetEquippedEmotes": {
+      "simple": "Gives a list of the emotes on the emote wheel, each with a Name and a Slot number.",
+      "example": "for _, emote in description:GetEquippedEmotes() do\n    print(\"Slot \" .. emote.Slot .. \": \" .. emote.Name)\nend"
+    },
+    "HumanoidDescription:RemoveEmote": {
+      "simple": "Removes every emote with that name. No error if there wasn't one.",
+      "example": "description:RemoveEmote(\"Salute\")"
+    },
+    "HumanoidDescription:SetAccessories": {
+      "simple": "Sets all layered clothing at once from a list. Each item has an AssetId, an AccessoryType, and an Order (which layer goes on first). Pass true as the second value to also set rigid accessories (items with no Order).",
+      "example": "description:SetAccessories({\n    { Order = 1, AssetId = 6984769289, AccessoryType = Enum.AccessoryType.Sweater },\n    { Order = 2, AssetId = 6984767443, AccessoryType = Enum.AccessoryType.Jacket },\n}, false)"
+    },
+    "HumanoidDescription:SetEmotes": {
+      "simple": "Replaces all emotes with a new table of name = list of IDs.",
+      "example": "description:SetEmotes({\n    Salute = { 3360689775 },\n    Agree = { 4849487550 },\n})"
+    },
+    "HumanoidDescription:SetEquippedEmotes": {
+      "simple": "Chooses which emotes go on the emote wheel, by name, in order (up to 8). The names must already be added with SetEmotes or AddEmote.",
+      "example": "description:SetEquippedEmotes({ \"Salute\", \"Agree\" })"
+    },
+    "HumanoidDescription.EmotesChanged": {
+      "simple": "Fires when emotes are added, removed or set. Gives the new emote table.",
+      "example": "description.EmotesChanged:Connect(function(newEmotes)\n    print(\"Emotes changed!\")\nend)"
+    },
+    "HumanoidDescription.EquippedEmotesChanged": {
+      "simple": "Fires when SetEquippedEmotes changes the emote wheel. Gives the new list.",
+      "example": "description.EquippedEmotesChanged:Connect(function(equipped)\n    print(#equipped .. \" emotes on the wheel\")\nend)"
+    }
+  }
+}

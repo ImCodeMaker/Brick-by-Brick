@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/players/teams.md",
+  "simple": "The `Teams` service lets you split players into groups, like Red vs Blue. Each team gets a name and a color, and players on that team show that color on their name and in the player list. You can let Roblox put players on teams for you, or choose teams yourself. You can also make spawn points that only one team can use.",
+  "analogy": "It is like gym class: everyone gets a colored jersey, and each color has its own bench to start from.",
+  "keyPoints": [
+    "No teams exist at first. Add a `Team` object under the `Teams` service in the Explorer.",
+    "Give each team a `Name` and its own `TeamColor`. Both show up in the player list.",
+    "By default, new players join the team with the fewest members because `AutoAssignable` is on.",
+    "To choose teams yourself, uncheck `AutoAssignable` and set a player's `Team` property, like `Teams[\"Blue Team\"]`.",
+    "Spawn locations are neutral at first, so anyone can spawn on them.",
+    "To make a team spawn, uncheck the spawn's `Neutral` box and set its `TeamColor` to match the team, like `Lapis`.",
+    "A spawn's `TeamColor` is not the same as its `BrickColor` or `Color`, which only change how it looks."
+  ],
+  "terms": {
+    "Teams service": "The container in the Explorer that holds all your `Team` objects.",
+    "TeamColor": "The color that marks a team. Players, spawns, and the team itself are matched by this color, such as `Lapis`.",
+    "AutoAssignable": "A checkbox on a team. When on, Roblox can put new players on that team automatically.",
+    "SpawnLocation": "A pad where players appear when they join or respawn.",
+    "Neutral": "A spawn setting. When checked, any player can spawn there, no matter their team.",
+    "BrickColor": "The color a part looks like. It has nothing to do with which team can use a spawn."
+  },
+  "example": {
+    "title": "Put players on a team by script",
+    "place": "Script in ServerScriptService (with teams named Red Team and Blue Team, AutoAssignable unchecked)",
+    "code": "local Players = game:GetService(\"Players\")\nlocal Teams = game:GetService(\"Teams\")\n\nlocal redTeam = Teams[\"Red Team\"]\nlocal blueTeam = Teams[\"Blue Team\"]\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- Put each new player on the smaller team\n\tif #redTeam:GetPlayers() <= #blueTeam:GetPlayers() then\n\t\tplayer.Team = redTeam\n\telse\n\t\tplayer.Team = blueTeam\n\tend\n\tprint(player.Name, \"joined\", player.Team.Name)\nend)",
+    "explain": [
+      "We find the two teams inside the `Teams` service by name.",
+      "When a player joins, we count how many players each team has with `GetPlayers()`.",
+      "We set `player.Team` to the smaller team. Their name color changes to match.",
+      "This only matters if you turned off `AutoAssignable`, otherwise Roblox already balances teams."
+    ]
+  },
+  "watchOut": [
+    "Changing a spawn's `BrickColor` and expecting it to become a team spawn. Set `TeamColor` and uncheck `Neutral` instead.",
+    "Giving two teams the same `TeamColor`. Each team needs its own unique color.",
+    "Leaving `AutoAssignable` on while also assigning teams in a script, which can put players on teams you did not expect."
+  ]
+}

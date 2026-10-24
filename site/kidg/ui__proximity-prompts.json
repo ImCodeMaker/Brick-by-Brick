@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/ui/proximity-prompts.md",
+  "simple": "A `ProximityPrompt` is the little pop-up that appears when you walk up to something, like \"E  Open Door\". It shows players what they can interact with and which key to press. It automatically shows the right button for keyboards, gamepads, and touch screens. You add it to a part and then use a script to decide what happens when it is triggered.",
+  "analogy": "It is like a shop door that lights up a sign saying \"Push\" when you get close. The sign tells you what to do, and the door only opens when you actually push.",
+  "keyPoints": [
+    "Put a `ProximityPrompt` inside the `BasePart`, `Model`, or `Attachment` players should interact with.",
+    "`ObjectText` names the thing (\"Door\"), `ActionText` names the action (\"Open\"), and `KeyboardKeyCode`/`GamepadKeyCode` set the keys.",
+    "`MaxActivationDistance` sets how close the character must be before the prompt appears.",
+    "`RequiresLineOfSight` (on by default) hides the prompt if something blocks the camera's view of it.",
+    "`Exclusivity` decides what happens when several prompts are close: one per key, only one at all, or always show all.",
+    "`HoldDuration` sets how many seconds the key must be held; 0 means a quick press works.",
+    "`ClickablePrompt` lets players click the prompt itself; on phones and tablets it can always be tapped.",
+    "Listen for `Triggered` on one prompt, or use `ProximityPromptService.PromptTriggered` to handle all prompts in one place."
+  ],
+  "terms": {
+    "proximity": "How close you are to something.",
+    "MaxActivationDistance": "The distance, in studs, from the prompt where it appears. At 10, the prompt shows when your character is within 10 studs.",
+    "line of sight": "A clear, unblocked view. If a wall is between the camera and the prompt, there is no line of sight.",
+    "Exclusivity": "Rules for which prompts show when several are nearby. `OneGlobally` shows only the one you are looking at.",
+    "keycode": "The name of a specific key or button, like `Enum.KeyCode.E`.",
+    "HoldDuration": "Seconds the key must be held. 2 means press and hold for 2 seconds.",
+    "trigger": "To set off the prompt's action, by pressing (or holding) the key or tapping it."
+  },
+  "example": {
+    "title": "Open a door with a prompt",
+    "place": "Script inside a ProximityPrompt that is inside a part named Door",
+    "code": "local prompt = script.Parent\nlocal door = prompt.Parent\n\nprompt.ObjectText = \"Door\"\nprompt.ActionText = \"Open\"\nprompt.KeyboardKeyCode = Enum.KeyCode.E\nprompt.HoldDuration = 0.5 -- hold E for half a second\nprompt.MaxActivationDistance = 10 -- show within 10 studs\n\nlocal function onTriggered(player)\n\tprint(player.Name .. \" opened the door\")\n\t-- Let players walk through and make the door see-through\n\tdoor.CanCollide = false\n\tdoor.Transparency = 0.7\n\tprompt.Enabled = false\n\n\ttask.wait(3)\n\n\t-- Close it again\n\tdoor.CanCollide = true\n\tdoor.Transparency = 0\n\tprompt.Enabled = true\nend\n\nprompt.Triggered:Connect(onTriggered)",
+    "explain": [
+      "The script sits in the prompt, and the prompt sits in the door part.",
+      "We set the text, key, hold time, and distance so the prompt reads \"Door / Open\" and needs E held for half a second.",
+      "When triggered, the server gets the player who used it and opens the door by turning off collisions and fading it.",
+      "We hide the prompt while open, wait 3 seconds, then close the door and show the prompt again."
+    ]
+  },
+  "watchOut": [
+    "A prompt placed in Workspace by itself will not show up. It must be inside a part, model, or attachment.",
+    "With `AlwaysShow`, every visible prompt using the same key fires at once. Use different keys or a different `Exclusivity`.",
+    "If the prompt never appears, check `MaxActivationDistance` and whether a wall is blocking the line of sight.",
+    "Do important game changes (like opening doors for everyone) in a server `Script`, not a `LocalScript`."
+  ]
+}

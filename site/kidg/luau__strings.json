@@ -1,0 +1,51 @@
+{
+  "path": "content/en-us/luau/strings.md",
+  "simple": "A string is a piece of text, like a player's name or a message on the screen. This page shows how to write strings, stick them together, put variables inside them, and turn them into numbers. It also teaches string patterns, a mini search language for finding things like numbers or words inside longer text. Almost every game uses strings for names, chat, and UI labels.",
+  "analogy": "A string is like a bead necklace where each bead is one letter, number, or symbol. Joining strings is tying two necklaces together, and a pattern is like a rule for finding beads, such as \"find all the red ones in a row\".",
+  "keyPoints": [
+    "Make a string with double quotes `\"hi\"` or single quotes `'hi'`. Use double brackets `[[ ]]` for text with many lines.",
+    "Join strings with `..`. It does not add a space, so add one yourself: `\"Hello\" .. \" \" .. \"world\"`.",
+    "Interpolation with backticks puts values right into text: `` `Coins: {coins}` ``.",
+    "`tonumber(\"123\")` gives the number 123. If the text is not a number, it gives `nil`.",
+    "Backslash escapes: `\\\"` puts a quote inside a string, `\\n` makes a new line, and `\\t` makes a tab.",
+    "Comparing strings with `<` goes letter by letter by character code, so `\"100\" < \"20\"` is true.",
+    "Patterns like `%d+` (one or more digits) work with `string.match` and `string.gmatch` to find parts of text.",
+    "Parentheses in a pattern make captures, which pull out pieces of a match into variables."
+  ],
+  "terms": {
+    "string": "Text, made of characters like letters, digits, spaces, and symbols. Written in quotes, like `\"Hello\"`.",
+    "character": "One single letter, digit, space, or symbol.",
+    "concatenate": "To join strings end to end. `\"Sun\" .. \"set\"` makes `\"Sunset\"`.",
+    "string interpolation": "Putting values right inside text using backticks and curly brackets. If `n = 3`, `` `{n} lives` `` becomes \"3 lives\".",
+    "escape": "Using a backslash so the next character is treated as plain text or a special symbol. `\\\"` is a quote mark inside a string.",
+    "substring": "A smaller piece of a bigger string. \"Rob\" is a substring of \"Roblox\".",
+    "string pattern": "A mini search rule. `%d+` means \"one or more digits in a row\".",
+    "character class": "A pattern code for a group of characters. `%a` is any letter, `%d` any digit, `%s` any space.",
+    "magic characters": "12 symbols with special meaning in patterns: `$ % ^ * ( ) . [ ] + - ?`. Put `%` in front to search for them as normal characters.",
+    "anchor": "`^` means \"at the start\" and `$` means \"at the end\". `^Hi` only matches text that begins with Hi.",
+    "quantifier / modifier": "A symbol after a class saying how many to match. `+` is 1 or more, `*` is 0 or more, `?` is 0 or 1.",
+    "set": "Square brackets that match any of several classes. `[%l%p]` matches a lowercase letter or punctuation.",
+    "capture": "A part of a pattern in parentheses. It saves that matched piece so you can use it.",
+    "lexicographical order": "Dictionary-style order, comparing one character at a time from left to right.",
+    "ASCII": "A standard list giving each character a number code. Capital letters come before lowercase ones."
+  },
+  "example": {
+    "title": "Read a gem count from a message",
+    "place": "Script in ServerScriptService",
+    "code": "local playerName = \"Builder\"\nlocal coins = 120\n\n-- Joining with ..\nprint(\"Welcome, \" .. playerName .. \"!\") --> Welcome, Builder!\n\n-- Interpolation with backticks\nprint(`{playerName} has {coins} coins`) --> Builder has 120 coins\n\n-- Find the number in a message with a pattern\nlocal message = \"The Cloud Kingdom has 25 power gems\"\nlocal gemText = string.match(message, \"%d+\") -- \"25\" (still a string)\nlocal gems = tonumber(gemText) -- 25 (a real number)\nprint(gems + 5) --> 30\n\n-- Use captures to split \"key = value\"\nlocal key, value = string.match(\"Speed = 16\", \"(%a+)%s?=%s?(%d+)\")\nprint(key, value) --> Speed 16",
+    "explain": [
+      "`..` glues strings together. The spaces are inside the quotes.",
+      "Backtick strings replace `{playerName}` and `{coins}` with their values.",
+      "`string.match(message, \"%d+\")` finds the first group of digits, \"25\".",
+      "`tonumber` turns \"25\" into the number 25 so you can do math with it.",
+      "The capture pattern grabs a word and a number from \"Speed = 16\" into two variables."
+    ]
+  },
+  "watchOut": [
+    "Forgetting spaces when joining. `\"Hello\" .. \"world\"` gives \"Helloworld\".",
+    "Using normal quotes for interpolation. Only backticks work: `` `Hi {name}` ``.",
+    "Searching for a period with `.` in a pattern. `.` means any character; use `%.` for a real period.",
+    "Sorting number strings. `\"100\" < \"20\"` is true; convert with `tonumber` first.",
+    "Doing math on non-number text, like `\"Hello\" + 10`. That throws an error."
+  ]
+}

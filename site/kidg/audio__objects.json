@@ -1,0 +1,52 @@
+{
+  "path": "content/en-us/audio/objects.md",
+  "simple": "This page explains the building blocks Roblox uses to play sound. Each audio object acts like a real piece of sound gear: a music player, a speaker, a microphone, or a cable. You connect them with `Wire` objects to make sound play everywhere (2D audio) or from a spot in the world (3D audio). It also covers turning text into a spoken voice and turning a player's speech into text.",
+  "analogy": "It is like hooking up a home stereo. The `AudioPlayer` is the music player, the `Wire` is the cable, and the `AudioDeviceOutput` is your headphones. Unplug the cable and you hear nothing.",
+  "keyPoints": [
+    "Audio objects either make sound (like `AudioPlayer`), receive it (like `AudioEmitter`), change it (effects), or carry it (`Wire`).",
+    "2D audio needs three objects in SoundService: an `AudioPlayer`, an `AudioDeviceOutput`, and a `Wire` from the player to the output.",
+    "A `Wire` uses `SourceInstance` for where the sound comes from and `TargetInstance` for where it goes.",
+    "3D audio puts an `AudioPlayer`, an `AudioEmitter`, and a `Wire` inside a part, and SoundService's `ListenerLocation` (Character or Camera) creates the listener and output for you.",
+    "`DistanceAttenuation` on an `AudioEmitter` is a curve that sets how loud the sound is at each distance.",
+    "`AudioTextToSpeech` reads text out loud (up to 300 characters) using a voice picked by `VoiceId`.",
+    "`AudioSpeechToText` turns microphone speech into text; you wire an `AudioDeviceInput` into it and set its `Player`.",
+    "To start a sound from code, call `:Play()` on an `AudioPlayer` that is wired up correctly."
+  ],
+  "terms": {
+    "2D audio": "Sound with no location. It is the same volume wherever your character stands, like background music.",
+    "3D audio": "Sound that comes from a place in the world. Stand 5 studs from a radio and it is loud; stand 100 studs away and it is quiet or silent.",
+    "audio stream": "The sound flowing from one audio object to the next through wires.",
+    "AudioEmitter": "A pretend speaker. It sends sound out from the position of whatever it is parented to, such as a part.",
+    "AudioListener": "A pretend microphone, usually on the camera or the player's character, that picks up sound from emitters nearby.",
+    "AudioDeviceOutput": "Stands for the player's real speakers or headphones. Sound must reach this to be heard.",
+    "SourceInstance / TargetInstance": "The two ends of a `Wire`. Source is where the sound starts, Target is where it goes. Example: Source = AudioPlayer, Target = AudioDeviceOutput.",
+    "ListenerLocation": "A SoundService setting that decides where the automatic listener goes: on the Camera, on the Character, or nowhere (None).",
+    "DistanceAttenuation": "A volume-over-distance curve. The page's example plays at half volume at 50 studs away and drops to silent at 70 studs.",
+    "attenuation": "Sound getting quieter, usually because you are farther away.",
+    "amplitude / Volume": "How loud the sound is. `AudioPlayer.Volume` goes from 0 (silent) to 10.",
+    "Looping": "When on, the sound starts over each time it ends, like music that never stops.",
+    "text-to-speech (TTS)": "The computer reads written words out loud with an artificial voice.",
+    "speech-to-text (STT)": "The computer listens to someone talking and writes down the words.",
+    "VoiceId": "A number that picks the TTS voice. For example 1 is British male and 4 is United States female #1.",
+    "tokenize": "Breaking a sentence into a list of single words, for example \"Open the door!\" becomes `open`, `the`, `door`."
+  },
+  "example": {
+    "title": "Play background music for everyone",
+    "place": "Script in ServerScriptService",
+    "code": "local SoundService = game:GetService(\"SoundService\")\n\n-- The audio player loads and plays the sound file\nlocal player = Instance.new(\"AudioPlayer\")\nplayer.Asset = \"rbxassetid://1234567890\" -- replace with your own audio asset ID\nplayer.Looping = true -- start over when it ends\nplayer.Volume = 1\nplayer.Parent = SoundService\n\n-- The output stands for everyone's speakers or headphones\nlocal output = Instance.new(\"AudioDeviceOutput\")\noutput.Parent = SoundService\n\n-- The wire carries sound from the player to the output\nlocal wire = Instance.new(\"Wire\")\nwire.SourceInstance = player\nwire.TargetInstance = output\nwire.Parent = SoundService\n\n-- Wait until the sound file is loaded, then play it\nwhile not player.IsReady do\n\ttask.wait(0.1)\nend\nplayer:Play()",
+    "explain": [
+      "We get SoundService, the usual home for sounds that play everywhere.",
+      "We make an `AudioPlayer` and give it an asset ID, turn on looping, and set the volume.",
+      "We make an `AudioDeviceOutput`. Because we do not set its `Player`, everyone hears it.",
+      "We make a `Wire` and set `SourceInstance` to the player and `TargetInstance` to the output, which connects them.",
+      "We wait until `IsReady` is true so the file is loaded, then call `:Play()`."
+    ]
+  },
+  "watchOut": [
+    "No sound? Check the `Wire`. If `SourceInstance` or `TargetInstance` is empty or pointing at the wrong object, nothing is heard.",
+    "For 3D sound you need two wires: player to emitter, and listener to output. Setting `ListenerLocation` to Character or Camera makes the second half for you.",
+    "If your 3D sound cuts out too soon, look at the `DistanceAttenuation` curve; it may drop to zero at a short distance.",
+    "Text-to-speech text is limited to 300 characters and must follow Roblox's Community Standards.",
+    "Turning on the microphone for speech-to-text also turns on voice chat by default. Turn off `EnableDefaultVoice` on VoiceChatService if you do not want others to hear players."
+  ]
+}

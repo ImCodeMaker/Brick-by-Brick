@@ -1,0 +1,79 @@
+{
+  "name": "ClickDetector",
+  "simple": "A ClickDetector lets players click (or tap) on a part in the 3D world. Put one inside a part, and its MouseClick event fires when someone clicks that part, telling you who clicked. It also knows when the mouse moves over the part or right-clicks it.",
+  "analogy": "A ClickDetector is like turning a part into a big real-life button. Without it, a part is just a block; with it, the part can feel your clicks.",
+  "whenToUse": [
+    "Buttons in the world, like an elevator button or a light switch.",
+    "Click a chest, NPC, or item to interact with it.",
+    "Change the mouse icon or glow a part when the mouse hovers over it."
+  ],
+  "where": "Put it inside a BasePart, Model, or Folder in Workspace. Its events fire in both Scripts (server) and LocalScripts (client). For a LocalScript, put the script in StarterPlayerScripts, not inside the ClickDetector.",
+  "terms": {
+    "hover": "When the mouse pointer is over something without clicking.",
+    "stud": "Roblox's unit of distance.",
+    "cursor": "The mouse pointer on the screen.",
+    "asset ID": "The address of an uploaded image or file, like `rbxassetid://123456`.",
+    "server": "Roblox's computer running the shared game.",
+    "client": "One player's own device.",
+    "deprecated": "Old and replaced by something newer."
+  },
+  "examples": [
+    {
+      "title": "Light switch",
+      "place": "Script inside a Part named Switch (with a ClickDetector inside it, and a PointLight in a Part named Lamp)",
+      "code": "local Workspace = game:GetService(\"Workspace\")\nlocal switch = script.Parent\nlocal detector = switch:WaitForChild(\"ClickDetector\")\nlocal light = Workspace:WaitForChild(\"Lamp\"):WaitForChild(\"PointLight\")\n\ndetector.MaxActivationDistance = 15 -- must be within 15 studs\n\ndetector.MouseClick:Connect(function(player)\n\tlight.Enabled = not light.Enabled -- flip on/off\n\tprint(player.Name, \"flipped the switch\")\nend)",
+      "explain": [
+        "MouseClick fires on the server with the player who clicked.",
+        "`not light.Enabled` flips true to false or false to true, so each click toggles the light.",
+        "Because this is a server Script, everyone sees the light change."
+      ]
+    },
+    {
+      "title": "Glow on hover",
+      "place": "Script inside a Part (with a ClickDetector inside it)",
+      "code": "local part = script.Parent\nlocal detector = part:WaitForChild(\"ClickDetector\")\n\ndetector.MouseHoverEnter:Connect(function()\n\tpart.Material = Enum.Material.Neon\nend)\n\ndetector.MouseHoverLeave:Connect(function()\n\tpart.Material = Enum.Material.Plastic\nend)",
+      "explain": [
+        "When the mouse moves onto the part, it turns glowing Neon.",
+        "When the mouse leaves, it turns back to Plastic."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A LocalScript inside a ClickDetector in Workspace will not run. Put LocalScripts in StarterPlayerScripts and find the detector from there.",
+    "Players farther than MaxActivationDistance cannot click it.",
+    "If several ClickDetectors could catch a click, only the deepest one (most nested) fires."
+  ],
+  "members": {
+    "ClickDetector.CursorIcon": {
+      "simple": "The image used for the mouse pointer while it hovers over the part. Leave empty for the default pointer.",
+      "example": "local detector = script.Parent:WaitForChild(\"ClickDetector\")\ndetector.CursorIcon = \"rbxassetid://0000000\" -- use your own image ID"
+    },
+    "ClickDetector.CursorIconContent": {
+      "simple": "Same idea as CursorIcon (the hover mouse image), but stored as a Content value. It only accepts asset addresses.",
+      "example": "local detector = script.Parent:WaitForChild(\"ClickDetector\")\ndetector.CursorIconContent = Content.fromUri(\"rbxassetid://0000000\")"
+    },
+    "ClickDetector.MaxActivationDistance": {
+      "simple": "How close, in studs, a player's character must be to click it. If a character is 10 studs away and this is 5, the click does not count.",
+      "example": "local detector = script.Parent:WaitForChild(\"ClickDetector\")\ndetector.MaxActivationDistance = 20"
+    },
+    "ClickDetector.MouseClick": {
+      "simple": "Fires when a player left-clicks the part (or taps it on a phone, or presses the controller button while aiming at it). Gives you the player who clicked.",
+      "example": "local detector = script.Parent:WaitForChild(\"ClickDetector\")\ndetector.MouseClick:Connect(function(player)\n\tprint(player.Name, \"clicked me\")\nend)"
+    },
+    "ClickDetector.mouseClick": {
+      "simple": "Old — use `MouseClick` instead."
+    },
+    "ClickDetector.MouseHoverEnter": {
+      "simple": "Fires when a player's mouse pointer moves onto the part. Gives you that player.",
+      "example": "local detector = script.Parent:WaitForChild(\"ClickDetector\")\ndetector.MouseHoverEnter:Connect(function(player)\n\tprint(player.Name, \"is pointing at me\")\nend)"
+    },
+    "ClickDetector.MouseHoverLeave": {
+      "simple": "Fires when a player's mouse pointer moves off the part.",
+      "example": "local detector = script.Parent:WaitForChild(\"ClickDetector\")\ndetector.MouseHoverLeave:Connect(function(player)\n\tprint(player.Name, \"stopped pointing at me\")\nend)"
+    },
+    "ClickDetector.RightMouseClick": {
+      "simple": "Fires when a player right-clicks the part. Gives you the player.",
+      "example": "local detector = script.Parent:WaitForChild(\"ClickDetector\")\ndetector.RightMouseClick:Connect(function(player)\n\tprint(player.Name, \"right-clicked me\")\nend)"
+    }
+  }
+}

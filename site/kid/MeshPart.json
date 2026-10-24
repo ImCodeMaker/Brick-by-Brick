@@ -1,0 +1,75 @@
+{
+  "name": "MeshPart",
+  "simple": "A MeshPart is a part with a custom 3D shape, like a sword, tree, or car, made in a 3D modeling program such as Blender and imported into Studio. It works just like a normal part: it can be anchored, collide, fall, and fire Touched. Its shape comes from `MeshId`, and its picture painted on the outside comes from `TextureID`.",
+  "analogy": "If a Part is a plain LEGO brick, a MeshPart is a custom-molded action figure: it can be any shape at all, but you still pick it up, drop it, and bump it like any other toy.",
+  "whenToUse": [
+    "Use detailed custom models (weapons, furniture, characters) that are solid and physical.",
+    "Swap the painted texture on a model while the game is running.",
+    "Lower the detail of far-away models with `RenderFidelity` to help speed."
+  ],
+  "where": "Lives in Workspace like any part. You usually import it in Studio (3D Importer). Scripts cannot change its shape directly; use `AssetService:CreateMeshPartAsync()` or `ApplyMesh` to make or swap shapes.",
+  "terms": {
+    "mesh": "A 3D shape made of many tiny triangles, like a sculpture made of paper triangles.",
+    "texture": "A flat picture that gets wrapped around a mesh to color it, like a sticker skin.",
+    "asset ID / asset URI": "The address of an uploaded file on Roblox, like `rbxassetid://123456`. It tells the game which mesh or picture to load.",
+    "render": "To draw something on the screen.",
+    "collision geometry": "The invisible shape physics uses to decide what the MeshPart bumps into.",
+    "skinned mesh": "A mesh with bones inside so it can bend, like a character's arm."
+  },
+  "examples": [
+    {
+      "title": "Swap a MeshPart's texture",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal statue = Workspace:WaitForChild(\"Statue\") -- a MeshPart\n\n-- Remove the texture so the statue shows just its Color\nstatue.TextureID = \"\"\nstatue.Color = Color3.fromRGB(255, 215, 0) -- gold\n\ntask.wait(5)\n-- Put a texture back (use your own uploaded image ID)\nstatue.TextureID = \"rbxassetid://0000000\"",
+      "explain": [
+        "Setting `TextureID` to an empty string removes the painted picture, so you see the part's Color instead.",
+        "After 5 seconds we set a new texture by its asset ID. Replace the zeros with a real image ID from your Creator Hub."
+      ]
+    }
+  ],
+  "gotchas": [
+    "You cannot change `MeshId` from a script while the game runs. Use `ApplyMesh` with another MeshPart, or `AssetService:CreateMeshPartAsync()`.",
+    "Leaves, hair, and cloth made from flat cards may look invisible from behind. Turn on `DoubleSided`."
+  ],
+  "members": {
+    "MeshPart.DoubleSided": {
+      "simple": "If true, both sides of each triangle are drawn. Useful for flat meshes like leaves, hair, or flags that would otherwise be invisible from the back.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal leaf = Workspace:WaitForChild(\"Leaf\")\nleaf.DoubleSided = true"
+    },
+    "MeshPart.HasJointOffset": {
+      "simple": "Old — no longer used."
+    },
+    "MeshPart.HasSkinnedMesh": {
+      "simple": "Read-only info that is true if the mesh has bones inside so it can bend (a skinned mesh). Roblox sets it when the mesh loads; scripts cannot change it.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal mesh = Workspace:WaitForChild(\"Creature\")\nprint(mesh.HasSkinnedMesh)"
+    },
+    "MeshPart.JointOffset": {
+      "simple": "Old — no longer used."
+    },
+    "MeshPart.MeshContent": {
+      "simple": "The mesh shape shown by this MeshPart. It can point to an uploaded mesh or an EditableMesh made in code. Scripts can read it but cannot change it directly.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal mesh = Workspace:WaitForChild(\"Sword\")\nprint(mesh.MeshContent.Uri)",
+      "gotcha": "To get a MeshPart with a new shape, use `AssetService:CreateMeshPartAsync()` and then `ApplyMesh`."
+    },
+    "MeshPart.MeshId": {
+      "simple": "The asset address (like `rbxassetid://123`) of the mesh shape. It is the text version of MeshContent. You set it in Studio; scripts can read it but not change it.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal mesh = Workspace:WaitForChild(\"Sword\")\nprint(mesh.MeshId)"
+    },
+    "MeshPart.RenderFidelity": {
+      "simple": "How much detail the mesh is drawn with. Automatic (the default) draws more detail up close and less far away. Precise always uses full detail. Performance always uses less detail to run faster.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal tree = Workspace:WaitForChild(\"Tree\")\ntree.RenderFidelity = Enum.RenderFidelity.Performance"
+    },
+    "MeshPart.TextureContent": {
+      "simple": "The picture wrapped around the mesh. It can be an uploaded image or an EditableImage made in code. Set it to `Content.none` for no texture. Unlike the mesh, the texture CAN be changed while the game runs.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal mesh = Workspace:WaitForChild(\"Statue\")\nmesh.TextureContent = Content.none -- no texture"
+    },
+    "MeshPart.TextureID": {
+      "simple": "The asset address (like `rbxassetid://123`) of the picture wrapped around the mesh. It is the text version of TextureContent. Set it to an empty string for no texture.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal mesh = Workspace:WaitForChild(\"Statue\")\nmesh.TextureID = \"\" -- no texture"
+    },
+    "MeshPart:ApplyMesh": {
+      "simple": "Copies the shape, texture, and collision shape from another MeshPart onto this one, all at once. This is how you change a MeshPart's shape while the game runs, since MeshId cannot be set directly.",
+      "example": "local ServerStorage = game:GetService(\"ServerStorage\")\nlocal Workspace = game:GetService(\"Workspace\")\nlocal block = Workspace:WaitForChild(\"MagicBlock\")      -- a MeshPart\nlocal dragon = ServerStorage:WaitForChild(\"DragonMesh\") -- another MeshPart\nblock:ApplyMesh(dragon) -- MagicBlock now looks and collides like the dragon"
+    }
+  }
+}

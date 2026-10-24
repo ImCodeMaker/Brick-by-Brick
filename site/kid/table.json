@@ -1,0 +1,126 @@
+{
+  "name": "table",
+  "simple": "A table is Luau's way of storing a bunch of values together, like a list of player names or a list of scores. The table library is a toolbox for lists: add items, remove items, find an item, sort the list, join it into text, copy it, and more.",
+  "analogy": "A table is like a numbered row of lockers. The table library is the school janitor who can add a new locker at the end, take one out and slide the others over, find which locker holds your backpack, or line them up in order.",
+  "whenToUse": [
+    "Keep a list of things and add to it (`table.insert`)",
+    "Take things out of a list (`table.remove`)",
+    "Check if something is in a list (`table.find`)",
+    "Put a leaderboard in order (`table.sort`)",
+    "Turn a list into one piece of text (`table.concat`)"
+  ],
+  "where": "A built-in library, so there is nothing to get. Works in any script.",
+  "terms": {
+    "table": "A container that holds many values. Make one with curly braces: `local fruits = {\"apple\", \"banana\"}`.",
+    "array (list)": "A table where items are stored at number positions 1, 2, 3 and so on, in order.",
+    "dictionary": "A table where items are stored under names (keys) instead of numbers, like `{coins = 10, level = 3}`.",
+    "index": "The number position of an item in a list. Luau lists start at 1, so `fruits[1]` is the first item.",
+    "key / value": "In a table, the key is the label (like 1 or \"coins\") and the value is what is stored there (like \"apple\" or 10).",
+    "length (#)": "How many items a list has. `#fruits` gives it.",
+    "nil": "Means \"nothing\" or \"no value\". Setting an item to nil removes it.",
+    "shallow copy": "A copy of the table itself, but any tables INSIDE it are shared with the original, not copied.",
+    "frozen": "Locked so it cannot be changed. Trying to change a frozen table causes an error.",
+    "tuple": "Several values handed back at once, like `local a, b, c = table.unpack(list)`.",
+    "comparison function": "A function you give to `table.sort` that takes two items and returns true if the first should come BEFORE the second."
+  },
+  "examples": [
+    {
+      "title": "A to-do list: add, remove, find",
+      "place": "Script in ServerScriptService",
+      "code": "local tasks = {\"Collect coins\", \"Beat the boss\"}\n\ntable.insert(tasks, \"Find the key\")       -- add at the end\ntable.insert(tasks, 1, \"Say hi\")          -- add at position 1, others slide up\nprint(table.concat(tasks, \", \"))\n-- Say hi, Collect coins, Beat the boss, Find the key\n\nlocal spot = table.find(tasks, \"Beat the boss\")\nprint(spot) -- 3\n\ntable.remove(tasks, spot)                 -- take it out, others slide down\nprint(#tasks) -- 3\nprint(table.concat(tasks, \", \"))\n-- Say hi, Collect coins, Find the key",
+      "explain": [
+        "`table.insert(list, value)` adds at the end. With a position first, it squeezes the value in there.",
+        "`table.find` tells you where an item is (or nil if it is not there).",
+        "`table.remove(list, position)` takes an item out and closes the gap.",
+        "`table.concat` joins the list into one string, with \", \" between items."
+      ]
+    },
+    {
+      "title": "Sort a leaderboard from highest to lowest",
+      "place": "Script in ServerScriptService",
+      "code": "local scores = {\n    {name = \"Ava\", points = 40},\n    {name = \"Ben\", points = 95},\n    {name = \"Cal\", points = 70},\n}\n\n-- return true if a should come before b\ntable.sort(scores, function(a, b)\n    return a.points > b.points -- bigger points first\nend)\n\nfor place, entry in scores do\n    print(place .. \". \" .. entry.name .. \" - \" .. entry.points)\nend\n-- 1. Ben - 95\n-- 2. Cal - 70\n-- 3. Ava - 40",
+      "explain": [
+        "Each item is a small table with a name and points.",
+        "`table.sort` puts the list in order. Our function says: a goes first if it has MORE points.",
+        "Without a function, `table.sort` puts plain numbers or strings from smallest to biggest."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Lists start at 1, not 0.",
+    "Most table functions only work on lists (number positions 1, 2, 3...). They ignore dictionary keys like `coins`.",
+    "Do not use `table.remove` while looping forward through the same list; items slide and you will skip some. Loop backwards instead: `for i = #list, 1, -1 do`.",
+    "`#list` can be wrong if the list has holes (a nil in the middle). Use `table.remove` instead of setting items to nil.",
+    "`table.clone` only copies the outer table. Tables inside it are still shared."
+  ],
+  "members": {
+    "table.clear": {
+      "simple": "Empties a table: every key is set to nil, so `#t` becomes 0. The table itself is kept, so you can refill it quickly.",
+      "example": "local bag = {\"sword\", \"shield\"}\ntable.clear(bag)\nprint(#bag) -- 0"
+    },
+    "table.clone": {
+      "simple": "Makes a copy of a table, so changing the copy does not change the original. It is a shallow copy: tables inside are shared.",
+      "example": "local original = {coins = 10}\nlocal copy = table.clone(original)\ncopy.coins = 99\nprint(original.coins) -- 10, the original did not change"
+    },
+    "table.concat": {
+      "simple": "Joins a list of strings or numbers into one string, with an optional separator between them. You can also choose a start and end position.",
+      "example": "print(table.concat({\"a\", \"b\", \"c\"}, \"-\")) -- a-b-c\nprint(table.concat({1, 2, 3}))           -- 123",
+      "gotcha": "Every item must be a string or number; anything else causes an error."
+    },
+    "table.create": {
+      "simple": "Makes a new list with room for a certain number of items, optionally filled with the same value. Good for speed when you know how big a list will be.",
+      "example": "local row = table.create(3, 0)\nprint(table.concat(row, \",\")) -- 0,0,0"
+    },
+    "table.find": {
+      "simple": "Looks through a list for a value and gives back its position, or nil if it is not there. An optional 3rd number says where to start looking.",
+      "example": "local colors = {\"red\", \"green\", \"blue\"}\nprint(table.find(colors, \"blue\"))  -- 3\nprint(table.find(colors, \"pink\"))  -- nil",
+      "gotcha": "It only searches number positions (lists), not dictionary keys."
+    },
+    "table.foreach": {
+      "simple": "Old — use a `for key, value in t do` loop instead."
+    },
+    "table.foreachi": {
+      "simple": "Old — use a `for i, value in ipairs(t) do` loop instead."
+    },
+    "table.freeze": {
+      "simple": "Locks a table so it can never be changed again. Good for settings that should stay the same. Only the outer table is locked; tables inside it are not.",
+      "example": "local SETTINGS = table.freeze({maxPlayers = 10})\n-- SETTINGS.maxPlayers = 20  -- this would cause an error\nprint(SETTINGS.maxPlayers) -- 10"
+    },
+    "table.getn": {
+      "simple": "Old — use the `#` operator instead, like `#list`."
+    },
+    "table.insert": {
+      "simple": "Adds a value to a list. `table.insert(list, value)` puts it at the end. `table.insert(list, position, value)` squeezes it in at that position and slides the rest up by one.",
+      "example": "local line = {\"Ava\", \"Ben\"}\ntable.insert(line, \"Cal\")      -- {\"Ava\", \"Ben\", \"Cal\"}\ntable.insert(line, 1, \"Zoe\")   -- {\"Zoe\", \"Ava\", \"Ben\", \"Cal\"}\nprint(table.concat(line, \", \"))"
+    },
+    "table.isfrozen": {
+      "simple": "True if the table has been locked with `table.freeze`.",
+      "example": "local t = table.freeze({})\nprint(table.isfrozen(t)) -- true"
+    },
+    "table.maxn": {
+      "simple": "Gives the biggest number key in a table, even if there are gaps. 0 if there are no number keys.",
+      "example": "local t = {[1] = \"a\", [5] = \"b\"}\nprint(table.maxn(t)) -- 5"
+    },
+    "table.move": {
+      "simple": "Copies a range of items from one list into a list (the same one or another), starting at a chosen position. Gives back the destination list.",
+      "example": "local a = {4, 5}\nlocal b = {1, 2, 3}\ntable.move(a, 1, 2, 4, b) -- copy a[1] to a[2] into b starting at b[4]\nprint(table.concat(b, \",\")) -- 1,2,3,4,5"
+    },
+    "table.pack": {
+      "simple": "Puts any number of values into a new list, and also stores how many there were in a field called `n`.",
+      "example": "local t = table.pack(\"a\", \"b\", \"c\")\nprint(t.n)    -- 3\nprint(t[2])   -- b"
+    },
+    "table.remove": {
+      "simple": "Takes an item out of a list at a position and gives it back. The items after it slide down to fill the gap. With no position, it removes the last item.",
+      "example": "local stack = {\"a\", \"b\", \"c\"}\nlocal last = table.remove(stack)     -- removes \"c\"\nlocal first = table.remove(stack, 1) -- removes \"a\"\nprint(last, first, #stack) -- c a 1"
+    },
+    "table.sort": {
+      "simple": "Puts a list in order, changing the list itself. By default smallest to biggest (or A to Z). Give a function to choose your own order: it gets two items and returns true if the first should come first.",
+      "example": "local nums = {5, 2, 9, 1}\ntable.sort(nums)\nprint(table.concat(nums, \",\")) -- 1,2,5,9\n\ntable.sort(nums, function(a, b) return a > b end)\nprint(table.concat(nums, \",\")) -- 9,5,2,1",
+      "gotcha": "Your function must be consistent. If it says both a before b AND b before a, you get an \"invalid order function\" error. Use `>` or `<`, never `>=`."
+    },
+    "table.unpack": {
+      "simple": "Takes the items out of a list and gives them back as separate values. Handy to pass a list's items into a function.",
+      "example": "local nums = {3, 7, 1}\nprint(math.max(table.unpack(nums))) -- 7\nlocal a, b = table.unpack({\"x\", \"y\"})\nprint(a, b) -- x y"
+    }
+  }
+}

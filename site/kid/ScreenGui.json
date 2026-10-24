@@ -1,0 +1,82 @@
+{
+  "name": "ScreenGui",
+  "simple": "A ScreenGui is the invisible 'sheet of glass' in front of the game that holds UI shown flat on the player's screen: health bars, menus, shop windows, buttons. Put Frames, TextLabels and buttons inside it. It only shows up when it's inside a player's PlayerGui, which happens automatically if you put it in StarterGui.",
+  "analogy": "A ScreenGui is like stickers on the glass of a TV. The show (the 3D game) plays behind, and your stickers (UI) stay in the same spot on the glass no matter where the camera looks.",
+  "whenToUse": [
+    "Any UI that sits on the screen: HUD, health bar, coin counter, menus, shop, settings",
+    "Grouping one menu together so you can turn it all on or off with Enabled",
+    "Putting one menu on top of another with DisplayOrder"
+  ],
+  "where": "Put it in StarterGui in Studio; it is copied into each player's PlayerGui (Players > YourName > PlayerGui) when they spawn. Change it from a LocalScript using Players.LocalPlayer.PlayerGui. Everything about it runs on the client.",
+  "terms": {
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts, because each player has their own copy of the UI.",
+    "client": "The player's own device: their computer, phone, tablet or console.",
+    "server": "Roblox's computer that runs the game for everyone at once.",
+    "StarterGui": "A folder in Explorer. UI you put here is copied to every player when they spawn.",
+    "PlayerGui": "Each player's own personal UI folder (inside their Player object). Only UI in here actually shows on their screen.",
+    "descendant": "Anything inside an object: children, grandchildren, and so on.",
+    "HUD": "Heads-Up Display: the info that's always on screen while you play, like health and coins.",
+    "safe area": "The part of the screen that isn't covered by things like the Roblox top bar buttons or a phone's camera notch.",
+    "inset": "Space pushed in from the edges of the screen so UI doesn't get covered.",
+    "notch": "The cut-out at the top of some phone screens where the camera is.",
+    "top bar": "The strip at the top of the Roblox window with the Roblox menu, chat and other built-in buttons.",
+    "Z-index order": "Which thing is drawn on top. Higher means more on top.",
+    "clip": "Cut off and hide the parts outside an area."
+  },
+  "examples": [
+    {
+      "title": "Make a coin counter in the top-right corner",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\nlocal playerGui = player:WaitForChild(\"PlayerGui\")\n\n-- The canvas\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Name = \"CoinGui\"\nscreenGui.ResetOnSpawn = false\nscreenGui.Parent = playerGui\n\n-- The label, stuck to the top-right corner\nlocal coinLabel = Instance.new(\"TextLabel\")\ncoinLabel.AnchorPoint = Vector2.new(1, 0)            -- place by its top-RIGHT corner\ncoinLabel.Position = UDim2.new(1, -10, 0, 10)        -- 10 px in from the right, 10 px down\ncoinLabel.Size = UDim2.fromOffset(160, 40)\ncoinLabel.BackgroundTransparency = 0.3\ncoinLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)\ncoinLabel.TextColor3 = Color3.fromRGB(255, 215, 0)  -- gold\ncoinLabel.TextSize = 24\ncoinLabel.Text = \"Coins: 0\"\ncoinLabel.Parent = screenGui",
+      "explain": [
+        "UI only shows on a player's screen if it's inside their PlayerGui, so we parent the ScreenGui there.",
+        "AnchorPoint (1, 0) means Position sets the label's top-right corner.",
+        "Position (1, -10, 0, 10): X Scale 1 = the right edge of the screen, then -10 pixels moves it left a bit. Y is 10 pixels from the top.",
+        "On a 1000-pixel-wide screen, the label's right edge is at 990 and its left edge at 990 - 160 = 830."
+      ]
+    },
+    {
+      "title": "Open and close a menu made in Studio",
+      "place": "LocalScript in StarterPlayerScripts (with ScreenGuis named \"MainMenu\" and \"Settings\" in StarterGui)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal mainMenu = playerGui:WaitForChild(\"MainMenu\")\nlocal settingsMenu = playerGui:WaitForChild(\"Settings\")\n\nsettingsMenu.DisplayOrder = 10 -- draw the settings ON TOP of the main menu\nmainMenu.DisplayOrder = 0\n\nmainMenu.Enabled = true\nsettingsMenu.Enabled = false\n\ntask.wait(3)\nsettingsMenu.Enabled = true -- pop the settings open after 3 seconds",
+      "explain": [
+        "Studio copies ScreenGuis from StarterGui into PlayerGui, so we find them there with WaitForChild (they may take a moment to appear).",
+        "DisplayOrder decides which ScreenGui is on top: 10 is above 0.",
+        "Enabled turns each whole menu on or off."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Changing UI in StarterGui from a script during the game does NOT change what players see. Change the copy in Players.LocalPlayer.PlayerGui instead.",
+    "A ScreenGui placed in Workspace or ReplicatedStorage won't show. It must end up in PlayerGui.",
+    "Use a LocalScript for UI. A server Script can't reliably control one player's screen.",
+    "By default the ScreenGui stays below the Roblox top bar. Set ScreenInsets to None (or IgnoreGuiInset to true) only for background art that can safely be covered.",
+    "Your UI resets every respawn unless ResetOnSpawn is false."
+  ],
+  "members": {
+    "ScreenGui.ClipToDeviceSafeArea": {
+      "simple": "When true (default), anything inside this ScreenGui is cut off at the edge of the device's safe area, so it doesn't draw under the phone's camera notch or other cut-outs. When false, UI can spread into those spots and might get hidden behind them.",
+      "example": "local gui = script.Parent -- a ScreenGui\ngui.ClipToDeviceSafeArea = false -- let background art go all the way to the edges",
+      "gotcha": "Ignored when ScreenInsets is None."
+    },
+    "ScreenGui.DisplayOrder": {
+      "simple": "Decides which ScreenGui is drawn on top when there are several. A higher number is drawn above a lower number. Give pop-up windows a higher DisplayOrder than your normal HUD.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nplayerGui:WaitForChild(\"HUD\").DisplayOrder = 0\nplayerGui:WaitForChild(\"PopupWindow\").DisplayOrder = 5 -- on top of the HUD",
+      "gotcha": "ZIndex only sorts objects INSIDE one ScreenGui. DisplayOrder sorts whole ScreenGuis."
+    },
+    "ScreenGui.IgnoreGuiInset": {
+      "simple": "When false (default), your UI starts just below the Roblox top bar. When true, it can go all the way up behind the top bar (the ScreenInsets switches to DeviceSafeInsets). Useful for full-screen loading screens.",
+      "example": "local loadingScreen = script.Parent -- a ScreenGui\nloadingScreen.IgnoreGuiInset = true -- cover the whole window, top bar area too",
+      "gotcha": "With this true, Position (0, 0) is the very top of the window instead of just below the top bar."
+    },
+    "ScreenGui.SafeAreaCompatibility": {
+      "simple": "Helps old full-screen UI look right on phones with notches by stretching it automatically (FullscreenExtension, the default) or not at all (None). For new games, Roblox recommends setting up ScreenInsets yourself instead.",
+      "example": "local gui = script.Parent\ngui.SafeAreaCompatibility = Enum.SafeAreaCompatibility.None"
+    },
+    "ScreenGui.ScreenInsets": {
+      "simple": "Decides how far in from the screen edges this ScreenGui's area starts. CoreUISafeInsets (default) keeps UI clear of the Roblox top bar buttons and phone notches. DeviceSafeInsets only avoids notches. None uses the whole screen, which is fine for backgrounds but buttons may get covered.",
+      "example": "local backgroundGui = script.Parent -- a ScreenGui with just a background picture\nbackgroundGui.ScreenInsets = Enum.ScreenInsets.None -- fill the entire screen",
+      "gotcha": "Don't put important buttons in a ScreenGui set to None; the top bar or a notch can cover them."
+    }
+  }
+}

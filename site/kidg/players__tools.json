@@ -1,0 +1,47 @@
+{
+  "path": "content/en-us/players/tools.md",
+  "simple": "Tools are the items players hold and use, like swords, wands, flashlights, and keys. This page shows how to build a `Tool`, where to put it so players get it, and how to make it do something when used. Knowing this lets you add gear to your game, give it as a reward, or sell it in a shop.",
+  "analogy": "A tool is like a backpack item in real life. It sits in your bag until you take it out (equip), and then you can use it (activate), like switching on a flashlight.",
+  "keyPoints": [
+    "Insert a `Tool` object, then set `TextureId` (its inventory picture) and `ToolTip` (the name shown on hover).",
+    "A physical tool needs exactly one part named `Handle`. That is where the character's right hand grabs it.",
+    "Weld all parts of a tool together, and do not anchor them, or the player gets stuck when holding it.",
+    "Change the tool's `Grip` to fix how it sits in the hand. You usually have to try a few values.",
+    "A tool with no 3D model, like a spell, needs `RequiresHandle` turned off.",
+    "Put tools in `StarterPack` so everyone starts with them, in `Workspace` so players can pick them up, or in `ReplicatedStorage` to hand them out later by cloning them into a player's `Backpack`.",
+    "`Equipped`, `Unequipped`, `Activated`, and `Deactivated` events tell you what the player is doing with the tool.",
+    "Tool input happens on the player's device, so most tools need a LocalScript, a server Script, and a RemoteEvent to talk between them."
+  ],
+  "terms": {
+    "Handle": "The part of a tool that the character's hand holds. It must be named exactly `Handle`.",
+    "Grip": "A `CFrame` setting that moves and turns the tool compared to the hand holding it. For example, a Grip position of `(0, -1.5, 0)` moves the tool 1.5 studs along the hand's own up/down direction.",
+    "CFrame": "A value that stores both a position and a rotation together.",
+    "relative to": "Measured from something else. A tool's Grip is measured from the hand, not from the center of the world.",
+    "equip": "Take a tool out of the backpack and hold it.",
+    "activate": "Use the tool, like clicking, tapping, or pressing the right trigger on a controller.",
+    "Backpack": "A player's inventory. Tools inside it show up in the hotbar at the bottom of the screen.",
+    "StarterPack": "A container whose tools get copied into every player's Backpack when they spawn.",
+    "anchored": "A part that is frozen in place and does not move with physics.",
+    "WeldConstraint": "An invisible glue that holds two parts together so they move as one.",
+    "R15 / R6": "Two kinds of Roblox character bodies. R15 has 15 body parts and holds tools in `RightHand`. R6 has 6 parts and uses `Right Arm`.",
+    "RemoteEvent": "A messenger object that lets a LocalScript send a message to a server Script, or the other way around.",
+    "clone": "Make a copy of an object. `tool:Clone()` makes a new copy you can give to a player."
+  },
+  "example": {
+    "title": "Print what the player does with a tool",
+    "place": "LocalScript inside a Tool in StarterPack",
+    "code": "local tool = script.Parent\n\ntool.Equipped:Connect(function()\n\tprint(tool.Name, \"equipped\")\nend)\n\ntool.Unequipped:Connect(function()\n\tprint(tool.Name, \"put away\")\nend)\n\ntool.Activated:Connect(function()\n\t-- Runs when the player clicks or taps while holding the tool\n\tprint(tool.Name, \"used\")\nend)\n\ntool.Deactivated:Connect(function()\n\tprint(tool.Name, \"released\")\nend)",
+    "explain": [
+      "The LocalScript lives inside the tool, so `script.Parent` is the tool.",
+      "Each event is connected to a function that prints a message in the Output window.",
+      "`Activated` fires when the player starts clicking or tapping, and `Deactivated` fires when they let go.",
+      "To change the world for everyone, like spawning a part, fire a RemoteEvent from here and do the work in a server Script."
+    ]
+  },
+  "watchOut": [
+    "Anchoring tool parts. Players freeze in place when they hold it. If a pickup must float, unanchor its parts in the `Equipped` event.",
+    "Having two parts named `Handle`. Roblox picks one at random, so the character might hold a sword by its blade.",
+    "Forgetting to weld multi-part tools. The pieces fall apart as soon as the player picks it up.",
+    "Expecting tool events to fire in a server Script for player input. They fire in LocalScripts, so send a RemoteEvent to the server."
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "name": "ContextActionService",
+  "simple": "ContextActionService connects a player's buttons to an action in your game, but only while it makes sense. For example, the H key honks the horn only while you sit in a car. You give the action a name, list the keys or buttons, and it calls your function when they are pressed. It can even make an on-screen button for phone players automatically.",
+  "analogy": "It is like a TV remote whose buttons change job depending on which app is open. In the car app, the H button honks. Leave the car, and you unplug that job so H does nothing (or goes back to its old job).",
+  "whenToUse": [
+    "A key that should only work in certain situations, like near a door, in a car, or holding a tool",
+    "One action that works on keyboard, controller and phone at the same time",
+    "Automatically making a touch button for phone and tablet players",
+    "Temporarily taking over a key, then giving it back when you are done"
+  ],
+  "where": "Client only. Use it in a LocalScript (for example in StarterPlayerScripts or inside a Tool) with game:GetService(\"ContextActionService\").",
+  "terms": {
+    "context": "A situation where an action is allowed, like sitting in a car or standing near a door.",
+    "action": "Something the player can do in that situation, identified by a name you choose, like \"HonkHorn\" or \"OpenDoor\".",
+    "bind": "To connect an action to some keys or buttons so your function runs when they are pressed.",
+    "unbind": "To disconnect it again, so the keys stop doing that action.",
+    "handler (action handler)": "Your function that runs when the action's input happens. It receives the action name, the input state, and the InputObject.",
+    "UserInputState": "What stage the input is in: `Begin` (just pressed), `Change` (moving, like a joystick), `End` (released) or `Cancel` (interrupted, for example the action was unbound while the key was held).",
+    "InputObject": "A package of information about the input, like which key (`KeyCode`) and what type (`UserInputType`).",
+    "stack": "A pile where the newest thing goes on top. If two actions use the same key, the one bound most recently is on top and gets the press first.",
+    "sink / pass": "When your handler is done with a press, it can return `Enum.ContextActionResult.Sink` (eat it, nobody else gets it; this is also what happens if you return nothing) or `Enum.ContextActionResult.Pass` (let the next action on the stack have it too).",
+    "priority": "A number for ordering. With `BindActionAtPriority`, higher numbers get the input first.",
+    "touch button": "An on-screen button for phone and tablet players.",
+    "UDim2": "A GUI position or size made of a scale part (a fraction of the screen, like 0.5 for half) and an offset part (an exact number of pixels)."
+  },
+  "examples": [
+    {
+      "title": "Honk a horn with H, controller Y, or a phone button",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local ContextActionService = game:GetService(\"ContextActionService\")\n\nlocal ACTION_HONK = \"HonkHorn\"\n\nlocal honk = Instance.new(\"Sound\")\nhonk.SoundId = \"rbxassetid://9120386436\" -- a car horn sound\nhonk.Looped = true\nhonk.Parent = workspace\n\nlocal function handleAction(actionName, inputState, inputObject)\n    if actionName == ACTION_HONK then\n        if inputState == Enum.UserInputState.Begin then\n            honk:Play()   -- button pressed: start honking\n        else\n            honk:Stop()   -- released (or cancelled): stop\n        end\n    end\n    return Enum.ContextActionResult.Sink -- we used this input\nend\n\n-- when the player gets in the car (here: right away, for testing)\nContextActionService:BindAction(ACTION_HONK, handleAction, true, Enum.KeyCode.H, Enum.KeyCode.ButtonY)\nContextActionService:SetTitle(ACTION_HONK, \"Honk\") -- text on the phone button\n\n-- when the player gets out of the car, call:\n-- ContextActionService:UnbindAction(ACTION_HONK)",
+      "explain": [
+        "We store the action name in a variable at the top, because we use it in several places.",
+        "`BindAction` takes: the action name, our handler function, `true` to make a phone button, and then any keys or buttons (H on the keyboard, Y on a controller).",
+        "Our handler gets the input state: `Begin` when pressed and `End` when released, so the horn plays only while held.",
+        "`SetTitle` puts the word \"Honk\" on the phone button.",
+        "Calling `UnbindAction` when they leave the car makes H stop honking."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Only works in LocalScripts. Changes for everyone need a RemoteEvent to the server.",
+    "Your handler runs for BOTH press and release (and sometimes Cancel). Check `inputState` or your action will happen twice.",
+    "Returning nothing counts as Sink, which blocks other actions on the same key. Return `Enum.ContextActionResult.Pass` if you want other things (like default movement) to still get the key.",
+    "Binding a key the game already uses (like W or Space) takes it over until you unbind it, so the player may not be able to walk or jump.",
+    "Name actions after what they do (\"OpenDoor\"), not the key (\"KeyE\").",
+    "Only up to 7 touch buttons can be created this way."
+  ],
+  "members": {
+    "ContextActionService:BindAction": {
+      "simple": "Connects an action name to one or more keys or buttons. When one is pressed or released, your handler function runs with (actionName, inputState, inputObject). The third value, true or false, says whether to make an on-screen button for touch devices. The newest binding on a key wins.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nlocal function onReload(actionName, inputState, inputObject)\n    if inputState == Enum.UserInputState.Begin then\n        print(\"Reloading!\")\n    end\nend\nContextActionService:BindAction(\"Reload\", onReload, true, Enum.KeyCode.R, Enum.KeyCode.ButtonX)",
+      "gotcha": "Remember to `UnbindAction` when the situation is over, or the key keeps doing the action."
+    },
+    "ContextActionService:BindActionAtPriority": {
+      "simple": "Like `BindAction`, but you also give a priority number. When two actions share a key, the one with the HIGHER priority runs first, no matter which was bound last.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nlocal function onUse(actionName, inputState, inputObject)\n    if inputState == Enum.UserInputState.Begin then\n        print(\"Use (high priority)\")\n    end\nend\n-- 4th value is the priority: higher goes first\nContextActionService:BindActionAtPriority(\"Use\", onUse, false, 3000, Enum.KeyCode.E)"
+    },
+    "ContextActionService:BindActionToInputTypes": {
+      "simple": "Old — use `ContextActionService:BindAction` instead."
+    },
+    "ContextActionService:BindActivate": {
+      "simple": "Picks a keyboard key or controller button that \"activates\" things like Tools, ClickDetectors and GUI buttons, as if the player clicked. Roblox already uses this to make the R2 trigger fire tools on controllers.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\n-- make the F key use the equipped tool, like a click\nContextActionService:BindActivate(Enum.UserInputType.Keyboard, Enum.KeyCode.F)",
+      "gotcha": "The input type must be `Keyboard` or one of `Gamepad1` to `Gamepad8`."
+    },
+    "ContextActionService:GetAllBoundActionInfo": {
+      "simple": "Gives a table of every bound action and its details (like priority and order). Handy for figuring out why a key is not doing what you expect.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nfor actionName, info in ContextActionService:GetAllBoundActionInfo() do\n    print(actionName, info.priorityLevel, info.stackOrder)\nend"
+    },
+    "ContextActionService:GetBoundActionInfo": {
+      "simple": "Gives a table of details about one bound action, like its order on the stack (`stackOrder`), its priority (`priorityLevel`), whether it has a touch button (`createTouchButton`) and its input types.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nlocal info = ContextActionService:GetBoundActionInfo(\"Reload\")\nprint(info.stackOrder, info.createTouchButton)"
+    },
+    "ContextActionService:GetButton": {
+      "simple": "Gives you the on-screen ImageButton that `BindAction` made for a touch device, so you can change how it looks. Returns nil if no button was made (for example on a computer). It may wait (yield) a moment.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nlocal button = ContextActionService:GetButton(\"Reload\")\nif button then\n    button.ImageColor3 = Color3.fromRGB(255, 200, 0)\nend"
+    },
+    "ContextActionService:GetCurrentLocalToolIcon": {
+      "simple": "Gives the picture ID (TextureId) of the Tool the player is holding, or nil if they hold nothing.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nprint(ContextActionService:GetCurrentLocalToolIcon())"
+    },
+    "ContextActionService:SetDescription": {
+      "simple": "Saves a short text description for an action. It does not change the touch button; it is just a label describing the action.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nContextActionService:SetDescription(\"Reload\", \"Refill your blaster\")"
+    },
+    "ContextActionService:SetImage": {
+      "simple": "Sets the picture on an action's touch button. Does nothing (and no error) if there is no button.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nContextActionService:SetImage(\"Reload\", \"rbxassetid://1234567890\") -- your image ID"
+    },
+    "ContextActionService:SetPosition": {
+      "simple": "Moves an action's touch button on the screen, using a UDim2 (a fraction of the screen plus extra pixels). Does nothing if there is no button.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\n-- 50% across, 20% down the button area, plus 0 extra pixels\nContextActionService:SetPosition(\"Reload\", UDim2.new(0.5, 0, 0.2, 0))"
+    },
+    "ContextActionService:SetTitle": {
+      "simple": "Sets the text written on an action's touch button. Does nothing if there is no button.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nContextActionService:SetTitle(\"Reload\", \"R\")"
+    },
+    "ContextActionService:UnbindAction": {
+      "simple": "Removes an action by name, so its keys stop calling your function. If another action was bound to the same key before, it gets the key back. No error if the name is not found.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nContextActionService:UnbindAction(\"Reload\")"
+    },
+    "ContextActionService:UnbindActivate": {
+      "simple": "Undoes `BindActivate`, so that key or button no longer activates tools and buttons.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nContextActionService:UnbindActivate(Enum.UserInputType.Keyboard, Enum.KeyCode.F)"
+    },
+    "ContextActionService:UnbindAllActions": {
+      "simple": "Removes every action and all their touch buttons at once.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nContextActionService:UnbindAllActions()"
+    },
+    "ContextActionService.LocalToolEquipped": {
+      "simple": "Fires when the local player equips (holds) a Tool. Gives you the Tool. A great place to bind tool-only actions.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nContextActionService.LocalToolEquipped:Connect(function(tool)\n    print(\"Now holding\", tool.Name)\nend)"
+    },
+    "ContextActionService.LocalToolUnequipped": {
+      "simple": "Fires when the local player puts a Tool away. A great place to unbind tool-only actions.",
+      "example": "local ContextActionService = game:GetService(\"ContextActionService\")\nContextActionService.LocalToolUnequipped:Connect(function(tool)\n    ContextActionService:UnbindAction(\"Reload\")\nend)"
+    }
+  }
+}

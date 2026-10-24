@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/physics/constraints/linear-velocity.md",
+  "simple": "This page is about `LinearVelocity`, a constraint that keeps a part moving at a steady speed in a direction you choose. Physics pushes the part harder or softer as needed so the speed stays the same. It is great for things like conveyor belts, moving platforms, or a hovercraft that cruises forward. You can also choose whether the direction follows the world or follows the part as it turns.",
+  "analogy": "It is like cruise control in a car: you pick a speed, and the car gives more or less gas by itself to stay at that speed, even going uphill.",
+  "keyPoints": [
+    "`LinearVelocity` applies force to an assembly so it keeps a constant velocity (speed plus direction).",
+    "It can control speed along a full 3D direction (a `Vector3`), along one line, or across a flat 2D plane.",
+    "If you want to choose how much push is used instead of what speed to reach, use `VectorForce` instead.",
+    "If you only need a starting push (like a launch), set the part's `AssemblyLinearVelocity` once instead of using a constraint.",
+    "The `RelativeTo` property decides what the direction is measured against: `World` or one of the two attachments.",
+    "With `RelativeTo` set to `World`, a velocity of (0, 0, 10) always means 10 studs per second along the world Z axis, no matter which way the part faces.",
+    "With `RelativeTo` set to `Attachment0`, the direction turns with the attachment, so 'forward' stays the part's own forward."
+  ],
+  "terms": {
+    "constraint": "An object that controls how parts move, like an invisible motor, rope, or hand pushing them. Mover constraints push or spin parts for you.",
+    "assembly": "A group of parts that are welded or joined together so physics moves them as one piece. A car body plus its welded seats is one assembly.",
+    "attachment": "A small invisible point you put inside a part. Constraints hook onto attachments, the same way a rope ties onto a hook.",
+    "Attachment0 / Attachment1": "The two attachment slots a constraint uses. Attachment0 is usually the one that gets pushed; Attachment1 is the other end or the reference point.",
+    "velocity": "Speed plus a direction. A velocity of (0, 0, 10) means moving 10 studs every second along the Z axis.",
+    "constant velocity": "A speed and direction that stay the same over time instead of speeding up or slowing down.",
+    "Vector3": "Three numbers (X, Y, Z) that describe a direction or position in 3D. (0, 10, 0) points straight up with a size of 10.",
+    "2D plane": "A flat surface, like a tabletop. Moving 'in a plane' means sliding in two directions but not the third.",
+    "relative to World": "Directions are measured using the fixed world axes, which never turn. Up is always up, no matter how the part spins.",
+    "relative to an attachment": "Directions are measured from the attachment's own facing. If the attachment turns 90 degrees, its 'forward' turns 90 degrees too.",
+    "studs per second": "How Roblox measures speed. 10 studs per second means the part travels 10 studs every second."
+  },
+  "example": {
+    "title": "Make a block slide forward at a steady speed",
+    "place": "Script inside a Part in Workspace (make sure the part is not Anchored)",
+    "code": "local part = script.Parent\n\n-- The constraint needs an attachment inside the part to push on\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal linearVelocity = Instance.new(\"LinearVelocity\")\nlinearVelocity.Attachment0 = attachment\nlinearVelocity.RelativeTo = Enum.ActuatorRelativeTo.World\nlinearVelocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Vector\nlinearVelocity.VectorVelocity = Vector3.new(0, 0, 10) -- 10 studs per second along world Z\nlinearVelocity.MaxForce = math.huge -- allow as much force as needed\nlinearVelocity.Parent = part",
+    "explain": [
+      "We grab the part the script lives in.",
+      "We make an `Attachment` inside it, because constraints push on attachments.",
+      "We create a `LinearVelocity` and hook it to that attachment with `Attachment0`.",
+      "`RelativeTo = World` means the direction (0, 0, 10) uses the world's axes, not the part's.",
+      "`MaxForce = math.huge` lets the constraint push as hard as it needs to keep the speed.",
+      "Parenting the constraint to the part turns it on, and the block starts gliding."
+    ]
+  },
+  "watchOut": [
+    "Anchored parts do not move with physics. Turn off `Anchored` or nothing will happen.",
+    "Forgetting to set `Attachment0` means the constraint has nothing to push, so it does nothing.",
+    "If `MaxForce` is too small for a heavy part, it may never reach the speed you asked for. Raise `MaxForce`.",
+    "Do not use `LinearVelocity` for a one-time launch; it keeps pushing forever. Set `AssemblyLinearVelocity` once instead."
+  ]
+}

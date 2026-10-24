@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/ui/size-modifiers.md",
+  "simple": "This page shows tools that help your UI stay the right size on every screen. `UIScale` makes an object and everything inside it bigger or smaller all at once. `AutomaticSize` lets a box grow to fit its contents, like a speech bubble that stretches for long messages. Constraints set limits, such as \"never smaller than this\" or \"always keep this shape\", so your UI does not get squished or huge on phones and big monitors.",
+  "analogy": "Constraints are like the rules for a stretchy T-shirt: it can stretch to fit, but it will never shrink below a small size or grow past an extra-large, and it keeps its T shape.",
+  "keyPoints": [
+    "`UIScale` multiplies the size of its parent and all its children; `Scale` of 2 makes everything twice as big.",
+    "`UIScale` is great for hover effects (tween it from 1 to 1.1) and for zooming in while designing.",
+    "`AutomaticSize` (X, Y, or XY) makes an object grow to fit its contents; `Size` then becomes the smallest it can be.",
+    "With `TextWrapped` on and `AutomaticSize` set to Y, a text label grows taller as text wraps onto new lines.",
+    "Scrolling frames use `AutomaticCanvasSize` instead of `AutomaticSize`.",
+    "`UISizeConstraint` sets a `MinSize` and `MaxSize` in pixels.",
+    "`UITextSizeConstraint` keeps text between `MinTextSize` and `MaxTextSize`; never go below 9 or text gets hard to read.",
+    "`UIAspectRatioConstraint` keeps the width-to-height shape; `AspectRatio` 2 means twice as wide as tall. Constraints override layouts like `UIListLayout`."
+  ],
+  "terms": {
+    "AbsoluteSize": "The real size of a UI object on the screen, in pixels, after all scale and offset math is done.",
+    "UIScale": "A modifier that multiplies its parent's size. 0.5 is half size; 1 is normal; 2 is double.",
+    "AutomaticSize": "Lets an object grow to fit what is inside it, across (X), down (Y), or both (XY).",
+    "minimum size": "The smallest something can become. With `AutomaticSize` on, `Size` X of 100 means it never gets thinner than 100 pixels.",
+    "constraint": "A rule object placed inside a UI element that limits its size or shape.",
+    "aspect ratio": "Width divided by height. A 200 by 100 box has an aspect ratio of 2.",
+    "TextScaled": "Makes text grow or shrink to fill its box.",
+    "localized": "Translated into other languages. A word can be much longer in German than in English, so boxes may need to grow.",
+    "override": "To take control instead of something else. A constraint wins over a layout when deciding size."
+  },
+  "example": {
+    "title": "Grow a button a little when hovered",
+    "place": "LocalScript inside a TextButton (inside a ScreenGui in StarterGui)",
+    "code": "local TweenService = game:GetService(\"TweenService\")\n\nlocal button = script.Parent\n\n-- UIScale lets us resize the button and its contents together\nlocal uiScale = Instance.new(\"UIScale\")\nuiScale.Scale = 1\nuiScale.Parent = button\n\n-- Keep the same wide shape on every screen\nlocal aspect = Instance.new(\"UIAspectRatioConstraint\")\naspect.AspectRatio = 3 -- 3 times as wide as tall\naspect.Parent = button\n\nlocal tweenInfo = TweenInfo.new(0.15) -- quick, 0.15 seconds\n\nbutton.MouseEnter:Connect(function()\n\tTweenService:Create(uiScale, tweenInfo, { Scale = 1.1 }):Play() -- 10% bigger\nend)\n\nbutton.MouseLeave:Connect(function()\n\tTweenService:Create(uiScale, tweenInfo, { Scale = 1 }):Play() -- back to normal\nend)",
+    "explain": [
+      "We add a `UIScale` to the button, starting at 1 (normal size).",
+      "We add a `UIAspectRatioConstraint` so the button always stays 3 times wider than it is tall.",
+      "When the mouse moves onto the button, we tween `Scale` to 1.1, making it 10% bigger.",
+      "When the mouse leaves, we tween it back to 1."
+    ]
+  },
+  "watchOut": [
+    "With `AutomaticSize` on, `Size` is the minimum. If you set it big, the object will never shrink below that.",
+    "A size or aspect ratio constraint overrides list and grid layouts, which can surprise you when items stop lining up.",
+    "Keep `MinTextSize` at 9 or higher so text stays readable.",
+    "Mouse hover events do not happen on touch screens, so do not hide important info behind a hover effect."
+  ]
+}

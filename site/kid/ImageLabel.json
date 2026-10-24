@@ -1,0 +1,100 @@
+{
+  "name": "ImageLabel",
+  "simple": "An ImageLabel is a box that shows a picture. Use it for icons, logos, item pictures, and backgrounds. You choose the picture by its asset ID, and you can tint it, fade it, or show just part of it.",
+  "analogy": "An ImageLabel is like a photo frame: the frame (background) can be visible or not, and the photo inside is your picture.",
+  "whenToUse": [
+    "Icons next to numbers, like a coin icon by the coin count",
+    "Item pictures in an inventory",
+    "Game logos and background art",
+    "Pictures on signs (inside a SurfaceGui)"
+  ],
+  "where": "Inside a ScreenGui, SurfaceGui or BillboardGui. Create it in Studio or with Instance.new(\"ImageLabel\") in a LocalScript.",
+  "terms": {
+    "UI / GUI": "User Interface: the buttons, menus, text and pictures drawn on the screen or on things in the game.",
+    "LocalScript": "A script that runs on the player's own device. All UI code goes in LocalScripts.",
+    "ScreenGui": "The invisible container that holds UI shown on the player's screen. It must be inside the player's PlayerGui (put it in StarterGui in Studio).",
+    "parent": "The object something is placed inside.",
+    "UDim2": "The value used for Size and Position: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction (0 to 1) of the parent's size; Offset is exact pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "transparency": "How see-through something is. 0 = solid, 1 = invisible.",
+    "Color3": "A color made of red, green and blue amounts, like Color3.fromRGB(255, 0, 0) for red.",
+    "asset ID": "The number Roblox gives an uploaded image, written like \"rbxassetid://1234567890\".",
+    "tint": "Coloring a picture by mixing a color into it.",
+    "sprite sheet": "One big image holding many small pictures (like icons) side by side. You show one piece at a time.",
+    "9-slice": "A trick that splits an image into 9 parts so corners stay crisp while the middle stretches. Great for resizable boxes and buttons.",
+    "tile": "Repeat a picture over and over, like floor tiles.",
+    "Rect": "A rectangle described by two corners: Rect.new(left, top, right, bottom).",
+    "Content": "A newer kind of value for pictures that can hold an asset link or an EditableImage.",
+    "moderation": "Roblox checking uploaded images to make sure they're safe.",
+    "read-only": "You can read the value but not change it."
+  },
+  "examples": [
+    {
+      "title": "A coin icon in the corner",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal icon = Instance.new(\"ImageLabel\")\nicon.Size = UDim2.fromOffset(48, 48)\nicon.Position = UDim2.fromOffset(10, 10)\nicon.BackgroundTransparency = 1 -- hide the box, show only the picture\nicon.Image = \"rbxassetid://1234567890\" -- replace with your coin image ID\nicon.ScaleType = Enum.ScaleType.Fit -- keep the picture's shape\nicon.Parent = screenGui",
+      "explain": [
+        "A 48x48 pixel picture, 10 pixels from the top-left of the screen area.",
+        "BackgroundTransparency = 1 removes the white box so only the coin shows.",
+        "ScaleType Fit stops the picture from being squished if it isn't square.",
+        "Swap the number in Image for an image you uploaded (Creator Hub or Studio's Asset Manager)."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Picture not showing? Make sure the asset ID is an IMAGE ID (not a decal page or a different number) and that moderation approved it.",
+    "A white box around your picture? Set BackgroundTransparency to 1.",
+    "Squished picture? Use ScaleType Fit, or add a UIAspectRatioConstraint."
+  ],
+  "members": {
+    "ImageLabel.Image": {
+      "simple": "The picture to show, as an asset ID like \"rbxassetid://1234567890\". Upload an image (or decal) to Roblox, then paste its ID here. Reading or writing this also updates ImageContent.",
+      "example": "local image = script.Parent\nimage.Image = \"rbxassetid://1234567890\" -- replace with your image ID",
+      "gotcha": "If the image doesn't show, check the ID is right and the image was approved by moderation (IsLoaded tells you)."
+    },
+    "ImageLabel.ImageColor3": {
+      "simple": "Tints (colors) the picture. White (default) means no change. If your image is pure white, you can make it any color with this, so one icon can be red, blue, green and so on.",
+      "example": "local image = script.Parent\nimage.ImageColor3 = Color3.fromRGB(255, 100, 100) -- reddish tint"
+    },
+    "ImageLabel.ImageContent": {
+      "simple": "The newer way to set the picture, using a Content value. It can hold an asset link or an EditableImage (a picture you draw with code). Image and ImageContent stay in sync.",
+      "example": "local image = script.Parent\nimage.ImageContent = Content.fromUri(\"rbxassetid://1234567890\")"
+    },
+    "ImageLabel.ImageRectOffset": {
+      "simple": "Used with ImageRectSize to show only part of an image, like one icon from a big sheet of icons (a sprite sheet). This is the top-left corner of that part, in pixels from the image's top-left. On a sheet of 64x64 icons, offset (64, 0) is the second icon in the top row.",
+      "example": "local image = script.Parent\nimage.Image = \"rbxassetid://1234567890\" -- a sheet of 64x64 icons\nimage.ImageRectSize = Vector2.new(64, 64)\nimage.ImageRectOffset = Vector2.new(64, 0) -- second icon, top row"
+    },
+    "ImageLabel.ImageRectSize": {
+      "simple": "Used with ImageRectOffset to show only part of an image. This is how big that part is, in pixels. If X or Y is 0, the whole image is shown.",
+      "example": "local image = script.Parent\nimage.ImageRectSize = Vector2.new(64, 64) -- show a 64x64 piece"
+    },
+    "ImageLabel.ImageTransparency": {
+      "simple": "How see-through the picture is. 0 = solid, 1 = invisible. Separate from BackgroundTransparency (the box behind the picture).",
+      "example": "local image = script.Parent\nimage.ImageTransparency = 0.5 -- half see-through"
+    },
+    "ImageLabel.IsLoaded": {
+      "simple": "Read-only. true once the picture has finished downloading. Images that moderation declined never load.",
+      "example": "local image = script.Parent\nif not image.IsLoaded then\n\timage:GetPropertyChangedSignal(\"IsLoaded\"):Wait()\nend\nprint(\"Image is ready!\")"
+    },
+    "ImageLabel.ResampleMode": {
+      "simple": "How the picture looks when stretched bigger or smaller. Default smooths it out. Pixelated keeps sharp, blocky pixels, perfect for pixel art.",
+      "example": "local image = script.Parent\nimage.ResampleMode = Enum.ResamplerMode.Pixelated"
+    },
+    "ImageLabel.ScaleType": {
+      "simple": "What to do when the picture's shape doesn't match the box. Stretch (default) squishes it to fill. Fit keeps its shape and fits it inside. Crop keeps its shape and fills, cutting off edges. Tile repeats it (see TileSize). Slice uses 9-slice so corners don't stretch (see SliceCenter).",
+      "example": "local image = script.Parent\nimage.ScaleType = Enum.ScaleType.Fit -- no squishing"
+    },
+    "ImageLabel.SliceCenter": {
+      "simple": "For 9-slice images (ScaleType = Slice): a Rect marking the middle part of the image, in pixels. The 4 corners outside it never stretch, the edges stretch one way, and the middle stretches both ways. That lets one small rounded-box picture make panels of any size.",
+      "example": "local image = script.Parent\nimage.ScaleType = Enum.ScaleType.Slice\nimage.SliceCenter = Rect.new(16, 16, 48, 48) -- corners are 16 px; middle is from (16,16) to (48,48)"
+    },
+    "ImageLabel.SliceScale": {
+      "simple": "For 9-slice images: makes the unstretched corners and edges bigger or smaller. 1 is normal, 2 doubles them, 0.5 halves them. Useful to reuse one rounded-corner image with different corner sizes.",
+      "example": "local image = script.Parent\nimage.SliceScale = 0.5 -- thinner corners"
+    },
+    "ImageLabel.TileSize": {
+      "simple": "For tiled images (ScaleType = Tile): how big each repeated tile is, as a UDim2. Scale is a fraction of this object's size, Offset is pixels. UDim2.fromOffset(32, 32) repeats the image every 32 pixels. Default (1, 0, 1, 0) is one tile filling the box.",
+      "example": "local image = script.Parent\nimage.ScaleType = Enum.ScaleType.Tile\nimage.TileSize = UDim2.fromOffset(32, 32) -- a checkerboard of 32x32 tiles"
+    }
+  }
+}

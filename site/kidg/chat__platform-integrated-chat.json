@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/chat/platform-integrated-chat.md",
+  "simple": "Platform-integrated chat is a new mode where Roblox itself shows and delivers all chat messages. When you turn it on, your scripts can no longer read what players type. That keeps everyone safer and makes safety tools work the same in every game. Starting in May 2027 every game will need it, so it is smart to learn it now.",
+  "analogy": "It is like a mail carrier who delivers sealed letters. You can choose where the mailbox goes and what it looks like, but you are not allowed to open the letters.",
+  "keyPoints": [
+    "Nothing changes until you set `TextChatService.PlatformIntegratedChat` to Enabled in Studio. You can set it back to Disabled any time.",
+    "You can only change this setting in Studio, not from a script.",
+    "Once enabled, message text APIs like `TextChatMessage.Text` return an empty string `\"\"` instead of the message, and log a warning.",
+    "To show chat in your own UI, use a `TextChannelWindow` and set its `Target` to a `TextChannel`. Each window shows one channel.",
+    "Chat prefixes (`PrefixText`) are not supported. If your game needs them, do not enable this yet.",
+    "Chat commands must use `TextChatCommand`. Code that reads `Player.Chatted` or message text to find commands stops working.",
+    "To keep a custom channel out of the default window, set `ChatWindowConfiguration.TextChannelDisplayMode` to DefaultTextChannels in Studio.",
+    "If you just use the default Roblox chat with no changes, you do not need to do anything."
+  ],
+  "terms": {
+    "platform-integrated": "Built into Roblox itself. Roblox, not your game, handles showing and sending the messages.",
+    "TextChannelWindow": "A UI object that shows the messages of one chat channel. You choose its size and position, Roblox fills in the messages.",
+    "TextChannel": "One chat room, like `RBXGeneral` (everyone) or a custom one like `Guild`.",
+    "Target": "The property on a `TextChannelWindow` that says which `TextChannel` it shows.",
+    "empty string": "Text with nothing in it, written `\"\"`. It is different from `nil`, so your scripts keep running but just get no words.",
+    "deprecated": "Old and on its way out. It may still work for now, but you should stop using it.",
+    "prefix": "A tag shown before a player's name in chat, like `[VIP]`. Not supported with platform-integrated chat.",
+    "TextChatCommand": "An object that makes a slash command like `/kick` run your code, without your code needing to read the message text.",
+    "read-only chat": "A permission that lets moderators view chat during live events without any API giving the text to scripts."
+  },
+  "example": {
+    "title": "Show the main chat in your own window",
+    "place": "LocalScript in StarterGui",
+    "code": "local TextChatService = game:GetService(\"TextChatService\")\n\n-- Make a ScreenGui to hold the window\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Name = \"MyChatGui\"\nscreenGui.Parent = script.Parent\n\n-- Make the chat window: 400 pixels wide, 300 tall, 10 pixels from the top-left corner\nlocal chatWindow = Instance.new(\"TextChannelWindow\")\nchatWindow.Size = UDim2.new(0, 400, 0, 300)\nchatWindow.Position = UDim2.new(0, 10, 0, 10)\nchatWindow.BackgroundColor3 = Color3.fromRGB(20, 20, 20)\nchatWindow.BackgroundTransparency = 0.5\n\n-- Find the general channel and show it in the window\nlocal channels = TextChatService:WaitForChild(\"TextChannels\")\nlocal general = channels:WaitForChild(\"RBXGeneral\")\nchatWindow.Target = general\n\nchatWindow.Parent = screenGui",
+    "explain": [
+      "We get `TextChatService`, which runs the chat.",
+      "We create a `ScreenGui` so the window can appear on the player's screen.",
+      "We create a `TextChannelWindow` and give it a size and a spot on the screen.",
+      "We wait for the `RBXGeneral` channel, which is the normal everyone-can-see chat.",
+      "Setting `Target` tells the window which channel to show. Roblox then fills in and sends messages for us.",
+      "Last, we parent the window to the `ScreenGui` so it shows up."
+    ]
+  },
+  "watchOut": [
+    "Trying to log or save chat messages after enabling it. No API gives you the message text anymore, on the client or the server.",
+    "Building admin commands by reading `Player.Chatted`. Use `TextChatCommand` instead, or the commands will stop working.",
+    "Trying to show the Global channel in a custom `TextChannelWindow`. That is not allowed.",
+    "Trying to change `TextChannelDisplayMode` from a script. Scripts can only read it. Set it in Studio.",
+    "Forgetting that your custom channel also shows in the default window unless you change `TextChannelDisplayMode`."
+  ]
+}

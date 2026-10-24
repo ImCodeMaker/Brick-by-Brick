@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/physics/constraints/hinge.md",
+  "simple": "A HingeConstraint lets two parts spin around one line, exactly like a door hinge or a wheel's axle. You can leave it loose, power it like a motor that keeps spinning, or make it a servo that turns to an exact angle and holds there. You can also set limits so a door only opens 90 degrees. Hinges are one of the most useful constraints for doors, wheels, fans and windmills.",
+  "analogy": "A door hinge. The door can swing around the hinge pin, but it cannot slide up, down, or fall off.",
+  "keyPoints": [
+    "A hinge holds two attachments in the same spot and lines up their X axes, so the parts can only rotate around that one line.",
+    "Point both attachments' yellow Axis arrows the same way. That arrow is the line the hinge spins around.",
+    "`ActuatorType = Motor` keeps spinning toward `AngularVelocity` (in radians per second), limited by `MotorMaxTorque` and `MotorMaxAcceleration`.",
+    "`ActuatorType = Servo` turns to `TargetAngle` (in degrees) at `AngularSpeed` (radians per second), with strength limited by `ServoMaxTorque`.",
+    "Turn on `LimitsEnabled` to set `LowerAngle` and `UpperAngle`, for example a door that swings only between 0 and 90 degrees.",
+    "`Restitution` sets how bouncy the hinge is when it hits a limit."
+  ],
+  "terms": {
+    "attachment": "A Roblox object you put inside a part to mark one exact point on it. Its Position is measured from the part's center, so an attachment at (-2, 0, 0) sits 2 studs toward the part's own left side.",
+    "axis": "The invisible line something spins around. A wheel's axis goes through the middle of the axle.",
+    "Axis (attachment)": "Every attachment has its own arrows. `Axis` (yellow arrow) is its main X direction and `SecondaryAxis` (orange arrow) is its Y direction. With Orientation (0, 0, 0) the yellow arrow points along the part's X; with Orientation (0, 0, 90) it is turned a quarter turn to point straight up.",
+    "actuator": "The part that powers the hinge. None means free-swinging, Motor means keep spinning, Servo means turn to an angle.",
+    "motor": "Power that keeps spinning at a set speed, like a fan.",
+    "servo": "Power that turns to an exact angle and holds it, like a robot arm.",
+    "radians per second": "A speed of turning. One full turn is about 6.28 radians, so `AngularVelocity = 6.28` is about 1 turn per second, and 3.14 is half a turn per second.",
+    "degrees": "The everyday way to measure angles. 90 degrees is a quarter turn, 360 is a full turn.",
+    "torque": "A twisting force. A heavy door needs more torque to swing than a light one.",
+    "MotorMaxAcceleration": "How fast the motor is allowed to speed up. A low value makes it spin up slowly.",
+    "restitution": "How bouncy the stop is when a moving piece hits its limit. 0 means it stops dead, 1 means it bounces back as hard as it hit."
+  },
+  "example": {
+    "title": "An automatic door that swings open to 90 degrees",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\n-- Anchored post the door hangs on\nlocal post = Instance.new(\"Part\")\npost.Size = Vector3.new(0.5, 7, 0.5)\npost.Position = Vector3.new(0, 3.75, 0)\npost.Anchored = true\npost.CanCollide = false\npost.Parent = Workspace\n\n-- The door: 4 wide, 7 tall, 0.5 thick. Its left edge is at X = 0, where the post is.\nlocal door = Instance.new(\"Part\")\ndoor.Size = Vector3.new(4, 7, 0.5)\ndoor.Position = Vector3.new(2, 3.75, 0)  -- bottom 0.25 studs above the ground so it does not scrape\ndoor.Parent = Workspace\n\n-- Orientation (0, 0, 90) turns each attachment's X axis to point straight up,\n-- so the hinge spins around a vertical line, like a real door\nlocal postAtt = Instance.new(\"Attachment\")\npostAtt.Orientation = Vector3.new(0, 0, 90)\npostAtt.Parent = post               -- at the post's center: world (0, 3.75, 0)\n\nlocal doorAtt = Instance.new(\"Attachment\")\ndoorAtt.Position = Vector3.new(-2, 0, 0) -- 2 studs left of the door's center = its left edge\ndoorAtt.Orientation = Vector3.new(0, 0, 90)\ndoorAtt.Parent = door               -- also world (0, 3.75, 0)\n\nlocal hinge = Instance.new(\"HingeConstraint\")\nhinge.Attachment0 = postAtt\nhinge.Attachment1 = doorAtt\nhinge.ActuatorType = Enum.ActuatorType.Servo\nhinge.AngularSpeed = 2          -- radians per second (about 115 degrees per second)\nhinge.ServoMaxTorque = 100000   -- strong enough to move the door\nhinge.LimitsEnabled = true\nhinge.LowerAngle = 0\nhinge.UpperAngle = 90\nhinge.Parent = post\n\n-- Open, wait, close, forever\nwhile true do\n\thinge.TargetAngle = 90\n\ttask.wait(3)\n\thinge.TargetAngle = 0\n\ttask.wait(3)\nend",
+    "explain": [
+      "The door is 4 studs wide and centered at X = 2, so its left edge is at X = 0, right where the post stands.",
+      "The door's attachment is at (-2, 0, 0) relative to the door's center, which is that left edge. Both attachments meet at world point (0, 3.75, 0). The door floats 0.25 studs above the ground so friction does not fight the hinge.",
+      "A new attachment's yellow Axis arrow points along X (sideways). Orientation (0, 0, 90) turns it a quarter turn so it points up. Now the hinge line is vertical, like a real door.",
+      "As a Servo, the hinge turns to `TargetAngle`. At 2 radians per second (about 115 degrees per second), a 90 degree swing takes about 0.8 seconds.",
+      "Limits from 0 to 90 stop the door from swinging past fully open or past closed, even if a player pushes it.",
+      "`ServoMaxTorque` starts at 0, which means no power at all, so we set it high."
+    ]
+  },
+  "watchOut": [
+    "The door spins the wrong way, like a pinwheel? Your attachments' Axis arrows are pointing the wrong way. For a normal door they should point straight up.",
+    "Nothing happens with Motor or Servo? `MotorMaxTorque` and `ServoMaxTorque` start at 0. Give them a big value.",
+    "Mixing up units is easy: `TargetAngle`, `LowerAngle` and `UpperAngle` are in degrees, but `AngularVelocity` and `AngularSpeed` are in radians per second.",
+    "If the door shakes, it may be colliding with the post. Turn off the post's CanCollide or add a NoCollisionConstraint between them."
+  ]
+}

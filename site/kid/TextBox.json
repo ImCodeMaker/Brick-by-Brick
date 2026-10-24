@@ -1,0 +1,219 @@
+{
+  "name": "TextBox",
+  "simple": "A TextBox is a box the player can click and type into. Use it for things like entering a code, naming a pet, or a custom chat. When they finish typing, you read what they wrote from its Text property.",
+  "analogy": "A TextBox is like a blank line on a form: 'Name: ____'. The player fills it in, and you read what they wrote.",
+  "whenToUse": [
+    "Entering a redeem code",
+    "Naming a pet, house or team",
+    "A search box in a shop or inventory",
+    "Custom chat or message boards"
+  ],
+  "where": "Inside a ScreenGui (or a SurfaceGui/BillboardGui in PlayerGui). Read the typed text in a LocalScript, then send it to the server with a RemoteEvent if the server needs it.",
+  "terms": {
+    "UI / GUI": "User Interface: the buttons, menus, text and pictures drawn on the screen or on things in the game.",
+    "LocalScript": "A script that runs on the player's own device. All UI code goes in LocalScripts.",
+    "ScreenGui": "The invisible container that holds UI shown on the player's screen. It must be inside the player's PlayerGui (put it in StarterGui in Studio).",
+    "parent": "The object something is placed inside.",
+    "UDim2": "The value used for Size and Position: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction (0 to 1) of the parent's size; Offset is exact pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "transparency": "How see-through something is. 0 = solid, 1 = invisible.",
+    "Color3": "A color made of red, green and blue amounts, like Color3.fromRGB(255, 0, 0) for red.",
+    "font": "The style of the letters, like Arial, Comic, or a blocky game font.",
+    "rich text": "Text with simple tags inside it, like <b>word</b>, that make parts bold, italic or colored.",
+    "grapheme": "One visible character, like a letter, a number, or a symbol.",
+    "wrap": "When text reaches the edge, it continues on the next line.",
+    "truncate": "Cut off text that's too long, often adding '...' at the end.",
+    "stroke": "An outline around each letter.",
+    "read-only": "You can read the value but not change it.",
+    "localization": "Translating text into the player's language.",
+    "deprecated": "Old and replaced by something better. Don't use it in new code.",
+    "focus": "When a TextBox is 'focused', the typing cursor is in it and keyboard keys type into it.",
+    "cursor": "The blinking line that shows where the next letter will appear.",
+    "placeholder": "Gray hint text shown when the box is empty.",
+    "byte": "A small piece of computer memory. Normal letters use 1 byte; emoji use up to 4.",
+    "filter": "Run text through Roblox's safety check to hide bad words. Required before showing a player's text to other players.",
+    "RemoteEvent": "A messenger that lets a LocalScript send information to the server.",
+    "server": "Roblox's computer that runs the game for everyone."
+  },
+  "examples": [
+    {
+      "title": "Type a code and press Enter",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal box = Instance.new(\"TextBox\")\nbox.AnchorPoint = Vector2.new(0.5, 0.5)\nbox.Position = UDim2.fromScale(0.5, 0.5)\nbox.Size = UDim2.fromOffset(300, 50)\nbox.PlaceholderText = \"Type a code and press Enter\"\nbox.Text = \"\"\nbox.TextSize = 22\nbox.ClearTextOnFocus = false\nbox.Parent = screenGui\n\nbox.FocusLost:Connect(function(enterPressed)\n\tif not enterPressed then\n\t\treturn -- they clicked away without pressing Enter\n\tend\n\tif string.upper(box.Text) == \"FREECOINS\" then\n\t\tprint(\"Code accepted!\")\n\telse\n\t\tprint(\"Unknown code\")\n\tend\n\tbox.Text = \"\"\nend)",
+      "explain": [
+        "We make a centered 300x50 TextBox with gray hint text.",
+        "FocusLost fires when the player stops typing. enterPressed is true only if they pressed Enter.",
+        "string.upper makes the check ignore capital letters, so 'freecoins' also works.",
+        "In a real game, send the code to the server with a RemoteEvent and give rewards there, so players can't cheat."
+      ]
+    }
+  ],
+  "gotchas": [
+    "ClearTextOnFocus is true by default, so clicking the box wipes old text. Turn it off if players should edit existing text.",
+    "Read box.Text in FocusLost, not on every key press, unless you really need live updates.",
+    "Anything a player types that other players will see (signs, pet names, chat) must be filtered with TextService:FilterStringAsync on the server, or your game could be moderated.",
+    "Never trust typed text for important stuff on the client. Check it on the server.",
+    "UIGradient doesn't work on a TextBox."
+  ],
+  "members": {
+    "TextBox.ContentText": {
+      "simple": "Read-only. The text exactly as players see it. If RichText is on, the formatting tags like <b> are removed. For Text = \"<b>Hi</b>\" with RichText on, ContentText is \"Hi\".",
+      "example": "local box = script.Parent\nprint(box.ContentText)"
+    },
+    "TextBox.Font": {
+      "simple": "Picks a built-in font from a list (Enum.Font), like Gotham or Cartoon. It stays in sync with FontFace; FontFace is the newer, more flexible choice.",
+      "example": "local box = script.Parent\nbox.Font = Enum.Font.GothamBold"
+    },
+    "TextBox.FontFace": {
+      "simple": "The font used to draw the text, including its weight (how bold) and style (italic). It can use fonts that aren't in the old Font list.",
+      "example": "local box = script.Parent\nbox.FontFace = Font.new(\"rbxasset://fonts/families/FredokaOne.json\")\n-- A bold font: pass the weight when you make it\nbox.FontFace = Font.new(\"rbxasset://fonts/families/GothamSSm.json\", Enum.FontWeight.Bold)"
+    },
+    "TextBox.FontSize": {
+      "simple": "Old — use TextSize instead."
+    },
+    "TextBox.LineHeight": {
+      "simple": "The space between lines of text, as a multiplier from 1 to 3. 1 is normal, 1.5 adds extra breathing room, 2 is double spacing.",
+      "example": "local box = script.Parent\nbox.LineHeight = 1.5"
+    },
+    "TextBox.MaxVisibleGraphemes": {
+      "simple": "Limits how many characters are shown, for both the typed Text and the PlaceholderText. -1 (default) shows everything.",
+      "example": "local box = script.Parent\nbox.MaxVisibleGraphemes = 10 -- only the first 10 characters are drawn",
+      "gotcha": "It only hides characters; the player can still type more. Check #box.Text yourself to limit length."
+    },
+    "TextBox.OpenTypeFeatures": {
+      "simple": "Turns on special font features using short codes separated by commas, like \"zero\" for a zero with a slash through it. Empty (default) means none. If a code doesn't work, OpenTypeFeaturesError says why.",
+      "example": "local box = script.Parent\nbox.OpenTypeFeatures = \"zero\" -- slashed zeros, so 0 doesn't look like O"
+    },
+    "TextBox.OpenTypeFeaturesError": {
+      "simple": "Read-only. Empty when OpenTypeFeatures worked. Otherwise a message like \"Unsupported feature: xyz\" telling you what went wrong.",
+      "example": "local box = script.Parent\nif box.OpenTypeFeaturesError ~= \"\" then\n\twarn(box.OpenTypeFeaturesError)\nend"
+    },
+    "TextBox.RichText": {
+      "simple": "When true, you can style parts of the text with tags like <b>bold</b>, <i>italic</i> or <font color=\"#FF0000\">red</font>. While the player is typing, they see the raw tags; the styling shows after they click away.",
+      "example": "local box = script.Parent\nbox.RichText = true\nbox.Text = \"You found a <b>golden</b> <font color=\\\"#FFD700\\\">sword</font>!\""
+    },
+    "TextBox.Text": {
+      "simple": "The words shown. When the player types, this changes to what they typed. You can use \\n in a script to start a new line.",
+      "example": "local box = script.Parent\nbox.Text = \"Line one\\nLine two\""
+    },
+    "TextBox.TextBounds": {
+      "simple": "Read-only. The size in pixels of the box the text actually needs. Handy for making a background exactly fit the text.",
+      "example": "local box = script.Parent\nprint(\"Text needs\", box.TextBounds.X, \"by\", box.TextBounds.Y, \"pixels\")"
+    },
+    "TextBox.TextColor": {
+      "simple": "Old — use TextColor3 instead."
+    },
+    "TextBox.TextColor3": {
+      "simple": "The color of the text. (Not the placeholder text; that's PlaceholderColor3.)",
+      "example": "local box = script.Parent\nbox.TextColor3 = Color3.fromRGB(255, 255, 255) -- white text"
+    },
+    "TextBox.TextDirection": {
+      "simple": "Which way the text reads. Auto (default) figures it out from the language, so languages like Arabic read right-to-left. You can force LeftToRight or RightToLeft.",
+      "example": "local box = script.Parent\nbox.TextDirection = Enum.TextDirection.Auto"
+    },
+    "TextBox.TextFits": {
+      "simple": "Read-only. true if all the text fits inside, false if some of it is cut off.",
+      "example": "local box = script.Parent\nif not box.TextFits then\n\tprint(\"Text is too long for this box!\")\nend"
+    },
+    "TextBox.TextScaled": {
+      "simple": "When true, the text automatically grows or shrinks to fill the whole box (TextSize is ignored and wrapping turns on). Great for BillboardGuis and SurfaceGuis.",
+      "example": "local box = script.Parent\nbox.TextScaled = true",
+      "gotcha": "Text can become tiny and hard to read. Add a UITextSizeConstraint to set a min/max size, and don't combine it with AutomaticSize."
+    },
+    "TextBox.TextSize": {
+      "simple": "How tall one line of text is, in pixels. 14 is small, 24 is medium, 48 is big. Ignored when TextScaled is on.",
+      "example": "local box = script.Parent\nbox.TextSize = 24",
+      "gotcha": "Try not to go below 9; tiny text is hard to read for many players."
+    },
+    "TextBox.TextStrokeColor3": {
+      "simple": "The color of the outline drawn around each letter. Only shows when TextStrokeTransparency is less than 1.",
+      "example": "local box = script.Parent\nbox.TextStrokeColor3 = Color3.fromRGB(0, 0, 0) -- black outline\nbox.TextStrokeTransparency = 0             -- make it visible",
+      "gotcha": "For thicker or gradient outlines, use a UIStroke instead."
+    },
+    "TextBox.TextStrokeTransparency": {
+      "simple": "How see-through the letter outline is. 1 (default) = no outline, 0 = solid outline. The outline is drawn several times stacked, so even 0.5 looks quite solid; 0.75 to 1 gives a soft outline.",
+      "example": "local box = script.Parent\nbox.TextStrokeTransparency = 0.5"
+    },
+    "TextBox.TextTransparency": {
+      "simple": "How see-through the text is. 0 = solid, 1 = invisible. Doesn't affect the background box (that's BackgroundTransparency).",
+      "example": "local TweenService = game:GetService(\"TweenService\")\nlocal box = script.Parent\n-- Fade the text out over 1 second\nTweenService:Create(box, TweenInfo.new(1), {TextTransparency = 1}):Play()"
+    },
+    "TextBox.TextTruncate": {
+      "simple": "What to do with text that's too long to fit. None (default) just cuts it off. AtEnd replaces the end with \"...\". SplitWord can cut in the middle of a word.",
+      "example": "local box = script.Parent\nbox.TextTruncate = Enum.TextTruncate.AtEnd -- \"A really long na...\""
+    },
+    "TextBox.TextWrap": {
+      "simple": "Old — use TextWrapped instead."
+    },
+    "TextBox.TextWrapped": {
+      "simple": "When true, long text continues on the next line instead of running off the side. It prefers to break at spaces. Lines that don't fit vertically aren't shown.",
+      "example": "local box = script.Parent\nbox.TextWrapped = true"
+    },
+    "TextBox.TextXAlignment": {
+      "simple": "Lines the text up sideways inside the box: Left, Center (default) or Right.",
+      "example": "local box = script.Parent\nbox.TextXAlignment = Enum.TextXAlignment.Left"
+    },
+    "TextBox.TextYAlignment": {
+      "simple": "Lines the text up up-and-down inside the box: Top, Center (default) or Bottom.",
+      "example": "local box = script.Parent\nbox.TextYAlignment = Enum.TextYAlignment.Top"
+    },
+    "TextBox.ClearTextOnFocus": {
+      "simple": "When true (default), the old text is erased the moment the player clicks into the box. Set false if players should edit what's already there.",
+      "example": "local box = script.Parent\nbox.ClearTextOnFocus = false -- keep the text when clicked"
+    },
+    "TextBox.CursorPosition": {
+      "simple": "Where the typing cursor is, counted in bytes starting at 1 (before the first character). -1 means the player isn't typing in the box. Used with SelectionStart to find selected text.",
+      "example": "local box = script.Parent\nbox:GetPropertyChangedSignal(\"CursorPosition\"):Connect(function()\n\tprint(\"Cursor at\", box.CursorPosition)\nend)",
+      "gotcha": "It counts bytes, not letters. An emoji is 4 bytes, so 'Hello' plus a waving-hand emoji puts the cursor at 10, not 7."
+    },
+    "TextBox.MultiLine": {
+      "simple": "When true, the player can type several lines, and pressing Enter makes a new line instead of finishing.",
+      "example": "local box = script.Parent\nbox.MultiLine = true -- good for writing a note or letter"
+    },
+    "TextBox.PlaceholderColor3": {
+      "simple": "The color of the hint text (PlaceholderText) shown when the box is empty. Usually a light gray.",
+      "example": "local box = script.Parent\nbox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)"
+    },
+    "TextBox.PlaceholderText": {
+      "simple": "Gray hint text shown while the box is empty, like \"Type your name...\". It disappears when the player types.",
+      "example": "local box = script.Parent\nbox.PlaceholderText = \"Enter a code...\""
+    },
+    "TextBox.SelectionStart": {
+      "simple": "Where the selected (highlighted) text starts, using the same counting as CursorPosition. -1 means nothing is selected.",
+      "example": "local box = script.Parent\nif box.SelectionStart ~= -1 then\n\tprint(\"Player has text selected\")\nend"
+    },
+    "TextBox.ShowNativeInput": {
+      "simple": "When true, the device's own keyboard (like your phone's normal keyboard) is used instead of Roblox's built-in one.",
+      "example": "local box = script.Parent\nbox.ShowNativeInput = true"
+    },
+    "TextBox.TextEditable": {
+      "simple": "Whether the player can change the text. Set false to make a box people can select and copy from, but not change.",
+      "example": "local box = script.Parent\nbox.TextEditable = false\nbox.ClearTextOnFocus = false -- otherwise clicking would still wipe it",
+      "gotcha": "Turn off ClearTextOnFocus too, or clicking will erase the text."
+    },
+    "TextBox:CaptureFocus": {
+      "simple": "Puts the typing cursor into this box right away, as if the player clicked it. Handy when a chat or code window opens.",
+      "example": "local box = script.Parent\nbox:CaptureFocus() -- player can start typing immediately"
+    },
+    "TextBox:IsFocused": {
+      "simple": "Returns true if the player is typing in this box right now, false if not.",
+      "example": "local box = script.Parent\nif box:IsFocused() then\n\tprint(\"Player is typing\")\nend"
+    },
+    "TextBox:ReleaseFocus": {
+      "simple": "Takes the typing cursor out of this box, so keyboard keys control the game again. Pass true to make FocusLost report it like Enter was pressed.",
+      "example": "local box = script.Parent\nbox:ReleaseFocus() -- stop typing\n-- box:ReleaseFocus(true) -- same, but FocusLost's enterPressed will be true"
+    },
+    "TextBox.Focused": {
+      "simple": "Fires when the player starts typing in the box (clicks or taps it, or CaptureFocus is called).",
+      "example": "local box = script.Parent\nbox.Focused:Connect(function()\n\tprint(\"Player started typing\")\nend)"
+    },
+    "TextBox.FocusLost": {
+      "simple": "Fires when the player stops typing in the box, by pressing Enter or clicking somewhere else. It tells you enterPressed (true if they pressed Enter) and the input that caused it. The best place to read what they typed.",
+      "example": "local box = script.Parent\nbox.FocusLost:Connect(function(enterPressed, inputThatCausedFocusLoss)\n\tif enterPressed then\n\t\tprint(\"Player submitted:\", box.Text)\n\tend\nend)"
+    },
+    "TextBox.ReturnPressedFromOnScreenKeyboard": {
+      "simple": "On phones and consoles, fires when the player presses the Return/Enter key on the on-screen keyboard while typing in this box.",
+      "example": "local box = script.Parent\nbox.ReturnPressedFromOnScreenKeyboard:Connect(function()\n\tprint(\"Done typing on the on-screen keyboard\")\nend)"
+    }
+  }
+}

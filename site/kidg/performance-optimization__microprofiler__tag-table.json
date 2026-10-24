@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/performance-optimization/microprofiler/tag-table.md",
+  "simple": "When you open the MicroProfiler, you see lots of strange labels like `stepHumanoid` or `computePath`. This page is a dictionary for those labels, called tags. For each one it says what Roblox is doing and how to make it faster. When you find a slow tag in your game, look it up here to know what to fix.",
+  "analogy": "It is like the dashboard lights in a car. When a light turns on, you look it up in the manual to learn what it means and what to do about it.",
+  "keyPoints": [
+    "Tags are also called tasks, timers, scopes, processes, or labels. Each one is a unit of work.",
+    "Sleep tags just mean a thread had nothing to do. Seeing lots of sleeping worker threads is normal.",
+    "Navigation tags like `computePath` come from pathfinding. Make fewer `Path:ComputeAsync()` calls and reuse paths for NPCs going to similar places.",
+    "Animation and humanoid tags like `stepHumanoid` and `stepAnimation` get faster with fewer Humanoids, fewer animated joints, and turning off states NPCs do not need, like Climbing or Swimming.",
+    "Networking tags grow when you replicate lots of objects, property changes, or events. Send fewer or smaller updates.",
+    "Rendering tags cover UI, particles, lighting, shadows, and transparency. Fewer visible parts, particles, lights, and see-through parts help.",
+    "Script tags like `Heartbeat/RunService.Heartbeat` and `GC` mean your code or the garbage collector is busy. Do less per frame and avoid making lots of temporary tables.",
+    "Simulation tags are physics. Fewer moving and colliding parts, simpler collision shapes, and not switching network ownership often all help."
+  ],
+  "terms": {
+    "tag": "A named chunk of work shown in the MicroProfiler, like `stepAnimation`.",
+    "pathfinding": "Finding a route for an NPC to walk from one spot to another around obstacles.",
+    "tile": "A small square section of the map that pathfinding uses. If a part in it moves, the tile has to be updated.",
+    "Humanoid state": "What a character is doing, like Running, Jumping, Climbing, or Swimming.",
+    "replicate": "Send changes from the server to players' devices, or the other way.",
+    "packet": "A small bundle of network data.",
+    "streaming radius": "How far around the player the game loads the world when streaming is on. Smaller radius means less data to send.",
+    "adorn": "An extra visual attached to an object, like a name tag or health bar above a character.",
+    "frustum culling": "Skipping drawing anything outside the camera's view, like objects behind you.",
+    "shadow map": "A picture the game makes to figure out where shadows fall. Not made at graphics quality below 4.",
+    "post-processing": "Effects added after the scene is drawn, like glow or color correction.",
+    "garbage collection (GC)": "Luau automatically cleaning up memory from tables and values nothing uses anymore. Making lots of short-lived tables gives it more work.",
+    "network ownership": "Which computer, the server or a player's device, is in charge of a part's physics.",
+    "assembly": "A group of parts joined together that physics moves as one piece.",
+    "simulation island": "A group of parts that touch or connect to each other but not to other groups, so physics can handle each group on its own.",
+    "throttled": "Slowed down on purpose because there is too much work. When physics is throttled, only important things like Humanoids keep simulating.",
+    "interpolate": "Smoothly fill in movement between two known positions so objects do not jump.",
+    "Z-order": "The order UI elements are stacked from back to front.",
+    "LayerCollector": "A UI container like a `ScreenGui` or `BillboardGui` that holds other UI elements."
+  },
+  "watchOut": [
+    "Worrying about sleep tags. Sleeping threads are normal, not a problem.",
+    "Fixing a parent tag directly. Look at the slowest child tag under it first.",
+    "Moving lots of parts that pathfinding uses. Each move makes paths need to be recalculated.",
+    "Using partial transparency everywhere. Parts between 0.01 and 1 transparency take more rendering work than fully solid ones.",
+    "Doing heavy work right when input arrives or every Heartbeat. Do a small amount right away and spread bigger jobs over time."
+  ]
+}

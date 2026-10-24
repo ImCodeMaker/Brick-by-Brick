@@ -1,0 +1,154 @@
+{
+  "name": "StarterPlayer",
+  "simple": "StarterPlayer holds the starting settings for every player and their character, like walk speed, jump power, camera zoom limits, and whether to use their own avatar. When someone joins, these values are copied onto their Player and character. It also holds two script folders: StarterPlayerScripts and StarterCharacterScripts.",
+  "analogy": "StarterPlayer is like the 'new player starter kit' settings page. Whatever you set here is what every new player starts with. Players who are already in the game don't change when you edit it.",
+  "whenToUse": [
+    "Change everyone's default walk speed, jump power, or slope limit.",
+    "Limit how far the camera can zoom, or force first person.",
+    "Choose whether players look like their own avatar (LoadCharacterAppearance).",
+    "Put LocalScripts that run once per player in StarterPlayerScripts.",
+    "Put scripts that go inside the character every spawn in StarterCharacterScripts."
+  ],
+  "where": "A service in the Explorer. Usually set its properties in Studio's Properties window. From code: `game:GetService(\"StarterPlayer\")`. Its child folders: StarterPlayerScripts (copied once into each Player's PlayerScripts when they join) and StarterCharacterScripts (copied into the Character every time it spawns). You can also add a Humanoid named StarterHumanoid or a Model named StarterCharacter to replace the default ones.",
+  "terms": {
+    "default": "The value something starts with if nobody changes it.",
+    "StarterPlayerScripts": "A folder in StarterPlayer. Its LocalScripts are copied once into each player's PlayerScripts when they join, and keep running across deaths. Good for input, camera, and UI managers.",
+    "StarterCharacterScripts": "A folder in StarterPlayer. Its scripts are copied into the character every time it spawns, so they restart each life. Good for things tied to the body, like a sprint script.",
+    "PlayerScripts": "A folder inside each Player that holds copies of StarterPlayerScripts. Only that player's device can see it.",
+    "StarterCharacter": "A Model you name StarterCharacter and put in StarterPlayer. Every player will spawn as a copy of it instead of their avatar.",
+    "StarterHumanoid": "A Humanoid you name StarterHumanoid and put in StarterPlayer. Its settings are used for every character's Humanoid.",
+    "stud": "Roblox's distance unit. A default character is about 5 studs tall.",
+    "respawn": "Getting a new character after dying.",
+    "mouse lock": "Also called shift lock. Locks the mouse in the middle of the screen so the camera turns as you move the mouse."
+  },
+  "examples": [
+    {
+      "title": "Set defaults for every player (by script)",
+      "place": "Script in ServerScriptService",
+      "code": "local StarterPlayer = game:GetService(\"StarterPlayer\")\n\n-- Every character that spawns from now on gets these\nStarterPlayer.CharacterWalkSpeed = 24      -- default is 16\nStarterPlayer.CharacterUseJumpPower = true\nStarterPlayer.CharacterJumpPower = 70       -- default is 50\n\n-- Camera limits for players who join from now on\nStarterPlayer.CameraMaxZoomDistance = 30\nStarterPlayer.CameraMinZoomDistance = 5",
+      "explain": [
+        "Character* settings are copied into each character's Humanoid when it spawns. Characters already in the world keep their old values until they respawn.",
+        "Camera* settings are copied onto the Player when they join.",
+        "Usually you just type these into the Properties window in Studio instead of using a script."
+      ]
+    },
+    {
+      "title": "Where to put player scripts",
+      "place": "LocalScript in StarterPlayer > StarterCharacterScripts",
+      "code": "-- Because this is in StarterCharacterScripts, a fresh copy is placed\n-- INSIDE the character every time it spawns. script.Parent is the character.\nlocal UserInputService = game:GetService(\"UserInputService\")\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\n\n-- Hold Left Shift to sprint\nUserInputService.InputBegan:Connect(function(input, typing)\n    if not typing and input.KeyCode == Enum.KeyCode.LeftShift then\n        humanoid.WalkSpeed = 28\n    end\nend)\nUserInputService.InputEnded:Connect(function(input)\n    if input.KeyCode == Enum.KeyCode.LeftShift then\n        humanoid.WalkSpeed = 16\n    end\nend)",
+      "explain": [
+        "StarterCharacterScripts -> copied into the Character on every spawn. The script restarts each life, and script.Parent is the new character, so you always have the right Humanoid.",
+        "StarterPlayerScripts -> copied once into the Player's PlayerScripts when they join. Those scripts keep running even when the character dies.",
+        "typing is true when the player is typing in a text box (like chat), so we ignore those key presses."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Changing StarterPlayer while the game runs only affects characters spawned (or players joining) afterward.",
+    "CharacterJumpPower only matters when CharacterUseJumpPower is true; CharacterJumpHeight only when it's false.",
+    "Scripts in StarterPlayerScripts don't restart on death; scripts in StarterCharacterScripts do.",
+    "Server Scripts placed in StarterPlayerScripts won't run, because the server can't see PlayerScripts."
+  ],
+  "members": {
+    "StarterPlayer.AllowCustomAnimations": {
+      "simple": "Hidden. Shows whether your game allows players' own avatar animations. Set on the game's settings page, not by scripts."
+    },
+    "StarterPlayer.AutoJumpEnabled": {
+      "simple": "Starting value for auto-jump on phones and tablets: the character hops over small obstacles by itself. Copied to Player.AutoJumpEnabled, then to the Humanoid.",
+      "example": "StarterPlayer.AutoJumpEnabled = false"
+    },
+    "StarterPlayer.AvatarJointUpgrade": {
+      "simple": "Internal Roblox setting (scripts can't use it). Controls whether avatars use newer physics joints that make ragdolls easier."
+    },
+    "StarterPlayer.CameraMaxZoomDistance": {
+      "simple": "Starting value for how far (in studs) players can zoom the camera out. Copied to Player.CameraMaxZoomDistance when they join.",
+      "example": "StarterPlayer.CameraMaxZoomDistance = 50"
+    },
+    "StarterPlayer.CameraMinZoomDistance": {
+      "simple": "Starting value for how close (in studs) players can zoom in. Copied to Player.CameraMinZoomDistance when they join.",
+      "example": "StarterPlayer.CameraMinZoomDistance = 2"
+    },
+    "StarterPlayer.CameraMode": {
+      "simple": "Starting camera mode for players: Classic (third person, the default) or LockFirstPerson (first person).",
+      "example": "StarterPlayer.CameraMode = Enum.CameraMode.LockFirstPerson"
+    },
+    "StarterPlayer.CharacterBreakJointsOnDeath": {
+      "simple": "Starting value for Humanoid.BreakJointsOnDeath on player characters (whether the body falls apart on death). Only works when the AvatarJointUpgrade setting is on.",
+      "example": "StarterPlayer.CharacterBreakJointsOnDeath = false"
+    },
+    "StarterPlayer.CharacterJumpHeight": {
+      "simple": "Starting jump height in studs (default 7.2). Used when CharacterUseJumpPower is false. Takes effect when characters respawn.",
+      "example": "StarterPlayer.CharacterJumpHeight = 12"
+    },
+    "StarterPlayer.CharacterJumpPower": {
+      "simple": "Starting jump strength (default 50, from 0 to 1000). Used when CharacterUseJumpPower is true. Takes effect when characters respawn.",
+      "example": "StarterPlayer.CharacterJumpPower = 80"
+    },
+    "StarterPlayer.CharacterMaxSlopeAngle": {
+      "simple": "Starting steepest slope (in degrees) characters can walk up. Default 89. Takes effect on respawn.",
+      "example": "StarterPlayer.CharacterMaxSlopeAngle = 45"
+    },
+    "StarterPlayer.CharacterUseJumpPower": {
+      "simple": "Picks which jump setting characters start with: true uses CharacterJumpPower, false uses CharacterJumpHeight. Default true.",
+      "example": "StarterPlayer.CharacterUseJumpPower = false"
+    },
+    "StarterPlayer.CharacterWalkSpeed": {
+      "simple": "Starting walk speed in studs per second (default 16). Takes effect on respawn.",
+      "example": "StarterPlayer.CharacterWalkSpeed = 20"
+    },
+    "StarterPlayer.ClassicDeath": {
+      "simple": "If true, characters break apart when they die (the classic Roblox 'oof'). If false, they ragdoll (go floppy) instead.",
+      "example": "StarterPlayer.ClassicDeath = false"
+    },
+    "StarterPlayer.CreateDefaultPlayerModule": {
+      "simple": "Internal setting (scripts can't use it). Controls whether Roblox adds its default camera and control scripts."
+    },
+    "StarterPlayer.DevCameraOcclusionMode": {
+      "simple": "What the camera does when a wall blocks the view of the character: Zoom (moves closer, the default) or Invisicam (makes the wall see-through). Applies to everyone.",
+      "example": "StarterPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Invisicam"
+    },
+    "StarterPlayer.DevComputerCameraMovementMode": {
+      "simple": "Forces a camera style for computer players. UserChoice lets each player pick in their settings.",
+      "example": "StarterPlayer.DevComputerCameraMovementMode = Enum.DevComputerCameraMovementMode.Classic"
+    },
+    "StarterPlayer.DevComputerMovementMode": {
+      "simple": "Forces a movement style for computer players, like KeyboardMouse or ClickToMove. UserChoice lets each player pick.",
+      "example": "StarterPlayer.DevComputerMovementMode = Enum.DevComputerMovementMode.KeyboardMouse"
+    },
+    "StarterPlayer.DevTouchCameraMovementMode": {
+      "simple": "Forces a camera style for touch-screen players. UserChoice lets each player pick."
+    },
+    "StarterPlayer.DevTouchMovementMode": {
+      "simple": "Forces a movement control for touch-screen players, like Thumbstick or DPad. UserChoice lets each player pick.",
+      "example": "StarterPlayer.DevTouchMovementMode = Enum.DevTouchMovementMode.Thumbstick"
+    },
+    "StarterPlayer.EnableDynamicHeads": {
+      "simple": "A Studio setting (scripts can't change it). Allows avatar heads that can move their faces (blink, smile)."
+    },
+    "StarterPlayer.EnableMouseLockOption": {
+      "simple": "Whether players can turn on shift lock (mouse locked in the middle, camera turns with the mouse). Copied to Player.DevEnableMouseLock.",
+      "example": "StarterPlayer.EnableMouseLockOption = false"
+    },
+    "StarterPlayer.HealthDisplayDistance": {
+      "simple": "Starting distance (in studs) at which players see other characters' health bars. Default 100. 0 hides them.",
+      "example": "StarterPlayer.HealthDisplayDistance = 0"
+    },
+    "StarterPlayer.LoadCharacterAppearance": {
+      "simple": "If true (default), players spawn wearing their own avatar. If false, they spawn plain: no clothes, hats or body colors. Handy if you dress everyone yourself with a HumanoidDescription.",
+      "example": "StarterPlayer.LoadCharacterAppearance = false"
+    },
+    "StarterPlayer.LoadCharacterLayeredClothing ": {
+      "simple": "A Studio setting (scripts can't change it). Whether spawning characters wear their layered 3D clothing like jackets."
+    },
+    "StarterPlayer.LuaCharacterController": {
+      "simple": "Picks which system moves player characters: Default, Legacy, LuaCharacterController, or NoCharacterController. Most games leave it on Default."
+    },
+    "StarterPlayer.NameDisplayDistance": {
+      "simple": "Starting distance (in studs) at which players see other characters' names. Default 100. 0 hides names.",
+      "example": "StarterPlayer.NameDisplayDistance = 40"
+    },
+    "StarterPlayer.UserEmotesEnabled": {
+      "simple": "If true, players' own emotes are loaded with their avatar. Set it in Studio. If false, only emotes your game adds are available."
+    }
+  }
+}

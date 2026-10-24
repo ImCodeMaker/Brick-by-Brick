@@ -1,0 +1,96 @@
+{
+  "name": "StarterGui",
+  "simple": "StarterGui is where you build your game's on-screen UI (buttons, health bars, menus) in Studio. When a player's character spawns, everything in StarterGui is copied into that player's own PlayerGui, which is what they actually see. It also has methods to hide or change Roblox's built-in UI, like the chat, the player list, and the backpack bar.",
+  "analogy": "StarterGui is like the master copy of a worksheet on the teacher's desk. Each student (player) gets their own photocopy (PlayerGui) to write on. Writing on the master copy during class doesn't change the copies students already have.",
+  "whenToUse": [
+    "Design ScreenGuis (buttons, text, menus) in Studio that every player should get.",
+    "Hide Roblox's built-in UI, like the player list or the backpack hotbar (SetCoreGuiEnabled).",
+    "Show a little notification in the corner (SetCore \"SendNotification\").",
+    "Turn off the reset button (SetCore \"ResetButtonCallback\")."
+  ],
+  "where": "A service in the Explorer. Get it with `game:GetService(\"StarterGui\")`. Put ScreenGuis inside it in Studio. Call SetCore, GetCore, SetCoreGuiEnabled and GetCoreGuiEnabled from a LocalScript, because they change one player's screen.",
+  "terms": {
+    "UI / GUI": "User interface: the buttons, text, pictures and menus drawn on the screen.",
+    "ScreenGui": "A container for 2D UI that draws on the player's screen. Put buttons and labels inside it.",
+    "PlayerGui": "A folder inside each Player that holds the UI that player actually sees. Filled with copies from StarterGui.",
+    "CoreGui": "Roblox's own built-in UI: chat, player list, backpack hotbar, health bar, emotes menu, and the top bar.",
+    "ResetOnSpawn": "A property on ScreenGui. If true (default), that ScreenGui is deleted and re-copied every time the character respawns. If false, it's copied once and stays.",
+    "LocalScript": "A script that runs on the player's own device. UI scripts are LocalScripts.",
+    "Enum.CoreGuiType": "The list of built-in UI pieces you can turn on or off, like PlayerList, Backpack, Chat, Health, EmotesMenu, or All.",
+    "pcall": "Runs a function safely: if it errors, your script keeps going. Useful for SetCore, which can fail if Roblox's UI hasn't loaded yet.",
+    "yield": "Pause and wait. GetCore can pause your script for a moment."
+  },
+  "examples": [
+    {
+      "title": "How StarterGui gets to the player's screen",
+      "place": "LocalScript inside a ScreenGui in StarterGui",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\n-- This script was COPIED from StarterGui into the player's PlayerGui.\n-- script.Parent is the copy of the ScreenGui the player sees.\nlocal screenGui = script.Parent\nprint(screenGui:GetFullName()) -- e.g. Players.YourName.PlayerGui.ScreenGui\n\n-- If screenGui.ResetOnSpawn is true (the default), this whole ScreenGui\n-- (and this script) is deleted and copied fresh every respawn.\n-- Set it to false to keep things like scores on screen across deaths.\nscreenGui.ResetOnSpawn = false",
+      "explain": [
+        "In Studio you build the UI inside StarterGui. That's the template.",
+        "When a character spawns, Roblox copies StarterGui's children into that player's PlayerGui. The copy is what shows on screen.",
+        "Because of the copy, script.Parent is the player's own ScreenGui, not the one in StarterGui.",
+        "ScreenGuis with ResetOnSpawn = true are replaced every respawn. With false, they are copied once and stay.",
+        "To change what one player sees during the game, change their PlayerGui, not StarterGui."
+      ]
+    },
+    {
+      "title": "Hide the player list and show a notification",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local StarterGui = game:GetService(\"StarterGui\")\n\n-- Hide the built-in player list in the top-right corner\nStarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)\n\n-- SetCore can fail if Roblox's UI isn't ready yet, so try a few times\nlocal success = false\nfor attempt = 1, 5 do\n    success = pcall(function()\n        StarterGui:SetCore(\"SendNotification\", {\n            Title = \"Welcome!\",\n            Text = \"Reach the top to win.\",\n            Duration = 5, -- seconds\n        })\n    end)\n    if success then\n        break\n    end\n    task.wait(1)\nend",
+      "explain": [
+        "SetCoreGuiEnabled turns a built-in UI piece on or off for this player.",
+        "SetCore(\"SendNotification\", {...}) pops up a small message at the bottom right.",
+        "We use pcall and retry because SetCore errors if Roblox's own UI scripts haven't loaded yet."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Changing StarterGui while the game runs doesn't change what players already see. Edit player.PlayerGui instead (or wait for them to respawn).",
+    "SetCore, GetCore and SetCoreGuiEnabled must be called from a LocalScript.",
+    "SetCore can error if called too early. Wrap it in pcall and retry.",
+    "If Players.CharacterAutoLoads is false, StarterGui isn't copied until the character is loaded with LoadCharacterAsync.",
+    "The top bar can't be hidden with SetCoreGuiEnabled. Use SetCore(\"TopbarEnabled\", false)."
+  ],
+  "members": {
+    "StarterGui.ClipsDescendantsSupportsRotation": {
+      "simple": "A Studio setting (scripts can't change it). When on, a frame with ClipsDescendants also correctly cuts off rotated things inside it."
+    },
+    "StarterGui.ProcessUserInput": {
+      "simple": "Hidden, plugin-only. Lets StarterGui handle input like PlayerGui does. Not used by game scripts."
+    },
+    "StarterGui.ResetPlayerGuiOnSpawn": {
+      "simple": "Old — use ScreenGui.ResetOnSpawn (LayerCollector.ResetOnSpawn) instead."
+    },
+    "StarterGui.RtlTextSupport": {
+      "simple": "A Studio setting (scripts can't change it). Turns on right-to-left text layout for languages like Arabic and Hebrew. On by default."
+    },
+    "StarterGui.ScreenOrientation": {
+      "simple": "The screen direction phones and tablets start in: landscape (sideways), portrait (upright), or Sensor (follows how they hold the device, the default). Changing it later doesn't affect players already in the game; change their PlayerGui.ScreenOrientation for that.",
+      "example": "game:GetService(\"StarterGui\").ScreenOrientation = Enum.ScreenOrientation.LandscapeSensor"
+    },
+    "StarterGui.ShowDevelopmentGui": {
+      "simple": "Whether StarterGui's UI is shown in the Studio editor while you build. Doesn't affect the running game."
+    },
+    "StarterGui.VirtualCursorMode": {
+      "simple": "A Studio setting (scripts can't change it). Turns the gamepad virtual cursor on or off, which lets controller players move a pointer over buttons. Always on in VR."
+    },
+    "StarterGui:GetCore": {
+      "simple": "Reads a setting or info from Roblox's built-in UI, picked by name, like \"PointsNotificationsActive\" or \"GetBlockedUserIds\". Use it in a LocalScript. It may pause briefly.",
+      "example": "-- LocalScript\nlocal StarterGui = game:GetService(\"StarterGui\")\nlocal blocked = StarterGui:GetCore(\"GetBlockedUserIds\")\nprint(\"You have blocked \" .. #blocked .. \" users\")"
+    },
+    "StarterGui:GetCoreGuiEnabled": {
+      "simple": "Tells you if a built-in UI piece (like the Backpack or PlayerList) is turned on. Call it in a LocalScript.",
+      "example": "local StarterGui = game:GetService(\"StarterGui\")\nprint(StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Backpack))"
+    },
+    "StarterGui:SetCore": {
+      "simple": "Changes or uses a feature of Roblox's built-in UI, picked by name. Popular ones: \"SendNotification\" (pop-up message), \"ResetButtonCallback\" (false turns off the reset button), \"TopbarEnabled\", \"PromptSendFriendRequest\". Use in a LocalScript, wrapped in pcall.",
+      "example": "-- LocalScript: turn off the Reset Character button\nlocal StarterGui = game:GetService(\"StarterGui\")\npcall(function()\n    StarterGui:SetCore(\"ResetButtonCallback\", false)\nend)",
+      "gotcha": "It errors if Roblox's UI scripts haven't loaded yet. Retry with pcall and task.wait."
+    },
+    "StarterGui:SetCoreGuiEnabled": {
+      "simple": "Turns a built-in UI piece on or off for this player: chat, player list, backpack hotbar, health, emotes menu, or All. Call it in a LocalScript.",
+      "example": "-- LocalScript in StarterPlayerScripts: make your own inventory instead\nlocal StarterGui = game:GetService(\"StarterGui\")\nStarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)",
+      "gotcha": "It can't hide the top bar. Use SetCore(\"TopbarEnabled\", false) for that."
+    }
+  }
+}

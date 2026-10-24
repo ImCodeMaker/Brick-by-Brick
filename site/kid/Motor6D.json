@@ -1,0 +1,59 @@
+{
+  "name": "Motor6D",
+  "simple": "Motor6D is a joint that holds two parts together but lets animations move them, like the shoulder that connects an arm to a body. Its Transform property is the extra twist or slide that the animation adds on top. New player avatars now usually use AnimationConstraint instead, but Motor6D is still great for your own rigs like turrets and doors.",
+  "analogy": "Motor6D is like the joint in an action figure's arm. It keeps the arm attached, but you (or an animation) can rotate it into new poses.",
+  "whenToUse": [
+    "Rigging your own animated models (robots, turrets, creatures)",
+    "Animating parts with code every frame using Transform",
+    "Working with older R15/R6 characters that still use Motor6D"
+  ],
+  "where": "Lives inside a part of a rig (a model with joints). Create with Instance.new(\"Motor6D\") and set Part0, Part1, C0 and C1 (from JointInstance). Animate it with an Animator or by setting Transform during RunService.PreSimulation.",
+  "terms": {
+    "CFrame": "A position plus a rotation in one value. It says where something is and which way it faces.",
+    "radians": "Another way to measure angles. A full circle is 2 x pi (about 6.28) radians, which is 360 degrees. `math.rad(90)` turns 90 degrees into radians.",
+    "assembly": "A group of parts that are rigidly joined (for example by welds) so they move as one solid object. A force on any part moves the whole group.",
+    "parent": "The object something is placed inside in the Explorer. Setting `x.Parent = part` puts x inside part.",
+    "replicate": "Copy from the server to every player's computer automatically. A property marked 'not replicated' is not copied.",
+    "Part0 / Part1": "The two parts a joint connects. Part0 is the first part, Part1 is the second.",
+    "C0 / C1": "Two CFrames that say where the joint sits inside Part0 (C0) and inside Part1 (C1). The joint keeps Part1.CFrame * C1 equal to Part0.CFrame * C0.",
+    "offset": "How far (and how turned) one thing is from another. If part B sits 3 studs above part A, B's offset from A is (0, 3, 0).",
+    "rigid joint": "A connection that does not bend at all. The joined parts act like one solid object.",
+    "root part": "The one part in an assembly that the others are measured from. When you change a weld, the root part stays where it is and the others move.",
+    "rig": "A model whose parts are connected by animatable joints, like a character's body.",
+    "Animator": "The object that plays animations on a rig by changing its joints.",
+    "Transform": "An extra CFrame that adds animation movement on top of the joint's normal C0/C1 placement.",
+    "RunService.PreSimulation": "An event that fires every frame just before physics runs. Good for setting Transform by code.",
+    "AnimationConstraint": "The newer joint that upgraded player avatars use instead of Motor6D."
+  },
+  "examples": [
+    {
+      "title": "Spin a turret head with code",
+      "place": "Script inside a Model named Turret (with parts Base and Head)",
+      "code": "local RunService = game:GetService(\"RunService\")\n\nlocal model = script.Parent\nlocal base = model:WaitForChild(\"Base\")\nlocal head = model:WaitForChild(\"Head\")\n\nlocal motor = Instance.new(\"Motor6D\")\nmotor.Part0 = base\nmotor.Part1 = head\nmotor.C0 = CFrame.new(0, 2, 0) -- the head sits 2 studs above the base's center\nmotor.Parent = base\n\nlocal angle = 0\nRunService.PreSimulation:Connect(function(deltaTime)\n\t-- deltaTime = seconds since last frame; pi radians = half a turn per second\n\tangle += math.pi * deltaTime\n\tmotor.Transform = CFrame.Angles(0, angle, 0)\nend)",
+      "explain": [
+        "The Motor6D joins Head to Base. C0 puts the joint 2 studs above Base's center.",
+        "Every frame before physics, we add a bit more angle and set Transform to that rotation.",
+        "Transform is added on top of C0, so the head stays 2 studs up but keeps turning, half a turn every second."
+      ]
+    }
+  ],
+  "gotchas": [
+    "On new player avatars (with AvatarJointUpgrade on), character joints are AnimationConstraints, not Motor6Ds. Code like character:FindFirstChildOfClass(\"Motor6D\") will find nothing.",
+    "If an Animator is playing animations on the rig, it overwrites Transform every frame, so your code changes get replaced.",
+    "Transform changes are applied in a batch just before physics, not instantly like C0/C1.",
+    "Part names must match the names used in the animation, or the animation will not move that joint."
+  ],
+  "members": {
+    "Motor6D.ChildName": {
+      "simple": "Internal read-only copy of Part1's name used by the animation system. Scripts cannot use it; read motor.Part1.Name instead."
+    },
+    "Motor6D.ParentName": {
+      "simple": "Internal read-only copy of Part0's name used by the animation system. Scripts cannot use it; read motor.Part0.Name instead."
+    },
+    "Motor6D.Transform": {
+      "simple": "The extra pose (a CFrame) that animations add to the joint, on top of C0 and C1. Use it for custom code animations. It is applied just before each physics step, and an Animator playing animations will overwrite it every frame.",
+      "example": "local RunService = game:GetService(\"RunService\")\nlocal motor = workspace.Turret.Base.Motor6D\n\nRunService.PreSimulation:Connect(function()\n\t-- Tilt the joint 30 degrees forward\n\tmotor.Transform = CFrame.Angles(math.rad(-30), 0, 0)\nend)",
+      "gotcha": "It is not replicated: setting it on the server does not copy to players. Set it in the same place the animation should run."
+    }
+  }
+}

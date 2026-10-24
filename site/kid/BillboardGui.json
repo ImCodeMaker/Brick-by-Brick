@@ -1,0 +1,134 @@
+{
+  "name": "BillboardGui",
+  "simple": "A BillboardGui shows UI floating in the 3D world that always turns to face your camera, like a name tag or health bar above a character's head. Put TextLabels and ImageLabels inside it and attach it to a part or an attachment. It stays at that spot in the world, but you always see it from the front.",
+  "analogy": "A BillboardGui is like a helium balloon with a picture on it, tied to a toy. Wherever the toy goes, the balloon follows, and it magically always turns its picture toward you.",
+  "whenToUse": [
+    "Name tags or health bars above characters or enemies",
+    "Floating markers like an arrow or '!' over a quest giver",
+    "Price tags hovering above shop items",
+    "Damage numbers that pop up over something you hit"
+  ],
+  "where": "Parent it to a Part or Attachment in Workspace (it floats at that part), or put it in StarterGui and set its Adornee to the part. Buttons inside only work if the BillboardGui is in the player's PlayerGui. Usually created or changed from a LocalScript, but a server Script can also put one in Workspace so everyone sees it.",
+  "terms": {
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts, because each player has their own copy of the UI.",
+    "client": "The player's own device: their computer, phone, tablet or console.",
+    "server": "Roblox's computer that runs the game for everyone at once.",
+    "StarterGui": "A folder in Explorer. UI you put here is copied to every player when they spawn.",
+    "PlayerGui": "Each player's own personal UI folder (inside their Player object). Only UI in here actually shows on their screen.",
+    "descendant": "Anything inside an object: children, grandchildren, and so on.",
+    "3D world": "The game world with parts and characters, as opposed to the flat screen UI.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "Adornee": "The part or attachment the BillboardGui is stuck to. It overrides the parent.",
+    "Attachment": "An invisible point inside a part that marks a spot, like the top of a head.",
+    "offset": "An extra shift from a starting point. StudsOffset (0, 3, 0) moves the billboard 3 studs up from the part's center.",
+    "camera": "Your eye in the game world: what decides what you see.",
+    "occluded": "Hidden behind something else, like a sign behind a wall.",
+    "Scale (in BillboardGui Size)": "In a BillboardGui, the Scale part of Size means studs in the world, not a percent. Scale 4 = 4 studs wide.",
+    "Offset (in BillboardGui Size)": "In a BillboardGui, the Offset part of Size is pixels on your screen, so it stays the same size no matter how far away you are.",
+    "deprecated": "Old and replaced by something better. Don't use it in new code."
+  },
+  "examples": [
+    {
+      "title": "Put a name tag above a part",
+      "place": "Script in ServerScriptService (with a Part named \"Shopkeeper\" in Workspace)",
+      "code": "local shopkeeper = workspace:WaitForChild(\"Shopkeeper\")\n\nlocal billboard = Instance.new(\"BillboardGui\")\nbillboard.Size = UDim2.fromOffset(200, 50)  -- 200 x 50 pixels on screen, at any distance\nbillboard.StudsOffset = Vector3.new(0, 3, 0) -- float 3 studs above the part's center\nbillboard.AlwaysOnTop = true                  -- don't hide behind walls\nbillboard.MaxDistance = 100                   -- disappear when farther than 100 studs\nbillboard.Parent = shopkeeper                 -- attach to the part\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.fromScale(1, 1)            -- fill the whole billboard\nlabel.BackgroundTransparency = 1              -- no box, just text\nlabel.Text = \"Shopkeeper\"\nlabel.TextColor3 = Color3.fromRGB(255, 255, 255)\nlabel.TextStrokeTransparency = 0              -- black outline so it's easy to read\nlabel.TextScaled = true\nlabel.Parent = billboard",
+      "explain": [
+        "Parenting the BillboardGui to the part makes it float at that part's position.",
+        "Size uses Offset (pixels), so the tag looks the same size on screen whether you're near or far.",
+        "StudsOffset (0, 3, 0) shifts it 3 studs up. If the part is at (10, 2, 5), the tag sits around (10, 5, 5).",
+        "Because this is a server Script and the billboard is in Workspace, every player sees it."
+      ]
+    },
+    {
+      "title": "A tag that shrinks with distance (world-sized)",
+      "place": "Script in ServerScriptService",
+      "code": "local part = workspace:WaitForChild(\"Chest\")\n\nlocal billboard = Instance.new(\"BillboardGui\")\nbillboard.Size = UDim2.fromScale(4, 1) -- 4 studs wide, 1 stud tall IN THE WORLD\nbillboard.StudsOffset = Vector3.new(0, 2, 0)\nbillboard.Parent = part\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.fromScale(1, 1)\nlabel.BackgroundTransparency = 1\nlabel.TextScaled = true -- text grows and shrinks with the billboard\nlabel.Text = \"Treasure!\"\nlabel.Parent = billboard",
+      "explain": [
+        "In a BillboardGui, Size's Scale numbers mean studs. (4, 1) is a sign 4 studs wide and 1 stud tall.",
+        "Because it's world-sized, it looks smaller as you walk away, like a real sign.",
+        "TextScaled makes the text fit the sign at any distance."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Size Scale works differently here: it means studs in the world, not a percent of the parent. Offset is still pixels.",
+    "Buttons inside a BillboardGui only get clicks if the BillboardGui is in PlayerGui (put it in StarterGui and set Adornee) AND Active is true on both the BillboardGui and the button.",
+    "If you can't see it, check that it has a parent part or an Adornee, and that it isn't hidden behind a wall (try AlwaysOnTop).",
+    "Offset-sized billboards stay big even far away, which can clutter the screen. Use MaxDistance to hide them."
+  ],
+  "members": {
+    "BillboardGui.Active": {
+      "simple": "Whether buttons inside can be clicked. A button in a BillboardGui is clickable only when Active is true on BOTH the BillboardGui and the button, and the BillboardGui is in the player's PlayerGui.",
+      "example": "local billboard = script.Parent -- a BillboardGui in StarterGui with Adornee set\nbillboard.Active = true"
+    },
+    "BillboardGui.Adornee": {
+      "simple": "The part or attachment the billboard floats at. Setting it overrides the parent, so the BillboardGui can live in StarterGui (needed for clickable buttons) while still showing over a part in the world.",
+      "example": "-- LocalScript; a BillboardGui named \"Marker\" is in StarterGui\nlocal Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nlocal marker = playerGui:WaitForChild(\"Marker\")\nmarker.Adornee = workspace:WaitForChild(\"QuestGiver\")"
+    },
+    "BillboardGui.AlwaysOnTop": {
+      "simple": "When true, the billboard is drawn on top of everything, so walls and parts can't hide it. Colors then look like normal screen UI and lighting is ignored. When false (default), it can be hidden behind things like a real object.",
+      "example": "local billboard = script.Parent\nbillboard.AlwaysOnTop = true -- see it through walls"
+    },
+    "BillboardGui.Brightness": {
+      "simple": "How bright the billboard glows when LightInfluence is 0. Default is 1, can go up to 1000. Turn it up to make a screen in a dark room pop.",
+      "example": "local billboard = script.Parent\nbillboard.LightInfluence = 0\nbillboard.Brightness = 5",
+      "gotcha": "Does nothing if LightInfluence is 1 or AlwaysOnTop is true."
+    },
+    "BillboardGui.ClipsDescendants": {
+      "simple": "When true (default), parts of UI inside that stick out past the billboard's edges are cut off. UI completely outside the billboard is never drawn, even when false.",
+      "example": "local billboard = script.Parent\nbillboard.ClipsDescendants = false"
+    },
+    "BillboardGui.CurrentDistance": {
+      "simple": "Read-only. How far away, in studs, the billboard is from the player's camera right now.",
+      "example": "local billboard = script.Parent\nprint(\"Camera is\", billboard.CurrentDistance, \"studs away\")",
+      "gotcha": "Its change event only fires if DistanceStep is more than 0."
+    },
+    "BillboardGui.DistanceLowerLimit": {
+      "simple": "Old — use MaxDistance and a Size using Scale or Offset instead."
+    },
+    "BillboardGui.DistanceStep": {
+      "simple": "How many studs the camera must move before CurrentDistance updates. Default 0. Set it above 0 if you want to listen for CurrentDistance changes.",
+      "example": "local billboard = script.Parent\nbillboard.DistanceStep = 5 -- update CurrentDistance every 5 studs\nbillboard:GetPropertyChangedSignal(\"CurrentDistance\"):Connect(function()\n\tprint(\"Now\", billboard.CurrentDistance, \"studs away\")\nend)"
+    },
+    "BillboardGui.DistanceUpperLimit": {
+      "simple": "Old — use MaxDistance and a Size using Scale or Offset instead."
+    },
+    "BillboardGui.ExtentsOffset": {
+      "simple": "Shifts the billboard away from its part, measured in 'half the part's size' units, along the camera's directions (right, up, toward camera). For a part 4 studs tall, ExtentsOffset (0, 1, 0) moves the billboard up 2 studs, right to the top edge.",
+      "example": "local billboard = script.Parent\nbillboard.ExtentsOffset = Vector3.new(0, 1, 0) -- sit at the top edge of the part"
+    },
+    "BillboardGui.ExtentsOffsetWorldSpace": {
+      "simple": "Like ExtentsOffset (shift in 'half the part's size' units), but the directions are the world's fixed X, Y, Z instead of the camera's.",
+      "example": "local billboard = script.Parent\nbillboard.ExtentsOffsetWorldSpace = Vector3.new(0, 1, 0) -- always world 'up'"
+    },
+    "BillboardGui.LightInfluence": {
+      "simple": "How much the world's lighting affects the billboard, from 0 to 1. 1 = fully affected (dark at night), 0 = not affected at all (always bright).",
+      "example": "local billboard = script.Parent\nbillboard.LightInfluence = 0 -- stays bright even at night"
+    },
+    "BillboardGui.MaxDistance": {
+      "simple": "How far away (in studs) the camera can be before the billboard disappears. 0 or infinity (the default) means it never disappears.",
+      "example": "local billboard = script.Parent\nbillboard.MaxDistance = 60 -- only show when the camera is within 60 studs"
+    },
+    "BillboardGui.PlayerToHideFrom": {
+      "simple": "One player who should NOT see this billboard. Great for hiding your own name tag from yourself while everyone else sees it.",
+      "example": "-- Script in ServerScriptService: name tag over each character, hidden from its owner\nlocal Players = game:GetService(\"Players\")\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(function(character)\n\t\tlocal head = character:WaitForChild(\"Head\")\n\t\tlocal tag = Instance.new(\"BillboardGui\")\n\t\ttag.Size = UDim2.fromOffset(150, 40)\n\t\ttag.StudsOffset = Vector3.new(0, 2, 0)\n\t\ttag.PlayerToHideFrom = player -- the owner doesn't see their own tag\n\t\ttag.Parent = head\n\t\tlocal label = Instance.new(\"TextLabel\")\n\t\tlabel.Size = UDim2.fromScale(1, 1)\n\t\tlabel.BackgroundTransparency = 1\n\t\tlabel.Text = player.DisplayName\n\t\tlabel.Parent = tag\n\tend)\nend)",
+      "gotcha": "Only works for one player. To hide from many, put it in StarterGui and turn Enabled on or off per player in a LocalScript."
+    },
+    "BillboardGui.Size": {
+      "simple": "How big the billboard is. Special rule: the Scale numbers mean STUDS in the world (so it looks smaller when far away), and the Offset numbers mean screen PIXELS (so it stays the same size on screen). UDim2.fromScale(4, 1) = 4 studs by 1 stud. UDim2.fromOffset(200, 50) = 200 by 50 pixels at any distance.",
+      "example": "local billboard = script.Parent\nbillboard.Size = UDim2.fromScale(6, 2)    -- a 6 x 2 stud sign in the world\n-- or\nbillboard.Size = UDim2.fromOffset(200, 50) -- always 200 x 50 pixels on screen"
+    },
+    "BillboardGui.SizeOffset": {
+      "simple": "Slides the billboard around its spot, measured in fractions of its own size, a bit like AnchorPoint but with different numbers. (0, 0) default = centered on the spot. (0.5, 0.5) = the spot is at the bottom-left of the billboard. (-0.5, -0.5) = the spot is at the bottom-right.",
+      "example": "local billboard = script.Parent\nbillboard.SizeOffset = Vector2.new(0, 0.5) -- billboard sits above the spot instead of centered on it"
+    },
+    "BillboardGui.StudsOffset": {
+      "simple": "Moves the billboard away from its part by a number of studs, using the camera's directions: X = camera's right, Y = camera's up, Z = toward the camera. Vector3.new(0, 3, 0) floats it 3 studs above the part's center.",
+      "example": "local billboard = script.Parent\nbillboard.StudsOffset = Vector3.new(0, 3, 0) -- 3 studs up"
+    },
+    "BillboardGui.StudsOffsetWorldSpace": {
+      "simple": "Moves the billboard away from its part by a number of studs along the world's fixed X, Y, Z directions (not the camera's). A part at (0, 5, 0) with StudsOffsetWorldSpace (2, 0, 0) puts the billboard at (2, 5, 0).",
+      "example": "local billboard = script.Parent\nbillboard.StudsOffsetWorldSpace = Vector3.new(0, 4, 0) -- always 4 studs straight up"
+    }
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "name": "CylindricalConstraint",
+  "simple": "CylindricalConstraint lets two parts slide along one line AND spin around a line at the same time. It is like a PrismaticConstraint (slide) and a HingeConstraint (spin) in one. Both the sliding and the spinning can be free, powered like a motor, or sent to a target like a servo.",
+  "analogy": "CylindricalConstraint is like a car wheel with suspension: the wheel spins on its axle, and the axle can also slide up and down on its springs.",
+  "whenToUse": [
+    "Vehicle wheels with suspension (with a SpringConstraint)",
+    "Drills that spin while pushing forward",
+    "Screws and corkscrew-like machines"
+  ],
+  "where": "Make it with Instance.new(\"CylindricalConstraint\"), set Attachment0 and Attachment1 and put it in workspace. Sliding is along Attachment0's X arrow; the spin line is centered on Attachment1 and tilted from the slide line by InclinationAngle. Sliding settings (ActuatorType, Velocity, LimitsEnabled...) come from SlidingBallConstraint.",
+  "terms": {
+    "constraint": "An invisible rule or connector that the physics engine follows, like 'these two parts must stay stuck together' or 'push this part upward'.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "axis": "An imaginary line something turns around or slides along. An attachment's X axis is its main arrow.",
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "angular velocity": "How fast something spins, and around which axis, measured in radians per second. 2 x pi (about 6.28) radians per second is one full turn every second.",
+    "radians": "Another way to measure angles. A full circle is 2 x pi (about 6.28) radians, which is 360 degrees. `math.rad(90)` turns 90 degrees into radians.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "restitution": "Bounciness, from 0 (no bounce, just stops) to 1 (bounces back as hard as it hit).",
+    "actuator": "The part of a constraint that powers movement by itself, like a motor. ActuatorType picks None (no power), Motor (keep spinning/moving at a speed) or Servo (move to a target spot and stop).",
+    "motor (ActuatorType)": "Keeps turning or sliding at a set speed, like a fan or a car wheel.",
+    "servo (ActuatorType)": "Moves to a set target angle or position and holds there, like a robot arm or an automatic door.",
+    "limits": "Stops that keep a joint from moving too far, like a door that can only swing 90 degrees.",
+    "acceleration": "How fast speed changes. The rule is F = m x a (force = mass x acceleration). Push a mass-5.6 part with force 56 and it speeds up by 10 studs/s every second.",
+    "world space": "Directions measured using the whole game world's fixed arrows: Y is always straight up toward the sky, no matter how a part is turned.",
+    "Vector3": "Three numbers (X, Y, Z) bundled together. Used for positions, directions, forces and speeds. Y is up.",
+    "linear": "In a straight line (sliding), as opposed to angular (spinning).",
+    "inclination angle": "How tilted the spin line is compared to the slide line, from -180 to 180 degrees. 0 means they point the same way.",
+    "degrees": "The usual way to measure angles: 90 degrees is a quarter turn. TargetAngle, LowerAngle, UpperAngle and InclinationAngle use degrees.",
+    "SlidingBallConstraint": "The parent class this constraint gets its sliding settings from, like ActuatorType, Velocity, TargetPosition, LowerLimit and UpperLimit."
+  },
+  "examples": [
+    {
+      "title": "A powered wheel with up-and-down travel",
+      "place": "Script in ServerScriptService",
+      "code": "local cylinder = workspace:WaitForChild(\"Car\"):WaitForChild(\"FrontWheel\"):WaitForChild(\"CylindricalConstraint\")\n\n-- SPIN: drive the wheel like a motor\ncylinder.AngularActuatorType = Enum.ActuatorType.Motor\ncylinder.AngularVelocity = 15        -- radians per second (about 2.4 turns per second)\ncylinder.MotorMaxTorque = 100000      -- enough twist to move the car\n\n-- SLIDE: let the wheel move up and down only 1 stud each way\ncylinder.LimitsEnabled = true\ncylinder.LowerLimit = -1\ncylinder.UpperLimit = 1\n-- (a SpringConstraint between the wheel and body does the bouncing)",
+      "explain": [
+        "AngularActuatorType = Motor makes the wheel keep spinning at AngularVelocity, measured in radians per second (6.28 = one turn per second).",
+        "MotorMaxTorque is the most twist the motor can use; heavy cars need more.",
+        "LimitsEnabled, LowerLimit and UpperLimit come from SlidingBallConstraint and keep the sliding within 1 stud up or down.",
+        "Add a SpringConstraint between the same parts so the wheel bounces back after bumps."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Spinning settings start with 'Angular' (AngularActuatorType, AngularVelocity). Sliding settings (ActuatorType, Velocity, Speed) come from SlidingBallConstraint. Do not mix them up.",
+    "AngularVelocity and AngularSpeed are in radians per second, but TargetAngle and the angle limits are in degrees.",
+    "If the wheel spins the wrong way around, rotate the attachments or change InclinationAngle.",
+    "If a part is joined this way to an anchored part (or something connected to an anchored part), its physics is not calculated on the player's own device when they touch it, so it may feel slightly delayed."
+  ],
+  "members": {
+    "CylindricalConstraint.AngularActuatorType": {
+      "simple": "How the spinning is powered: None (free), Motor (keep spinning at AngularVelocity) or Servo (turn to TargetAngle and hold).",
+      "example": "workspace.Drill.CylindricalConstraint.AngularActuatorType = Enum.ActuatorType.Motor"
+    },
+    "CylindricalConstraint.AngularLimitsEnabled": {
+      "simple": "If true, the spin can only go between LowerAngle and UpperAngle.",
+      "example": "local c = workspace.Knob.CylindricalConstraint\nc.AngularLimitsEnabled = true\nc.LowerAngle = -90\nc.UpperAngle = 90"
+    },
+    "CylindricalConstraint.AngularResponsiveness": {
+      "simple": "In angular Servo mode, how sharply it turns to TargetAngle. Bigger = faster and snappier; smaller = softer and slower.",
+      "example": "workspace.Knob.CylindricalConstraint.AngularResponsiveness = 45"
+    },
+    "CylindricalConstraint.AngularRestitution": {
+      "simple": "How bouncy the spin is when it hits LowerAngle or UpperAngle, from 0 to 1.",
+      "example": "workspace.Knob.CylindricalConstraint.AngularRestitution = 0.5"
+    },
+    "CylindricalConstraint.AngularSpeed": {
+      "simple": "In angular Servo mode, how fast it turns toward TargetAngle, in radians per second. Always positive, because the servo always heads toward the target.",
+      "example": "workspace.Knob.CylindricalConstraint.AngularSpeed = math.rad(90) -- 90 degrees per second"
+    },
+    "CylindricalConstraint.AngularVelocity": {
+      "simple": "In angular Motor mode, the spin speed it tries to keep, in radians per second around the spin line. Negative spins the other way.",
+      "example": "workspace.Drill.CylindricalConstraint.AngularVelocity = 20"
+    },
+    "CylindricalConstraint.CurrentAngle": {
+      "simple": "Read-only: how far it is turned right now, in degrees, from -180 to 180.",
+      "example": "print(workspace.Knob.CylindricalConstraint.CurrentAngle)"
+    },
+    "CylindricalConstraint.InclinationAngle": {
+      "simple": "How tilted the spin line is from the slide line (Attachment0's X arrow), from -180 to 180 degrees. 0 = spin around the same line it slides on; 90 = spin around a line at a right angle to it.",
+      "example": "-- Slide up/down, but spin like a wheel around a sideways line\nworkspace.Car.FrontWheel.CylindricalConstraint.InclinationAngle = 90"
+    },
+    "CylindricalConstraint.LowerAngle": {
+      "simple": "The lowest spin angle, in degrees (-180 to 180), when AngularLimitsEnabled is true.",
+      "example": "workspace.Knob.CylindricalConstraint.LowerAngle = -45"
+    },
+    "CylindricalConstraint.MotorMaxAngularAcceleration": {
+      "simple": "In angular Motor mode, the fastest it may speed up its spin, in radians per second, per second. Lower numbers give a smoother start.",
+      "example": "workspace.Drill.CylindricalConstraint.MotorMaxAngularAcceleration = 10"
+    },
+    "CylindricalConstraint.MotorMaxTorque": {
+      "simple": "In angular Motor mode, the most twisting strength it can use to reach AngularVelocity.",
+      "example": "workspace.Drill.CylindricalConstraint.MotorMaxTorque = 50000"
+    },
+    "CylindricalConstraint.RotationAxisVisible": {
+      "simple": "If true, draws the spin line so you can see which way it turns. Handy while building.",
+      "example": "workspace.Car.FrontWheel.CylindricalConstraint.RotationAxisVisible = true"
+    },
+    "CylindricalConstraint.ServoMaxTorque": {
+      "simple": "In angular Servo mode, the most twisting strength it can use to reach TargetAngle.",
+      "example": "workspace.Knob.CylindricalConstraint.ServoMaxTorque = 10000"
+    },
+    "CylindricalConstraint.SoftlockAngularServoUponReachingTarget": {
+      "simple": "Old — use the normal angular Servo settings (TargetAngle, AngularSpeed, ServoMaxTorque) instead."
+    },
+    "CylindricalConstraint.TargetAngle": {
+      "simple": "In angular Servo mode, the angle in degrees (-180 to 180) to turn to and hold.",
+      "example": "workspace.Knob.CylindricalConstraint.TargetAngle = 45"
+    },
+    "CylindricalConstraint.UpperAngle": {
+      "simple": "The highest spin angle, in degrees (-180 to 180), when AngularLimitsEnabled is true.",
+      "example": "workspace.Knob.CylindricalConstraint.UpperAngle = 45"
+    },
+    "CylindricalConstraint.WorldRotationAxis": {
+      "simple": "Read-only: the direction of the spin line in world directions, as a length-1 Vector3.",
+      "example": "print(\"Wheel spins around:\", workspace.Car.FrontWheel.CylindricalConstraint.WorldRotationAxis)"
+    }
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "name": "DateTime",
+  "simple": "A DateTime is one exact moment in time, like \"June 11, 2020 at 3:45 PM\". It can tell you the current time, turn times into nice text like \"September 4, 1986\", and convert between the player's own time zone and world time (UTC). Inside, it is just a count of milliseconds since January 1, 1970.",
+  "analogy": "A DateTime is like a stopwatch that started on January 1, 1970 and has been ticking ever since. The number on it is the moment. Then you can ask it to read that number out as a calendar date in any language or time zone.",
+  "whenToUse": [
+    "Daily rewards: checking if a day has passed since the last claim",
+    "Showing the date or time on screen in the player's own format",
+    "Saving a time in a DataStore as a number and loading it later",
+    "Counting down to an event on a set date"
+  ],
+  "where": "Works in any script on the server or client. Make one with DateTime.now(), DateTime.fromUnixTimestamp, DateTime.fromUniversalTime, DateTime.fromLocalTime, or DateTime.fromIsoDate.",
+  "terms": {
+    "Unix timestamp": "The number of seconds since midnight on January 1, 1970 (in UTC). For example, 86400 means exactly one day later: January 2, 1970.",
+    "millisecond": "One thousandth of a second. 1000 milliseconds = 1 second.",
+    "UTC": "Short for Coordinated Universal Time, the world's shared clock. It is the same everywhere, no matter your time zone.",
+    "local time": "The time on the player's own device clock, in their time zone. Two players in different countries see different local times for the same moment.",
+    "time zone": "A region of the world that uses the same clock time. When it is noon in London, it is morning in New York.",
+    "ISO 8601": "A standard way to write a date and time as text, like 2020-01-02T10:30:45Z. The Z at the end means UTC.",
+    "format string": "A pattern of special letters that get replaced with parts of the date. YYYY becomes the year, MM the month number, DD the day.",
+    "locale": "A code for a language and region, like \"en-us\" for American English. It controls things like month names and the order of day and month.",
+    "dictionary": "A Lua table where you look things up by name, like t.Year or t.Month.",
+    "nil": "Lua's word for \"nothing\"."
+  },
+  "examples": [
+    {
+      "title": "Show today's date in the player's own time zone",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local now = DateTime.now()\n\n-- \"LL\" is a ready-made pattern: like \"September 4, 1986\" in en-us\nprint(\"Today is \" .. now:FormatLocalTime(\"LL\", \"en-us\"))\n\n-- \"LT\" is the short time, like \"8:30 PM\"\nprint(\"The time is \" .. now:FormatLocalTime(\"LT\", \"en-us\"))\n\n-- Build your own pattern\nprint(now:FormatLocalTime(\"YYYY-MM-DD\", \"en-us\")) -- like 2026-10-22",
+      "explain": [
+        "DateTime.now() grabs the current moment.",
+        "FormatLocalTime turns it into text using the player's time zone. We run it in a LocalScript so it uses the player's device.",
+        "\"LL\" and \"LT\" are shortcuts for a long date and a short time.",
+        "\"YYYY-MM-DD\" builds a custom pattern: 4-digit year, 2-digit month, 2-digit day."
+      ]
+    },
+    {
+      "title": "Is it time for a daily reward?",
+      "place": "Script in ServerScriptService",
+      "code": "local ONE_DAY = 24 * 60 * 60 -- 86400 seconds in a day\n\n-- Pretend we loaded this from a DataStore (a Unix timestamp in seconds)\nlocal lastClaim = DateTime.now().UnixTimestamp - 90000\n\nlocal now = DateTime.now().UnixTimestamp\nif now - lastClaim >= ONE_DAY then\n\tprint(\"Reward ready! Claim it!\")\n\tlastClaim = now -- save this back to the DataStore\nelse\n\tlocal secondsLeft = ONE_DAY - (now - lastClaim)\n\tprint(\"Come back in\", math.ceil(secondsLeft / 3600), \"hours\")\nend",
+      "explain": [
+        "UnixTimestamp is a plain number, which is easy to save in a DataStore.",
+        "We subtract the last claim time from now to get how many seconds have passed.",
+        "If at least 86400 seconds (one day) have passed, the reward is ready.",
+        "Otherwise we work out how many hours are left by dividing seconds by 3600."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A player can change their device clock, so do not trust DateTime.now() on the client for rewards. Do reward checks on the server.",
+    "To measure how long code takes, use os.clock(), not DateTime.",
+    "FormatLocalTime and ToLocalTime use the time zone of the computer running the script. On the server, that is the server's zone, not the player's.",
+    "Dates that do not exist, like February 30, cause an error in fromUniversalTime and fromLocalTime."
+  ],
+  "members": {
+    "DateTime.now": {
+      "simple": "Gives a DateTime for right now, using the device's clock. Good for showing the time, but players can change their own clock.",
+      "example": "local now = DateTime.now()\nprint(now.UnixTimestamp) -- seconds since January 1, 1970",
+      "gotcha": "For a time that matches between server and clients, use workspace:GetServerTimeNow() instead."
+    },
+    "DateTime.fromUnixTimestamp": {
+      "simple": "Makes a DateTime from a number of seconds since January 1, 1970 (UTC). For example, 0 is that exact midnight, and 86400 is one day later.",
+      "example": "local moment = DateTime.fromUnixTimestamp(86400)\nprint(moment:ToIsoDate()) --> 1970-01-02T00:00:00Z",
+      "gotcha": "It only counts whole seconds. Use fromUnixTimestampMillis for more detail."
+    },
+    "DateTime.fromUnixTimestampMillis": {
+      "simple": "Makes a DateTime from a number of milliseconds (thousandths of a second) since January 1, 1970 (UTC).",
+      "example": "local moment = DateTime.fromUnixTimestampMillis(1500) -- 1.5 seconds after the start\nprint(moment.UnixTimestampMillis) --> 1500"
+    },
+    "DateTime.fromUniversalTime": {
+      "simple": "Makes a DateTime from calendar parts (year, month, day, hour, minute, second, millisecond) in UTC, the world clock. Anything you leave out is the lowest value (year defaults to 1970). Extra minutes roll over: 90 minutes becomes 1 hour 30 minutes.",
+      "example": "-- New Year's Day 2030 at midnight, world time\nlocal newYear = DateTime.fromUniversalTime(2030, 1, 1)\nprint(newYear:ToIsoDate()) --> 2030-01-01T00:00:00Z",
+      "gotcha": "Impossible dates like month 13 or January 32 cause an error. Decimals are rounded down: 2.5 hours counts as 2."
+    },
+    "DateTime.fromLocalTime": {
+      "simple": "Like fromUniversalTime, but the calendar parts you give are in the local time zone of the device running the script.",
+      "example": "-- October 22, 2026 at 6 PM in the device's own time zone\nlocal t = DateTime.fromLocalTime(2026, 10, 22, 18, 0, 0)\nprint(t:FormatLocalTime(\"LLL\", \"en-us\"))",
+      "gotcha": "On the server, local time means the server's time zone, not the player's."
+    },
+    "DateTime.fromIsoDate": {
+      "simple": "Makes a DateTime from ISO 8601 text in UTC, like \"2020-01-02T10:30:45Z\". If the text cannot be understood, it gives nil.",
+      "example": "local t = DateTime.fromIsoDate(\"2020-01-02T10:30:45Z\")\nif t then\n\tprint(t.UnixTimestamp)\nend"
+    },
+    "DateTime.UnixTimestamp": {
+      "simple": "This moment as a whole number of seconds since January 1, 1970 (UTC). Easy to save and to subtract.",
+      "example": "local start = DateTime.now().UnixTimestamp\ntask.wait(3)\nprint(DateTime.now().UnixTimestamp - start) --> about 3"
+    },
+    "DateTime.UnixTimestampMillis": {
+      "simple": "This moment as a number of milliseconds (thousandths of a second) since January 1, 1970 (UTC). Two DateTimes are equal only if this number is the same.",
+      "example": "local now = DateTime.now()\nprint(now.UnixTimestampMillis) -- like 1792699200123"
+    },
+    "DateTime:ToUniversalTime": {
+      "simple": "Breaks the moment into a table of calendar parts in UTC: Year, Month, Day, Hour, Minute, Second, Millisecond.",
+      "example": "local parts = DateTime.now():ToUniversalTime()\nprint(parts.Year, parts.Month, parts.Day, parts.Hour)"
+    },
+    "DateTime:ToLocalTime": {
+      "simple": "Breaks the moment into a table of calendar parts in the device's local time zone: Year, Month, Day, Hour, Minute, Second, Millisecond.",
+      "example": "local parts = DateTime.now():ToLocalTime()\nif parts.Hour >= 18 then\n\tprint(\"Good evening!\")\nend"
+    },
+    "DateTime:ToIsoDate": {
+      "simple": "Turns the moment into ISO 8601 text in UTC, like \"2020-01-02T10:30:45Z\". DateTime.fromIsoDate can turn it back.",
+      "example": "print(DateTime.now():ToIsoDate()) -- like 2026-10-22T14:05:09Z"
+    },
+    "DateTime:FormatUniversalTime": {
+      "simple": "Turns the moment into text using a pattern (like \"YYYY-MM-DD\" or \"LL\") and a language code (like \"en-us\"), in UTC time. Good when everyone should see the same time.",
+      "example": "local t = DateTime.fromUniversalTime(2030, 1, 1)\nprint(t:FormatUniversalTime(\"LL\", \"en-us\")) --> January 1, 2030"
+    },
+    "DateTime:FormatLocalTime": {
+      "simple": "Turns the moment into text using a pattern and a language code, in the device's local time zone. Use it in a LocalScript to show players their own time.",
+      "example": "local now = DateTime.now()\nprint(now:FormatLocalTime(\"dddd, h:mm A\", \"en-us\")) -- like Thursday, 8:30 PM"
+    }
+  }
+}

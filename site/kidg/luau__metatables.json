@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/luau/metatables.md",
+  "simple": "A metatable is a hidden settings table you can attach to a normal table to give it special powers. With it, you can decide what happens when someone adds two tables with `+`, reads a key that does not exist, or calls a table like a function. Metatables are an advanced tool, but they power a lot of Roblox code, like making your own object types. This page also covers weak tables and building a set.",
+  "analogy": "A metatable is like a rule card stuck to the back of a board game box. The box (table) still holds the pieces, but the card says what to do in special situations, like \"if a piece is missing, borrow it from this other box\".",
+  "keyPoints": [
+    "`setmetatable(t, mt)` attaches metatable `mt` to table `t` and returns `t`. `getmetatable(t)` gets it back.",
+    "Metamethods are special keys in the metatable, like `__index`, `__add`, `__call`, and `__tostring`.",
+    "`__index` runs when you read a key that is missing. If it is a table, Luau looks the key up there instead.",
+    "`__newindex` runs when you set a key that does not exist yet.",
+    "Math metamethods like `__add`, `__sub`, and `__div` let you use `+`, `-`, and `/` on tables. Check which side is the table, since `2 / a` and `a / 2` are different.",
+    "`rawset(t, key, value)` sets a value without triggering metamethods, which avoids endless loops.",
+    "A weak table (using `__mode` set to `\"k\"`, `\"v\"`, or `\"kv\"`) lets the garbage collector remove items nothing else uses.",
+    "A set is a collection with no order and no repeats. You can build one with a metatable and add union (`+`) and subtraction (`-`)."
+  ],
+  "terms": {
+    "metatable": "A table attached to another table that holds rules for special actions.",
+    "metamethod": "A function (or value) inside a metatable that runs when a certain action happens, like `__add` for `+`.",
+    "index / indexing": "Looking up a key in a table, like `t.x` or `t[1]`.",
+    "__index": "The metamethod for missing keys. With `__index = { x = 1 }`, reading `t.x` on an empty `t` gives 1.",
+    "__newindex": "The metamethod that runs when you try to add a new key to the table.",
+    "unary minus": "The minus sign used on one value to flip its sign, like `-5` or `-myTable`.",
+    "concatenation": "Joining with `..`. The `__concat` metamethod controls what `..` does with your table.",
+    "rawset": "Sets a table value directly, skipping `__newindex` and other metamethods.",
+    "stack overflow": "An error when a function keeps calling itself so many times the computer runs out of room.",
+    "strong reference": "A normal variable pointing to an object. It keeps the object from being cleaned up.",
+    "weak table": "A table whose keys or values do not keep objects alive. If nothing else points to them, they can be removed.",
+    "garbage collection": "Luau automatically deleting things no script can reach anymore. You cannot know exactly when it happens.",
+    "set": "A group of items with no order and no duplicates. \"Apple\" is either in the set or not.",
+    "intersection / union": "Intersection is items in both sets. Union is everything from both sets combined, without repeats.",
+    "scalar": "A plain single number, as opposed to a vector with several numbers."
+  },
+  "example": {
+    "title": "Default stats and adding two points",
+    "place": "Script in ServerScriptService",
+    "code": "-- 1. Default values with __index\nlocal defaults = { speed = 16, jump = 50 }\nlocal playerStats = setmetatable({ speed = 24 }, { __index = defaults })\nprint(playerStats.speed) --> 24 (its own value)\nprint(playerStats.jump)  --> 50 (missing, so it comes from defaults)\n\n-- 2. Make + and tostring work on a custom Point type\nlocal Point = {}\nPoint.__index = Point\n\nfunction Point.new(x, y)\n\treturn setmetatable({ x = x, y = y }, Point)\nend\n\nPoint.__add = function(a, b)\n\treturn Point.new(a.x + b.x, a.y + b.y)\nend\n\nPoint.__tostring = function(p)\n\treturn `({p.x}, {p.y})`\nend\n\nlocal a = Point.new(1, 2)\nlocal b = Point.new(10, 20)\nprint(tostring(a + b)) --> (11, 22)",
+    "explain": [
+      "`playerStats` only has `speed`. Its metatable's `__index` points at `defaults`.",
+      "Reading `playerStats.jump` finds nothing, so Luau checks `defaults` and returns 50.",
+      "`Point` is used as the metatable for every point, and `Point.__index = Point` lets points find shared functions.",
+      "`__add` tells Luau how to do `a + b` for points: add the x values and the y values.",
+      "`__tostring` decides how a point looks as text, so the result prints as (11, 22)."
+    ]
+  },
+  "watchOut": [
+    "Setting values inside `__index` when `__newindex` blocks them. That loops forever; use `rawset` instead.",
+    "Using a weak table to check if a part still exists. Luau can drop the reference while the part is alive; use `AncestryChanged` instead.",
+    "Expecting `__eq` to compare a table with any random table. Both must share the same metamethod.",
+    "Assuming the table is always the first argument in math metamethods. In `2 / a`, the number comes first."
+  ]
+}

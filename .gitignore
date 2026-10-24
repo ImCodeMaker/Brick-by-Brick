@@ -1,0 +1,13 @@
+# macOS metadata (recreated on external drives)
+._*
+.DS_Store
+
+# Upstream Roblox creator-docs clone (clone it yourself, see README)
+src/creator-docs/
+
+# Generated compressed media from build_guides.py
+gproc/
+
+node_modules/
+__pycache__/
+*.pyc

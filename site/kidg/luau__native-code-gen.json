@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/luau/native-code-gen.md",
+  "simple": "Normally Roblox reads your Luau code through a middle step called bytecode. Native code generation lets server scripts skip that step and turn into instructions the computer's processor runs directly. This can make math-heavy server code run faster. You turn it on with one line, but you should only use it where it really helps.",
+  "analogy": "It is like reading a book in your own language instead of having someone translate every sentence for you as you go. It is faster, but making the translated copy takes time and shelf space, so you only do it for books you read a lot.",
+  "keyPoints": [
+    "Native code generation works for server-side scripts.",
+    "Put `--!native` on the very first line of a script to try it for the whole script.",
+    "Put `@native` right before one function to turn it on for just that function.",
+    "Your code behaves exactly the same; only the speed changes.",
+    "It helps most with lots of math, especially on tables and `buffer` values, and with functions called many times, like every frame.",
+    "Do not add it to every script. It takes time to compile, uses extra memory, and there is a size limit for the whole game.",
+    "Add type annotations like `v: Vector3` so the compiler can make faster code.",
+    "Use the Script Profiler to check: functions running natively show `<native>` next to their name."
+  ],
+  "terms": {
+    "native code": "Instructions written in the processor's own language, so it can run them directly without translation.",
+    "bytecode": "A simpler in-between form of your script that the Luau virtual machine reads and runs step by step.",
+    "machine code": "The raw instructions a computer's CPU understands.",
+    "CPU": "The main chip in a computer that does the work of running programs.",
+    "compile": "To translate code from one form into another, like turning Luau into machine code.",
+    "VM (virtual machine)": "The part of Roblox that reads Luau bytecode and runs it.",
+    "profitable": "Worth it. The engine only compiles code natively if it thinks it will actually be faster.",
+    "top-level scope": "The code in a script that is not inside any function. It usually runs only once, so making it native helps little.",
+    "de-optimization": "When native code has to fall back to the slower normal way, for example because of a type surprise.",
+    "type annotation": "A label that tells Luau what kind of value something is, like `x: number` or `v: Vector3`.",
+    "breakpoint": "A marker in Studio that pauses a script at a line so you can inspect it. It turns off native mode for that function.",
+    "instruction limit": "A cap on how much compiled code is allowed. For example, one block of code cannot use more than 64K instructions, and one script cannot pass 1 million in total."
+  },
+  "example": {
+    "title": "Speed up a math-heavy function",
+    "place": "Script in ServerScriptService",
+    "code": "--!native\n-- The line above asks Luau to compile this script to native code\n\n-- The type annotation tells the compiler v is a Vector3, so it can make faster code\nlocal function sumComponents(v: Vector3): number\n\treturn v.X + v.Y + v.Z\nend\n\nlocal total = 0\nfor i = 1, 100000 do\n\ttotal += sumComponents(Vector3.new(i, 1, 2))\nend\nprint(\"Total:\", total)",
+    "explain": [
+      "`--!native` must be the first line. It turns on native code for this script.",
+      "`sumComponents` adds the X, Y, and Z of a vector. The `: Vector3` label helps the compiler skip extra checks.",
+      "The loop calls the function 100,000 times, which is the kind of repeated math native code is good at.",
+      "The script prints the final total. It works the same with or without `--!native`; only speed changes."
+    ]
+  },
+  "watchOut": [
+    "Adding `--!native` to every script \"just in case\". It slows server startup and uses memory. Use it only where you measured a speed-up.",
+    "Forgetting type annotations, or passing the wrong type (like `foo(true)` to a function that wants a string). That causes slower fallback code.",
+    "Using old functions like `getfenv` or `setfenv`. They stop native execution.",
+    "Leaving a breakpoint in a native function and wondering why it is slow. Breakpoints turn off native mode for that function."
+  ]
+}

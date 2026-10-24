@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/environment/global-wind.md",
+  "simple": "Global wind sets which way and how hard the wind blows in your game. It moves terrain grass, dynamic clouds, fire, smoke, and particles that are set up to follow it. You set it with the `GlobalWind` property on Workspace, either in Studio or with a script. With a script you can even make gusts that rise and fall like real wind.",
+  "analogy": "`GlobalWind` is like an arrow drawn on a weather map. The arrow's direction is where the wind blows, and the arrow's length is how strong it is.",
+  "keyPoints": [
+    "`Workspace.GlobalWind` is a `Vector3`: its direction is where the wind blows and its length is how strong it is.",
+    "To set it in Studio: select Workspace in the Explorer, then type X, Y, and Z values for `GlobalWind` in the Properties window.",
+    "Wind affects terrain grass and dynamic clouds.",
+    "`Fire` and `Smoke` follow the wind by default.",
+    "A `ParticleEmitter` follows the wind only if `WindAffectsDrag` is on and `Drag` is above 0. This is great for rain.",
+    "The Wind Direction widget (in Studio's View menu) shows a wind sock and lets you set Speed, Yaw, and Pitch with sliders.",
+    "Players with Reduce Motion turned on see grass move slower, but in the same direction.",
+    "A script can change `GlobalWind` over time to make gusts."
+  ],
+  "terms": {
+    "vector": "An arrow with a direction and a length. `Vector3.new(5, 0, 2)` points mostly along X and a bit along Z.",
+    "Vector3": "A value with X, Y, and Z numbers, used for positions, directions, and speeds in 3D.",
+    "magnitude": "The length of a vector, which here means the wind's strength.",
+    "gust": "A sudden, short burst of stronger wind.",
+    "cyclical": "Repeating in a cycle, over and over.",
+    "Drag": "A ParticleEmitter property that slows particles down over time. It must be above 0 for wind to push them.",
+    "WindAffectsDrag": "A ParticleEmitter setting that lets the global wind push its particles.",
+    "yaw": "Turning left or right, like shaking your head no.",
+    "pitch": "Tilting up or down, like nodding yes.",
+    "math.sin": "A math function that smoothly rises from 0 up to 1 and back down. Used here to ease a gust in and out.",
+    "Reduce Motion": "An accessibility setting players can turn on to make things on screen move less."
+  },
+  "example": {
+    "title": "Wind that gusts now and then",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal baseWind = Vector3.new(5, 0, 2)  -- normal gentle breeze\nlocal gust = Vector3.new(25, 0, 10)    -- extra push during a gust\nlocal GUST_LENGTH = 3.5 -- seconds each gust lasts\nlocal STEPS = 100\n\nWorkspace.GlobalWind = baseWind\n\nwhile true do\n\t-- Wait a random time between gusts (0 to 5 seconds)\n\ttask.wait(math.random() * 5)\n\n\tfor i = 1, STEPS do\n\t\t-- f goes smoothly from 0 up to 1 and back down to 0\n\t\tlocal f = math.sin(math.pi * i / STEPS)\n\t\tWorkspace.GlobalWind = baseWind + gust * f\n\t\ttask.wait(GUST_LENGTH / STEPS)\n\tend\n\n\tWorkspace.GlobalWind = baseWind -- back to the gentle breeze\nend",
+    "explain": [
+      "`baseWind` is the normal breeze. `gust` is the extra wind added during a gust.",
+      "The loop waits a random time, then starts a gust.",
+      "`math.sin(math.pi * i / STEPS)` rises from 0 to 1 halfway through and falls back to 0, so the gust eases in and out.",
+      "Each step adds part of the gust to the base wind and waits a tiny bit, so the whole gust takes about 3.5 seconds.",
+      "After the gust, the wind returns to the gentle breeze."
+    ]
+  },
+  "watchOut": [
+    "Setting wind and seeing particles ignore it. Turn on `WindAffectsDrag` and set `Drag` above 0 on the ParticleEmitter.",
+    "Forgetting that the Y value is up and down. Most wind should have Y near 0.",
+    "Changing wind in a loop without `task.wait`. That freezes the game."
+  ]
+}

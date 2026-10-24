@@ -1,0 +1,94 @@
+{
+  "name": "coroutine",
+  "simple": "A coroutine is a function that can pause itself in the middle and be continued later, picking up exactly where it stopped. The coroutine library lets you make them, start or continue them, pause them, check on them, and close them. For most games, `task.spawn` is easier; coroutines are for when you want to control the pausing yourself.",
+  "analogy": "A coroutine is like reading a book with a bookmark. You read a few pages (run), put the bookmark in (yield), go do something else, then open the book and keep reading from the bookmark (resume).",
+  "whenToUse": [
+    "Make a function that hands out values one at a time, like the next number in a list each time you ask",
+    "Split a big job into pieces that pause in between",
+    "Advanced control over threads that `task.spawn` alone does not give you"
+  ],
+  "where": "A built-in library, so there is nothing to get. Works in any Script, LocalScript or ModuleScript on the server or client.",
+  "terms": {
+    "coroutine": "A function that can pause (yield) partway through and later continue from that same spot.",
+    "thread": "The value that represents a coroutine. `coroutine.create` gives you one. Your whole script is also running as a thread.",
+    "yield": "To pause. A coroutine yields with `coroutine.yield(...)`, and anything you put in the parentheses is handed back to whoever resumed it.",
+    "resume": "To start a coroutine, or continue it after it yielded.",
+    "status": "Which state a coroutine is in: `suspended` (paused or not started yet), `running` (running right now), `normal` (it started another coroutine and is waiting for it) or `dead` (finished or crashed).",
+    "dead": "Finished for good. A dead coroutine cannot be resumed again.",
+    "callback": "A function you give to something else so it can call it later.",
+    "error": "When code crashes because something went wrong. `coroutine.resume` catches errors and tells you about them instead of stopping your script.",
+    "metamethod": "A special advanced function on a table that runs automatically, for example when two tables are added. You cannot yield inside most of these."
+  },
+  "examples": [
+    {
+      "title": "Pause and continue a coroutine",
+      "place": "Script in ServerScriptService",
+      "code": "local co = coroutine.create(function(name)\n    print(\"Hi \" .. name)          -- runs on the first resume\n    coroutine.yield(\"paused once\") -- pause here and hand back a message\n    print(\"Back again!\")          -- runs on the second resume\n    return \"all done\"\nend)\n\nprint(coroutine.status(co))        -- suspended (made but not started)\nprint(coroutine.resume(co, \"Sam\")) -- Hi Sam, then: true paused once\nprint(coroutine.status(co))        -- suspended (paused at yield)\nprint(coroutine.resume(co))        -- Back again!, then: true all done\nprint(coroutine.status(co))        -- dead (finished)",
+      "explain": [
+        "`coroutine.create` makes the coroutine but does not run it yet.",
+        "The first `resume` starts it and passes \"Sam\" in as `name`. It runs until `yield`.",
+        "`resume` gives back `true` (no error) plus whatever was passed to `yield`.",
+        "The second `resume` continues right after the yield line and runs to the end, giving back the return value.",
+        "Once it has finished, its status is `dead` and it cannot run again."
+      ]
+    },
+    {
+      "title": "A number machine with coroutine.wrap",
+      "place": "Script in ServerScriptService",
+      "code": "-- each call gives the next even number\nlocal nextEven = coroutine.wrap(function()\n    local n = 0\n    while true do\n        n += 2\n        coroutine.yield(n) -- hand back n and pause\n    end\nend)\n\nprint(nextEven()) -- 2\nprint(nextEven()) -- 4\nprint(nextEven()) -- 6",
+      "explain": [
+        "`coroutine.wrap` makes a coroutine and gives you a plain function that resumes it.",
+        "Each time you call `nextEven()`, the loop runs once more, yields the new number, and pauses.",
+        "Its variable `n` is remembered between calls, because the coroutine is only paused, not finished. This endless loop is fine because it pauses at every yield."
+      ]
+    }
+  ],
+  "gotchas": [
+    "`coroutine.resume` catches errors: it returns `false` and the error message instead of crashing. Check the first value or you might miss bugs.",
+    "`coroutine.wrap` does NOT catch errors; an error inside it is thrown at the place you called it.",
+    "A dead coroutine cannot be resumed again. Make a new one instead.",
+    "For simply running code on the side, `task.spawn` is easier and works nicely with `task.wait`.",
+    "If a coroutine you control yields with `task.wait` inside, the game resumes it later on its own; mixing that with your own `coroutine.resume` calls gets confusing. Pick one style."
+  ],
+  "members": {
+    "coroutine.close": {
+      "simple": "Shuts a coroutine down for good (makes it dead) so it can never be resumed. Returns `true`, or `false` plus the error message if the coroutine had crashed.",
+      "example": "local co = coroutine.create(function()\n    coroutine.yield()\n    print(\"never printed\")\nend)\ncoroutine.resume(co)   -- runs until the yield\ncoroutine.close(co)    -- close it while it is paused\nprint(coroutine.status(co)) -- dead",
+      "gotcha": "You cannot close a coroutine that is running right now."
+    },
+    "coroutine.create": {
+      "simple": "Turns a function into a new coroutine (a thread) that starts paused. Nothing runs until you call `coroutine.resume` on it. The values you pass to the first resume become the function's arguments.",
+      "example": "local co = coroutine.create(function(a, b)\n    print(a + b)\nend)\ncoroutine.resume(co, 2, 3) -- prints 5"
+    },
+    "coroutine.finally": {
+      "simple": "Lets you attach a clean-up function that runs when a coroutine ends. Your function is told how it ended: \"finished\" (plus the returned values), \"error\" (plus the error), or \"cancelled\" (it was closed or cancelled early). Useful for tidying up no matter how the work ended.",
+      "example": "local co = coroutine.create(function()\n    coroutine.yield()\n    return \"treasure\"\nend)\n\ncoroutine.finally(co, function(status, ...)\n    print(\"Coroutine ended:\", status, ...)\nend)\n\ncoroutine.resume(co) -- runs until the yield\ncoroutine.resume(co) -- prints: Coroutine ended: finished treasure",
+      "gotcha": "Adding a clean-up function to a coroutine that is already dead causes an error. Using it with a `coroutine.wrap` coroutine also errors when that coroutine ends."
+    },
+    "coroutine.isyieldable": {
+      "simple": "Returns true if the code running right now is allowed to pause (yield). Some special places, like inside metamethods, cannot pause.",
+      "example": "print(coroutine.isyieldable()) -- true in a normal script"
+    },
+    "coroutine.resume": {
+      "simple": "Starts a coroutine or continues it from where it last paused. It returns `true` plus any values from `yield` or `return` if all went well, or `false` plus an error message if the coroutine crashed.",
+      "example": "local co = coroutine.create(function()\n    error(\"oops!\")\nend)\nlocal ok, message = coroutine.resume(co)\nprint(ok, message) -- false, followed by the error message containing oops!"
+    },
+    "coroutine.running": {
+      "simple": "Gives you the thread that is running right now. Handy if you want to save it and resume it later from somewhere else.",
+      "example": "local thread = coroutine.running()\nprint(thread) -- something like: thread: 0x..."
+    },
+    "coroutine.status": {
+      "simple": "Tells you what a coroutine is doing, as text: \"suspended\" (paused or not started), \"running\" (running right now), \"normal\" (it started another coroutine and is waiting on it), or \"dead\" (finished or crashed).",
+      "example": "local co = coroutine.create(function() end)\nprint(coroutine.status(co)) -- suspended\ncoroutine.resume(co)\nprint(coroutine.status(co)) -- dead"
+    },
+    "coroutine.wrap": {
+      "simple": "Makes a coroutine and gives you back a normal function. Each time you call that function, the coroutine continues. It is shorter than create plus resume, and returns the values directly (without the true/false at the front).",
+      "example": "local counter = coroutine.wrap(function()\n    for i = 1, 3 do\n        coroutine.yield(i)\n    end\nend)\nprint(counter(), counter(), counter()) -- 1 2 3",
+      "gotcha": "Errors inside a wrapped coroutine are NOT caught; they crash where you called it. Calling it again after it finished also errors."
+    },
+    "coroutine.yield": {
+      "simple": "Pauses the coroutine it is in. Any values you put in the parentheses are handed back to whoever resumed it. When it is resumed again, `yield` returns the values passed to that resume.",
+      "example": "local co = coroutine.create(function()\n    local answer = coroutine.yield(\"What is 2 + 2?\")\n    print(\"You said\", answer)\nend)\n\nlocal _, question = coroutine.resume(co)\nprint(question)            -- What is 2 + 2?\ncoroutine.resume(co, 4)    -- You said 4"
+    }
+  }
+}

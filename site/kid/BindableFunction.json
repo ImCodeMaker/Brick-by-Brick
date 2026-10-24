@@ -1,0 +1,46 @@
+{
+  "name": "BindableFunction",
+  "simple": "A BindableFunction lets one script ask another script on the SAME side a question and wait for the answer. It is like a RemoteFunction, but it does not travel between server and players.",
+  "analogy": "A BindableFunction is like asking a classmate in the same room 'what is the answer to number 3?' and waiting until they tell you. You cannot ask someone in a different building this way.",
+  "whenToUse": [
+    "One server Script needs to get information from another server Script, like 'what level is this player?'.",
+    "Two LocalScripts on the same player need to share an answer.",
+    "Tip: a ModuleScript is often a simpler way to share functions between scripts."
+  ],
+  "where": "Create it in Studio or with `Instance.new(\"BindableFunction\")`. The answering script sets `OnInvoke`; the asking script calls `Invoke`.",
+  "terms": {
+    "server": "The one computer, run by Roblox in a data center, that is in charge of a game. Every player in the same game is connected to it. It keeps the official copy of the game, like who has how many coins.",
+    "client": "Your own device (phone, PC, Xbox) running the game. Every player has their own client. The client draws the screen and reads your keyboard, mouse or touch.",
+    "client-server boundary": "The invisible wall between the server and each client. They are different computers, so a script on one side cannot just reach over and change a variable on the other side. Messages have to be sent across.",
+    "invoke": "To call a function and wait for its answer.",
+    "callback": "A function you give to Roblox to run later. You set `OnInvoke` with `=`.",
+    "yield": "To pause and wait. `Invoke` pauses your script until the answer comes back.",
+    "ModuleScript": "A script that holds shared code. Other scripts load it with `require`."
+  },
+  "examples": [
+    {
+      "title": "Ask another script for a player's level",
+      "place": "Two Scripts in ServerScriptService, BindableFunction named GetLevel in ServerStorage",
+      "code": "-- Script A: owns the level data\nlocal ServerStorage = game:GetService(\"ServerStorage\")\nlocal getLevel = ServerStorage:WaitForChild(\"GetLevel\")\n\nlocal levels = {}\n\ngetLevel.OnInvoke = function(player)\n\treturn levels[player.UserId] or 1\nend\n\n-- Script B: wants to know\nlocal Players = game:GetService(\"Players\")\nlocal ServerStorage = game:GetService(\"ServerStorage\")\nlocal getLevel = ServerStorage:WaitForChild(\"GetLevel\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal level = getLevel:Invoke(player) -- waits for Script A\n\tprint(player.Name .. \" is level \" .. level)\nend)",
+      "explain": [
+        "Script A sets `OnInvoke`, the function that answers.",
+        "Script B calls `Invoke(player)` and waits for the number Script A returns."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Set `OnInvoke` with `=`. Only one answering function can exist; setting it again replaces it.",
+    "If nobody has set `OnInvoke` yet, `Invoke` waits until someone does.",
+    "Does not cross between server and client. Use a RemoteFunction for that."
+  ],
+  "members": {
+    "BindableFunction:Invoke": {
+      "simple": "Calls the function set in `OnInvoke` and waits for what it returns.",
+      "example": "-- Script in ServerScriptService\nlocal double = Instance.new(\"BindableFunction\")\ndouble.OnInvoke = function(n)\n\treturn n * 2\nend\n\nprint(double:Invoke(21)) --> 42"
+    },
+    "BindableFunction.OnInvoke": {
+      "simple": "The function that answers when someone calls `Invoke`. Whatever it returns is sent back to the caller.",
+      "example": "-- Script in ServerScriptService\nlocal ServerStorage = game:GetService(\"ServerStorage\")\nlocal isVip = ServerStorage:WaitForChild(\"IsVip\")\n\nisVip.OnInvoke = function(player)\n\treturn player:GetAttribute(\"VIP\") == true\nend"
+    }
+  }
+}

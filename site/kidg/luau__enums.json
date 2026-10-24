@@ -1,0 +1,37 @@
+{
+  "path": "content/en-us/luau/enums.md",
+  "simple": "An enum is a fixed list of choices that Roblox gives you, like all the shapes a part can be: Ball, Block, Cylinder, and so on. You use enums to set properties without typos, like `part.Shape = Enum.PartType.Ball`. Each choice is called an enum item, and it has a name, a number value, and the enum it belongs to.",
+  "analogy": "An enum is like a menu with a few fixed options. You cannot order something that is not on the menu, and each item has a name and a number next to it.",
+  "keyPoints": [
+    "An enum is a fixed list of items. You reach them all through the global `Enum`.",
+    "Enums only exist in Roblox; they are not a built-in Luau type.",
+    "`Enum.PartType:GetEnumItems()` gives you a list of every item in that enum.",
+    "Each `EnumItem` has `Name` (like \"Cylinder\"), `Value` (a number, like 2), and `EnumType` (the enum it belongs to, like `PartType`).",
+    "Some properties only accept items from one enum. A part's `Shape` uses `Enum.PartType`.",
+    "Best practice: set properties with the full enum, like `part.Shape = Enum.PartType.Cylinder`.",
+    "You can also use the item's name as a string, like `part.Shape = \"Cylinder\"`, but the full enum is safer."
+  ],
+  "terms": {
+    "enum (enumeration)": "A fixed list of named choices, like `Enum.PartType` with Ball, Block, Cylinder, Wedge, and CornerWedge.",
+    "EnumItem": "One choice from an enum, like `Enum.PartType.Cylinder`.",
+    "Name": "The item's name as text. `Enum.PartType.Cylinder.Name` is \"Cylinder\".",
+    "Value": "The item's number. `Enum.PartType.Cylinder.Value` is 2.",
+    "EnumType": "The enum an item belongs to. For `Enum.PartType.Cylinder`, it is `PartType`.",
+    "global": "Available everywhere without needing to get it first. `Enum` is a global."
+  },
+  "example": {
+    "title": "Make a part with a random shape",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\n-- Get every shape a part can be\nlocal shapes = Enum.PartType:GetEnumItems()\nfor _, item in shapes do\n\tprint(item.Name, item.Value)\nend\n\n-- Pick one at random\nlocal randomShape = shapes[math.random(1, #shapes)]\n\nlocal part = Instance.new(\"Part\")\npart.Shape = randomShape -- set the property with an EnumItem\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = Workspace\n\nprint(\"Made a\", randomShape.Name)",
+    "explain": [
+      "`GetEnumItems()` returns a table of all the part shapes.",
+      "The loop prints each shape's name and number value.",
+      "`math.random(1, #shapes)` picks a random position in the list.",
+      "The new part's `Shape` is set to that EnumItem, and the part is placed in Workspace."
+    ]
+  },
+  "watchOut": [
+    "Misspelling the string, like `part.Shape = \"Cylender\"`. Use `Enum.PartType.Cylinder` so Studio can catch typos.",
+    "Using an item from the wrong enum. `Shape` needs a `PartType` item, not a `Material` item."
+  ]
+}

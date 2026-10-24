@@ -1,0 +1,33 @@
+{
+  "path": "content/en-us/players/avatar-inspect-menu.md",
+  "simple": "The Avatar Inspect Menu lets players look closely at someone else's avatar, try on their items, and even buy them. It is on by default in every game. This page shows how to make the menu show what a player is wearing in your game right now, and how to open the menu for any user, even someone not in the server.",
+  "analogy": "It is like asking a friend where they got their cool jacket and then trying it on in the store mirror.",
+  "keyPoints": [
+    "Players open the menu from the Players tab in the Roblox menu, by clicking a name in the player list, or from the Avatar Context Menu.",
+    "By default it shows the avatar from the player's Roblox profile, which might not match their look in your game.",
+    "To show their in-game look, turn off the default with `GuiService:SetInspectMenuEnabled(false)`.",
+    "Then get their current look with `humanoid:GetAppliedDescription()` and open it with `GuiService:InspectPlayerFromHumanoidDescription()`.",
+    "Use `GuiService:InspectPlayerFromUserId()` to inspect any user by their user ID, even if they are not in your game."
+  ],
+  "terms": {
+    "inspect": "Look closely at an avatar to see each item it is wearing.",
+    "HumanoidDescription": "An object listing everything about how a character looks, like clothes, accessories, and body colors.",
+    "user ID": "The number that identifies a Roblox account.",
+    "profile avatar": "The look a player set on their Roblox account, outside any game.",
+    "pcall": "Runs a function safely and catches errors, so a failed web request does not crash your script."
+  },
+  "example": {
+    "title": "Open the inspect menu for a user by name",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local GuiService = game:GetService(\"GuiService\")\nlocal Players = game:GetService(\"Players\")\n\n-- Look up a user ID from a username (this asks Roblox's servers)\nlocal success, userId = pcall(function()\n\treturn Players:GetUserIdFromNameAsync(\"Roblox\")\nend)\n\nif success then\n\t-- Show the inspect menu for that user\n\tGuiService:InspectPlayerFromUserId(userId)\nelse\n\twarn(\"Could not find that user\")\nend",
+    "explain": [
+      "`GetUserIdFromNameAsync()` turns a username into a user ID by asking Roblox online.",
+      "We wrap it in `pcall` because web requests can fail, for example if the name does not exist.",
+      "If it worked, `InspectPlayerFromUserId()` opens the inspect menu on that player's screen."
+    ]
+  },
+  "watchOut": [
+    "Expecting the default menu to show in-game costumes. It shows the profile avatar unless you use `InspectPlayerFromHumanoidDescription()`.",
+    "Calling `GetUserIdFromNameAsync()` without `pcall`. If the name is wrong, the script errors and stops."
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/performance-optimization/microprofiler/index.md",
+  "simple": "The MicroProfiler is a tool that shows exactly how long each job takes in every frame of your game, like scripts, physics, animation, and drawing. Its goal is to help you find frames that took too long (spikes) and what caused them. You can use it in Studio, on desktop, on phones, and even on the server. You can also add your own labels to your code to see how long it takes.",
+  "analogy": "It is like a stopwatch for every runner in a relay race. If the team is slow, you can see exactly which runner took the longest on each lap.",
+  "keyPoints": [
+    "Frame time is how long one frame takes. Frame rate is 1,000 divided by frame time, so 16.67 ms means 60 FPS.",
+    "Steady frame times matter as much as a high frame rate. One 410 ms frame among quick ones feels like a big stutter.",
+    "Open it with Ctrl+F6 (Cmd+F6) in Studio or the desktop client. On mobile, turn it on in Settings and open the shown IP address and port in a browser on the same network.",
+    "Profiling on a phone is best, since most players use phones and a powerful PC can hide problems.",
+    "The bar graph at the top shows each frame's time. Orange bars mean worker threads (scripts, physics, animation) took longest; blue bars mean rendering took longest; red means rendering plus a GPU wait over 2.5 ms.",
+    "The timeline below shows every task. Wider bars took longer. Labels under another label are parts of that bigger task.",
+    "Wrap your own code in `debug.profilebegin(\"Name\")` and `debug.profileend()` to give it a label on the timeline.",
+    "Save dumps to HTML files to review later or share, and capture short server dumps from the Developer Console (up to 60 frames)."
+  ],
+  "terms": {
+    "frame time": "How long one frame took, in milliseconds. 33.33 ms is 30 FPS, 16.67 ms is 60 FPS, 8.33 ms is 120 FPS.",
+    "spike": "A frame that takes much longer than the others, shown as a tall bar.",
+    "frame rate cap": "The highest FPS allowed. With a 60 FPS cap, frames taking 4 ms and 16 ms both look fine, even though one is 4 times slower.",
+    "thread": "A line of work the computer runs alongside others. Roblox has a Main thread, Worker threads, and a Render thread.",
+    "main thread": "Handles input, Humanoids, animations, sound, resuming waiting scripts, and coordinates the other threads.",
+    "worker thread": "Helper threads for networking, physics, and pathfinding.",
+    "render thread": "Talks to the graphics chip in three steps: prepare, perform, present.",
+    "wall time": "Real time passed, like on a wall clock. Jobs Wall Time vs Render Wall Time decides a bar's color.",
+    "GPU": "The graphics chip that draws the picture.",
+    "dump": "A saved file of profiler data for a set number of frames.",
+    "IP address and port": "The address of your phone on your Wi-Fi network, like `172.18.56.105:1338`. You type it into a browser to see the phone's profiler.",
+    "flame graph": "A chart that stacks all the tasks from a dump and sizes them by total time, so tasks that run a lot add up and stand out.",
+    "X-Ray": "A web UI view where lighter colors show where more memory was being allocated."
+  },
+  "example": {
+    "title": "Time a chunk of your code",
+    "place": "Script in ServerScriptService (or a LocalScript in StarterPlayerScripts to profile the client)",
+    "code": "local RunService = game:GetService(\"RunService\")\n\nlocal function onPreSimulation()\n\t-- Start a label called \"Hard Work\" in the MicroProfiler\n\tdebug.profilebegin(\"Hard Work\")\n\n\t-- Example hard work: swap two variables 200,000 times\n\tlocal a, b = 0, 1\n\tfor _ = 1, 200000 do\n\t\ta, b = b, a\n\tend\n\n\t-- End the label\n\tdebug.profileend()\nend\n\nRunService.PreSimulation:Connect(onPreSimulation)",
+    "explain": [
+      "`PreSimulation` runs our function every frame.",
+      "`debug.profilebegin(\"Hard Work\")` starts timing and creates a label with that name.",
+      "The loop is pretend heavy work that takes a noticeable amount of time.",
+      "`debug.profileend()` stops the timing for that label.",
+      "Open the MicroProfiler and you will see a wide Hard Work bar, showing this function uses a lot of each frame."
+    ]
+  },
+  "watchOut": [
+    "Only profiling on a strong PC with an FPS cap. Problems can hide there. Test on a phone too.",
+    "Chasing a good color. There is no right color; focus on whether frame times hit your goal.",
+    "Fixing the parent task instead of its children. Look for the slowest child task under it.",
+    "Expecting a dump to contain the whole play session. It only holds the selected number of frames (except counters mode).",
+    "Combining dumps from different places in one diff. You can compare places, but do not combine them."
+  ]
+}

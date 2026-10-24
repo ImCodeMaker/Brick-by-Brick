@@ -1,0 +1,35 @@
+{
+  "path": "content/en-us/matchmaking/customize-matchmaking.md",
+  "simple": "This page shows how to make your own matchmaking rules on the Creator Dashboard. You can change how much the built-in signals matter, add your own custom signals, or both. Custom signals need custom attributes first, like a player's skill level saved in a data store. You can test your rules on pretend servers and then apply them to the places in your game.",
+  "analogy": "It is like adjusting the sliders on a music equalizer. Turn up the bass (ping) and the song (server choice) changes, and you can preview it before you save.",
+  "keyPoints": [
+    "Start on the Creator Dashboard: pick your game, then go to Configurations > Custom matchmaking.",
+    "On the Configuration tab, click Create Configuration, give it a name, change signal weights, then Save Configuration.",
+    "Choose which places use the configuration, then click Save Configuration again.",
+    "To add your own signal, click Add Custom Signal. You can have up to 2 custom signals per game.",
+    "Custom signals need a custom attribute first. Each game can have up to 5 player attributes and 5 server attributes.",
+    "Player attributes read from a data store. You tell matchmaking which data store, the key template (with `{UserId}`), the value path, and the scope.",
+    "Server attributes only need a name, data type, and default value.",
+    "Click Preview and Test to see three mock servers scored with your weights. The winner is highlighted."
+  ],
+  "terms": {
+    "configuration": "A saved set of signals and weights that decides how servers are scored for a place.",
+    "custom signal": "A scoring rule you make yourself from a custom attribute, like matching players with similar skill.",
+    "aggregate": "Combine many players' values into one number for the server.",
+    "average": "Add all values and divide by how many. Skills 10, 20, 30 average to 20.",
+    "median": "The middle value when sorted. For 10, 20, 90 the median is 20, even though the average is 40.",
+    "sum": "All values added together, including the joining player's. Used to aim for a total, like team power near 5000.",
+    "cluster": "Put players with the same value together, like same guild.",
+    "diversify": "Mix players with different values, like different classes on one team.",
+    "data store key template": "A pattern for the key where each player's data is saved. With `Player_{UserId}`, a player with ID 42 is stored at `Player_42`.",
+    "value path": "Where to look inside the saved data. If the data is a table with a `Skill` field, the path points to that field.",
+    "scope": "An extra name that groups data store entries. If you leave it empty, it is `global`.",
+    "mock server": "A pretend server used only for previewing scores. It does not reflect real servers."
+  },
+  "watchOut": [
+    "Trying to add a custom signal before making a custom attribute. Create the attribute first on the Attributes tab.",
+    "Forgetting the second Save Configuration after picking places. Your configuration will not be applied otherwise.",
+    "Using the wrong data store key template. It must match exactly how your scripts save player data, or matchmaking cannot find it.",
+    "Treating preview scores as real. They come from pretend servers, so also check the Analytics tab after you go live."
+  ]
+}

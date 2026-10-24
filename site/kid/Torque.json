@@ -1,0 +1,56 @@
+{
+  "name": "Torque",
+  "simple": "Torque is an invisible twister. It keeps twisting a part with the same strength all the time, so the part spins faster and faster. You choose which way it twists with a Vector3: the direction of the vector is the line it spins around.",
+  "analogy": "Torque is like a friend who keeps flicking a fidget spinner. Every flick adds more spin, so it goes faster and faster unless something slows it down.",
+  "whenToUse": [
+    "Make an object spin up over time",
+    "Wheels or propellers that you want to speed up gradually",
+    "Twisting an object over when hit"
+  ],
+  "where": "Create with Instance.new(\"Torque\") and set Attachment0 to an attachment in the part to spin. It always twists around the part's center of mass. Usually set up from a Script on the server.",
+  "terms": {
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "angular velocity": "How fast something spins, and around which axis, measured in radians per second. 2 x pi (about 6.28) radians per second is one full turn every second.",
+    "radians": "Another way to measure angles. A full circle is 2 x pi (about 6.28) radians, which is 360 degrees. `math.rad(90)` turns 90 degrees into radians.",
+    "Vector3": "Three numbers (X, Y, Z) bundled together. Used for positions, directions, forces and speeds. Y is up.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "assembly": "A group of parts that are rigidly joined (for example by welds) so they move as one solid object. A force on any part moves the whole group.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "center of mass": "The balance point of an object. Pushing exactly through it moves the object without spinning it; pushing off to the side also makes it spin.",
+    "world space": "Directions measured using the whole game world's fixed arrows: Y is always straight up toward the sky, no matter how a part is turned.",
+    "attachment space": "Directions measured using an attachment's own arrows. If the part tips over, 'up' for the attachment tips over too.",
+    "RelativeTo": "Chooses whose arrows the numbers use: World (the game world's fixed directions) or Attachment0/Attachment1 (that attachment's own directions, which turn when the part turns).",
+    "spin axis": "The imaginary stick something spins around. A Torque of Vector3.new(0, 500, 0) spins around the up-down (Y) line, like a merry-go-round.",
+    "constant torque": "A twist that never changes strength, so the spin speed keeps growing until friction or something else stops it."
+  },
+  "examples": [
+    {
+      "title": "Spin a floating part like a top",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Size = Vector3.new(4, 1, 2)\npart.Position = Vector3.new(0, 10, 0)\npart.Anchored = false\npart.Parent = workspace\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\n-- Hold it up so it does not fall (see VectorForce)\nlocal hover = Instance.new(\"VectorForce\")\nhover.Attachment0 = attachment\nhover.RelativeTo = Enum.ActuatorRelativeTo.World\nhover.ApplyAtCenterOfMass = true\nhover.Force = Vector3.new(0, part.AssemblyMass * workspace.Gravity, 0)\nhover.Parent = part\n\n-- Twist it around the up (Y) axis\nlocal twist = Instance.new(\"Torque\")\ntwist.Attachment0 = attachment\ntwist.RelativeTo = Enum.ActuatorRelativeTo.World\ntwist.Torque = Vector3.new(0, 50, 0)\ntwist.Parent = part\n\ntask.wait(2)\ntwist.Enabled = false -- stop adding spin; it keeps spinning at its current speed\nprint(\"Spin speed:\", part.AssemblyAngularVelocity.Y, \"radians per second\")",
+      "explain": [
+        "First we cancel gravity with a VectorForce so the part floats.",
+        "Torque (0, 50, 0) in World space means 'twist around the up-down line'.",
+        "Each moment, the twist adds more spin, so after 2 seconds it is spinning much faster than after 1.",
+        "When we turn the Torque off, nothing slows the floating part, so it keeps the spin it already has."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Torque never stops adding spin, so things can end up spinning extremely fast. Use AngularVelocity if you want a steady spin speed.",
+    "A part sitting on the ground has friction holding it. Small torques may do nothing; try bigger numbers.",
+    "Big or heavy parts need much more torque to spin than small light ones.",
+    "With RelativeTo = Attachment0 (the default), the spin axis turns with the part. Use World if you want it to always spin around the true up direction."
+  ],
+  "members": {
+    "Torque.RelativeTo": {
+      "simple": "Picks whose directions the Torque vector uses: World (the game's fixed directions), Attachment0 (default; turns with the part), or Attachment1 (follows the other attachment).",
+      "example": "local twist = workspace.Top.Torque\ntwist.RelativeTo = Enum.ActuatorRelativeTo.World -- always spin around the real up axis"
+    },
+    "Torque.Torque": {
+      "simple": "How hard and around which line to twist, as a Vector3. (0, 50, 0) twists around Y; (50, 0, 0) around X. A negative number twists the other way.",
+      "example": "local twist = workspace.Top.Torque\ntwist.Torque = Vector3.new(0, -50, 0) -- spin the opposite direction"
+    }
+  }
+}

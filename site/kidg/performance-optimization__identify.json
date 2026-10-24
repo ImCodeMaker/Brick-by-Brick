@@ -1,0 +1,47 @@
+{
+  "path": "content/en-us/performance-optimization/identify.md",
+  "simple": "Before you can fix a slow game, you need to find out what is slow. This page lists Roblox's tools for checking frame rate, memory, load time, and ping on both players' devices and the server. It also tells you what healthy numbers look like, like a server heartbeat near 60 and server memory below 50 percent. Once you know where the problem is, you can pick the right fix.",
+  "analogy": "It is like a doctor's checkup. The doctor uses a thermometer, a stethoscope, and a scale to find out what is wrong before giving any medicine.",
+  "keyPoints": [
+    "Problems usually fall into three groups: frame rate (compute), memory, or load time.",
+    "Key tools: Developer Console (F9), MicroProfiler (Ctrl+Alt+F6), Scene Analysis (Studio), Performance Stats (Ctrl+Alt+F7), Debug Stats (Shift+Ctrl+F1 to F5), Network Simulation, and the Performance Dashboard.",
+    "Server heartbeat is capped at 60. Check it in the Developer Console Server Jobs tab under Heartbeat, Steps Per Sec. Lower than 60 can mean a problem.",
+    "Client frame rate defaults to a cap of 60 FPS. A frame longer than 16.67 ms in the MicroProfiler means it is running slow.",
+    "Studio skews performance numbers, so check frame rate and memory in the real client.",
+    "Keep server memory under 50 percent. Total server memory is 6.25 GiB plus 100 MiB per player at the most crowded moment.",
+    "Investigate client crashes if they go above 2 to 3 percent, especially right after an update.",
+    "Load time has no built-in timer, but a stopwatch works. The Print Join Size Breakdown setting shows the biggest things being loaded."
+  ],
+  "terms": {
+    "compute": "The work the CPU does each frame, like running scripts and physics.",
+    "server heartbeat": "How many times per second the server updates the world. 60 is the best and the max.",
+    "spike": "One frame that takes much longer than the others, causing a hitch or freeze.",
+    "ping / latency": "How long data takes to go from your device to the server and back, in milliseconds.",
+    "GiB and MiB": "Memory sizes using powers of 2. 1 GiB is 1,024 MiB. A server with 30 players gets about 6.25 GiB + 3,000 MiB, which is about 9.18 GiB.",
+    "frame rate manager": "A Roblox system that automatically lowers graphics quality to keep the game smooth. Setting graphics to manual and max turns its effect off for testing.",
+    "replicate": "Copy from the server to a player's device. When you join, the game world is replicated to you.",
+    "ReplicatedFirst": "A container that is sent to the player first, before anything else. Loading screens go here.",
+    "obfuscated script": "A script written to be hard to read on purpose. Some free models hide these to create thousands of extra objects.",
+    "network ping": "Round-trip time for a simple network message to reach the server and come back. Mostly depends on distance.",
+    "data ping": "Round-trip time for game data, including waiting in line on the client and server. It is always equal to or higher than network ping.",
+    "replication queue": "A waiting line for data that needs to be sent. If the server makes data faster than it can send, the line grows and data ping rises."
+  },
+  "example": {
+    "title": "Roughly time how long your game takes to load",
+    "place": "LocalScript in ReplicatedFirst",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal startTime = os.clock()\n\nlocal function report()\n\tlocal loadTime = os.clock() - startTime\n\t-- Round to 4 decimal places\n\tlocal rounded = math.round(loadTime * 10000) / 10000\n\tprint(\"Game loaded in \" .. rounded .. \" seconds.\")\n\tprint(\"Number of instances loaded: \" .. #Workspace:GetDescendants())\nend\n\nif game:IsLoaded() then\n\treport()\nelse\n\tgame.Loaded:Wait()\n\treport()\nend",
+    "explain": [
+      "Scripts in ReplicatedFirst run very early, so we start a timer right away with `os.clock()`.",
+      "`game.Loaded` fires when the first big download of the game world is done. We wait for it.",
+      "We subtract the start time to get how many seconds loading took, then round it.",
+      "We also print how many objects are in the Workspace, since more objects usually means longer loading.",
+      "This is not the full join time. It skips connecting to the server and loading the avatar, so also use a stopwatch."
+    ]
+  },
+  "watchOut": [
+    "Trusting frame rate in Studio. Studio itself slows things down, so check in the real client.",
+    "Thinking server memory shrinks when players leave. It grows as players join but does not go back down until the server restarts.",
+    "Ignoring free models. Some contain hidden scripts that create thousands of objects and make loading slow.",
+    "Blaming network ping when data ping is much higher. That usually means your game is sending too much data, so check the MicroProfiler network view."
+  ]
+}

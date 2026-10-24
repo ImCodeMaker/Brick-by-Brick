@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/physics/constraints/align-position.md",
+  "simple": "This page explains `AlignPosition`, a constraint that pulls a part toward a target spot. It can pull one attachment to another attachment, or pull one attachment to a position you type in. It only moves the part, it does not turn it. It is useful for floating pets, hover boards, and objects that follow a player.",
+  "analogy": "It is like a magnet on a string pulling a toy car toward your hand: it moves the car to you, but it does not care which way the car is facing.",
+  "keyPoints": [
+    "`AlignPosition` applies force to move `Attachment0` to a goal position. It changes position only, never rotation.",
+    "To line up rotation instead, use `AlignOrientation`.",
+    "By default only `Attachment0` gets pushed. Turn on `ReactionForceEnabled` to push both attachments toward each other with equal and opposite force.",
+    "Force is applied at the attachment's spot. If that spot is off-center, the part can also start to tip or spin. Turn on `ApplyAtCenterOfMass` to push from the center instead.",
+    "`RigidityEnabled = true` makes it snap to the goal as fast as physics allows.",
+    "With `RigidityEnabled = false`, you control how strong and fast it is with `MaxForce`, `MaxVelocity`, and `Responsiveness`.",
+    "`Mode = TwoAttachment` (default) moves `Attachment0` to `Attachment1` and ignores `Position`.",
+    "`Mode = OneAttachment` ignores `Attachment1` and moves `Attachment0` to the `Position` you set."
+  ],
+  "terms": {
+    "constraint": "An object that controls how parts move, like an invisible motor, rope, or hand pushing them. Mover constraints push or spin parts for you.",
+    "assembly": "A group of parts that are welded or joined together so physics moves them as one piece. A car body plus its welded seats is one assembly.",
+    "attachment": "A small invisible point you put inside a part. Constraints hook onto attachments, the same way a rope ties onto a hook.",
+    "Attachment0 / Attachment1": "The two attachment slots a constraint uses. Attachment0 is usually the one that gets pushed; Attachment1 is the other end or the reference point.",
+    "goal position": "The spot the constraint is trying to reach, like (0, 20, 0), which is 20 studs above the world center.",
+    "center of mass": "The balance point of an object. Push there and it slides without spinning; push off to the side and it also turns.",
+    "rigidity": "How stiff or instant the pull is. Rigid means it tries to reach the goal right away.",
+    "responsiveness": "How quickly the constraint reacts. A higher number means it chases the goal faster.",
+    "equal and opposite": "Both parts get the same amount of push but in opposite directions, so they pull toward each other, like two people tugging the same rope.",
+    "MaxVelocity": "The top speed the constraint is allowed to move the part, in studs per second."
+  },
+  "example": {
+    "title": "Make a block float to a spot in the sky",
+    "place": "Script inside a Part in Workspace (part not Anchored)",
+    "code": "local part = script.Parent\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal align = Instance.new(\"AlignPosition\")\nalign.Attachment0 = attachment\nalign.Mode = Enum.PositionAlignmentMode.OneAttachment\nalign.Position = Vector3.new(0, 20, 0) -- 20 studs above the world center\nalign.MaxForce = 100000\nalign.MaxVelocity = 10 -- move at most 10 studs per second\nalign.Responsiveness = 20\nalign.Parent = part",
+    "explain": [
+      "We add an attachment for the constraint to pull on.",
+      "`Mode = OneAttachment` means we only use one attachment and aim it at `Position`.",
+      "`Position = (0, 20, 0)` is the goal spot in the world.",
+      "`MaxForce`, `MaxVelocity`, and `Responsiveness` decide how strong and how quick the pull is, because `RigidityEnabled` is off.",
+      "Once parented, the block rises and settles at the goal."
+    ]
+  },
+  "watchOut": [
+    "In `TwoAttachment` mode, changing `Position` does nothing. Switch `Mode` to `OneAttachment` first.",
+    "If the part tips over while moving, the force is being applied off-center. Turn on `ApplyAtCenterOfMass` or add an `AlignOrientation`.",
+    "If `MaxForce` is too low, a heavy part may never lift off. Raise it or turn on `RigidityEnabled`."
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "name": "ImageButton",
+  "simple": "An ImageButton is a clickable picture. It works like an ImageLabel but also has button events like Activated. It can even swap to a different picture when hovered (HoverImage) or pressed (PressedImage).",
+  "analogy": "An ImageButton is like an app icon on a phone: a picture you tap to make something happen.",
+  "whenToUse": [
+    "Icon buttons like a backpack, shop cart, or settings gear",
+    "Inventory slots the player clicks",
+    "Fancy buttons drawn as images"
+  ],
+  "where": "Inside a ScreenGui (or a SurfaceGui/BillboardGui in PlayerGui). Click code goes in a LocalScript, often inside the button in StarterGui.",
+  "terms": {
+    "UI / GUI": "User Interface: the buttons, menus, text and pictures drawn on the screen or on things in the game.",
+    "LocalScript": "A script that runs on the player's own device. All UI code goes in LocalScripts.",
+    "ScreenGui": "The invisible container that holds UI shown on the player's screen. It must be inside the player's PlayerGui (put it in StarterGui in Studio).",
+    "parent": "The object something is placed inside.",
+    "UDim2": "The value used for Size and Position: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction (0 to 1) of the parent's size; Offset is exact pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "transparency": "How see-through something is. 0 = solid, 1 = invisible.",
+    "Color3": "A color made of red, green and blue amounts, like Color3.fromRGB(255, 0, 0) for red.",
+    "asset ID": "The number Roblox gives an uploaded image, written like \"rbxassetid://1234567890\".",
+    "tint": "Coloring a picture by mixing a color into it.",
+    "sprite sheet": "One big image holding many small pictures (like icons) side by side. You show one piece at a time.",
+    "9-slice": "A trick that splits an image into 9 parts so corners stay crisp while the middle stretches. Great for resizable boxes and buttons.",
+    "tile": "Repeat a picture over and over, like floor tiles.",
+    "Rect": "A rectangle described by two corners: Rect.new(left, top, right, bottom).",
+    "Content": "A newer kind of value for pictures that can hold an asset link or an EditableImage.",
+    "moderation": "Roblox checking uploaded images to make sure they're safe.",
+    "read-only": "You can read the value but not change it.",
+    "Activated": "The button's main 'pressed' event. Works with mouse, touch and gamepad.",
+    "hover": "When the mouse pointer is resting over something."
+  },
+  "examples": [
+    {
+      "title": "A shop icon that opens the shop",
+      "place": "LocalScript inside an ImageButton, in a ScreenGui in StarterGui with a Frame named \"Shop\"",
+      "code": "local button = script.Parent\nlocal shop = button.Parent:WaitForChild(\"Shop\")\n\nbutton.Image = \"rbxassetid://1234567890\"        -- normal icon (replace ID)\nbutton.HoverImage = \"rbxassetid://1234567891\"   -- glowing icon on hover (replace ID)\nbutton.BackgroundTransparency = 1\n\nbutton.Activated:Connect(function()\n\tshop.Visible = not shop.Visible\nend)",
+      "explain": [
+        "Image is the normal picture; HoverImage swaps in automatically while the mouse is over it.",
+        "Activated fires on click, tap or gamepad press and toggles the shop open or closed."
+      ]
+    }
+  ],
+  "gotchas": [
+    "AutoButtonColor doesn't darken an ImageButton that has an Image; use HoverImage and PressedImage for feedback.",
+    "Click code must be in a LocalScript. Use a RemoteEvent if the server needs to act.",
+    "Hover images don't exist on touch screens (there's no mouse), so don't hide important info behind hovering."
+  ],
+  "members": {
+    "ImageButton.Image": {
+      "simple": "The picture to show, as an asset ID like \"rbxassetid://1234567890\". Upload an image (or decal) to Roblox, then paste its ID here. Reading or writing this also updates ImageContent.",
+      "example": "local button = script.Parent\nbutton.Image = \"rbxassetid://1234567890\" -- replace with your image ID",
+      "gotcha": "If the image doesn't show, check the ID is right and the image was approved by moderation (IsLoaded tells you)."
+    },
+    "ImageButton.ImageColor3": {
+      "simple": "Tints (colors) the picture. White (default) means no change. If your image is pure white, you can make it any color with this, so one icon can be red, blue, green and so on.",
+      "example": "local button = script.Parent\nbutton.ImageColor3 = Color3.fromRGB(255, 100, 100) -- reddish tint"
+    },
+    "ImageButton.ImageContent": {
+      "simple": "The newer way to set the picture, using a Content value. It can hold an asset link or an EditableImage (a picture you draw with code). Image and ImageContent stay in sync.",
+      "example": "local button = script.Parent\nbutton.ImageContent = Content.fromUri(\"rbxassetid://1234567890\")"
+    },
+    "ImageButton.ImageRectOffset": {
+      "simple": "Used with ImageRectSize to show only part of an image, like one icon from a big sheet of icons (a sprite sheet). This is the top-left corner of that part, in pixels from the image's top-left. On a sheet of 64x64 icons, offset (64, 0) is the second icon in the top row.",
+      "example": "local button = script.Parent\nbutton.Image = \"rbxassetid://1234567890\" -- a sheet of 64x64 icons\nbutton.ImageRectSize = Vector2.new(64, 64)\nbutton.ImageRectOffset = Vector2.new(64, 0) -- second icon, top row"
+    },
+    "ImageButton.ImageRectSize": {
+      "simple": "Used with ImageRectOffset to show only part of an image. This is how big that part is, in pixels. If X or Y is 0, the whole image is shown.",
+      "example": "local button = script.Parent\nbutton.ImageRectSize = Vector2.new(64, 64) -- show a 64x64 piece"
+    },
+    "ImageButton.ImageTransparency": {
+      "simple": "How see-through the picture is. 0 = solid, 1 = invisible. Separate from BackgroundTransparency (the box behind the picture).",
+      "example": "local button = script.Parent\nbutton.ImageTransparency = 0.5 -- half see-through",
+      "gotcha": "If you want an invisible clickable area, a TextButton with no text is often simpler."
+    },
+    "ImageButton.IsLoaded": {
+      "simple": "Read-only. true once the picture has finished downloading. Images that moderation declined never load.",
+      "example": "local button = script.Parent\nif not button.IsLoaded then\n\tbutton:GetPropertyChangedSignal(\"IsLoaded\"):Wait()\nend\nprint(\"Image is ready!\")"
+    },
+    "ImageButton.ResampleMode": {
+      "simple": "How the picture looks when stretched bigger or smaller. Default smooths it out. Pixelated keeps sharp, blocky pixels, perfect for pixel art.",
+      "example": "local button = script.Parent\nbutton.ResampleMode = Enum.ResamplerMode.Pixelated"
+    },
+    "ImageButton.ScaleType": {
+      "simple": "What to do when the picture's shape doesn't match the box. Stretch (default) squishes it to fill. Fit keeps its shape and fits it inside. Crop keeps its shape and fills, cutting off edges. Tile repeats it (see TileSize). Slice uses 9-slice so corners don't stretch (see SliceCenter).",
+      "example": "local button = script.Parent\nbutton.ScaleType = Enum.ScaleType.Fit -- no squishing"
+    },
+    "ImageButton.SliceCenter": {
+      "simple": "For 9-slice images (ScaleType = Slice): a Rect marking the middle part of the image, in pixels. The 4 corners outside it never stretch, the edges stretch one way, and the middle stretches both ways. That lets one small rounded-box picture make panels of any size.",
+      "example": "local button = script.Parent\nbutton.ScaleType = Enum.ScaleType.Slice\nbutton.SliceCenter = Rect.new(16, 16, 48, 48) -- corners are 16 px; middle is from (16,16) to (48,48)"
+    },
+    "ImageButton.SliceScale": {
+      "simple": "For 9-slice images: makes the unstretched corners and edges bigger or smaller. 1 is normal, 2 doubles them, 0.5 halves them. Useful to reuse one rounded-corner image with different corner sizes.",
+      "example": "local button = script.Parent\nbutton.SliceScale = 0.5 -- thinner corners"
+    },
+    "ImageButton.TileSize": {
+      "simple": "For tiled images (ScaleType = Tile): how big each repeated tile is, as a UDim2. Scale is a fraction of this object's size, Offset is pixels. UDim2.fromOffset(32, 32) repeats the image every 32 pixels. Default (1, 0, 1, 0) is one tile filling the box.",
+      "example": "local button = script.Parent\nbutton.ScaleType = Enum.ScaleType.Tile\nbutton.TileSize = UDim2.fromOffset(32, 32) -- a checkerboard of 32x32 tiles"
+    },
+    "ImageButton.HoverImage": {
+      "simple": "A different picture to show while the mouse is over the button. Makes buttons feel alive.",
+      "example": "local button = script.Parent\nbutton.HoverImage = \"rbxassetid://1234567890\" -- replace with your 'hovered' image ID"
+    },
+    "ImageButton.HoverImageContent": {
+      "simple": "The newer Content version of HoverImage. Only supports asset links.",
+      "example": "local button = script.Parent\nbutton.HoverImageContent = Content.fromUri(\"rbxassetid://1234567890\")"
+    },
+    "ImageButton.PressedImage": {
+      "simple": "A different picture to show while the button is being pressed down.",
+      "example": "local button = script.Parent\nbutton.PressedImage = \"rbxassetid://1234567890\" -- replace with your 'pressed' image ID"
+    },
+    "ImageButton.PressedImageContent": {
+      "simple": "The newer Content version of PressedImage. Only supports asset links.",
+      "example": "local button = script.Parent\nbutton.PressedImageContent = Content.fromUri(\"rbxassetid://1234567890\")"
+    }
+  }
+}

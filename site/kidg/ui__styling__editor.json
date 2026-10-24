@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/ui/styling/editor.md",
+  "simple": "The Style Editor is a Studio tool, found in the UI tab, that lets you style your whole game's UI without writing scripts. You make tokens (saved colors, sizes, fonts), rules (like \"all Frames look like this\"), hover effects, screen-size changes, smooth animations, and swappable themes. Once set up, any new button or frame you add picks up the look by itself. It is great for keeping menus consistent and changing your whole game's style in seconds.",
+  "analogy": "Think of it like the settings for a group chat's look: pick a color scheme once and every message bubble changes, instead of painting each bubble yourself.",
+  "keyPoints": [
+    "Open it from the UI tab and click Create Design. This makes a Design folder in ReplicatedStorage with a BaseStyleSheet and a StyleSheet design sheet.",
+    "Do not delete or edit the BaseStyleSheet, and keep the `StyleDerive` that points to it, or unstyled objects can get odd values like a size of 0, 0, 0, 0.",
+    "Make a token sheet (Tokens, plus button, New Token StyleSheet) and add tokens like `Gold` = `#ffcc00` or `Text32` = `32`.",
+    "Insert a ScreenGui in StarterGui; a `StyleLink` pointing at the StyleSheet should appear under it. If not, select both and click Insert StyleLink.",
+    "To style a whole class, pick it under UI Elements, click Add a Property, then use the three-dot menu and Link Token to pick a `$` token.",
+    "Tag rules start with a dot, like `.ButtonPrimary`. Select an object and click Apply Tag to tag it quickly.",
+    "Use New, Pseudo Instance, UICorner for rounded corners, and New, GuiState, Hover for hover effects like rotating -4 degrees.",
+    "Queries change styles by screen size or container width, transitions animate changes over time, and themes let you swap whole sets of tokens with radio buttons."
+  ],
+  "terms": {
+    "token": "A saved, named value you can reuse, like `Text32` meaning text size 32. Change the token once and every place using it updates.",
+    "token sheet": "A style sheet that only holds tokens, like a palette of colors and sizes.",
+    "design sheet": "The style sheet that holds your rules and gets linked to your UI. Only one can apply to a given tree of UI.",
+    "BaseStyleSheet": "The starter sheet the editor makes for you. It matches Studio's usual defaults, like the gray color `[163, 162, 165]`.",
+    "StyleDerive": "A link that lets one sheet borrow (inherit) tokens and rules from another sheet.",
+    "StyleLink": "An object inside a ScreenGui that says which style sheet styles that ScreenGui.",
+    "pseudo instance": "A pretend child object, like a `UICorner`, that the style adds to matching objects without you inserting it.",
+    "GuiState": "What is happening to a UI object: `Idle`, `Hover`, `Press`, or `NonInteractable`. A Hover rule applies only while the mouse is over it.",
+    "built-in query": "A ready-made condition like `@ViewportDisplaySizeSmall` that turns on when the screen is small, like on a phone.",
+    "custom query": "A condition you set yourself, like `MinSize` of `400, 0`, meaning \"only when the object is at least 400 pixels wide\".",
+    "viewport": "The area of the screen where the game shows. A PS5 TV counts as Large, a laptop as Medium, an iPhone as Small.",
+    "transition": "A smooth change between two looks over time instead of an instant jump. The default is `1, Quad, Out, 0`: 1 second, Quad easing, Out direction, no delay.",
+    "easing": "How a change speeds up or slows down. Out means it starts fast and slows down at the end.",
+    "TweenInfo": "A bundle of animation settings: how long, what easing style, which direction, and any delay before starting.",
+    "theme": "A set of tokens you can swap as a group, like ThemeA with gold buttons and ThemeB with magenta buttons.",
+    "Device Emulator": "A Studio tool that pretends your screen is a phone, tablet, or console so you can test how UI looks there."
+  },
+  "watchOut": [
+    "Deleting or changing the BaseStyleSheet. Leave it alone and build your own tokens and rules on top.",
+    "Typing a plain value when you meant to use a token. Use the three-dot menu and Link Token so the `$` token is connected.",
+    "Naming a tag rule without the leading dot. It must be `.ButtonPrimary`, and the object must actually have the `ButtonPrimary` tag.",
+    "When linking theme tokens, check the hover says the token is from the theme (like in ThemeA), not the global token sheet.",
+    "For hover color changes on a TextButton, set `AutoButtonColor` to `false` like the page does, so Roblox's automatic hover darkening does not fight your style.",
+    "Duplicated themes must keep the same token names. Only change which values they link to."
+  ]
+}

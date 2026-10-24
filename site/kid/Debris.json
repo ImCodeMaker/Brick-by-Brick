@@ -1,0 +1,48 @@
+{
+  "name": "Debris",
+  "simple": "Debris is a cleanup crew. You give it an object and a number of seconds, and when the time is up it destroys that object for you. Your script does not have to stop and wait, and the cleanup still happens even if your script is turned off or deleted.",
+  "analogy": "Debris is like putting a note on an item saying \"throw this away in 5 seconds\" and handing it to the janitor. You can walk away and keep working; the janitor will take care of it no matter what.",
+  "whenToUse": [
+    "Remove bullets, sparks, broken bricks or effects after a few seconds",
+    "Clean up a temporary object without pausing your script",
+    "Make sure something gets removed even if the script that made it is destroyed"
+  ],
+  "where": "Server and client. Get it with game:GetService(\"Debris\").",
+  "terms": {
+    "destroy": "To delete an object from the game for good, the same as calling `:Destroy()` on it.",
+    "lifetime": "How many seconds the object is allowed to stay before Debris removes it.",
+    "yield": "To pause your script. Debris does not yield, so your code keeps going right away.",
+    "memory": "The space your game uses to remember things. Lots of leftover objects use more memory and can make the game slower."
+  },
+  "examples": [
+    {
+      "title": "Drop a brick that disappears after 3 seconds",
+      "place": "Script in ServerScriptService",
+      "code": "local Debris = game:GetService(\"Debris\")\n\nfor i = 1, 5 do\n    local brick = Instance.new(\"Part\")\n    brick.Size = Vector3.new(1, 1, 1)\n    brick.Position = Vector3.new(i * 2, 20, 0)\n    brick.Parent = workspace\n\n    Debris:AddItem(brick, 3) -- remove this brick in 3 seconds\n\n    task.wait(0.5) -- one brick every half second\nend\nprint(\"All bricks dropped\")",
+      "explain": [
+        "We create 5 bricks high up so they fall.",
+        "`Debris:AddItem(brick, 3)` schedules each brick to be destroyed 3 seconds later.",
+        "AddItem does not pause, so the loop keeps going and drops the next brick."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Debris can only hold 1,000 objects at once. If you add more, the oldest ones are destroyed right away. So think of the time as the MOST it will stay, not an exact time.",
+    "If you leave out the seconds, the default is 10 seconds.",
+    "Do not use the object after it is destroyed. Check that it still has a Parent first.",
+    "`task.delay(3, function() brick:Destroy() end)` also works, but stops if the script is destroyed; Debris keeps working anyway."
+  ],
+  "members": {
+    "Debris.MaxItems": {
+      "simple": "Old — it is ignored now. Debris always holds up to 1,000 items."
+    },
+    "Debris:AddItem": {
+      "simple": "Schedules an object to be destroyed after a number of seconds (10 if you leave it out). It does not pause your script.",
+      "example": "local Debris = game:GetService(\"Debris\")\n\nlocal spark = Instance.new(\"Part\")\nspark.Anchored = true\nspark.Parent = workspace\nDebris:AddItem(spark, 2) -- gone in 2 seconds",
+      "gotcha": "If more than 1,000 objects are waiting, the oldest are removed early."
+    },
+    "Debris:addItem": {
+      "simple": "Old — use `Debris:AddItem` instead (with a capital A)."
+    }
+  }
+}

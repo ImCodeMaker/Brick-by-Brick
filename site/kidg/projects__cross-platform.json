@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/projects/cross-platform.md",
+  "simple": "Roblox players join from phones, tablets, computers, consoles, and more, sometimes switching devices in the middle of a week. This page gives tips so your game works well on all of them: support every kind of control, show the right button hints, and make your UI fit every screen size. A game that only works well on a PC loses everyone playing on a phone or Xbox, which is a huge part of Roblox.",
+  "analogy": "It is like a restaurant that serves people who are right-handed, left-handed, eating with chopsticks, or using a fork. A good restaurant gives everyone the right tool and a table that fits, instead of making them all use the same thing.",
+  "keyPoints": [
+    "Support all main inputs: mouse and keyboard, touch, and gamepads (controllers).",
+    "The Input Action System lets you name actions like jump or sprint, then connect many inputs to each one, so you do not write separate code for each device.",
+    "`UserInputService.PreferredInput` tells you which input the player mainly uses right now, like Touch or Gamepad, and it updates when they switch.",
+    "Show hints that match the device, like 1 to 5 on a keyboard or trigger icons on a gamepad. `InputActionLabel` can do this with no code.",
+    "Place and size UI using Scale (a percentage of the screen) instead of pixels, and use AnchorPoint to set which corner a UI element is pinned by.",
+    "`GuiService.ViewportDisplaySize` sorts the screen into Small (most phones and tablets), Medium (most laptops and monitors), or Large (most TVs).",
+    "Use layouts like `UIListLayout` to line up buttons in rows or columns that adjust automatically when you add or remove items.",
+    "Keep text readable on all screens, use enough color contrast, and never use only color to show meaning. Test with Studio's Device Emulator and Controller Emulator."
+  ],
+  "terms": {
+    "cross-platform": "Working on many kinds of devices, like phone, PC, console, and VR.",
+    "input": "How a player controls the game: keys, mouse clicks, screen taps, or controller buttons.",
+    "gamepad": "A game controller, like an Xbox or PlayStation controller.",
+    "binding": "A link between a real button (like Space or ButtonA) and an action (like jump).",
+    "primary input type": "The control the player is mainly using right now. A tablet with a controller plugged in may switch from Touch to Gamepad.",
+    "assistive hint": "A small on-screen picture or text that shows which button to press, like a little A icon.",
+    "Scale": "A size or position measured as a fraction of the screen. An X scale of 0.5 means halfway across, no matter if the screen is 800 or 3000 pixels wide.",
+    "pixel": "One tiny dot on a screen. Different devices have very different numbers of pixels, so pixel sizes look different on each.",
+    "AnchorPoint": "The point on a UI element that its position refers to. With AnchorPoint (1, 0), the element's top-right corner sits at its position, so position X scale 1, Y scale 0 puts it snug in the top-right corner of the screen.",
+    "viewport": "The area of the screen where the game is shown.",
+    "layout": "An object, like `UIListLayout`, that automatically arranges the UI items next to it in rows or columns.",
+    "contrast": "How different two colors look. White text on black has high contrast and is easy to read; light gray on white is hard.",
+    "emulator": "A Studio tool that pretends to be another device, like a phone or controller, so you can test without owning it.",
+    "haptic feedback": "Vibration from a phone or controller to make actions feel real."
+  },
+  "example": {
+    "title": "Show the right jump hint for the player's device",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\nlocal UserInputService = game:GetService(\"UserInputService\")\n\nlocal player = Players.LocalPlayer\n\n-- Make a simple hint label at the bottom of the screen\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.ResetOnSpawn = false\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\nlocal hint = Instance.new(\"TextLabel\")\nhint.AnchorPoint = Vector2.new(0.5, 1)          -- pin by bottom-middle\nhint.Position = UDim2.fromScale(0.5, 0.95)      -- 50% across, 95% down\nhint.Size = UDim2.fromScale(0.3, 0.06)          -- 30% wide, 6% tall\nhint.TextScaled = true\nhint.Parent = screenGui\n\n-- Change the text to match the main input type\nlocal function updateHint()\n\tlocal input = UserInputService.PreferredInput\n\tif input == Enum.PreferredInput.Gamepad then\n\t\thint.Text = \"Press A to jump\"\n\telseif input == Enum.PreferredInput.Touch then\n\t\thint.Text = \"Tap the jump button\"\n\telse\n\t\thint.Text = \"Press Space to jump\"\n\tend\nend\n\nupdateHint()\n-- Update again if the player switches devices\nUserInputService:GetPropertyChangedSignal(\"PreferredInput\"):Connect(updateHint)",
+    "explain": [
+      "We create a ScreenGui and a TextLabel inside the player's PlayerGui so the hint shows on their screen.",
+      "The label uses Scale, so it is 30% of the screen wide on any device, and AnchorPoint (0.5, 1) keeps it centered at the bottom.",
+      "`updateHint` reads `PreferredInput` and picks the right words for gamepad, touch, or keyboard.",
+      "We call it once at the start, then again whenever `PreferredInput` changes, like when a tablet player connects a controller."
+    ]
+  },
+  "watchOut": [
+    "Sizing UI in pixels. A 400-pixel-wide button can be huge on a phone and tiny on a 4K TV. Use Scale and test with the Device Emulator.",
+    "Using Scale only, with no limits. 75% of a TV screen is enormous. Adapt by `ViewportDisplaySize` or add size constraints.",
+    "Putting buttons in corners where phone notches or Roblox's own buttons cover them. Check that every button can still be tapped.",
+    "Showing keyboard hints like Press E to a phone or console player. Match hints to the player's main input."
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/projects/update-games.md",
+  "simple": "When you publish an update, players already in your game stay on the old version until their server closes. This page explains how to move everyone to the new version by restarting servers, and how to give players a warning first. Your scripts can even hear when a restart is coming and show a countdown. This helps you update your game without making players angry or mixing old and new versions for a long time.",
+  "analogy": "It is like a movie theater getting a new film. People already watching the old film keep watching until it ends, unless the manager announces, \"We are switching films in 10 minutes,\" and then walks everyone into the new screening room together.",
+  "keyPoints": [
+    "Publishing an update does not kick players off old servers. New servers use the new version, and old servers keep running until they empty.",
+    "If you do nothing, players slowly move to the new version, but for a while different players may be on different versions.",
+    "If the way you save player data changed, you should restart servers so no old server saves data in the old format.",
+    "To restart: Creations > your game > Configurations > Server management, pick the places, click Restart Servers, choose options, then Restart.",
+    "Restart only servers with outdated versions avoids kicking players who are already on the newest version. Roblox recommends always choosing it.",
+    "Delay server restart gives players 1 to 60 minutes to finish up before the restart. This is called server bleed-off.",
+    "After the restart, Roblox teleports everyone from one old server together into the same new server.",
+    "On delayed restarts, the `DataModel.ServerRestartScheduled` event fires on the server so your script can warn players or ask them to save."
+  ],
+  "terms": {
+    "server": "A Roblox computer that runs one copy of your game for a group of players. A popular game has many servers at once.",
+    "outdated server": "A server still running an older published version of your place.",
+    "restart servers": "Shut down servers and send their players to new servers running the latest version.",
+    "migrate": "Move players from one place or version to another.",
+    "matchmaking": "How Roblox picks which server a player joins when they press Play.",
+    "server bleed-off": "Waiting a set time (1 to 60 minutes) before shutting a server down, so players can leave on their own instead of being disconnected suddenly.",
+    "config": "A setting you can change from the dashboard without republishing. You can ship new content hidden, then flip the config to turn it on at an exact time.",
+    "event": "A signal that fires when something happens. Your script connects a function to it so the function runs at that moment.",
+    "DateTime": "A Roblox data type that stores a moment in time. Its `UnixTimestamp` is the number of seconds since January 1, 1970, so subtracting two timestamps gives seconds between them.",
+    "Enum.CloseReason": "A fixed list of reasons a server closes. `DeveloperUpdate` means you restarted it for an update, and `RobloxMaintenance` means Roblox needed to restart it."
+  },
+  "example": {
+    "title": "Warn players before a restart",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\n-- This event fires on the server when a restart is scheduled\ngame.ServerRestartScheduled:Connect(function(restartTime, source, attributes)\n\t-- How many seconds until the restart (at the earliest)\n\tlocal secondsLeft = restartTime.UnixTimestamp - DateTime.now().UnixTimestamp\n\n\tlocal why = \"maintenance\"\n\tif source == Enum.CloseReason.DeveloperUpdate then\n\t\twhy = \"a game update\"\n\tend\n\n\tprint(\"Server restarting for \" .. why .. \" in about \" .. secondsLeft .. \" seconds\")\n\n\t-- Store the time on Workspace so LocalScripts can show a countdown\n\tworkspace:SetAttribute(\"RestartAt\", restartTime.UnixTimestamp)\n\n\tfor _, player in Players:GetPlayers() do\n\t\tprint(\"Warning sent to \" .. player.Name)\n\tend\nend)",
+    "explain": [
+      "`game` is the DataModel, so `game.ServerRestartScheduled` is the restart event.",
+      "When you choose a delayed restart, Roblox fires the event and passes the restart time, the reason, and any extra attributes.",
+      "We subtract the current time from the restart time to get seconds left. For example, 1700000600 minus 1700000000 is 600 seconds, or 10 minutes.",
+      "We check `source` to tell an update apart from Roblox maintenance.",
+      "We save the restart time as an attribute on Workspace. Attributes replicate, so a LocalScript can read it and draw a countdown on screen."
+    ]
+  },
+  "watchOut": [
+    "Restarting every server, including ones already on the new version. Tick Restart only servers with outdated versions so you do not disconnect players for no reason.",
+    "Changing how player data is saved without restarting servers. Old servers could keep saving data in the old way and mess it up.",
+    "Thinking a restart closes your game. Players come right back on new servers. To fully shut it, you must remove public access.",
+    "Expecting the restart event to give lots of warning without a delay. Choose Delay server restart so players have time to save and leave."
+  ]
+}

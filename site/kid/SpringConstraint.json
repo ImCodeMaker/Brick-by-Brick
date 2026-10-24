@@ -1,0 +1,110 @@
+{
+  "name": "SpringConstraint",
+  "simple": "SpringConstraint acts like a real spring between two attachments. If they get farther apart than its resting length, it pulls them back together; if they get squashed closer, it pushes them apart. Stiffness says how strong the spring is, and Damping says how fast the bouncing calms down.",
+  "analogy": "SpringConstraint is like the spring inside a pogo stick or the shock absorbers on a car: squash it and it pushes back, and the damper stops it bouncing forever.",
+  "whenToUse": [
+    "Car and vehicle suspension (often with CylindricalConstraint)",
+    "Bouncy trampolines and launch pads",
+    "Wobbly, springy decorations",
+    "Soft connections that stretch a bit"
+  ],
+  "where": "Make it with Instance.new(\"SpringConstraint\"), set Attachment0 and Attachment1 (one in each part) and put it in workspace. Set Visible = true to draw it as a coil.",
+  "terms": {
+    "constraint": "An invisible rule or connector that the physics engine follows, like 'these two parts must stay stuck together' or 'push this part upward'.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "force": "A push or pull. In Roblox it is measured in Roblox force units (mass x studs per second per second). A bigger number is a harder push.",
+    "mass": "How much 'stuff' an object has, which decides how hard it is to push. A part's mass = its volume x its material density. A 4x1x2 Plastic part (volume 8, density 0.7) has mass 5.6.",
+    "gravity": "The pull that makes things fall. In Roblox it is `workspace.Gravity`, which is 196.2 studs per second per second by default.",
+    "velocity": "Speed plus direction, written as a Vector3 in studs per second. Vector3.new(0, 0, 20) means 20 studs every second along the Z direction.",
+    "stiffness": "How strong a spring is. A stiff spring pushes back hard when you squash or stretch it even a little.",
+    "damping": "Something that slows wobbling down, like shock absorbers in a car. 0 means it bounces forever; bigger numbers settle down faster.",
+    "stud": "Roblox's unit of length. A default baseplate grid square is 1 stud; a classic character is about 5 studs tall.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "MaxForce": "A cap (upper limit) on how hard a constraint is allowed to push. It is a limit, not the amount it always pushes.",
+    "limits": "Stops that keep a joint from moving too far, like a door that can only swing 90 degrees.",
+    "restitution": "Bounciness, from 0 (no bounce, just stops) to 1 (bounces back as hard as it hit).",
+    "FreeLength": "The spring's relaxed length, when it is neither pushing nor pulling.",
+    "oscillate": "Bounce back and forth again and again, like a spring toy.",
+    "spring force": "Roughly Stiffness x (how far from FreeLength). A spring with Stiffness 100 stretched 2 studs too long pulls with about 200 force.",
+    "suspension": "The springy parts that connect a car's wheels to its body so bumps do not shake it too much."
+  },
+  "examples": [
+    {
+      "title": "Hang a bouncy block from a spring",
+      "place": "Script in ServerScriptService",
+      "code": "local ceiling = workspace:WaitForChild(\"Ceiling\") -- anchored part\nlocal ball = workspace:WaitForChild(\"Ball\")       -- unanchored part\n\nlocal a0 = Instance.new(\"Attachment\")\na0.Parent = ceiling\nlocal a1 = Instance.new(\"Attachment\")\na1.Parent = ball\n\nlocal spring = Instance.new(\"SpringConstraint\")\nspring.Attachment0 = a0\nspring.Attachment1 = a1\nspring.FreeLength = 6    -- relaxed length: 6 studs\nspring.Stiffness = 500   -- how strong the spring is\nspring.Damping = 10      -- calms the bouncing down over time\nspring.Visible = true    -- draw the coil\nspring.Coils = 6\nspring.Parent = ceiling\n\nwhile true do\n\tprint(\"Spring length now:\", spring.CurrentLength)\n\ttask.wait(0.5)\nend",
+      "explain": [
+        "The spring wants to be 6 studs long. Gravity pulls the ball down, stretching it a bit more.",
+        "It settles where spring pull = weight. If the ball has mass 5.6, its weight is 5.6 x 196.2 = about 1098.7, so a Stiffness of 500 stretches about 1098.7 / 500 = about 2.2 studs past 6, ending near 8.2 studs.",
+        "Damping 10 makes the bouncing fade. With Damping 0 it would bounce forever.",
+        "CurrentLength tells you how long the spring is right now."
+      ]
+    },
+    {
+      "title": "Pick a stiffness for car suspension",
+      "place": "Script in ServerScriptService",
+      "code": "local car = workspace:WaitForChild(\"Car\")\nlocal body = car:WaitForChild(\"Body\")\n\n-- Weight of the whole car: mass x gravity\nlocal weight = body.AssemblyMass * workspace.Gravity\n-- 4 springs share the weight. We want each one squashed by 1 stud.\nlocal squash = 1\nlocal stiffness = (weight / 4) / squash\n\nfor _, spring in car:GetDescendants() do\n\tif spring:IsA(\"SpringConstraint\") then\n\t\tspring.Stiffness = stiffness\n\t\tspring.Damping = stiffness / 20 -- a little damping so it does not wobble forever\n\tend\nend\nprint(\"Each spring stiffness:\", stiffness)",
+      "explain": [
+        "A spring's push is about Stiffness x squash. To hold the car up, the 4 springs together must push with the car's weight.",
+        "For a car with mass 100: weight = 100 x 196.2 = 19620. Each spring holds 4905, so for a 1-stud squash, Stiffness = 4905.",
+        "The damping amount here is just a starting guess; tune it until the ride feels right."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A spring with no Damping bounces forever. Add some damping.",
+    "If Stiffness is too low compared to the weight, the spring squashes flat. Use weight (mass x 196.2) to estimate it.",
+    "Very stiff springs can go unstable and shake wildly. Set MaxForce to a sensible limit.",
+    "Limits (MinLength/MaxLength) stop the spring without any bounce.",
+    "If a part is joined this way to an anchored part (or something connected to an anchored part), its physics is not calculated on the player's own device when they touch it, so it may feel slightly delayed."
+  ],
+  "members": {
+    "SpringConstraint.Coils": {
+      "simple": "How many coils are drawn (0 to 8). Only changes the look.",
+      "example": "workspace.Ceiling.SpringConstraint.Coils = 8"
+    },
+    "SpringConstraint.CurrentLength": {
+      "simple": "Read-only: the distance between the two attachments right now, in studs.",
+      "example": "print(workspace.Ceiling.SpringConstraint.CurrentLength)"
+    },
+    "SpringConstraint.Damping": {
+      "simple": "How much the spring resists fast movement, which calms bouncing down. It is multiplied by how fast the attachments are moving, so it only matters while they move. 0 = bounces forever.",
+      "example": "workspace.Car.Spring.Damping = 200"
+    },
+    "SpringConstraint.FreeLength": {
+      "simple": "The relaxed length of the spring in studs. Longer than this, it pulls in; shorter, it pushes out.",
+      "example": "workspace.Trampoline.SpringConstraint.FreeLength = 3"
+    },
+    "SpringConstraint.LimitsEnabled": {
+      "simple": "If true, the spring can never get shorter than MinLength or longer than MaxLength. It just stops there with no bounce.",
+      "example": "local spring = workspace.Car.Spring\nspring.LimitsEnabled = true\nspring.MinLength = 1\nspring.MaxLength = 4",
+      "gotcha": "For a bouncy stop at the ends, add a RopeConstraint or PrismaticConstraint with Restitution."
+    },
+    "SpringConstraint.MaxForce": {
+      "simple": "The most force the spring may push or pull with. Setting a sensible number stops very stiff springs from going wild.",
+      "example": "workspace.Car.Spring.MaxForce = 50000"
+    },
+    "SpringConstraint.MaxLength": {
+      "simple": "The longest the spring may stretch, in studs, when LimitsEnabled is true.",
+      "example": "workspace.Car.Spring.MaxLength = 5"
+    },
+    "SpringConstraint.MinLength": {
+      "simple": "The shortest the spring may squash, in studs, when LimitsEnabled is true.",
+      "example": "workspace.Car.Spring.MinLength = 0.5"
+    },
+    "SpringConstraint.Radius": {
+      "simple": "How wide the drawn coils look. Only changes the look.",
+      "example": "workspace.Car.Spring.Radius = 0.6"
+    },
+    "SpringConstraint.Stiffness": {
+      "simple": "How strong the spring is. The push or pull is about Stiffness x (how far it is from FreeLength). Stiffness 1000 squashed 2 studs pushes with about 2000.",
+      "example": "local spring = workspace.Trampoline.SpringConstraint\nspring.Stiffness = 3000 -- a strong, springy trampoline"
+    },
+    "SpringConstraint.Thickness": {
+      "simple": "How thick the drawn coil wire looks. Only changes the look.",
+      "example": "workspace.Car.Spring.Thickness = 0.1"
+    }
+  }
+}

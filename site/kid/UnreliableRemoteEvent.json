@@ -1,0 +1,65 @@
+{
+  "name": "UnreliableRemoteEvent",
+  "simple": "An UnreliableRemoteEvent works like a RemoteEvent, sending messages between the server and players' devices, but it is faster and lighter because Roblox does not promise every message arrives or arrives in order. Use it for things that change constantly, where a newer message will soon replace a lost one.",
+  "analogy": "A RemoteEvent is like a registered letter: it always arrives, in order. An UnreliableRemoteEvent is like shouting the score across a noisy playground: most shouts get through, and if one is missed, the next shout has the new score anyway.",
+  "whenToUse": [
+    "Sending something that updates many times per second, like where a player is aiming or a visual effect position.",
+    "Effects that do not matter if one is skipped, like a spark or a footstep sound.",
+    "Never for important things like buying items, giving coins or saving data. Use a normal RemoteEvent for those."
+  ],
+  "where": "Create it in Studio and put it in ReplicatedStorage so both sides can see it. Same methods and events as RemoteEvent.",
+  "terms": {
+    "server": "The one computer, run by Roblox in a data center, that is in charge of a game. Every player in the same game is connected to it. It keeps the official copy of the game, like who has how many coins.",
+    "client": "Your own device (phone, PC, Xbox) running the game. Every player has their own client. The client draws the screen and reads your keyboard, mouse or touch.",
+    "client-server boundary": "The invisible wall between the server and each client. They are different computers, so a script on one side cannot just reach over and change a variable on the other side. Messages have to be sent across.",
+    "ReplicatedStorage": "A storage folder that both the server and every client can see. The usual home for RemoteEvents and RemoteFunctions.",
+    "fire": "To send off an event so that the functions listening to it run.",
+    "exploiter": "A cheater who uses hacking tools to change their own client. They can run any code they want on their own device, including firing your RemoteEvents with fake values.",
+    "reliable": "Guaranteed to arrive, and in the same order it was sent. Normal RemoteEvents are reliable.",
+    "unreliable": "Might get lost, and might arrive in a different order than sent. Roblox will not resend it.",
+    "byte": "A tiny unit of data, about the size of one letter of text. 1000 bytes is roughly a short paragraph.",
+    "payload": "The data you are sending in one message."
+  },
+  "examples": [
+    {
+      "title": "Share where a player is aiming",
+      "place": "LocalScript in StarterPlayerScripts + Script in ServerScriptService, UnreliableRemoteEvent named AimUpdate in ReplicatedStorage",
+      "code": "-- CLIENT: send our aim point about 10 times a second\nlocal Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal aimUpdate = ReplicatedStorage:WaitForChild(\"AimUpdate\")\nlocal mouse = Players.LocalPlayer:GetMouse()\n\nwhile true do\n\taimUpdate:FireServer(mouse.Hit.Position)\n\ttask.wait(0.1)\nend\n\n-- SERVER: remember each player's latest aim point\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal aimUpdate = ReplicatedStorage:WaitForChild(\"AimUpdate\")\n\naimUpdate.OnServerEvent:Connect(function(player, aimPosition)\n\tif typeof(aimPosition) ~= \"Vector3\" then return end -- never trust the client\n\tplayer:SetAttribute(\"AimPosition\", aimPosition)\nend)",
+      "explain": [
+        "The client sends a small Vector3 position every 0.1 seconds.",
+        "If one message is lost, it does not matter: another arrives a moment later.",
+        "The server still checks the type, because an exploiter can send anything."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Messages over 1000 bytes are dropped. Keep each message small.",
+    "Messages can be lost or arrive out of order. If order matters, send a counter number and ignore older ones.",
+    "If nothing is connected to `OnServerEvent` / `OnClientEvent` yet, the message is thrown away (a normal RemoteEvent would wait in a queue).",
+    "Never use it for money, items or anything a player would be upset to lose.",
+    "Never trust what the client sends, same as a normal RemoteEvent."
+  ],
+  "members": {
+    "UnreliableRemoteEvent:FireAllClients": {
+      "simple": "Server only. Sends a small, might-get-lost message to every player. Max 1000 bytes.",
+      "example": "-- Script in ServerScriptService\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal sparkle = ReplicatedStorage:WaitForChild(\"Sparkle\")\n\n-- Tell everyone to show a spark effect at this spot\nsparkle:FireAllClients(Vector3.new(0, 5, 0))"
+    },
+    "UnreliableRemoteEvent:FireClient": {
+      "simple": "Server only. Sends a small, might-get-lost message to one player. First value is the Player. Max 1000 bytes.",
+      "example": "-- Script in ServerScriptService\nlocal Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal ping = ReplicatedStorage:WaitForChild(\"Ping\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tping:FireClient(player, os.clock())\nend)"
+    },
+    "UnreliableRemoteEvent:FireServer": {
+      "simple": "Client only. Sends a small, might-get-lost message to the server. Max 1000 bytes. If the client sends too fast, extra messages are dropped.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal lookDir = ReplicatedStorage:WaitForChild(\"LookDirection\")\n\nlocal camera = workspace.CurrentCamera\nwhile true do\n\tlookDir:FireServer(camera.CFrame.LookVector)\n\ttask.wait(0.2)\nend"
+    },
+    "UnreliableRemoteEvent.OnClientEvent": {
+      "simple": "Runs in a LocalScript when the server fires to this client. Some messages may never arrive, so do not count on every one.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal sparkle = ReplicatedStorage:WaitForChild(\"Sparkle\")\n\nsparkle.OnClientEvent:Connect(function(position)\n\tprint(\"Sparkle at\", position)\nend)"
+    },
+    "UnreliableRemoteEvent.OnServerEvent": {
+      "simple": "Runs in a server Script when a client fires. First value is the Player who sent it, then their values.",
+      "example": "-- Script in ServerScriptService\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal lookDir = ReplicatedStorage:WaitForChild(\"LookDirection\")\n\nlookDir.OnServerEvent:Connect(function(player, direction)\n\tif typeof(direction) ~= \"Vector3\" then return end -- check it\n\tplayer:SetAttribute(\"LookDirection\", direction)\nend)",
+      "gotcha": "Values after `player` can be faked by exploiters. Check them."
+    }
+  }
+}

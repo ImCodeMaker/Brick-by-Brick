@@ -1,0 +1,53 @@
+{
+  "path": "content/en-us/workspace/streaming/techniques.md",
+  "simple": "This page is the practical guide to making a game work well with streaming, where each player's device only loads the world near them. It lists the best Workspace settings, how to build models so they stream nicely, and, most importantly, which kinds of scripts break with streaming and how to fix each one. Most streaming bugs come from LocalScripts that assume a part is always there. If you learn these patterns, your game will run smoothly on low-end phones without random errors.",
+  "analogy": "Writing code for streaming is like asking for a book in a library where only nearby shelves are stocked. You cannot just grab the book, because it might not be on the shelf yet. You either wait for it to be delivered, check if it is there and skip it if not, or ask the main library (the server), which has every book.",
+  "keyPoints": [
+    "Use the recommended settings: EnableSLIMAvatars on, ModelStreamingBehavior Improved, StreamingIntegrityMode PauseOutsideLoadedArea, MinRadius 64, TargetRadius 1024, StreamOutBehavior Opportunistic.",
+    "Set `Model.LevelOfDetail` to SLIM on models that never move or change, so far-away ones still look real. Keep each model small, about 64 studs across.",
+    "Group related parts into small models, make a model Atomic if a script needs all its parts, and use Persistent only when you truly must.",
+    "In LocalScripts, `workspace.House1.Door` can error if it has not streamed in. Use `WaitForChild` if you must have it, or `FindFirstChild` plus an `if` check if you can skip it.",
+    "A part sent through a RemoteEvent might not exist on the client yet. Wait for it with a timeout, pre-load the area with `RequestStreamAroundAsync`, or skip it.",
+    "ChildAdded, ChildRemoved, and CollectionService tag signals also fire when things stream in and out, not only when they are truly created or destroyed.",
+    "On the client, `GetChildren`, raycasts, and other searches only see what is streamed in. Do full-world checks on the server.",
+    "Test with StreamingTargetRadius set to 64, travel the whole map, teleport far, and watch for `attempt to index nil` errors."
+  ],
+  "terms": {
+    "streaming": "Loading only the part of the world near each player onto their device, and unloading far parts when needed.",
+    "level of detail (LOD)": "Showing a simpler, cheaper version of something when it is far away.",
+    "SLIM": "Scalable Lightweight Interactive Models. A Roblox feature that shows a very light stand-in mesh for far-away models and avatars that looks almost like the real thing.",
+    "static": "Not moving or changing while the game runs. SLIM only works on static models.",
+    "atomic model": "A model whose parts all arrive on the player's device together, never half-loaded.",
+    "persistent model": "A model that is loaded soon after joining and never unloaded. It always uses memory.",
+    "decompose": "Break one big thing into smaller pieces. Split one giant model full of NPCs into one model per NPC.",
+    "index": "Reach into an object to get a child, like `workspace.House1`. It errors if the child is missing.",
+    "nil": "Luau's word for nothing. `FindFirstChild` returns nil if the child is not there.",
+    "yield": "Pause the script and wait. `WaitForChild` yields until the child appears, possibly forever unless you give a timeout like `WaitForChild(\"Door\", 5)` for 5 seconds.",
+    "pre-fetch": "Load an area early, before the player gets there, so it is ready when they arrive.",
+    "desynchronization": "When a player's device shows something different from the server, for example a part they cloned only for themselves.",
+    "stale": "Old and out of date. A streamed-out part's `Position` still reads, but it is the last value received, not the real one now.",
+    "spatial query": "Asking the world a question about space, like a raycast (what does this line hit?) or what parts are in this box.",
+    "CollectionService tag": "A label you stick on objects, like \"Coin\", so scripts can find all objects with that label.",
+    "attribute": "A custom value you store on an object, like `Spawned = true`."
+  },
+  "example": {
+    "title": "Spin every coin that is currently loaded",
+    "place": "LocalScript in StarterPlayerScripts (coins are parts tagged \"Coin\" in Studio's Tags section)",
+    "code": "local CollectionService = game:GetService(\"CollectionService\")\nlocal RunService = game:GetService(\"RunService\")\n\nlocal TAG_NAME = \"Coin\"\nlocal coins = {} -- coins that are streamed in right now\n\n-- Coins already loaded when this script starts\nfor _, coin in CollectionService:GetTagged(TAG_NAME) do\n\tcoins[coin] = true\nend\n\n-- A coin streamed in (or was created)\nCollectionService:GetInstanceAddedSignal(TAG_NAME):Connect(function(coin)\n\tcoins[coin] = true\nend)\n\n-- A coin streamed out (or was destroyed)\nCollectionService:GetInstanceRemovedSignal(TAG_NAME):Connect(function(coin)\n\tcoins[coin] = nil\nend)\n\n-- Spin only the coins we actually have, every frame\nRunService.RenderStepped:Connect(function(deltaTime)\n\tfor coin in coins do\n\t\tcoin.CFrame = coin.CFrame * CFrame.Angles(0, math.rad(90) * deltaTime, 0)\n\tend\nend)",
+    "explain": [
+      "Instead of looking up `workspace.Coins.Coin1` (which might not be loaded), we track coins by their tag.",
+      "`GetTagged` gives the coins already streamed in when the script starts.",
+      "The added signal fires when a coin streams in, so we add it to our list. The removed signal fires when it streams out, so we take it off.",
+      "Every frame we turn each loaded coin 90 degrees per second. If a frame took 0.02 seconds, that is 1.8 degrees.",
+      "Because we never touch coins that are not loaded, the script never errors, no matter where the player is."
+    ]
+  },
+  "watchOut": [
+    "Using dot paths like `workspace.Map.Shop.Door` in LocalScripts. Use `WaitForChild` or `FindFirstChild` checks instead.",
+    "Using `WaitForChild` with no timeout on something that may never load. The script can be stuck forever. Add a second number, like `WaitForChild(\"Door\", 10)`.",
+    "Playing a spawn sound every time a ChildAdded or tag signal fires. It will replay whenever the enemy streams back in. Mark it with an attribute the first time.",
+    "Cloning the whole map from ReplicatedStorage on the client and waiting for it before hiding the loading screen. With no character yet, it can wait forever.",
+    "Only testing near the spawn point. Streaming bugs show up at edges and after teleports, so test with a small target radius and travel everywhere.",
+    "Running the AI streaming conversion skill without a backup. Always use File > Publish to Roblox As first."
+  ]
+}

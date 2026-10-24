@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/ui/video-frames.md",
+  "simple": "A `VideoFrame` lets you play a video inside your game, on the screen or on a part like a movie screen. You can use videos from the Toolbox, or upload your own if you meet the rules. Uploading has an age and ID requirement and costs Robux. Once you have a video, you set it on a `VideoFrame` and play it, with or without code.",
+  "analogy": "A `VideoFrame` is like a TV you hang in your game. The video asset is the show, and the `SurfaceGui` or `ScreenGui` is the wall you hang the TV on.",
+  "keyPoints": [
+    "Uploading videos requires being 13+ and ID verified, and the Video Uploads beta must be turned on.",
+    "Videos must be yours to use, 5 minutes or less, `.mp4` or `.mov`, at most 4096 by 2160, and under 3.75 GB.",
+    "Each video upload costs 2,000 Robux, and you can upload at most 20 videos a day.",
+    "A `VideoFrame` only plays when it is inside a `ScreenGui`, `SurfaceGui`, or `BillboardGui`.",
+    "At most two videos can play at the same time.",
+    "Without code: insert a video from the Toolbox or Asset Manager, move the `VideoFrame` into a container, then turn on `Looped` and `Playing`.",
+    "With code: set `Video` to an asset ID, wait until it is loaded, then call `:Play()`."
+  ],
+  "terms": {
+    "video asset": "A video file uploaded to Roblox, with its own ID.",
+    "ID verified": "Your account has been confirmed with an official ID.",
+    "beta feature": "A new feature still being tested, which you turn on in Studio's beta settings.",
+    "resolution": "How many pixels wide and tall a video is. 4096 by 2160 is the biggest allowed.",
+    "alpha channel": "See-through parts of a video. Roblox ignores them, so transparent areas will not be see-through.",
+    "asset privacy": "A system that keeps your uploads from being used by others without permission.",
+    "IsLoaded": "True once the video has finished loading and can play."
+  },
+  "example": {
+    "title": "Play a video on a big screen",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\n-- A flat part to act as the screen\nlocal screenPart = Instance.new(\"Part\")\nscreenPart.Size = Vector3.new(16, 9, 1) -- 16 wide, 9 tall, like a TV\nscreenPart.Position = Vector3.new(0, 8, -20)\nscreenPart.Orientation = Vector3.new(0, 180, 0) -- turn it to face the spawn\nscreenPart.Anchored = true\nscreenPart.Parent = Workspace\n\nlocal surfaceGui = Instance.new(\"SurfaceGui\")\nsurfaceGui.Parent = screenPart\n\nlocal videoFrame = Instance.new(\"VideoFrame\")\nvideoFrame.Size = UDim2.fromScale(1, 1) -- fill the whole face\nvideoFrame.Looped = true\nvideoFrame.Video = \"rbxassetid://5608384572\" -- replace with your video's asset ID\nvideoFrame.Parent = surfaceGui\n\n-- Wait for the video to load before playing\nwhile not videoFrame.IsLoaded do\n\tvideoFrame.Loaded:Wait()\nend\n\nvideoFrame:Play()",
+    "explain": [
+      "We make an anchored part shaped like a TV and put it in the world.",
+      "We add a `SurfaceGui` so UI can appear on the part's front face.",
+      "We add a `VideoFrame` that fills the face, set it to loop, and give it a video ID.",
+      "We wait until `IsLoaded` is true, then call `:Play()`."
+    ]
+  },
+  "watchOut": [
+    "A `VideoFrame` sitting directly in Workspace or a part will not play. It must be inside a `ScreenGui`, `SurfaceGui`, or `BillboardGui`.",
+    "Only two videos can play at once, so do not plan a wall of ten TVs all playing.",
+    "Uploads cost Robux and can be rejected, so double-check length, size, and format before uploading."
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "name": "GlobalDataStore",
+  "simple": "GlobalDataStore is the basic save box that DataStore and OrderedDataStore are built from. It holds the everyday save functions: get a value, set a value, add to a value, update it safely, and remove it. You use these functions on any data store you get from DataStoreService.",
+  "analogy": "A GlobalDataStore is like a wall of lockers. Each locker has a label (the key) and something inside (the value). You can look inside, swap what is inside, add to it, or empty it, but each trip to the lockers takes a moment, so you should not run back and forth too often.",
+  "whenToUse": [
+    "Reading saved data with `GetAsync` when a player joins.",
+    "Saving data with `SetAsync` or `UpdateAsync` when a player leaves or the server closes.",
+    "Counting things across all servers with `IncrementAsync`."
+  ],
+  "where": "Server only. You never create one yourself; get one from `DataStoreService:GetDataStore`, `GetOrderedDataStore` or `GetGlobalDataStore`.",
+  "terms": {
+    "data store": "Roblox's save system. It keeps information (like coins or levels) even after players leave and servers shut down, and every server of your game shares it.",
+    "key": "The name you save a value under, like a label on a locker. A common key is `\"User_\" .. player.UserId`, for example `User_12345`.",
+    "value": "The thing stored under a key, like a number, text, true/false, or a table.",
+    "server": "The Roblox computer in charge of one copy of your game. Data stores can only be used from server Scripts.",
+    "pcall": "Short for 'protected call'. It runs a function and catches any error instead of letting your whole script crash. It gives back `true` plus the results if it worked, or `false` plus the error message if it failed.",
+    "async / yield": "Functions ending in `Async` talk to Roblox's computers over the internet, so they take a moment. While waiting, your script pauses (yields), then carries on when the answer arrives.",
+    "retry": "Trying again after a failure. Data store calls sometimes fail because of the internet, so good code waits a little and tries again a few times.",
+    "rate limit / budget": "How many data store requests a server is allowed to make per minute. For normal reads and writes the default is 60 + 40 for each player, so a server with 10 players can do 460 reads per minute. If you go over, requests are slowed down or dropped.",
+    "throttle": "When Roblox slows down or rejects your requests because you sent too many too fast.",
+    "UserId": "A player's permanent ID number. It never changes, even if they change their name, so it makes a great key.",
+    "callback": "A function you hand to Roblox so Roblox can run it for you later.",
+    "nil": "Luau's word for nothing or no value. `GetAsync` returns nil when nothing was ever saved under that key.",
+    "version": "Every time you save a key, Roblox keeps the old value as an older version for a while, a bit like undo history.",
+    "metadata": "Extra notes saved alongside a value, like a tag saying when or why it was saved.",
+    "cache": "A short-term memory. After you read a key, the server remembers it for 4 seconds, and reading again in that time gives the remembered copy.",
+    "increment": "To add to a number. Incrementing 10 by 5 gives 15. Incrementing by -3 subtracts 3."
+  },
+  "examples": [
+    {
+      "title": "Save and load coins safely (pcall, retries, PlayerRemoving, BindToClose)",
+      "place": "Script in ServerScriptService",
+      "code": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal Players = game:GetService(\"Players\")\n\nlocal coinStore = DataStoreService:GetDataStore(\"PlayerCoins\")\n\n-- Try a data store call up to 5 times, waiting longer each time\nlocal function withRetries(callback)\n\tlocal waitTime = 1\n\tfor attempt = 1, 5 do\n\t\tlocal ok, result = pcall(callback) -- catch errors instead of crashing\n\t\tif ok then\n\t\t\treturn true, result\n\t\tend\n\t\twarn(\"Data store attempt \" .. attempt .. \" failed: \" .. tostring(result))\n\t\tif attempt < 5 then\n\t\t\ttask.wait(waitTime + math.random()) -- small random extra so servers don't all retry together\n\t\t\twaitTime *= 2 -- 1s, 2s, 4s, 8s...\n\t\tend\n\tend\n\treturn false, nil\nend\n\nlocal loaded = {} -- players whose data loaded safely\n\nlocal function keyFor(player)\n\treturn \"User_\" .. player.UserId\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- Make a leaderboard stat\n\tlocal leaderstats = Instance.new(\"Folder\")\n\tleaderstats.Name = \"leaderstats\"\n\tlocal coins = Instance.new(\"IntValue\")\n\tcoins.Name = \"Coins\"\n\tcoins.Parent = leaderstats\n\tleaderstats.Parent = player\n\n\t-- Load saved coins\n\tlocal ok, saved = withRetries(function()\n\t\treturn coinStore:GetAsync(keyFor(player))\n\tend)\n\tif ok then\n\t\tcoins.Value = saved or 0 -- nil means a brand new player\n\t\tloaded[player] = true\n\telse\n\t\twarn(\"Could not load data for \" .. player.Name .. \", will not save to protect it\")\n\tend\nend)\n\nlocal function savePlayer(player)\n\tif not loaded[player] then\n\t\treturn -- loading failed, so saving 0 would wipe their real coins\n\tend\n\tlocal leaderstats = player:FindFirstChild(\"leaderstats\")\n\tlocal coins = leaderstats and leaderstats:FindFirstChild(\"Coins\")\n\tif not coins then return end\n\twithRetries(function()\n\t\treturn coinStore:SetAsync(keyFor(player), coins.Value, { player.UserId })\n\tend)\nend\n\n-- 1. Save when a player leaves\nPlayers.PlayerRemoving:Connect(function(player)\n\tsavePlayer(player)\n\tloaded[player] = nil\nend)\n\n-- 2. Save everyone when the server shuts down\ngame:BindToClose(function()\n\tlocal stillSaving = 0\n\tfor _, player in Players:GetPlayers() do\n\t\tstillSaving += 1\n\t\ttask.spawn(function() -- save all players at the same time\n\t\t\tsavePlayer(player)\n\t\t\tstillSaving -= 1\n\t\tend)\n\tend\n\t-- Keep the server alive until every save finishes (Roblox allows up to 30 seconds)\n\twhile stillSaving > 0 do\n\t\ttask.wait()\n\tend\nend)",
+      "explain": [
+        "`GetDataStore(\"PlayerCoins\")` opens a save box called PlayerCoins. Every server of your game sees the same box.",
+        "`withRetries` wraps each call in `pcall`. If Roblox's save servers have a hiccup, the script does not crash; it waits 1 second, then 2, then 4... and tries again, up to 5 times.",
+        "When a player joins, we load their coins with `GetAsync`. If nothing was saved yet we get nil, so we start at 0.",
+        "If loading failed every time, we remember NOT to save that player. Otherwise we would overwrite their real coins with 0.",
+        "`PlayerRemoving` saves the player's coins when they leave.",
+        "`game:BindToClose` runs when the server is shutting down (for example, the last player left or you updated the game). Without it, the server could close before saves finish. Roblox waits up to 30 seconds for this function.",
+        "Budgets: each server gets about 60 + 40 per player reads and writes per minute. One load per join and one save per leave stays far below that. Do NOT save every time a coin changes."
+      ]
+    },
+    {
+      "title": "Add to a value safely with UpdateAsync",
+      "place": "Script in ServerScriptService",
+      "code": "local DataStoreService = game:GetService(\"DataStoreService\")\nlocal store = DataStoreService:GetDataStore(\"PlayerData\")\n\nlocal function addGems(userId, amount)\n\tlocal ok, err = pcall(function()\n\t\tstore:UpdateAsync(\"User_\" .. userId, function(oldData)\n\t\t\toldData = oldData or { Gems = 0 } -- nil for a new player\n\t\t\toldData.Gems += amount\n\t\t\treturn oldData -- returning nil instead would cancel the save\n\t\tend)\n\tend)\n\tif not ok then\n\t\twarn(\"Could not add gems: \" .. tostring(err))\n\tend\nend\n\naddGems(12345, 10)",
+      "explain": [
+        "`UpdateAsync` reads the newest saved value, gives it to your function, and saves whatever your function returns.",
+        "If another server changed the same key at the same moment, Roblox runs your function again with the newest value, so nothing gets lost.",
+        "Returning nil cancels the save."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Data stores only work in server Scripts. A LocalScript cannot use them.",
+    "In Studio, data stores are off until you publish the game and turn on Game Settings > Security > Enable Studio Access to API Services. Studio uses the same data as the live game, so be careful, or use a separate test place.",
+    "Always wrap calls in `pcall`. They talk over the internet and can fail.",
+    "Never save in a fast loop or on every coin pickup. You will hit the rate limit. Save on leave, on shutdown, and maybe every few minutes as a backup.",
+    "If loading failed, do not save, or you may overwrite good data with empty data.",
+    "Keys must be 50 characters or fewer, and one key can hold up to about 4 MB. Text must be valid UTF-8.",
+    "Use `player.UserId` in keys, never the player's name (names can change).",
+    "You cannot save Instances like Parts or Color3/Vector3 values directly. Save numbers, strings, booleans and plain tables.",
+    "`SetAsync` overwrites whatever was there. If two servers might write the same key, use `UpdateAsync`.",
+    "The function you give `UpdateAsync` must not wait or yield (no `task.wait` inside); just change the value and return it."
+  ],
+  "members": {
+    "GlobalDataStore:BatchGetAsync": {
+      "simple": "Reads many keys in one request instead of one at a time. Right now it only works on an OrderedDataStore. You get back a table where each found key maps to a table with a `value` field; missing keys are simply left out.",
+      "example": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal winsStore = DataStoreService:GetOrderedDataStore(\"TotalWins\")\n\nlocal ok, results = pcall(function()\n\treturn winsStore:BatchGetAsync({ \"User_1\", \"User_2\", \"User_3\" })\nend)\nif ok then\n\tfor key, entry in results do\n\t\tprint(key, entry.value)\n\tend\nend",
+      "gotcha": "Calling it on a normal DataStore throws an error. Up to 100 keys per call by default."
+    },
+    "GlobalDataStore:GetAsync": {
+      "simple": "Reads the value saved under a key. Returns the value (or nil if nothing is saved) and an info object about that version. Use it to load a player's data when they join.",
+      "example": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal store = DataStoreService:GetDataStore(\"PlayerCoins\")\n\nlocal ok, coins = pcall(function()\n\treturn store:GetAsync(\"User_12345\")\nend)\nif ok then\n\tprint(\"Coins:\", coins or 0) -- nil means never saved\nelse\n\twarn(\"Load failed:\", coins) -- on failure, the second value is the error\nend",
+      "gotcha": "Reading the same key again within 4 seconds gives a cached copy. Always use pcall."
+    },
+    "GlobalDataStore:IncrementAsync": {
+      "simple": "Adds a whole number to the number saved under a key and returns the new total. Great for counters shared by all servers, like total visits.",
+      "example": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal Players = game:GetService(\"Players\")\nlocal stats = DataStoreService:GetDataStore(\"GameStats\")\n\nPlayers.PlayerAdded:Connect(function()\n\tlocal ok, total = pcall(function()\n\t\treturn stats:IncrementAsync(\"TotalVisits\", 1)\n\tend)\n\tif ok then print(\"Total visits ever:\", total) end\nend)",
+      "gotcha": "Both the saved value and the amount must be whole numbers (integers)."
+    },
+    "GlobalDataStore:OnUpdate": {
+      "simple": "Old — use MessagingService to tell other servers about changes instead."
+    },
+    "GlobalDataStore:RemoveAsync": {
+      "simple": "Deletes the value saved under a key and gives you back what it was. In a normal DataStore the old versions can still be recovered for a while (deleted for good after 30 days). In an OrderedDataStore it is gone right away.",
+      "example": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal store = DataStoreService:GetDataStore(\"PlayerCoins\")\n\nlocal ok, oldValue = pcall(function()\n\treturn store:RemoveAsync(\"User_12345\")\nend)\nprint(ok, \"Value before removing:\", oldValue)"
+    },
+    "GlobalDataStore:SetAsync": {
+      "simple": "Saves a value under a key, replacing whatever was there. You can also pass a list of UserIds the data belongs to, which helps Roblox remove a player's data if they ask.",
+      "example": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal store = DataStoreService:GetDataStore(\"PlayerData\")\n\nlocal userId = 12345\nlocal data = { Coins = 50, Level = 3 }\n\nlocal ok, err = pcall(function()\n\tstore:SetAsync(\"User_\" .. userId, data, { userId })\nend)\nif not ok then warn(\"Save failed:\", err) end",
+      "gotcha": "It overwrites blindly. If two servers might save the same key at once, use `UpdateAsync` instead."
+    },
+    "GlobalDataStore:UpdateAsync": {
+      "simple": "The safest way to change saved data. Roblox reads the newest value, passes it to your function, and saves what your function returns. If another server changed it in between, your function runs again with the fresh value. Return nil to cancel.",
+      "example": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal store = DataStoreService:GetDataStore(\"PlayerCoins\")\n\nlocal ok, newValue = pcall(function()\n\treturn store:UpdateAsync(\"User_12345\", function(current)\n\t\treturn (current or 0) + 10 -- add 10 coins\n\tend)\nend)\nprint(ok, newValue)",
+      "gotcha": "Uses both a read and a write from your budget. Do not wait inside the function."
+    }
+  }
+}

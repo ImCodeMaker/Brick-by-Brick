@@ -1,0 +1,71 @@
+{
+  "name": "UICorner",
+  "simple": "A UICorner rounds off the sharp corners of its parent UI object. Drop one into a Frame, button or image and the corners become smooth curves. A big enough radius turns a rectangle into a pill shape, or a square into a circle.",
+  "analogy": "A UICorner is like sanding the corners of a wooden board so they're round instead of pointy.",
+  "whenToUse": [
+    "Rounded buttons and panels for a modern look",
+    "Circle profile pictures (square ImageLabel + CornerRadius of 50%)",
+    "Pill-shaped health bars or tags"
+  ],
+  "where": "Put it inside the UI object you want rounded (Frame, TextButton, ImageLabel...). Create in Studio or with Instance.new in a LocalScript.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "radius": "How big the curve on a corner is. A radius of 8 pixels means the corner curves over 8 pixels. Bigger radius = rounder corner.",
+    "pill shape": "A rectangle with fully rounded ends, like a capsule.",
+    "clip": "Cut off and hide what's outside an area.",
+    "beta": "A test feature you may need to turn on in Studio's Beta Features window before it works."
+  },
+  "examples": [
+    {
+      "title": "Rounded button and a circle picture",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\nlocal playerGui = player:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\n-- Rounded button\nlocal button = Instance.new(\"TextButton\")\nbutton.Size = UDim2.fromOffset(200, 50)\nbutton.Position = UDim2.fromOffset(20, 20)\nbutton.Text = \"Play\"\nbutton.Parent = screenGui\n\nlocal corner = Instance.new(\"UICorner\")\ncorner.CornerRadius = UDim.new(0, 12) -- 12-pixel round corners\ncorner.Parent = button\n\n-- Circle avatar picture\nlocal avatar = Instance.new(\"ImageLabel\")\navatar.Size = UDim2.fromOffset(100, 100) -- must be square for a perfect circle\navatar.Position = UDim2.fromOffset(20, 90)\navatar.Image = Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)\navatar.Parent = screenGui\n\nlocal circle = Instance.new(\"UICorner\")\ncircle.CornerRadius = UDim.new(0.5, 0) -- 50% of the smaller side = full circle\ncircle.Parent = avatar",
+      "explain": [
+        "UDim.new(0, 12) rounds each corner by 12 pixels.",
+        "UDim.new(0.5, 0) uses Scale: half of the shorter side. For a 100x100 image that's 50 pixels, which makes a full circle.",
+        "On a 200x50 button, a radius of 0.5 would be 25 pixels (half of 50, the shorter side), making a pill shape.",
+        "GetUserThumbnailAsync gets the player's headshot picture to show."
+      ]
+    }
+  ],
+  "gotchas": [
+    "UICorner doesn't work on a ScrollingFrame.",
+    "Children are NOT cut to the rounded shape, even with ClipsDescendants. Add a UICorner to the child too.",
+    "Scale radius is based on the SHORTER side, and anything over half of it just makes a pill shape.",
+    "The individual corner properties (TopLeftRadius and friends) may need the 'New UI Capabilities' beta in Studio."
+  ],
+  "members": {
+    "UICorner.BottomLeftRadius": {
+      "simple": "How round just the bottom-left corner is, as a UDim. Lets you round some corners but not others.",
+      "example": "local corner = script.Parent -- a UICorner\ncorner.BottomLeftRadius = UDim.new(0, 0) -- keep this corner sharp",
+      "gotcha": "Currently a beta feature; enable 'New UI Capabilities' in Studio's Beta Features. Setting CornerRadius overwrites it."
+    },
+    "UICorner.BottomRightRadius": {
+      "simple": "How round just the bottom-right corner is, as a UDim.",
+      "example": "local corner = script.Parent\ncorner.BottomRightRadius = UDim.new(0, 0)",
+      "gotcha": "Currently a beta feature. Setting CornerRadius overwrites it."
+    },
+    "UICorner.CornerRadius": {
+      "simple": "Rounds all four corners by the same amount, as a UDim. UDim.new(0, 8) = 8 pixels. UDim.new(0.5, 0) = half of the shorter side (a circle or pill). Reading it gives you the top-left corner's value.",
+      "example": "local corner = Instance.new(\"UICorner\")\ncorner.CornerRadius = UDim.new(0, 8)\ncorner.Parent = script.Parent -- the Frame or button to round"
+    },
+    "UICorner.TopLeftRadius": {
+      "simple": "How round just the top-left corner is, as a UDim.",
+      "example": "local corner = script.Parent\ncorner.TopLeftRadius = UDim.new(0, 16)",
+      "gotcha": "Currently a beta feature. Setting CornerRadius overwrites it."
+    },
+    "UICorner.TopRightRadius": {
+      "simple": "How round just the top-right corner is, as a UDim.",
+      "example": "local corner = script.Parent\ncorner.TopRightRadius = UDim.new(0, 16)",
+      "gotcha": "Currently a beta feature. Setting CornerRadius overwrites it."
+    }
+  }
+}

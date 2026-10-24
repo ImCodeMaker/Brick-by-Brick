@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/animation/using.md",
+  "simple": "After you make or pick an animation, you need scripts to actually use it in your game. This page shows two things: playing an animation from a script (like a kick when a player presses a key) and swapping out the default character animations (like replacing the normal run with a Ninja Run). It also lists the asset IDs for Roblox's catalog animation packs, such as Ninja, Robot, Zombie, and Superhero. With this, your characters can move in their own style.",
+  "analogy": "An animation asset is like a dance video saved online. The `Animation` object is the link, `LoadAnimation` is pressing \"download\" onto your character, and `Play()` is pressing the play button.",
+  "keyPoints": [
+    "To play an animation on a character: get the `Animator` inside the `Humanoid`, create an `Animation` with an `AnimationId`, load it with `Animator:LoadAnimation()` to get an `AnimationTrack`, then call `:Play()`.",
+    "Rigs without a `Humanoid` need an `AnimationController` with an `Animator` inside it before you can load animations.",
+    "You can listen for named animation events on the track with `GetMarkerReachedSignal`.",
+    "To replace default animations, use a Script in ServerScriptService that changes the `AnimationId` values inside each character's `Animate` script, like `animateScript.run.RunAnim.AnimationId`.",
+    "The page's replace script first stops all playing tracks with `GetPlayingAnimationTracks()` and `:Stop(0)`, and runs on `CharacterAppearanceLoaded`.",
+    "Default animations you can replace include run, walk, jump, idle (two versions), fall, swim, swim idle, and climb.",
+    "When there are multiple versions (like two idles), `Weight` controls how often each plays: weight divided by the total weight.",
+    "Catalog pack IDs are listed on the page. For example, Ninja Run is `656118852` and Ninja Jump is `656117878`."
+  ],
+  "terms": {
+    "Animation": "An object that just holds the asset ID of an animation. It does not play by itself.",
+    "AnimationId": "The address of the animation, written as `rbxassetid://` plus the number, like `rbxassetid://656118852`.",
+    "Animator": "The object inside a `Humanoid` or `AnimationController` that loads and plays animations.",
+    "AnimationTrack": "What you get after loading an animation. It has `Play()`, `Stop()`, and signals you can use.",
+    "AnimationController": "Used instead of a `Humanoid` for rigs that are not characters, like a moving machine or a creature without a Humanoid.",
+    "Animate script": "The script Roblox puts inside every player character that plays default animations like walking and jumping.",
+    "weight": "How likely one version is to be picked. With Animation1 weight 5 and Animation2 weight 10, the total is 15, so Animation1 plays 5/15 = one third of the time and Animation2 two thirds.",
+    "catalog": "Roblox's shop of avatar items, including animation packs.",
+    "comment out": "Putting `--` in front of a line so it does not run. Removing `--` is called uncommenting."
+  },
+  "example": {
+    "title": "Kick when you press F",
+    "place": "LocalScript in StarterCharacterScripts",
+    "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal animator = humanoid:WaitForChild(\"Animator\")\n\n-- The Animation object holds the asset ID\nlocal kickAnimation = Instance.new(\"Animation\")\nkickAnimation.AnimationId = \"rbxassetid://2515090838\"\n\n-- Load once so we get a reusable AnimationTrack\nlocal kickTrack = animator:LoadAnimation(kickAnimation)\n\nUserInputService.InputBegan:Connect(function(input, gameProcessed)\n\t-- Ignore keys typed into chat or text boxes\n\tif gameProcessed then\n\t\treturn\n\tend\n\tif input.KeyCode == Enum.KeyCode.F then\n\t\tkickTrack:Play()\n\tend\nend)",
+    "explain": [
+      "The script sits in the character, so `script.Parent` is the character.",
+      "We wait for the `Humanoid` and its `Animator`.",
+      "We make an `Animation` and give it the kick's asset ID from the page.",
+      "`LoadAnimation` gives us `kickTrack`. We load it once at the start, not on every key press.",
+      "When the player presses F (and is not typing in chat), we call `kickTrack:Play()`."
+    ]
+  },
+  "watchOut": [
+    "Calling `LoadAnimation` on the `Humanoid` instead of the `Animator`. Use `humanoid:WaitForChild(\"Animator\")` and load on that.",
+    "Forgetting `rbxassetid://` in front of the ID number.",
+    "Using an animation you do not own or that is not shared with your game or group. It will not play.",
+    "Custom replacements for default animations need the final keyframe named `End` when you publish them.",
+    "Animations with low priority can be hidden by default ones. Set a higher priority (like Action) in the Animation Editor for things like attacks."
+  ]
+}

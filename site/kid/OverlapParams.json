@@ -1,0 +1,95 @@
+{
+  "name": "OverlapParams",
+  "simple": "OverlapParams is a settings box for the \"what parts are inside this area?\" functions, like workspace:GetPartBoundsInRadius, GetPartBoundsInBox, and GetPartsInPart. It tells them which parts to skip, which parts are allowed, and the most parts to return.",
+  "analogy": "It is like the rules for a game of tag inside a circle drawn on the ground: \"count everyone inside the circle, but not the person who is It, and stop after 10 people\".",
+  "whenToUse": [
+    "Finding everything inside a bomb's blast radius, but not the bomb itself",
+    "Checking which players are standing in a zone",
+    "Limiting how many parts a check returns with MaxParts",
+    "Only checking parts inside one folder"
+  ],
+  "where": "Works in any script on server or client. Make one with OverlapParams.new() (no arguments), set its properties, then pass it as the last argument to GetPartBoundsInRadius, GetPartBoundsInBox, or GetPartsInPart. You can reuse it.",
+  "terms": {
+    "filter": "A list of things the ray should skip (exclude) or the only things it may hit (include). Usually you exclude your own character so you do not hit yourself.",
+    "descendant": "Anything inside something else, at any depth: its children, their children, and so on. Excluding a character also excludes its arms, legs, hats, and so on.",
+    "collision group": "A named team of parts that you set up so some groups pass through each other. Queries can pretend to be in one of these groups.",
+    "CanQuery": "A part property. When false, raycasts and other spatial queries skip that part.",
+    "CanCollide": "A part property. When false, players and other parts can walk or fall through it.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "overlap": "When two things take up some of the same space, like a ball half inside a box.",
+    "bounding box": "The smallest invisible box that fits around a part. \"Bounds\" functions check these boxes, which is fast but not exact for round or rotated shapes.",
+    "exclude": "Skip these things.",
+    "include": "ONLY these things can be found.",
+    "array": "A list in Lua, written with curly braces like {partA, partB}."
+  },
+  "examples": [
+    {
+      "title": "Explosion that finds everything nearby",
+      "place": "Script in ServerScriptService",
+      "code": "local bomb = Instance.new(\"Part\")\nbomb.Shape = Enum.PartType.Ball\nbomb.Anchored = true\nbomb.Position = Vector3.new(0, 3, 0)\nbomb.Parent = workspace\n\nlocal params = OverlapParams.new()\nparams.ExcludeInstances = { bomb } -- don't find the bomb itself\nparams.MaxParts = 50                -- stop after 50 parts\n\ntask.wait(3) -- countdown\n\n-- Find parts within 10 studs of the bomb\nlocal parts = workspace:GetPartBoundsInRadius(bomb.Position, 10, params)\nfor _, part in parts do\n\tprint(\"Caught in the blast:\", part:GetFullName())\nend\nbomb:Destroy()",
+      "explain": [
+        "We make a ball-shaped bomb and an OverlapParams.",
+        "ExcludeInstances skips the bomb so it does not find itself.",
+        "MaxParts = 50 means the list will never have more than 50 parts.",
+        "GetPartBoundsInRadius gives a list of every part whose box touches a 10-stud ball around the bomb.",
+        "We print each part's full name, then remove the bomb."
+      ]
+    }
+  ],
+  "gotchas": [
+    "IncludeInstances = {} (empty) finds nothing. Leave it nil to allow everything.",
+    "If something is in both lists, exclude wins.",
+    "MaxParts 0 means no limit, not zero parts.",
+    "Older code uses FilterDescendantsInstances and FilterType. New code should use ExcludeInstances and IncludeInstances."
+  ],
+  "members": {
+    "OverlapParams.new": {
+      "simple": "Makes a blank OverlapParams with no rules. It takes no arguments; set its properties afterwards.",
+      "example": "local params = OverlapParams.new()\nparams.MaxParts = 10"
+    },
+    "OverlapParams.ExcludeInstances": {
+      "simple": "A list of things to skip, along with everything inside them.",
+      "example": "local params = OverlapParams.new()\nparams.ExcludeInstances = { workspace:WaitForChild(\"Baseplate\") } -- ignore the floor"
+    },
+    "OverlapParams.IncludeInstances": {
+      "simple": "A list of the ONLY things that can be found (plus everything inside them). nil allows everything; an empty list {} allows nothing.",
+      "example": "local params = OverlapParams.new()\nparams.IncludeInstances = { workspace:WaitForChild(\"Coins\") } -- only find coins",
+      "gotcha": "nil and {} are opposites: nil = everything, {} = nothing."
+    },
+    "OverlapParams.MaxParts": {
+      "simple": "The most parts the check will return. 0 (the default) means no limit.",
+      "example": "local params = OverlapParams.new()\nparams.MaxParts = 1 -- I only need to know if ANY part is there\nlocal parts = workspace:GetPartBoundsInRadius(Vector3.new(0, 5, 0), 4, params)\nprint(#parts > 0)"
+    },
+    "OverlapParams.CollisionGroup": {
+      "simple": "The name of a collision group the check pretends to belong to. Parts in groups set to NOT collide with it are skipped. If not set, it uses \"Default\".",
+      "example": "local params = OverlapParams.new()\nparams.CollisionGroup = \"Players\" -- this group must exist in your game"
+    },
+    "OverlapParams.Tolerance": {
+      "simple": "Makes the checked area very slightly bigger so parts that are just barely touching still count. It can only be between 0 and 0.05 studs.",
+      "example": "local params = OverlapParams.new()\nparams.Tolerance = 0.05 -- the biggest allowed"
+    },
+    "OverlapParams.RespectCanCollide": {
+      "simple": "If true, a part is found or skipped based on its CanCollide setting instead of CanQuery. So walk-through parts (CanCollide off) are skipped.",
+      "example": "local params = OverlapParams.new()\nparams.RespectCanCollide = true"
+    },
+    "OverlapParams.BruteForceAllSlow": {
+      "simple": "If true, ignores all the usual part settings and checks every part the slow way. Only for testing, never in a real game.",
+      "example": "local params = OverlapParams.new()\nparams.BruteForceAllSlow = true -- testing only!"
+    },
+    "OverlapParams.FilterDescendantsInstances": {
+      "simple": "The older way to filter: a list used as a skip list or an only-these list depending on FilterType. New code should use ExcludeInstances or IncludeInstances.",
+      "example": "local params = OverlapParams.new()\nparams.FilterType = Enum.RaycastFilterType.Exclude\nparams.FilterDescendantsInstances = { workspace:WaitForChild(\"Baseplate\") }",
+      "gotcha": "Replaced by ExcludeInstances and IncludeInstances for new work."
+    },
+    "OverlapParams.FilterType": {
+      "simple": "Says whether FilterDescendantsInstances is a skip list (Enum.RaycastFilterType.Exclude) or an only-these list (Enum.RaycastFilterType.Include). Part of the older filter system.",
+      "example": "local params = OverlapParams.new()\nparams.FilterType = Enum.RaycastFilterType.Include\nparams.FilterDescendantsInstances = { workspace:WaitForChild(\"Coins\") }",
+      "gotcha": "New code should use ExcludeInstances or IncludeInstances."
+    },
+    "OverlapParams:AddToFilter": {
+      "simple": "Adds one thing, or a list of things, to FilterDescendantsInstances without wiping what is already there. Part of the older filter system.",
+      "example": "local params = OverlapParams.new()\nparams.FilterType = Enum.RaycastFilterType.Exclude\nparams:AddToFilter(workspace:WaitForChild(\"Baseplate\"))",
+      "gotcha": "New code should use ExcludeInstances or IncludeInstances."
+    }
+  }
+}

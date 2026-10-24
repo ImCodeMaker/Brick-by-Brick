@@ -1,0 +1,36 @@
+{
+  "path": "content/en-us/projects/groups.md",
+  "simple": "A Roblox group is a team account that lets several creators work on the same games, share assets, split the money the games earn, and all get credit. This page explains how to create a group, how roles and permissions decide what each member can do, how to invite and remove members, how to pay members, and how to protect your work. Setting this up carefully matters, because Roblox cannot step in to settle arguments inside a group.",
+  "analogy": "A group is like a school club. The club has officers (roles) such as president, treasurer, and member. Each officer has certain jobs they are allowed to do (permissions), and the treasurer decides how the money from the bake sale gets shared.",
+  "keyPoints": [
+    "Creating a group costs 100 Robux. On the Creator Dashboard, open the account switcher in the top-left, click the plus (+) button, add a logo and name, and click Purchase.",
+    "Members get one or more roles, and each role has permissions, such as playing unreleased games, editing games, publishing games, or managing money.",
+    "Roles are listed from highest to lowest. Some permissions only let you manage people whose highest role is below yours.",
+    "Click Save after changing a role's permissions, or nothing changes. Some powerful permissions require you to have two-step verification turned on.",
+    "Invite members from the Members page, assign or remove roles with the plus and minus buttons, and kick members from the three-dot menu.",
+    "Under Finances > Payouts, you can send one-time Robux payments or set recurring percentage splits.",
+    "Example split: a game earns 1000 Robux, split 40%, 30%, 10%. Members get 400, 300, and 100. The leftover 200 goes to the group split of 20%, 20%, 10%, giving 40, 40, and 20 more, and 100 stays in the group.",
+    "Members who can edit all games can turn on Place Copying, so check roles carefully and keep copying off to protect your work."
+  ],
+  "terms": {
+    "group": "A shared account that can own games, assets, and Robux, with many members working together. Roblox also calls these communities.",
+    "role": "A rank or job title in the group, like Owner, Developer, or Tester.",
+    "permission": "Something a role is allowed to do, like edit games or send payouts.",
+    "hierarchy": "The order of roles from most powerful to least. A higher role can manage roles below it, but not above.",
+    "public vs private role": "A public role can be shown on the community page and in games. A private role is only shown to people who manage roles or who have that role.",
+    "two-step verification (2FA)": "An extra login check, like a code, on top of your password.",
+    "payout": "Sending Robux from the group to a member.",
+    "recurring payout": "An automatic percentage of earnings sent to members every time the game earns, instead of one manual payment.",
+    "split": "Dividing earnings by percentages. 40% of 1000 Robux is 400 Robux.",
+    "remainder": "What is left after the splits. If members get 40% + 30% + 10% = 80%, the remainder is 20%.",
+    "CSV": "A simple spreadsheet file. For bulk payouts, it has columns `userId` and `payoutInRobux`.",
+    "audit log": "A history list of changes made in the group, so owners can see who did what.",
+    "intellectual property": "Your original creations, like your game's scripts, models, and art, which belong to you or the group."
+  },
+  "watchOut": [
+    "Giving new members powerful roles like publishing or managing revenue right away. Start with less and add more once you trust them.",
+    "Forgetting to click Save after changing permissions.",
+    "Expecting Roblox support to fix a fight in your group. Roblox cannot settle group disagreements, so agree on rules and money splits early.",
+    "Changing split percentages and expecting old private server subscriptions to change too. They keep the split from when they were bought."
+  ]
+}

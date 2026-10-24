@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/production/publishing/publish-games-and-places.md",
+  "simple": "This page shows how to start a new game in Studio, save it online (publish), add more places to it, and finally open it up to other players (release). Publishing and releasing are two different steps: publishing saves your game to Roblox, but only you and your team can play it. Releasing lets the public in, and Roblox has safety rules about who can release to which ages. Knowing these steps helps you share your game with friends first and the whole world later.",
+  "analogy": "Publishing is like saving your school project to the class drive where only you and your teacher can see it. Releasing is like hanging it on the hallway wall, and the school has rules about which hallway it can go in depending on what is in it.",
+  "keyPoints": [
+    "To create a game, open Studio and pick a template such as Baseplate, Platformer, or Racing. You start with one place called the start place, where every player first spawns.",
+    "To publish for the first time, go to File > Publish, add an icon, thumbnail, name, genre, and description, then click Save. Your game is now stored online and linked to your account.",
+    "Give your game a clear name and a description whose first sentence says what the game is. Repeating words like OBBY OBBY OBBY or stuffing in unrelated game names can get your game pushed down in search.",
+    "To add another place, open or make a place, choose File > Publish As, pick your game, and choose Add as a new place.",
+    "To change the start place, open the new place from the Creator Dashboard, use File > Publish As (not Publish), and overwrite the current start place.",
+    "Before releasing, you can invite up to 10 similar-aged friends as early testers with File > Invite early testers. They see a preview watermark, and safety and reporting tools still work.",
+    "To release, use File > Publish again and answer the content maturity questions. A game with no age-restricted content first gets a Content May Vary label and is shown to age-checked players 16 and up.",
+    "Reaching all ages, including younger kids, needs more: account verification, 2-step verification, a passed review, a full questionnaire, and either a Plus or Premium subscription for 2 months in a row or a refundable fee."
+  ],
+  "terms": {
+    "publish": "Saving your game to Roblox's servers so it is linked to your account and you can open it from any computer. It does not make the game public by itself.",
+    "release": "Opening your published game so other players (not only you and your team) can join it.",
+    "place": "One map or level of a game. A game can have a dungeon place, a desert place, and an island place, and players teleport between them.",
+    "start place": "The place every player loads into first when they join your game.",
+    "template": "A ready-made starting project, like Baseplate (a flat floor and a spawn point), so you do not start from nothing.",
+    "UniverseID": "The unique ID number Roblox gives your whole game when you publish it. Each place inside also has its own ID.",
+    "metadata": "Information about your game, like its name, genre, and description, that helps players and Roblox find it.",
+    "Publish As": "A menu option that lets you save the place you have open into a different game or over a different place, instead of over itself.",
+    "overwrite": "Replace something with a new version. The old version is no longer the current one.",
+    "early testers": "Up to 10 friends you invite to try your game before it is released, so you can get feedback.",
+    "content maturity label": "A tag like Minimal, Mild, or Moderate that tells players and parents what kind of content is in the game, based on a questionnaire you fill out.",
+    "age check": "A way Roblox confirms your age, such as a face age estimate or a government ID.",
+    "2FA": "Two-step verification. Besides your password, you also confirm a code, so it is harder for someone to steal your account.",
+    "refundable fee": "Robux you pay up front and can get back later if rules are met. For example, the 1,000 Robux publishing fee comes back if your game keeps 25 highly engaged players for 60 days without being moderated.",
+    "target audience": "Which players are allowed to join, such as only testers, only friends, or everyone."
+  },
+  "watchOut": [
+    "When changing the start place, clicking Publish instead of Publish As just saves the place over itself. Use Publish As and pick the current start place to overwrite.",
+    "Expecting your friends to join right after you publish. A newly published game is private until you invite early testers or release it.",
+    "Stuffing your description with popular game names to get clicks. Roblox treats this as spam and can demote your game.",
+    "Renaming your game often. Players who remember the old name will have a harder time finding it.",
+    "You can only release up to 5 brand-new games per day, so plan ahead if you have many."
+  ]
+}

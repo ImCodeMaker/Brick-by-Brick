@@ -1,0 +1,29 @@
+{
+  "path": "content/en-us/sound/index.md",
+  "simple": "This page introduces the older way to add sound in Roblox, using the `Sound` object. Roblox now has a newer set of audio objects that can do more, but `Sound` still shows up in lots of games and tutorials, so it helps to know it. Where you put a `Sound` in the Explorer decides whether players hear it everywhere or only near a spot. You can also group sounds together and add effects like echo or muffling.",
+  "analogy": "A `Sound` inside a part is like a radio sitting on a table: you hear it louder as you walk up to it. A `Sound` in SoundService is like music in your headphones: the same wherever you go.",
+  "keyPoints": [
+    "This is the legacy (older) sound system; the newer audio objects are recommended for new work.",
+    "Each audio file has an ID you put into a `Sound` object's `SoundId` to choose what it plays.",
+    "A sound can play automatically when the game starts, or a script can start it.",
+    "Put a `Sound` inside a part or `Attachment` to make it positional, so players only hear it nearby.",
+    "Put a `Sound` directly in Workspace or SoundService to make it background audio heard everywhere.",
+    "A `SoundGroup` works like a mixer that controls the volume and effects of many sounds at once.",
+    "Dynamic effects like `EqualizerSoundEffect`, `CompressorSoundEffect`, and `ReverbSoundEffect` change how a sound or group sounds."
+  ],
+  "terms": {
+    "legacy": "An older feature that still works but has a newer replacement.",
+    "audio asset": "A sound file uploaded to Roblox, with its own ID number.",
+    "runtime": "When the game is actually running and being played.",
+    "positional audio": "Sound that comes from a spot in the world and gets quieter as you move away from it.",
+    "background audio": "Sound that is the same volume no matter where you stand, like a soundtrack.",
+    "parent": "The object something sits inside in the Explorer. If a `Sound` is inside a part, the part is its parent.",
+    "audio mixer": "A tool that lets you adjust the volume of many sounds together, like sliders on a DJ board.",
+    "dynamic effect": "An object that changes how a sound comes out, like adding echo or muffling it."
+  },
+  "watchOut": [
+    "If you want everyone to hear music everywhere, do not put the `Sound` inside a part. Put it in SoundService or Workspace.",
+    "If a sound seems to play from nowhere, check its parent; a `Sound` in Workspace plays for the whole game.",
+    "For brand-new projects, try the newer audio objects first, since `Sound` is the older system."
+  ]
+}

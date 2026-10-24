@@ -1,0 +1,47 @@
+{
+  "path": "content/en-us/workspace/index.md",
+  "simple": "The Workspace is the 3D world of your game. Anything you put inside it, like parts, meshes, models and terrain, can be seen and can be affected by physics. If something is not in the Workspace, players will not see it in the world. Knowing this is the first step to building and scripting anything players can touch.",
+  "analogy": "The Workspace is the stage in a theater. Props and actors on the stage are seen by the audience. Things waiting backstage (like in ReplicatedStorage or ServerStorage) are real, but nobody sees them until you bring them onto the stage.",
+  "keyPoints": [
+    "The Workspace holds every object you want Roblox to draw in the 3D world.",
+    "Parts are the basic building blocks. They can be blocks, spheres, cylinders, wedges or corner wedges, and a TrussPart is a part characters can climb like a ladder.",
+    "Parts are physically simulated by default, which means gravity and collisions affect them unless they are anchored.",
+    "Meshes (MeshPart) are detailed 3D shapes usually made in programs like Blender or Maya and then imported into Studio.",
+    "Terrain lets you sculpt big natural landscapes like mountains, water, hills and deserts with the Terrain Editor.",
+    "Models are containers that group parts and other objects together, like one whole car or one character.",
+    "Attachments mark points on parts where effects, UI like BillboardGuis, or physics constraints connect.",
+    "In a script you can reach the Workspace three ways: `game:GetService(\"Workspace\")`, `workspace`, or `game.Workspace`."
+  ],
+  "terms": {
+    "Workspace": "The service that holds the 3D world. If a part's Parent is the Workspace (or something inside it), it shows up in the game.",
+    "container": "An object whose job is to hold other objects inside it, like a folder.",
+    "service": "One of Roblox's big built-in objects with a special job, such as Workspace, Players or Lighting. You get them with `game:GetService(\"Name\")`.",
+    "render": "Draw on the screen. A rendered part is one players can see.",
+    "primitive": "One of the simplest basic shapes, like a block or sphere, that bigger builds are made from.",
+    "BasePart": "The family name for all part types, including Part and MeshPart.",
+    "mesh": "A 3D shape made of many points (vertices), lines (edges) and flat faces. A treasure chest mesh might have thousands of faces.",
+    "rig": "A hidden skeleton inside a model or mesh that lets it bend and be animated.",
+    "texture": "An image wrapped onto a 3D object to give it color and detail.",
+    "attachment": "An invisible point stuck to a part, used as a connection spot for effects and constraints.",
+    "constraint": "A physics connection between parts, like a hinge, spring or rope.",
+    "primary part": "The one part in a model you choose as its main part, used as the model's handle when moving it.",
+    "assembly": "Parts joined so that physics treats them as one solid object that moves together.",
+    "runtime": "While the game is actually running, not while you are editing."
+  },
+  "example": {
+    "title": "Make a glowing ball appear in the world",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\n-- Create a new ball-shaped part\nlocal ball = Instance.new(\"Part\")\nball.Shape = Enum.PartType.Ball\nball.Size = Vector3.new(4, 4, 4)          -- 4 studs wide\nball.Position = Vector3.new(0, 20, 0)     -- 20 studs above the world center\nball.Material = Enum.Material.Neon\nball.BrickColor = BrickColor.new(\"Bright yellow\")\n\n-- Nothing shows up until the part is inside the Workspace\nball.Parent = Workspace\n\n-- The ball is not anchored, so gravity pulls it down\ntask.wait(3)\nprint(\"The ball is now at height\", ball.Position.Y)",
+    "explain": [
+      "`Instance.new(\"Part\")` creates a part, but at first it lives nowhere, so nobody can see it.",
+      "We make it a ball, 4 studs wide, glowing yellow, and place it 20 studs up.",
+      "Setting `ball.Parent = Workspace` puts it into the 3D world. That is the moment players see it.",
+      "Because new parts are not anchored, gravity makes the ball fall. After 3 seconds we print its height, which will be much lower than 20 once it lands."
+    ]
+  },
+  "watchOut": [
+    "Forgetting to set `Parent` to the Workspace. Your part exists in memory but never appears in the game.",
+    "Building a floor or wall and forgetting to anchor it. Unanchored parts fall or get knocked around, so set `Anchored = true` for things that should stay still.",
+    "Putting things you want hidden in the Workspace. Items that should wait offstage belong in ReplicatedStorage or ServerStorage until you need them."
+  ]
+}

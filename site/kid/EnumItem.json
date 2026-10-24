@@ -1,0 +1,47 @@
+{
+  "name": "EnumItem",
+  "simple": "An EnumItem is one option from an Enum list, like Enum.Material.Wood or Enum.KeyCode.E. You use them to set properties and to check what something is. Each one has a Name, a number Value, and knows which Enum it belongs to.",
+  "analogy": "If an Enum is a restaurant menu, an EnumItem is one dish on it. The dish has a name (\"Pizza\"), a menu number (#12), and you know which menu it came from.",
+  "whenToUse": [
+    "Setting properties like part.Material = Enum.Material.Neon",
+    "Checking which key was pressed, like input.KeyCode == Enum.KeyCode.E",
+    "Saving an option as text (Name) or a number (Value)"
+  ],
+  "where": "Available everywhere. Get one with Enum.<EnumName>.<ItemName>, like Enum.Material.Wood.",
+  "terms": {
+    "enum": "A fixed list of named options, like Enum.Material.",
+    "EnumItem": "One option inside an enum.",
+    "integer": "A whole number with no decimal part."
+  },
+  "examples": [
+    {
+      "title": "Do something when the E key is pressed",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nUserInputService.InputBegan:Connect(function(input, gameProcessed)\n\tif gameProcessed then\n\t\treturn -- the player was typing in chat, ignore\n\tend\n\tif input.KeyCode == Enum.KeyCode.E then\n\t\tprint(\"You pressed E!\")\n\t\tprint(input.KeyCode.Name, input.KeyCode.Value) --> E 101\n\tend\nend)",
+      "explain": [
+        "InputBegan fires whenever the player presses a key or button.",
+        "gameProcessed is true when Roblox already used the key, like typing in chat.",
+        "input.KeyCode is an EnumItem. We compare it with Enum.KeyCode.E.",
+        "The EnumItem's Name is \"E\" and its Value is 101."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Compare EnumItems directly (input.KeyCode == Enum.KeyCode.E), not their names as strings.",
+    "EnumItems from different enums are never equal, even if they share a name."
+  ],
+  "members": {
+    "EnumItem.Name": {
+      "simple": "The name of this option as text, like \"Wood\". Handy for printing or saving.",
+      "example": "print(Enum.Material.Wood.Name) --> Wood"
+    },
+    "EnumItem.Value": {
+      "simple": "The whole number that belongs to this option. Handy for saving, and Enum:FromValue can turn it back into the EnumItem.",
+      "example": "print(Enum.Material.Plastic.Value) --> 256\nprint(Enum.KeyCode.E.Value)        --> 101"
+    },
+    "EnumItem.EnumType": {
+      "simple": "The Enum list this option belongs to. Enum.Material.Wood.EnumType is Enum.Material.",
+      "example": "local item = Enum.Material.Wood\nprint(item.EnumType == Enum.Material) --> true"
+    }
+  }
+}

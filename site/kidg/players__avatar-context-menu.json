@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/players/avatar-context-menu.md",
+  "simple": "The Avatar Context Menu, or ACM, is a small menu that pops up when a player clicks on another player's character. It has buttons to send a friend request, chat privately, view their avatar, or wave. It is off by default, so you turn it on with a LocalScript. You can also add your own buttons, like Trade or Invite to Party, remove buttons, and change its colors and fonts.",
+  "analogy": "It is like tapping someone on the shoulder at a party and getting a quick list of things you can do: shake hands, chat, or swap phone numbers.",
+  "keyPoints": [
+    "Turn it on with `StarterGui:SetCore(\"AvatarContextMenuEnabled\", true)` in a LocalScript, ideally in `StarterPlayerScripts`.",
+    "It works best in games where clicking on other players does not already do something else.",
+    "Open it for a player with `SetCore(\"AvatarContextMenuTarget\", targetPlayer)` and close it by passing `nil`.",
+    "The default buttons are Friend, Chat, View, and Wave. Players can scroll to other nearby characters in a carousel, sorted by distance.",
+    "Add a button with `SetCore(\"AddAvatarContextMenuOption\", {\"Button Name\", bindableEvent})`. The event fires with the player who was clicked.",
+    "Remove a button with `SetCore(\"RemoveAvatarContextMenuOption\", ...)` using its name or an `Enum.AvatarContextMenuOption` value.",
+    "You cannot change the menu while it is open, so check that an action still makes sense when it runs.",
+    "Change the look with `SetCore(\"AvatarContextMenuTheme\", {...})` using settings like `BackgroundColor`, `ButtonFrameColor`, and `Font`."
+  ],
+  "terms": {
+    "context menu": "A small menu that shows options for the thing you clicked on.",
+    "SetCore": "A function on `StarterGui` that changes built-in Roblox features by name, like turning the ACM on.",
+    "BindableEvent": "An object that lets one script send a signal to code in the same place (client to client or server to server). Here it tells your code when your custom button is pressed.",
+    "carousel": "A row of choices you scroll through left and right, which loops back to the start.",
+    "theme": "A set of colors, fonts, and images that decide how something looks.",
+    "Transparency": "How see-through something is. `0` is solid, `0.5` is half see-through, and `1` is invisible.",
+    "Color3": "A color value. `Color3.fromRGB(0, 0, 200)` is a dark blue made from red 0, green 0, and blue 200 (out of 255).",
+    "programmatically": "Done by a script instead of by the player clicking."
+  },
+  "example": {
+    "title": "Turn on the ACM and add a custom button",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\nlocal StarterGui = game:GetService(\"StarterGui\")\n\nlocal player = Players.LocalPlayer\n\n-- SetCore can fail if Roblox's menus are not ready yet, so retry a few times\nlocal function setCoreSafe(name, value)\n\tfor attempt = 1, 10 do\n\t\tlocal ok = pcall(function()\n\t\t\tStarterGui:SetCore(name, value)\n\t\tend)\n\t\tif ok then\n\t\t\treturn true\n\t\tend\n\t\ttask.wait(1)\n\tend\n\treturn false\nend\n\n-- Turn on the Avatar Context Menu\nsetCoreSafe(\"AvatarContextMenuEnabled\", true)\n\n-- Make a custom \"High Five\" button\nlocal highFiveEvent = Instance.new(\"BindableEvent\")\nhighFiveEvent.Event:Connect(function(targetPlayer)\n\tprint(player.Name .. \" high-fived \" .. targetPlayer.Name)\nend)\n\nsetCoreSafe(\"AddAvatarContextMenuOption\", {\"High Five\", highFiveEvent})",
+    "explain": [
+      "`setCoreSafe` tries `SetCore` and waits 1 second between tries if Roblox is not ready yet.",
+      "The first call turns the ACM on, so clicking another character opens the menu.",
+      "We make a `BindableEvent` and connect a function that runs when the button is pressed. It receives the clicked player.",
+      "`AddAvatarContextMenuOption` adds a button named \"High Five\" that fires our event.",
+      "To make the high five affect the server, you would fire a RemoteEvent inside that function."
+    ]
+  },
+  "watchOut": [
+    "Trying to turn on the ACM from a server Script. It must be a LocalScript.",
+    "Turning on the ACM in a game where clicking players already does something, like attacking. The clicks will fight each other.",
+    "Assuming a custom action is still valid. If a Trade button is only for the market area, check both players are still there when it runs."
+  ]
+}

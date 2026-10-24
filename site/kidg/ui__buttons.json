@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/ui/buttons.md",
+  "simple": "Buttons are UI pieces that players can click or tap to make something happen, like opening a shop or jumping into a round. A `TextButton` shows words, and an `ImageButton` shows a picture that can change when you hover or press it. You can put buttons on the screen or on the side of a part. A script listens for the `Activated` event to know when the button was pressed.",
+  "analogy": "A button is like a doorbell: it does nothing until someone presses it, and then it rings whatever you wired it to.",
+  "keyPoints": [
+    "`TextButton` and `ImageButton` both fire the `Activated` event when clicked or tapped.",
+    "`SecondaryActivated` fires on right-click on a computer or a long press on a phone.",
+    "For on-screen buttons, add a `ScreenGui` to `StarterGui`, then add the button inside it.",
+    "For buttons on a part, add a `SurfaceGui` to the part, then add the button inside it; switch `Face` if you cannot see it.",
+    "`TextButton` uses `FontFace`, `Text`, `TextSize`, and `TextColor3` to change how its words look.",
+    "`ImageButton` has `Image`, `HoverImage`, and `PressedImage` so it can look different when hovered and pressed.",
+    "Buttons also have normal UI properties like `BackgroundColor3`, `Rotation`, and `Size`."
+  ],
+  "terms": {
+    "event": "A signal that something happened, like a button being clicked. You `:Connect` a function to run when it fires.",
+    "Activated": "The button's event for a normal click or tap.",
+    "SecondaryActivated": "The button's event for a right-click or long press.",
+    "hover": "When the mouse pointer rests on top of the button without clicking.",
+    "cross-platform": "Works on many kinds of devices, like computers, phones, and consoles.",
+    "HSV": "A way to describe color with hue (which color), saturation (how strong), and value (how bright), each from 0 to 1."
+  },
+  "example": {
+    "title": "Change a button's color on every click",
+    "place": "LocalScript inside a TextButton (inside a ScreenGui in StarterGui)",
+    "code": "local button = script.Parent\nlocal rng = Random.new()\n\nlocal function onButtonActivated()\n\t-- Pick a random hue from 0 to 1, with full color and brightness\n\tbutton.BackgroundColor3 = Color3.fromHSV(rng:NextNumber(), 1, 1)\nend\n\nbutton.Activated:Connect(onButtonActivated)",
+    "explain": [
+      "`script.Parent` is the button, because the script sits inside it.",
+      "We make a random number maker with `Random.new()`.",
+      "Our function sets the button's background to a random bright color.",
+      "We connect the function to `Activated`, so it runs on every click or tap."
+    ]
+  },
+  "watchOut": [
+    "Use `Activated`, not mouse-only events, so your button works on phones and consoles too.",
+    "Button scripts should be `LocalScript`s, since UI runs on the player's device.",
+    "If a button on a part will not respond, the `SurfaceGui` may need to be in `StarterGui` with its `Adornee` set to the part."
+  ]
+}

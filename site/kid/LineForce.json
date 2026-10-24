@@ -1,0 +1,67 @@
+{
+  "name": "LineForce",
+  "simple": "LineForce pushes or pulls a part along the straight line between two attachments. As the attachments move, the direction of the push follows them. A positive Magnitude pulls Attachment0 toward Attachment1, like a tractor beam; a negative one pushes it away.",
+  "analogy": "LineForce is like an invisible magnet string between two points. Wherever the target goes, the pull points straight at it.",
+  "whenToUse": [
+    "Magnets that pull objects closer",
+    "Tractor beams or homing pulls toward a point",
+    "Pushing things away from an explosion center or force field"
+  ],
+  "where": "Create with Instance.new(\"LineForce\") in a Script, set Attachment0 (the part that gets pushed) and Attachment1 (the target), and put it in workspace.",
+  "terms": {
+    "force": "A push or pull. In Roblox it is measured in Roblox force units (mass x studs per second per second). A bigger number is a harder push.",
+    "mass": "How much 'stuff' an object has, which decides how hard it is to push. A part's mass = its volume x its material density. A 4x1x2 Plastic part (volume 8, density 0.7) has mass 5.6.",
+    "gravity": "The pull that makes things fall. In Roblox it is `workspace.Gravity`, which is 196.2 studs per second per second by default.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "center of mass": "The balance point of an object. Pushing exactly through it moves the object without spinning it; pushing off to the side also makes it spin.",
+    "magnitude": "The length (size) of a vector, ignoring its direction. The magnitude of Vector3.new(3, 4, 0) is 5.",
+    "MaxForce": "A cap (upper limit) on how hard a constraint is allowed to push. It is a limit, not the amount it always pushes.",
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "inverse square law": "A rule where force gets much stronger as things get closer: half the distance means 4 times the force, a third of the distance means 9 times. Real magnets and gravity work roughly like this.",
+    "reaction force": "The 'push back'. If you push a wall, the wall pushes you back just as hard. With a reaction force, both parts get pulled toward each other."
+  },
+  "examples": [
+    {
+      "title": "Magnet that pulls a ball toward it",
+      "place": "Script in ServerScriptService",
+      "code": "local magnet = workspace:WaitForChild(\"Magnet\") -- anchored part\nlocal ball = workspace:WaitForChild(\"Ball\")     -- unanchored part\n\nlocal target = Instance.new(\"Attachment\")\ntarget.Parent = magnet\nlocal pulled = Instance.new(\"Attachment\")\npulled.Parent = ball\n\nlocal pull = Instance.new(\"LineForce\")\npull.Attachment0 = pulled   -- this part gets pulled\npull.Attachment1 = target   -- toward this point\npull.Magnitude = 2000       -- positive = pull closer\npull.InverseSquareLaw = true -- stronger when closer, like a real magnet\npull.MaxForce = 5000        -- never push harder than this\npull.ApplyAtCenterOfMass = true\npull.Parent = ball",
+      "explain": [
+        "Attachment0 is in the ball, so the ball is what moves. Attachment1 in the magnet is the target.",
+        "Magnitude 2000 is the strength. A positive number pulls the ball toward the magnet.",
+        "InverseSquareLaw makes the pull grow fast as the ball gets close.",
+        "MaxForce stops the pull from becoming gigantic when the ball is almost touching the magnet, which could make it fly off."
+      ]
+    }
+  ],
+  "gotchas": [
+    "With InverseSquareLaw on and no MaxForce, the force can become huge when the attachments get very close and fling parts away. Always set MaxForce.",
+    "MaxForce only does anything when InverseSquareLaw is true.",
+    "By default only the Attachment0 part is pushed. Turn on ReactionForceEnabled if both parts should feel it.",
+    "Remember gravity: to lift a part, Magnitude must beat its weight (mass x 196.2)."
+  ],
+  "members": {
+    "LineForce.ApplyAtCenterOfMass": {
+      "simple": "If true, the force pushes through the balance point of Attachment0's part (no spinning), and the line starts there. If false, it pushes at Attachment0 itself.",
+      "example": "workspace.Ball.LineForce.ApplyAtCenterOfMass = true"
+    },
+    "LineForce.InverseSquareLaw": {
+      "simple": "If true, the force gets much stronger as the two attachments get closer: at half the distance it is 4 times stronger. Great for magnets.",
+      "example": "local pull = workspace.Ball.LineForce\npull.InverseSquareLaw = true\npull.MaxForce = 5000 -- always add a cap with this on",
+      "gotcha": "Set MaxForce too, or parts can explode apart when they almost touch."
+    },
+    "LineForce.Magnitude": {
+      "simple": "How strong the push or pull is. Positive pulls Attachment0 toward Attachment1; negative pushes it away.",
+      "example": "local push = workspace.Ball.LineForce\npush.Magnitude = -3000 -- push the ball AWAY from the target"
+    },
+    "LineForce.MaxForce": {
+      "simple": "The most force allowed. Only used when InverseSquareLaw is true, to stop the force getting endlessly big when the attachments are very close.",
+      "example": "workspace.Ball.LineForce.MaxForce = 5000"
+    },
+    "LineForce.ReactionForceEnabled": {
+      "simple": "If true, the Attachment1 part gets pushed too, the same amount in the opposite direction, so both parts pull toward (or push away from) each other. If false (default), only Attachment0's part moves.",
+      "example": "-- Two unanchored balls that attract each other\nworkspace.BallA.LineForce.ReactionForceEnabled = true"
+    }
+  }
+}

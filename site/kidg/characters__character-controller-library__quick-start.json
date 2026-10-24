@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/characters/character-controller-library/quick-start.md",
+  "simple": "This page shows the fastest way to change how built-in moves feel with the Character Controller Library (CCL). Each built-in ability, like Running, Jumping, or Swimming, has settings called attributes, such as a speed multiplier. Controllers handle the physics, like how fast you speed up and turn on the ground. With one server script you can make players run twice as fast or feel more slippery.",
+  "analogy": "It is like the settings menu for a remote-control car. Abilities are the buttons for moves (drive, jump, swim), and their attributes and controllers are the dials for speed, grip, and turning.",
+  "keyPoints": [
+    "First turn on CCL: File > Beta Features, then Avatar Settings > Movement > Abilities > Character Controller Library.",
+    "Do not disable Running, or characters cannot move on the ground. Keep Getting Up on if Falling Down is on.",
+    "At runtime, each built-in ability is a `Configuration` in the character's `Abilities` folder. Get one with `AvatarAbilities.getAbilityConfigurationForCharacter()`.",
+    "Change an ability with attributes, for example `running:SetAttribute(\"SpeedMultiplier\", 2)` to double running speed.",
+    "Some attributes match old `Humanoid` properties, like Jumping's `JumpHeight` and Dead's `MaxHealth`.",
+    "A `ControllerManager` in the character has `BaseMoveSpeed` and `BaseTurnSpeed`. Child controllers like `GroundController` multiply those with `MoveSpeedFactor` and `TurnSpeedFactor`.",
+    "`GroundController.AccelerationTime` and `DecelerationTime` set how many seconds it takes to reach full speed or stop.",
+    "Run these changes from a Script in `ServerScriptService`, for each character when it spawns."
+  ],
+  "terms": {
+    "attribute": "A custom setting stored on an object, which you read with `GetAttribute` and change with `SetAttribute`.",
+    "Configuration": "A folder-like object that holds settings. In CCL, each ability's settings live in one.",
+    "multiplier": "A number you multiply by. A `SpeedMultiplier` of `2` makes the speed 2 times bigger, so 16 becomes 32.",
+    "controller": "An object that handles the physics of one kind of movement, like on the ground, in the air, climbing, or swimming.",
+    "ControllerManager": "The boss object that holds the base speeds and switches between controllers.",
+    "BaseMoveSpeed": "The starting walk speed every controller uses before its own `MoveSpeedFactor` is applied.",
+    "MoveSpeedFactor": "A controller's multiplier for `BaseMoveSpeed`. If base is 16 and the factor is 0.5, the speed is 8.",
+    "acceleration time": "Seconds it takes to go from standing still to full speed. `0.2` is a quick start.",
+    "torque": "A twisting force that turns something, used to rotate a swimming character.",
+    "runtime": "While the game is actually running, not while you are editing it."
+  },
+  "example": {
+    "title": "Make every character run twice as fast",
+    "place": "Script named AbilitiesScript in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\nlocal AvatarAbilities = require(\"@rbx/AvatarAbilities\")\n\n-- Keep checking until the ability shows up, or give up after some seconds\nlocal function waitForAbility(character, abilityName, timeout)\n\tlocal deadline = time() + timeout\n\twhile character.Parent and time() < deadline do\n\t\tlocal ability = AvatarAbilities.getAbilityConfigurationForCharacter(character, abilityName)\n\t\tif ability then\n\t\t\treturn ability\n\t\tend\n\t\ttask.wait()\n\tend\n\treturn nil\nend\n\nlocal function onCharacterAdded(character)\n\tlocal running = waitForAbility(character, \"Running\", 10)\n\tif running then\n\t\trunning:SetAttribute(\"SpeedMultiplier\", 2) -- double speed\n\tend\nend\n\nlocal function onPlayerAdded(player)\n\tif player.Character then\n\t\tonCharacterAdded(player.Character)\n\tend\n\tplayer.CharacterAdded:Connect(onCharacterAdded)\nend\n\nPlayers.PlayerAdded:Connect(onPlayerAdded)\nfor _, player in Players:GetPlayers() do\n\tonPlayerAdded(player)\nend",
+    "explain": [
+      "`waitForAbility` keeps looking for the `Running` ability every frame for up to 10 seconds, because it may not exist the instant a character spawns.",
+      "When found, `SetAttribute(\"SpeedMultiplier\", 2)` makes running twice as fast.",
+      "`onPlayerAdded` handles a character that already exists and every future respawn.",
+      "The loop at the end covers players who joined before the script started."
+    ]
+  },
+  "watchOut": [
+    "Trying this without turning on CCL first. There will be no `Abilities` folder to change.",
+    "Assuming every ability is there. Abilities you unchecked in Avatar Settings will not exist, so always check for `nil`.",
+    "Changing a `Humanoid` property and expecting the ability attribute to change the Humanoid back. The link is one-way, from the Humanoid property to the attribute.",
+    "Only changing the character once. Characters respawn as new models, so apply your change in `CharacterAdded`."
+  ]
+}

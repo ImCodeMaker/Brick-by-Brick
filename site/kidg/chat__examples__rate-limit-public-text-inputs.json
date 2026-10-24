@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/chat/examples/rate-limit-public-text-inputs.md",
+  "simple": "If players can type text that others will see, like notes on a bulletin board, you need a speed limit so it does not turn into a second chat. This example lets each player post only one note per minute. It also runs every note through Roblox's text filter before anyone else sees it. The server keeps track of when each player last posted.",
+  "analogy": "It is like a cookie jar rule: you can take one cookie, then you have to wait a full minute before taking another.",
+  "keyPoints": [
+    "Text boxes that others can read, like signs and boards, need a rate limit of at least 1 minute.",
+    "The server creates a `RemoteEvent` so clients can ask to post a note.",
+    "A table `lastPostTime` remembers when each player (by `UserId`) last posted.",
+    "If less than 60 seconds have passed, the server tells the player how many seconds are left and does not post.",
+    "All public text must go through Roblox's text filter before being shown to others.",
+    "When a player leaves, remove their entry from the table to keep it clean."
+  ],
+  "terms": {
+    "rate limit": "A rule for how often something can happen. Here: one note per 60 seconds per player.",
+    "cooldown": "The waiting time after an action before you can do it again. If you posted 20 seconds ago, your cooldown has 40 seconds left.",
+    "RemoteEvent": "A messenger that lets a client script and the server script send each other signals.",
+    "text filter": "Roblox's system that hides inappropriate words. Any text other players can see must go through it.",
+    "broadcast": "Sending something to everyone. `GetNonChatStringForBroadcastAsync` gets filtered text that is safe to show to all players.",
+    "UserId": "The unique number for each Roblox account. It never changes, even if the player changes their name."
+  },
+  "example": {
+    "title": "One filtered note per minute",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal TextService = game:GetService(\"TextService\")\n\nlocal postNoteEvent = Instance.new(\"RemoteEvent\")\npostNoteEvent.Name = \"PostNoteEvent\"\npostNoteEvent.Parent = ReplicatedStorage\n\nlocal COOLDOWN_TIME = 60 -- seconds\nlocal lastPostTime = {} -- UserId -> time of last post\n\npostNoteEvent.OnServerEvent:Connect(function(player, text)\n\tif typeof(text) ~= \"string\" or #text == 0 then\n\t\treturn\n\tend\n\n\t-- Check the cooldown\n\tlocal now = os.clock()\n\tlocal last = lastPostTime[player.UserId]\n\tif last and now - last < COOLDOWN_TIME then\n\t\tlocal secondsLeft = math.ceil(COOLDOWN_TIME - (now - last))\n\t\tpostNoteEvent:FireClient(player, \"cooldown\", secondsLeft)\n\t\treturn\n\tend\n\n\t-- Filter the text before anyone else sees it\n\tlocal success, filtered = pcall(function()\n\t\tlocal result = TextService:FilterStringAsync(text, player.UserId)\n\t\treturn result:GetNonChatStringForBroadcastAsync()\n\tend)\n\tif not success then\n\t\twarn(\"Error filtering text!\")\n\t\treturn\n\tend\n\n\tlastPostTime[player.UserId] = now\n\tpostNoteEvent:FireAllClients(\"newNote\", filtered)\nend)\n\n-- Forget players who leave\nPlayers.PlayerRemoving:Connect(function(player)\n\tlastPostTime[player.UserId] = nil\nend)",
+    "explain": [
+      "The server makes a `RemoteEvent` in ReplicatedStorage so clients can send notes.",
+      "When a note arrives, we first make sure it is real, non-empty text.",
+      "We compare the current time to the player's last post time. If under 60 seconds, we send back the seconds left and stop.",
+      "We filter the text with `TextService:FilterStringAsync` and get the version safe for everyone.",
+      "We save the new post time and send the filtered note to all players.",
+      "When a player leaves, we remove their saved time."
+    ]
+  },
+  "watchOut": [
+    "Doing the cooldown check only on the client. Exploiters can skip client code, so always check on the server.",
+    "Showing text to others without filtering it. This breaks Roblox rules.",
+    "Updating `lastPostTime` before filtering succeeds. If filtering fails, the player would be stuck waiting for nothing."
+  ]
+}

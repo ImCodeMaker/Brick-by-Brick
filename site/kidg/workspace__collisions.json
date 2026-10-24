@@ -1,0 +1,51 @@
+{
+  "path": "content/en-us/workspace/collisions.md",
+  "simple": "A collision is when two objects bump into each other. This page shows how to run code when parts touch or stop touching, and how to choose which things can pass through each other. For example, you can let players walk through each other or make bullets fly through teammates. It also explains how complicated shapes like meshes decide their bumping shape.",
+  "analogy": "Collision groups are like teams in dodgeball: you decide which teams can hit each other. Players on the same team pass right through, but other teams bounce off.",
+  "keyPoints": [
+    "`Touched` fires when a part touches another part or terrain, and gives you the other part. `TouchEnded` fires when they stop touching.",
+    "`CanTouch` must be true for those events to fire. `CanCollide` only decides if parts physically bump; touch events still work with `CanCollide` off.",
+    "Touch events only fire from physics movement, not when a script teleports a part by setting `Position` or `CFrame`.",
+    "`Touched` can fire many times in a row, so use a debounce (cooldown) to stop your code running too often.",
+    "`BindToCollisionSummaries()` gives detailed hit info every frame, like where the hit happened and how fast.",
+    "Collision groups let whole groups of parts pass through each other. Register groups with `RegisterCollisionGroup`, set rules with `CollisionGroupSetCollidable`, and assign parts with the `CollisionGroup` property.",
+    "To stop just two parts from colliding, use a `NoCollisionConstraint` instead of groups.",
+    "Models do not have `Touched` events. Connect to each part inside the model instead."
+  ],
+  "terms": {
+    "collision": "Two objects coming into contact in the 3D world.",
+    "event": "A signal that fires when something happens, like a part being touched. You connect a function to run when it fires.",
+    "CanTouch": "A part property. If false, `Touched` and `TouchEnded` will never fire for it.",
+    "CanCollide": "A part property. If false, other things pass right through it, but it can still detect touches.",
+    "debounce / cooldown": "A short wait that stops code from running again too soon. With a 1-second cooldown, a coin can only be collected once per second.",
+    "attribute": "A custom value you store on an object, like a 'Touched' true/false flag.",
+    "collision group": "A named group of parts. You choose which groups can bump into which.",
+    "register": "To officially create a collision group name so it can be used.",
+    "race condition": "A bug caused by two scripts running in an unknown order, like one trying to use a group before another script has created it.",
+    "network owner": "The computer (the server or one player's device) that does the physics math for a part.",
+    "normal": "An arrow that points straight out from a surface. For a floor, the normal points straight up.",
+    "relative velocity": "How fast one part moves compared to the other. If a ball moves at 30 and a car chases it at 20 the same way, their relative speed is 10.",
+    "dot product": "A math trick that measures how much one direction lines up with another. Here it finds the head-on part of the hit speed.",
+    "CollisionFidelity": "How closely a mesh's invisible bump shape matches how it looks. Box is the simplest and fastest; PreciseConvexDecomposition is the most exact and slowest.",
+    "convex hull": "The shape you would get by shrink-wrapping an object. Dents and holes get filled in.",
+    "voxel": "A small 3D block of terrain, like one cube of grass or water."
+  },
+  "example": {
+    "title": "Let players walk through each other",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\n-- Create one group for all characters, and make it not collide with itself\nworkspace:RegisterCollisionGroup(\"Characters\")\nworkspace:CollisionGroupSetCollidable(\"Characters\", \"Characters\", false)\n\nlocal function onDescendantAdded(descendant)\n\tif descendant:IsA(\"BasePart\") then\n\t\tdescendant.CollisionGroup = \"Characters\"\n\tend\nend\n\nlocal function onCharacterAdded(character)\n\t-- Handle parts that already exist and any added later\n\tfor _, descendant in character:GetDescendants() do\n\t\tonDescendantAdded(descendant)\n\tend\n\tcharacter.DescendantAdded:Connect(onDescendantAdded)\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(onCharacterAdded)\nend)",
+    "explain": [
+      "We register a collision group called Characters.",
+      "`CollisionGroupSetCollidable(\"Characters\", \"Characters\", false)` means parts in this group will not bump into each other.",
+      "Whenever a character spawns, we put every part of it into the Characters group.",
+      "We also listen for new parts added later (like accessories) and put those in the group too.",
+      "Now players pass through each other but still stand on floors and hit walls."
+    ]
+  },
+  "watchOut": [
+    "Turning off `CanCollide` does not stop `Touched`. To stop touch events, turn off `CanTouch`.",
+    "Without a debounce, a `Touched` handler can run many times from one bump, giving out ten coins instead of one.",
+    "Register all collision groups in one script. Spreading it across scripts can cause a group to be used before it exists.",
+    "Parts teleported with `CFrame` will not trigger `Touched`. Use a check like distance or `GetPartsInPart` if you move things that way."
+  ]
+}

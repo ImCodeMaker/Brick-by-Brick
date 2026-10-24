@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/scripting/security/server-side-detection.md",
+  "simple": "Even after you check every request, some players may do things that are allowed but look very suspicious, like earning 10,000 coins in one second. This page shows how the server can notice that kind of behavior and how to respond fairly. The goal is to stop the harm first and only punish when you are quite sure, so you do not ban honest players by mistake.",
+  "analogy": "A good referee does not throw a player out for one odd moment. They watch for a pattern: one strange move is a note in the book, but several different strange moves together mean a red card.",
+  "keyPoints": [
+    "Detection and punishment should happen on the server, never based on client-side checks.",
+    "Stop the harm first. For a speed cheater, just move them back to their last good spot instead of kicking right away.",
+    "Prefer actions you can undo, like temporary bans, since detection can be wrong.",
+    "Heuristics are rules of thumb: fastest possible completion time, maximum rate of earning, and timing between actions that is too perfect to be human.",
+    "Treat each heuristic as a clue, not proof. Add to a suspicion score and only act when several different clues add up.",
+    "A honeypot is a fake RemoteEvent your real scripts never use. If anyone fires it, they are almost certainly cheating.",
+    "Use a consequence ladder: silent logging, then quietly blocking the effect, then limiting features, then kicks or bans.",
+    "Wait before visible punishments so cheaters cannot easily tell what got them caught. For repeat offenders, `Players:BanAsync()` is stronger than kicks."
+  ],
+  "terms": {
+    "detection": "Noticing that a player might be cheating.",
+    "consequence": "What happens to a player who is caught, like a kick or a ban.",
+    "heuristic": "A rule of thumb that flags things that are possible but very unlikely, like finishing a 30-second obby in 5 seconds.",
+    "false positive": "When an honest player is wrongly flagged as a cheater.",
+    "rubber-band": "Snapping a player back to their last valid position, like a stretched rubber band pulling back.",
+    "proportional": "A response that fits how bad the problem is. A small issue gets a small response.",
+    "reversible": "Can be undone, like a 1-day suspension instead of a permanent ban.",
+    "cadence": "The rhythm or timing between repeated actions. Humans vary a little; bots can be exactly 2.500 seconds every time.",
+    "macro / auto-clicker": "A program that repeats clicks or keys automatically.",
+    "suspicion score": "A number the server raises each time a player fails a check. Only a high score leads to strong action.",
+    "threshold": "The cut-off number. For example, kick only when the suspicion score passes 10.",
+    "honeypot": "A trap that looks real to cheaters but that no honest player would ever touch.",
+    "log": "To write down a record of what happened, for checking later."
+  },
+  "example": {
+    "title": "Honeypot remote that catches cheaters",
+    "place": "Script in ServerScriptService",
+    "code": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n\n-- Create a decoy remote that no real script in the game ever fires\nlocal honeypot = Instance.new(\"RemoteEvent\")\nhoneypot.Name = \"GiveCoins\" -- a tempting name for cheaters\nhoneypot.Parent = ReplicatedStorage\n\nhoneypot.OnServerEvent:Connect(function(player)\n\t-- Only a cheater could fire this, because none of our LocalScripts use it\n\twarn(\"Honeypot fired by\", player.Name, player.UserId) -- log it\n\tplayer:Kick(\"Unexpected activity detected.\")\nend)",
+    "explain": [
+      "The server creates a RemoteEvent named `GiveCoins` in ReplicatedStorage, where cheaters will see it.",
+      "None of your own LocalScripts ever fire it.",
+      "If the server ever receives a `GiveCoins` event, it must be from someone sending fake messages.",
+      "The server logs the player's name and ID with `warn`, then kicks them."
+    ]
+  },
+  "watchOut": [
+    "Banning based on one heuristic. A skilled player might just be fast or found a shortcut. Wait for several different clues.",
+    "Trusting detection code that runs on the client. Cheaters can turn it off.",
+    "Jumping straight to permanent bans. Start with quiet fixes and reversible actions.",
+    "Accidentally firing your honeypot from a real script. Make sure nothing legitimate ever uses it.",
+    "Using detection instead of validation. Detection adds to good checks and rate limits; it does not replace them."
+  ]
+}

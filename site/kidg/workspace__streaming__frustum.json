@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/workspace/streaming/frustum.md",
+  "simple": "With streaming, a player normally only gets the world loaded in a box around their character. That is a problem if they look through a sniper scope or race at high speed, because faraway things they should see are not loaded. Frustum streaming fixes this by also loading what is inside the player's camera view, even far away. You turn it on per player from a server script, and it costs extra memory, so use it when your game needs long-range viewing.",
+  "analogy": "Normal streaming is like a lantern that lights a circle around you. Frustum streaming adds a flashlight beam pointing where you are looking, so you can see far ahead in that one direction.",
+  "keyPoints": [
+    "Frustum streaming adds to normal streaming. It never shrinks the normal area around the player.",
+    "The total loaded area is the normal box around the player, plus the camera-view shape, plus any extra replication foci.",
+    "Set `Player.FrustumStreaming` to Default, Disabled, Automatic, or Enabled. Default works the same as Disabled.",
+    "Automatic turns on by itself when the camera zooms in (like a scope), when the player moves fast toward where they are looking, or when the camera is far from the player. It has a short delay.",
+    "Enabled is always on. Use it to switch on early, like during a scope-equip animation, so the view is ready.",
+    "The property only works when set by the server. A client must ask the server with a RemoteEvent, and the server should check the request.",
+    "With Opportunistic stream-out, things that leave the view (and are outside the normal area) are removed after 1.5 seconds. With LowMemory they stay until memory runs low.",
+    "It does not see walls, so things behind a hill can still load. On low graphics settings, the engine may switch it off automatically."
+  ],
+  "terms": {
+    "frustum": "The shape of what a camera can see: a pyramid with its tip at the camera, getting wider the farther it goes.",
+    "streaming radius": "How far around the player the world is normally loaded. By default, the target is 1024 studs.",
+    "replication focus": "A center point the world is loaded around. Normally your character.",
+    "additive": "Added on top. Frustum streaming loads extra, it does not replace anything.",
+    "field of view": "How wide the camera sees. A sniper scope has a narrow field of view, like 10 degrees instead of the normal 70.",
+    "velocity": "Speed in a direction, like 100 studs per second forward.",
+    "draw distance": "How far away the device is willing to draw things. Lower graphics settings shrink it.",
+    "garbage collected": "Removed from memory because it is no longer needed.",
+    "occlusion culling": "Skipping things hidden behind walls. Frustum streaming does not do this, so hidden things can still load.",
+    "churn": "Things loading and unloading over and over, which can happen when the camera spins quickly.",
+    "validate": "Check that a request makes sense before doing it, so cheaters cannot abuse it."
+  },
+  "example": {
+    "title": "Turn on frustum streaming only while a sniper is equipped",
+    "place": "Script in ServerScriptService (a LocalScript in the tool fires the ScopeEvent RemoteEvent with true or false)",
+    "code": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n\n-- Create the RemoteEvent the client will fire\nlocal scopeEvent = Instance.new(\"RemoteEvent\")\nscopeEvent.Name = \"ScopeEvent\"\nscopeEvent.Parent = ReplicatedStorage\n\nscopeEvent.OnServerEvent:Connect(function(player, wantsScope)\n\t-- Validate: the value must be true or false\n\tif typeof(wantsScope) ~= \"boolean\" then\n\t\treturn\n\tend\n\n\tif wantsScope then\n\t\t-- Validate: the player must actually be holding the sniper\n\t\tlocal character = player.Character\n\t\tif not (character and character:FindFirstChild(\"Sniper\")) then\n\t\t\treturn\n\t\tend\n\t\tplayer.FrustumStreaming = Enum.FrustumStreamingMode.Enabled\n\telse\n\t\tplayer.FrustumStreaming = Enum.FrustumStreamingMode.Default\n\tend\nend)",
+    "explain": [
+      "Only the server can set `FrustumStreaming`, so the client sends a message with a RemoteEvent.",
+      "First we check the message is really true or false, because a cheater could send anything.",
+      "When a tool is equipped, it moves into the character, so we check the character has a tool named Sniper.",
+      "If everything checks out we set Enabled, so far targets in the player's view load in. When they put it away, we set it back to Default."
+    ]
+  },
+  "watchOut": [
+    "Setting `player.FrustumStreaming` in a LocalScript. It does nothing there. Set it on the server.",
+    "Turning it on for everyone all the time in a game that does not need long-range views. It uses more memory and can slow down phones.",
+    "Trusting the client's request without checks. Always validate before changing the setting.",
+    "Expecting it to work in a game without StreamingEnabled. Everything is already loaded there, so it has no effect."
+  ]
+}

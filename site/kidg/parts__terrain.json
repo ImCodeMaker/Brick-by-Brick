@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/parts/terrain.md",
+  "simple": "Terrain is Roblox's tool for building natural landscapes like mountains, lakes, hills, caves and deserts. Instead of placing parts one by one, you paint and sculpt the ground with brushes, or let Studio generate a whole map for you. Terrain is made of tiny 4 x 4 x 4 stud cubes called voxels, each filled with a material like Grass, Sand or Water. You can also build terrain with scripts.",
+  "analogy": "Terrain is like a giant sandbox. You can pile sand into hills, dig out lakes, smooth it with your hand, flatten a spot for a house, and sprinkle different colored sand on top.",
+  "keyPoints": [
+    "Terrain is a grid of voxels. Each voxel is a 4 x 4 x 4 stud cube with one material.",
+    "The Generate tool builds a whole landscape from biomes like Mountains, Dunes, Arctic, Canyons and Plains.",
+    "You can import a heightmap (bright pixels become high ground, dark pixels low ground) and a colormap that picks materials by color. 1 pixel equals 4 studs, up to 4096 x 4096 pixels.",
+    "Edit tab tools for big areas: Select, Transform, Fill/Replace and Sea Level (Create or Evaporate water).",
+    "Brush tools for details: Draw, Sculpt, Smooth, Flatten and Paint, with sphere, box or cylinder brushes from 1 to 64 studs. Hold Ctrl (Cmd) to subtract, Shift to smooth.",
+    "Water color, reflection, see-through amount, wave size and wave speed are set on the Terrain object's properties.",
+    "Turn on `Decoration` for swaying grass on the Grass material, and set `GrassLength` between 0.1 and 1.",
+    "Scripts can make terrain with `FillBlock`, `FillBall`, `FillCylinder`, `FillWedge` and `FillRegion`."
+  ],
+  "terms": {
+    "terrain": "The ground and water of your world, made by sculpting instead of placing parts.",
+    "voxel": "One 4 x 4 x 4 stud cube of terrain. A 40-stud wide hill is 10 voxels across.",
+    "biome": "A type of landscape, like a desert, arctic or marsh.",
+    "procedural": "Made automatically by rules, not placed by hand.",
+    "heightmap": "A black and white picture seen from above. White means high, black means low. With a selection height of 128, pure white is 64 studs above the center and pure black is 64 studs below.",
+    "colormap": "A picture whose colors are turned into materials, for example the exact color (106, 127, 63) becomes Grass.",
+    "anti-aliasing": "Soft blurry edges in an image. It creates in-between colors that can turn into the wrong terrain material.",
+    "brush": "The round, square or cylinder shape you paint terrain with. A 16-stud brush covers a wider area than a 4-stud one.",
+    "strength": "How much a sculpt or smooth stroke changes the ground each time. Low strength makes gentle changes.",
+    "sea level": "A flat height where water fills the area.",
+    "reflectance": "How mirror-like a surface is. Water reflectance 1 shows lots of sky reflection; 0 shows none.",
+    "CFrame": "A position plus a rotation. `CFrame.new(0, -10, 0)` means the spot 10 studs below the center of the world, not turned.",
+    "global wind": "A world setting that blows grass, particles and clouds in one direction at one strength."
+  },
+  "example": {
+    "title": "Script a small island in a lake",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\nlocal terrain = Workspace.Terrain\n\n-- A flat lake: 200 studs wide, 200 long, 8 deep, with its top at Y = 0\nterrain:FillBlock(CFrame.new(0, -4, 0), Vector3.new(200, 8, 200), Enum.Material.Water)\n\n-- Sand floor under the water, 4 studs thick (one voxel)\nterrain:FillBlock(CFrame.new(0, -10, 0), Vector3.new(200, 4, 200), Enum.Material.Sand)\n\n-- A round island: a ball of Grass with radius 20, centered 12 studs below the water line\nterrain:FillBall(Vector3.new(0, -12, 0), 20, Enum.Material.Grass)\n\n-- A rocky lighthouse base: a cylinder 16 tall with radius 6, standing on the island\nterrain:FillCylinder(CFrame.new(0, 14, 0), 16, 6, Enum.Material.Rock)",
+    "explain": [
+      "`FillBlock` takes a CFrame for the center, a size, and a material. The water's center is at Y = -4 and it is 8 tall, so it goes from Y = -8 up to Y = 0.",
+      "The sand is centered at Y = -10 and is 4 tall, so it covers Y = -12 to Y = -8, right under the water.",
+      "`FillBall` takes a center point, a radius and a material. A ball of radius 20 centered at Y = -12 reaches up to Y = -12 + 20 = 8, so the top 8 studs of the island poke out of the water.",
+      "`FillCylinder` takes a CFrame, a height and a radius. Centered at Y = 14 with height 16, it stands from Y = 6 to Y = 22, sitting on the island.",
+      "Terrain is made of 4-stud voxels, so sizes and positions that are multiples of 4 look the cleanest."
+    ]
+  },
+  "watchOut": [
+    "Colormap images with smooth or blurry edges create colors between two materials. Use hard edges and the exact RGB values from the table.",
+    "Some water settings only show while playtesting. Raise Editor Quality Level in Studio Settings to preview them while editing.",
+    "Terrain smaller than 4 studs cannot be very detailed, because the smallest building block is a 4-stud voxel.",
+    "Swaying grass only appears on the Grass material and only when `Decoration` is on."
+  ]
+}

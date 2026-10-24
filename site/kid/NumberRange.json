@@ -1,0 +1,50 @@
+{
+  "name": "NumberRange",
+  "simple": "A NumberRange is a pair of numbers: a smallest (Min) and a biggest (Max). Roblox picks random numbers between them. It is mostly used in ParticleEmitters, like how long each particle lives or how fast it flies.",
+  "analogy": "It is like saying \"bring between 3 and 5 friends\". Each time, the number could be anything from 3 to 5.",
+  "whenToUse": [
+    "ParticleEmitter.Lifetime: how many seconds each particle lasts",
+    "ParticleEmitter.Speed: how fast particles shoot out",
+    "ParticleEmitter.Rotation and RotSpeed: how much particles spin",
+    "Storing any \"from this to that\" range in your own code"
+  ],
+  "where": "Works in any script. Make one with NumberRange.new(min, max) or NumberRange.new(value).",
+  "terms": {
+    "range": "All the numbers from a smallest to a biggest. The range 2 to 5 includes 2, 3.7, 5, and so on.",
+    "Min": "The smallest number in the range.",
+    "Max": "The biggest number in the range.",
+    "ParticleEmitter": "An object that shoots out lots of little images (particles) to make fire, smoke, sparkles, and similar effects.",
+    "32-bit float": "The way NumberRange stores numbers. It keeps about 7 digits of accuracy, so very big or very precise numbers get rounded a little."
+  },
+  "examples": [
+    {
+      "title": "Sparkles that live a random amount of time",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = workspace\n\nlocal emitter = Instance.new(\"ParticleEmitter\")\nemitter.Lifetime = NumberRange.new(1, 3) -- each particle lives 1 to 3 seconds\nemitter.Speed = NumberRange.new(5)       -- every particle moves at exactly 5\nemitter.Parent = part",
+      "explain": [
+        "NumberRange.new(1, 3): each particle gets a random lifetime between 1 and 3 seconds, so they do not all vanish at once.",
+        "NumberRange.new(5): Min and Max are both 5, so every particle has the same speed.",
+        "Putting the emitter inside the part makes the sparkles come out of the part."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Min must be smaller than or equal to Max. NumberRange.new(5, 1) causes an error.",
+    "You cannot change .Min or .Max after making it. Make a new NumberRange instead."
+  ],
+  "members": {
+    "NumberRange.new": {
+      "simple": "Makes a NumberRange. Give it one number to make Min and Max the same, or two numbers for Min and Max.",
+      "example": "local exact = NumberRange.new(2)      -- Min 2, Max 2\nlocal between = NumberRange.new(1, 4) -- Min 1, Max 4\nprint(between.Min, between.Max) --> 1 4",
+      "gotcha": "The first number must not be bigger than the second."
+    },
+    "NumberRange.Min": {
+      "simple": "The smallest number in the range. Always less than or equal to Max.",
+      "example": "local r = NumberRange.new(1, 4)\nprint(r.Min) --> 1"
+    },
+    "NumberRange.Max": {
+      "simple": "The biggest number in the range. Always greater than or equal to Min.",
+      "example": "local r = NumberRange.new(1, 4)\nprint(r.Max) --> 4"
+    }
+  }
+}

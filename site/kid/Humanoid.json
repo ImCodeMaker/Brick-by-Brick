@@ -1,0 +1,442 @@
+{
+  "name": "Humanoid",
+  "simple": "A Humanoid is the special object that turns a Model into a living character. It gives it health, lets it walk, jump, climb, swim and sit, and shows the name and health bar above its head. Every player's character has one, and you can put one in an NPC too.",
+  "analogy": "If a character Model is a puppet made of parts, the Humanoid is the puppeteer. It decides how fast the puppet walks, how high it jumps, how much health it has, and when it falls down.",
+  "whenToUse": [
+    "Change how fast a character walks (WalkSpeed) or how high it jumps (JumpPower / JumpHeight).",
+    "Hurt or heal a character (Health, TakeDamage) and react when it dies (Died).",
+    "Make an NPC walk somewhere (MoveTo).",
+    "Equip or remove tools and accessories.",
+    "Change a character's look with a HumanoidDescription (ApplyDescriptionAsync).",
+    "Turn off actions like jumping or climbing (SetStateEnabled)."
+  ],
+  "where": "Inside a character Model, next to its body parts. For a player: `player.Character:FindFirstChildOfClass(\"Humanoid\")` or `character:WaitForChild(\"Humanoid\")`. Works in Scripts and LocalScripts. Players' own devices control their character's movement, so some changes (like WalkSpeed) can be made on either side.",
+  "terms": {
+    "character": "A Model with a Humanoid, a HumanoidRootPart, a Head and other body parts. Players have one; NPCs can too.",
+    "NPC": "Non-player character. A character controlled by your scripts instead of a real person, like a shopkeeper or a zombie.",
+    "rig": "The skeleton setup of a character: which parts it has and how they're jointed together.",
+    "R6": "The older, simpler character rig with 6 body parts (head, torso, 2 arms, 2 legs).",
+    "R15": "The newer character rig with 15 body parts (like upper arm, lower arm and hand), so it can bend more smoothly.",
+    "HumanoidRootPart": "An invisible box in the middle of every character. It's the part that actually moves; the rest of the body follows it.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "state": "What the Humanoid is doing right now, like Running, Jumping, Freefall, Swimming, Seated or Dead. Listed in Enum.HumanoidStateType.",
+    "Enum": "A fixed list of named choices. For example Enum.HumanoidStateType.Jumping is one choice from the list of humanoid states.",
+    "Vector3": "Three numbers (X, Y, Z) that describe a position or direction in 3D. Y is up.",
+    "direction": "A Vector3 that points a certain way, like (1, 0, 0) for 'toward +X'. A unit direction has a length of 1.",
+    "velocity": "Speed plus direction: how fast something moves and which way, in studs per second.",
+    "world space": "Directions measured from the map itself (X, Y, Z of the whole world), not from the character's facing.",
+    "ForceField": "The sparkly bubble a player gets right after spawning. While it's there, TakeDamage does nothing.",
+    "Accessory": "An item a character wears, like a hat, hair or a backpack.",
+    "Motor6D": "A joint that connects two body parts and lets animations bend them, like an elbow.",
+    "Attachment": "An invisible point on a part. Accessories and joints use matching attachments to know where to connect.",
+    "yield": "Pause the script until something finishes. Methods ending in Async yield.",
+    "replicate": "Copy a change across the internet so the server and the players see the same thing. Some Humanoid changes don't replicate."
+  },
+  "examples": [
+    {
+      "title": "Speed boost pad",
+      "place": "Script inside a Part in Workspace",
+      "code": "local pad = script.Parent\nlocal BOOST_SPEED = 40\nlocal NORMAL_SPEED = 16 -- Roblox's default WalkSpeed\n\nlocal boosting = {} -- remembers which humanoids are already boosted\n\npad.Touched:Connect(function(hit)\n    local humanoid = hit.Parent:FindFirstChildOfClass(\"Humanoid\")\n    if humanoid and not boosting[humanoid] then\n        boosting[humanoid] = true\n        humanoid.WalkSpeed = BOOST_SPEED\n        task.wait(3) -- boost lasts 3 seconds\n        humanoid.WalkSpeed = NORMAL_SPEED\n        boosting[humanoid] = nil\n    end\nend)",
+      "explain": [
+        "Touched gives us the body part that touched the pad. Its Parent is the character Model.",
+        "FindFirstChildOfClass(\"Humanoid\") finds the Humanoid in that Model, or nil if it was just a random part.",
+        "WalkSpeed is studs per second. 16 is normal, 40 is very fast.",
+        "The boosting table stops the boost from restarting over and over while the player stands on the pad."
+      ]
+    },
+    {
+      "title": "Damage, healing, and reacting to death",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAdded:Connect(function(character)\n        local humanoid = character:WaitForChild(\"Humanoid\")\n        humanoid.MaxHealth = 200\n        humanoid.Health = 200\n\n        humanoid.HealthChanged:Connect(function(health)\n            print(player.Name .. \" health is now \" .. math.floor(health))\n        end)\n\n        humanoid.Died:Connect(function()\n            print(player.Name .. \" was defeated!\")\n        end)\n    end)\nend)",
+      "explain": [
+        "Each time a character spawns we give it 200 max health and fill it up.",
+        "HealthChanged fires whenever Health goes up or down.",
+        "Died fires once when Health reaches 0. After Players.RespawnTime seconds the player gets a new character, and CharacterAdded runs again."
+      ]
+    },
+    {
+      "title": "Make an NPC walk to a list of points",
+      "place": "Script inside an NPC Model (the Model has a Humanoid and HumanoidRootPart)",
+      "code": "local npc = script.Parent\nlocal humanoid = npc:WaitForChild(\"Humanoid\")\n\nlocal points = {\n    Vector3.new(0, 0, 0),\n    Vector3.new(20, 0, 0),\n    Vector3.new(20, 0, 20),\n}\n\nwhile true do\n    for _, point in points do\n        humanoid:MoveTo(point)\n        local reached = humanoid.MoveToFinished:Wait() -- wait until it arrives (or gives up)\n        if not reached then\n            print(\"Couldn't reach the point in 8 seconds\")\n        end\n        task.wait(1)\n    end\nend",
+      "explain": [
+        "MoveTo tells the Humanoid where to walk. It walks there on its own.",
+        "MoveToFinished:Wait() pauses until it gets there. It gives true if it made it, or false if it took more than 8 seconds.",
+        "The while loop makes the NPC patrol forever."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Characters are rebuilt on every respawn, so get the new Humanoid inside CharacterAdded each time.",
+    "Use WaitForChild(\"Humanoid\") right after a character spawns, because parts may still be loading.",
+    "A ForceField (right after spawning) blocks TakeDamage. Set Health directly if you must ignore it.",
+    "Players can change WalkSpeed on their own device. Don't trust WalkSpeed as an anti-cheat.",
+    "Use the Animator inside the Humanoid to play animations. Humanoid:LoadAnimation is old.",
+    "MoveTo gives up after 8 seconds. Call it again to keep walking further."
+  ],
+  "members": {
+    "Humanoid.AutoJumpEnabled": {
+      "simple": "If true, a player on a touch screen jumps automatically when walking into a small obstacle. Only works for player characters using touch controls.",
+      "example": "humanoid.AutoJumpEnabled = false"
+    },
+    "Humanoid.AutomaticScalingEnabled": {
+      "simple": "If true, the character's body resizes when you change the scale values inside the Humanoid (like BodyHeightScale or HeadScale). If false, changing those values does nothing.",
+      "example": "humanoid.AutomaticScalingEnabled = true\nhumanoid:WaitForChild(\"BodyHeightScale\").Value = 1.5 -- 50% taller (R15)"
+    },
+    "Humanoid.AutoRotate": {
+      "simple": "If true (normal), the character turns to face the way it's walking. Set false to keep it facing the same way, like when aiming.",
+      "example": "humanoid.AutoRotate = false -- strafe without turning"
+    },
+    "Humanoid.BreakJointsOnDeath": {
+      "simple": "If true (the default), the body falls apart when the character dies. Set to false so it stays in one piece (good for ragdoll effects).",
+      "example": "humanoid.BreakJointsOnDeath = false"
+    },
+    "Humanoid.CameraOffset": {
+      "simple": "Moves the camera away from where it normally looks at the character. The offset is measured from the character's own facing, so (0, 2, 0) moves the camera 2 studs up from the normal spot, and (2, 0, 0) moves it 2 studs to the character's right.",
+      "example": "humanoid.CameraOffset = Vector3.new(0, 2, 0) -- camera looks from 2 studs higher"
+    },
+    "Humanoid.CollisionType": {
+      "simple": "Old — no longer needed; Roblox handles character collisions for you."
+    },
+    "Humanoid.DisplayDistanceType": {
+      "simple": "Controls who decides when this character's name and health bar show. Viewer: each viewer's own distance settings decide. Subject: this Humanoid's NameDisplayDistance and HealthDisplayDistance decide. None: never show them.",
+      "example": "humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- hide name and health bar"
+    },
+    "Humanoid.DisplayName": {
+      "simple": "The text shown above the character's head. If empty, the Model's name is shown. For players it is set to their DisplayName when they spawn.",
+      "example": "humanoid.DisplayName = \"Captain Bob\""
+    },
+    "Humanoid.EvaluateStateMachine": {
+      "simple": "If set to false, the Humanoid stops doing its own physics: no walking forces, no floor checks, no automatic state changes. Only for advanced custom character controllers."
+    },
+    "Humanoid.FloorMaterial": {
+      "simple": "Read-only. The material the character is standing on, like Grass or Ice. It's Air when the character is in the air.",
+      "example": "humanoid:GetPropertyChangedSignal(\"FloorMaterial\"):Connect(function()\n    if humanoid.FloorMaterial == Enum.Material.Ice then\n        print(\"Slippery!\")\n    end\nend)"
+    },
+    "Humanoid.Health": {
+      "simple": "How much life the character has, from 0 up to MaxHealth. At 0 the character dies. By default players slowly heal 1% of MaxHealth every second.",
+      "example": "humanoid.Health = humanoid.MaxHealth -- full heal\nhumanoid.Health = 0 -- defeat instantly",
+      "gotcha": "To stop automatic healing, put an empty Script named Health in StarterCharacterScripts."
+    },
+    "Humanoid.HealthDisplayDistance": {
+      "simple": "Works with DisplayDistanceType: how close (in studs) you must be to see a health bar."
+    },
+    "Humanoid.HealthDisplayType": {
+      "simple": "When the health bar may show: DisplayWhenDamaged (default, only when hurt), AlwaysOn, or AlwaysOff.",
+      "example": "humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOn"
+    },
+    "Humanoid.HipHeight": {
+      "simple": "How high (in studs) the HumanoidRootPart floats above the ground when standing. Bigger numbers make the character stand taller (or hover). R15 characters set this for you.",
+      "example": "humanoid.HipHeight = 5 -- float higher off the ground"
+    },
+    "Humanoid.Jump": {
+      "simple": "Set it to true to make the character jump once (if it is standing on something).",
+      "example": "humanoid.Jump = true"
+    },
+    "Humanoid.JumpHeight": {
+      "simple": "How high the character jumps, in studs (default 7.2). Only used when UseJumpPower is false.",
+      "example": "humanoid.UseJumpPower = false\nhumanoid.JumpHeight = 20 -- super jump"
+    },
+    "Humanoid.JumpPower": {
+      "simple": "How strong the upward push is when jumping (default 50). Only used when UseJumpPower is true. Gravity also affects how high you go.",
+      "example": "humanoid.UseJumpPower = true\nhumanoid.JumpPower = 100",
+      "gotcha": "To stop jumping completely, use humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false) instead of setting this to 0."
+    },
+    "Humanoid.LeftLeg": {
+      "simple": "Old — only worked with R6. Use character:FindFirstChild(\"Left Leg\") or Humanoid:GetBodyPartR15 instead."
+    },
+    "Humanoid.MaxHealth": {
+      "simple": "The most health the character can have (default 100). Health can't go above it.",
+      "example": "humanoid.MaxHealth = 250\nhumanoid.Health = 250"
+    },
+    "Humanoid.maxHealth": {
+      "simple": "Old — use Humanoid.MaxHealth instead."
+    },
+    "Humanoid.MaxSlopeAngle": {
+      "simple": "The steepest slope (in degrees, 0 to 89) the character can walk up. Steeper slopes make it slide down. Default 89, so almost anything.",
+      "example": "humanoid.MaxSlopeAngle = 30 -- can't climb steep hills"
+    },
+    "Humanoid.MoveDirection": {
+      "simple": "Read-only. Which way the character is trying to walk, as a direction in world space (length 1), or (0, 0, 0) when standing still.",
+      "example": "if humanoid.MoveDirection.Magnitude > 0 then\n    print(\"Walking\") -- Magnitude is the length of the direction\nend"
+    },
+    "Humanoid.NameDisplayDistance": {
+      "simple": "Works with DisplayDistanceType: how close (in studs) you must be to see a name."
+    },
+    "Humanoid.NameOcclusion": {
+      "simple": "Whether names and health bars can be seen through walls. You can hide all names behind walls, hide only enemies' names, or never hide them.",
+      "example": "humanoid.NameOcclusion = Enum.NameOcclusion.OccludeAll"
+    },
+    "Humanoid.PlatformStand": {
+      "simple": "If true, the character goes limp and can't move by itself, a bit like sitting but jumping won't get it out. Set back to false to let it move again.",
+      "example": "humanoid.PlatformStand = true"
+    },
+    "Humanoid.RequiresNeck": {
+      "simple": "If true (default), the character dies if its neck joint is removed, even for a moment. Set false if your game swaps heads or rebuilds the body.",
+      "example": "humanoid.RequiresNeck = false"
+    },
+    "Humanoid.RightLeg": {
+      "simple": "Old — only worked with R6. Use character:FindFirstChild(\"Right Leg\") or Humanoid:GetBodyPartR15 instead."
+    },
+    "Humanoid.RigType": {
+      "simple": "Says whether the character is R6 (6 body parts) or R15 (15 body parts).",
+      "example": "if humanoid.RigType == Enum.HumanoidRigType.R15 then\n    print(\"Modern R15 body\")\nend",
+      "gotcha": "Setting the wrong rig type kills the Humanoid, because it can't find the body parts it expects."
+    },
+    "Humanoid.RootPart": {
+      "simple": "Read-only shortcut to the character's HumanoidRootPart, the invisible part in the middle that everything follows. Move it to move the whole character.",
+      "example": "local root = humanoid.RootPart\nif root then\n    print(\"Character is at \" .. tostring(root.Position))\nend"
+    },
+    "Humanoid.SeatPart": {
+      "simple": "Read-only. The Seat or VehicleSeat the character is sitting in, or nil if it isn't sitting.",
+      "example": "if humanoid.SeatPart then\n    print(\"Sitting in \" .. humanoid.SeatPart.Name)\nend"
+    },
+    "Humanoid.Sit": {
+      "simple": "True if the character is sitting. Set it to true to force it to sit. Jumping gets it back up.",
+      "example": "humanoid.Sit = true"
+    },
+    "Humanoid.TargetPoint": {
+      "simple": "Don't use. It only worked in a discontinued mode. It was the spot a player last clicked with a tool."
+    },
+    "Humanoid.Torso": {
+      "simple": "Old — only worked with R6. Use Humanoid.RootPart instead."
+    },
+    "Humanoid.UseJumpPower": {
+      "simple": "Picks which jump setting is used: true uses JumpPower (a push strength), false uses JumpHeight (a height in studs). It starts from StarterPlayer.CharacterUseJumpPower.",
+      "example": "humanoid.UseJumpPower = false -- now JumpHeight is used"
+    },
+    "Humanoid.WalkSpeed": {
+      "simple": "How fast the character walks, in studs per second. The default is 16, so it covers 16 studs every second. 0 freezes it in place.",
+      "example": "humanoid.WalkSpeed = 32 -- twice as fast as normal",
+      "gotcha": "Players can change this on their own device, so don't rely on it to stop cheaters."
+    },
+    "Humanoid.WalkToPart": {
+      "simple": "The part the Humanoid is walking toward after MoveTo was given a part. If the part moves, the goal moves with it. Setting this alone doesn't start walking; call MoveTo."
+    },
+    "Humanoid.WalkToPoint": {
+      "simple": "The position the Humanoid is walking to after MoveTo. If WalkToPart is set, this point is measured from that part instead of from the world center. Setting it alone doesn't start walking; call MoveTo."
+    },
+    "Humanoid:AddAccessory": {
+      "simple": "Puts an Accessory (like a hat) on the character. It finds an Attachment on the body with the same name as the one in the accessory's Handle (for example HatAttachment) and welds it there.",
+      "example": "-- Script (server)\nlocal hat = game:GetService(\"ServerStorage\").CoolHat:Clone()\nhumanoid:AddAccessory(hat)",
+      "gotcha": "If no matching Attachment is found, the accessory is added but just falls off."
+    },
+    "Humanoid:AddCustomStatus": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid:AddStatus": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid:ApplyDescription": {
+      "simple": "Old — use Humanoid:ApplyDescriptionAsync instead."
+    },
+    "Humanoid:ApplyDescriptionAsync": {
+      "simple": "Changes the character's whole look (clothes, accessories, body colors, sizes, animations) to match a HumanoidDescription. It waits until the change is finished.",
+      "example": "-- Script (server): make a character 20% taller\nlocal description = humanoid:GetAppliedDescription() -- copy of current look\ndescription.HeightScale = 1.2\nhumanoid:ApplyDescriptionAsync(description)",
+      "gotcha": "Only call it on the server. If other scripts changed the character in other ways, use ApplyDescriptionResetAsync instead."
+    },
+    "Humanoid:ApplyDescriptionReset": {
+      "simple": "Old — use Humanoid:ApplyDescriptionResetAsync instead."
+    },
+    "Humanoid:ApplyDescriptionResetAsync": {
+      "simple": "Like ApplyDescriptionAsync, but it makes sure the look matches exactly, even if other scripts changed the character's clothes or parts in other ways. A bit slower.",
+      "example": "local description = Instance.new(\"HumanoidDescription\")\nhumanoid:ApplyDescriptionResetAsync(description) -- plain default look"
+    },
+    "Humanoid:BuildRigFromAttachments": {
+      "simple": "Builds the Motor6D joints that hold a character together, by matching up Attachments whose names end in RigAttachment. Used when you put together a custom character from loose parts so animations can work.",
+      "example": "humanoid:BuildRigFromAttachments()"
+    },
+    "Humanoid:ChangeState": {
+      "simple": "Forces the Humanoid into a state, like Jumping or FallingDown. Some states won't stick (for example Swimming when not in water).",
+      "example": "humanoid:ChangeState(Enum.HumanoidStateType.Jumping) -- jump right now"
+    },
+    "Humanoid:EquipTool": {
+      "simple": "Makes the character hold a Tool. Any tool already held is put away first.",
+      "example": "local sword = player.Backpack:FindFirstChild(\"Sword\")\nif sword then\n    humanoid:EquipTool(sword)\nend"
+    },
+    "Humanoid:GetAccessories": {
+      "simple": "Gives a list of every Accessory the character is wearing.",
+      "example": "for _, accessory in humanoid:GetAccessories() do\n    print(\"Wearing: \" .. accessory.Name)\nend"
+    },
+    "Humanoid:GetAppliedDescription": {
+      "simple": "Gives a copy of the HumanoidDescription that describes the character's current look. Change the copy and apply it to edit the look, or apply it to another character to copy the outfit.",
+      "example": "local look = humanoidA:GetAppliedDescription()\nhumanoidB:ApplyDescriptionAsync(look) -- B now dresses like A"
+    },
+    "Humanoid:GetBodyPartR15": {
+      "simple": "Tells you which R15 body part a part is (like Enum.BodyPartR15.LeftFoot), or Unknown if it isn't one. Useful for hit locations.",
+      "example": "local which = humanoid:GetBodyPartR15(hitPart)\nif which == Enum.BodyPartR15.Head then\n    print(\"Headshot!\")\nend"
+    },
+    "Humanoid:GetLimb": {
+      "simple": "Tells you which limb a body part belongs to (Head, Torso, LeftArm, RightArm, LeftLeg, RightLeg). Works for R6 and R15, so a LeftFoot counts as LeftLeg.",
+      "example": "print(humanoid:GetLimb(character.LeftFoot)) -- Enum.Limb.LeftLeg",
+      "gotcha": "Errors if the part isn't inside the same Model as the Humanoid."
+    },
+    "Humanoid:GetMoveVelocity": {
+      "simple": "Gives the velocity the character is trying to walk at: WalkSpeed times the direction it's walking. (0, 0, 0) when not trying to move.",
+      "example": "print(humanoid:GetMoveVelocity())"
+    },
+    "Humanoid:GetPlayingAnimationTracks": {
+      "simple": "Old — use Animator:GetPlayingAnimationTracks instead."
+    },
+    "Humanoid:GetRelativeVelocityAtFloor": {
+      "simple": "Gives how fast the character is really moving compared to the floor it's on. If it stands still on a moving train, this is about zero. If it walks into a wall, this is near zero even though it's trying to move.",
+      "example": "local v = humanoid:GetRelativeVelocityAtFloor()\nprint(\"Real speed over the floor: \" .. v.Magnitude)"
+    },
+    "Humanoid:GetState": {
+      "simple": "Tells you what the Humanoid is doing right now, as an Enum.HumanoidStateType (like Running, Freefall, Swimming).",
+      "example": "if humanoid:GetState() == Enum.HumanoidStateType.Freefall then\n    print(\"Falling!\")\nend"
+    },
+    "Humanoid:GetStateEnabled": {
+      "simple": "Tells you if a state is allowed (true) or turned off (false) for this Humanoid.",
+      "example": "print(humanoid:GetStateEnabled(Enum.HumanoidStateType.Jumping))"
+    },
+    "Humanoid:GetStatuses": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid:HasCustomStatus": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid:HasStatus": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid:LoadAnimation": {
+      "simple": "Old — use Animator:LoadAnimation instead."
+    },
+    "Humanoid:loadAnimation": {
+      "simple": "Old — use Animator:LoadAnimation instead."
+    },
+    "Humanoid:Move": {
+      "simple": "Makes the Humanoid walk in a direction (not to a spot). Normally the direction is in world space; pass true as the second value to make it relative to the camera, where (0, 0, -1) means 'forward the way the camera looks'.",
+      "example": "humanoid:Move(Vector3.new(0, 0, -1), true) -- walk the way the camera faces",
+      "gotcha": "For players, the default control script overrides this every frame. It works best on NPCs."
+    },
+    "Humanoid:MoveTo": {
+      "simple": "Makes the Humanoid walk to a position. If you also give a part, the goal moves along with that part. It gives up after 8 seconds unless you call it again.",
+      "example": "humanoid:MoveTo(Vector3.new(50, 0, 10))\nhumanoid.MoveToFinished:Wait()\nprint(\"Arrived (or gave up)\")"
+    },
+    "Humanoid:PlayEmote": {
+      "simple": "Old — use Humanoid:PlayEmoteAsync instead."
+    },
+    "Humanoid:PlayEmoteAsync": {
+      "simple": "Plays an emote by its name, like \"Shrug\". The emote must be in the character's HumanoidDescription. Returns true if it played; errors if the name isn't found.",
+      "example": "-- LocalScript in StarterCharacterScripts\nlocal humanoid = script.Parent:WaitForChild(\"Humanoid\")\nlocal ok, played = pcall(function()\n    return humanoid:PlayEmoteAsync(\"Shrug\")\nend)\nprint(ok and played)"
+    },
+    "Humanoid:RemoveAccessories": {
+      "simple": "Removes (destroys) every accessory the character is wearing, like all hats and hair.",
+      "example": "humanoid:RemoveAccessories()"
+    },
+    "Humanoid:RemoveCustomStatus": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid:RemoveStatus": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid:ReplaceBodyPartR15": {
+      "simple": "Swaps one R15 body part (like the left hand) for a different part you made. The new part is scaled to fit. Returns true if it worked. Name the new part the same as the body part.",
+      "example": "local newHand = game:GetService(\"ServerStorage\").RobotLeftHand:Clone()\nnewHand.Name = \"LeftHand\"\nhumanoid:ReplaceBodyPartR15(Enum.BodyPartR15.LeftHand, newHand)"
+    },
+    "Humanoid:SetStateEnabled": {
+      "simple": "Turns a state on or off. When a state is off, the Humanoid can never go into it. Great for 'no jumping' or 'no climbing' rules.",
+      "example": "-- LocalScript in StarterCharacterScripts: no jumping\nlocal humanoid = script.Parent:WaitForChild(\"Humanoid\")\nhumanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)",
+      "gotcha": "This doesn't copy between server and client. For a player's own movement, call it in a LocalScript."
+    },
+    "Humanoid:TakeDamage": {
+      "simple": "Lowers Health by an amount, unless the character has a ForceField. Better than changing Health directly for weapons, because it respects spawn protection.",
+      "example": "humanoid:TakeDamage(25) -- lose 25 health"
+    },
+    "Humanoid:takeDamage": {
+      "simple": "Old — use Humanoid:TakeDamage instead."
+    },
+    "Humanoid:UnequipTools": {
+      "simple": "Puts away whatever tool the character is holding, back into the player's Backpack. Only works for player characters (NPCs have no Backpack).",
+      "example": "humanoid:UnequipTools()"
+    },
+    "Humanoid.AnimationPlayed": {
+      "simple": "Old — use Animator.AnimationPlayed instead."
+    },
+    "Humanoid.ApplyDescriptionFinished": {
+      "simple": "Fires when ApplyDescriptionAsync or ApplyDescriptionResetAsync finishes changing the character's look. Gives you the description that was applied.",
+      "example": "humanoid.ApplyDescriptionFinished:Connect(function(description)\n    print(\"New look applied!\")\nend)"
+    },
+    "Humanoid.Climbing": {
+      "simple": "Fires when climbing speed changes, like on a ladder or truss. Gives the speed in studs per second. Humanoids climb at 70% of WalkSpeed.",
+      "example": "humanoid.Climbing:Connect(function(speed)\n    print(\"Climbing at \" .. speed)\nend)"
+    },
+    "Humanoid.CustomStatusAdded": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid.CustomStatusRemoved": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid.Died": {
+      "simple": "Fires once when the Humanoid dies (usually when Health hits 0). Only works while the character is in Workspace.",
+      "example": "humanoid.Died:Connect(function()\n    print(\"Game over for this character\")\nend)"
+    },
+    "Humanoid.FallingDown": {
+      "simple": "Fires with true when the character trips and falls over, and false when it starts getting up (about 3 seconds later).",
+      "example": "humanoid.FallingDown:Connect(function(active)\n    print(\"Falling down:\", active)\nend)"
+    },
+    "Humanoid.FreeFalling": {
+      "simple": "Fires with true when the character starts falling through the air and false when that stops.",
+      "example": "humanoid.FreeFalling:Connect(function(active)\n    if active then\n        print(\"Wheee!\")\n    end\nend)",
+      "gotcha": "To know when it lands, use StateChanged and look for Enum.HumanoidStateType.Landed."
+    },
+    "Humanoid.GettingUp": {
+      "simple": "Fires with true when the character starts standing back up after falling or ragdolling, then false shortly after.",
+      "example": "humanoid.GettingUp:Connect(function(active)\n    print(\"Getting up:\", active)\nend)"
+    },
+    "Humanoid.HealthChanged": {
+      "simple": "Fires whenever Health changes, and gives the new health number. Perfect for updating a health bar.",
+      "example": "humanoid.HealthChanged:Connect(function(health)\n    print(\"Health: \" .. math.floor(health) .. \" / \" .. humanoid.MaxHealth)\nend)"
+    },
+    "Humanoid.Jumping": {
+      "simple": "Fires with true when the character jumps, and false shortly after (not when it lands).",
+      "example": "humanoid.Jumping:Connect(function(active)\n    if active then\n        print(\"Jump!\")\n    end\nend)"
+    },
+    "Humanoid.MoveToFinished": {
+      "simple": "Fires when a MoveTo walk ends. Gives true if it reached the goal, or false if 8 seconds passed first.",
+      "example": "humanoid:MoveTo(Vector3.new(0, 0, 30))\nhumanoid.MoveToFinished:Connect(function(reached)\n    print(\"Reached goal:\", reached)\nend)"
+    },
+    "Humanoid.PlatformStanding": {
+      "simple": "Fires with true when the Humanoid goes limp (PlatformStand on), and false when it leaves that state.",
+      "example": "humanoid.PlatformStanding:Connect(function(active)\n    print(\"Platform standing:\", active)\nend)"
+    },
+    "Humanoid.Ragdoll": {
+      "simple": "Fires with true when the character goes into the floppy Ragdoll state, and false when it leaves it.",
+      "example": "humanoid.Ragdoll:Connect(function(active)\n    print(\"Ragdoll:\", active)\nend)"
+    },
+    "Humanoid.Running": {
+      "simple": "Fires when the character's running speed changes. Gives the speed; 0 means it stopped. Handy for footstep sounds.",
+      "example": "humanoid.Running:Connect(function(speed)\n    if speed > 0 then\n        print(\"Moving\")\n    else\n        print(\"Stopped\")\n    end\nend)"
+    },
+    "Humanoid.Seated": {
+      "simple": "Fires when the character sits down or gets up. Gives true plus the seat when sitting, and false plus nil when standing up.",
+      "example": "humanoid.Seated:Connect(function(isSitting, seat)\n    if isSitting then\n        print(\"Sat in \" .. seat.Name)\n    end\nend)"
+    },
+    "Humanoid.StateChanged": {
+      "simple": "Fires every time the Humanoid's state changes, giving the old state and the new one. The most flexible way to know what the character is doing.",
+      "example": "humanoid.StateChanged:Connect(function(oldState, newState)\n    if newState == Enum.HumanoidStateType.Landed then\n        print(\"Landed!\")\n    end\nend)"
+    },
+    "Humanoid.StateEnabledChanged": {
+      "simple": "Fires when SetStateEnabled turns a state on or off. Gives the state and true/false.",
+      "example": "humanoid.StateEnabledChanged:Connect(function(state, isEnabled)\n    print(state, isEnabled)\nend)"
+    },
+    "Humanoid.StatusAdded": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid.StatusRemoved": {
+      "simple": "Old — this was part of an unfinished status system. Don't use it. Use Attributes to store conditions instead."
+    },
+    "Humanoid.Strafing": {
+      "simple": "Don't use. It's tied to an unused state and doesn't fire when the character walks sideways."
+    },
+    "Humanoid.Swimming": {
+      "simple": "Fires when swimming speed in Terrain water changes. Gives the speed. Humanoids swim at 87.5% of WalkSpeed.",
+      "example": "humanoid.Swimming:Connect(function(speed)\n    print(\"Swimming at \" .. speed)\nend)"
+    },
+    "Humanoid.Touched": {
+      "simple": "Fires when any body part of the character touches another part. Gives the part that was touched and the body part that touched it.",
+      "example": "humanoid.Touched:Connect(function(otherPart, bodyPart)\n    print(bodyPart.Name .. \" touched \" .. otherPart.Name)\nend)",
+      "gotcha": "It fires a lot while walking. Usually it's better to use Touched on the specific part you care about (like a coin or lava)."
+    }
+  }
+}

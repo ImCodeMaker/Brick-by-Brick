@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/performance-optimization/design.md",
+  "simple": "This page gives you good habits to follow while you build, so your game runs well from the start. It covers testing on weaker devices like phones, using streaming, reusing materials and meshes, avoiding see-through parts, and writing scripts that do not waste time every frame. Following these early is much easier than fixing a slow game later.",
+  "analogy": "It is like packing a backpack for a hike. If you pack light from the start, you do not have to stop halfway and dump things out.",
+  "keyPoints": [
+    "Pick a baseline device, like an older phone, and test on it throughout development. Watch frame rate and memory.",
+    "The Studio device emulator is good for screen shape and controls, but not for memory, because Studio runs both server and client.",
+    "Turn on instance streaming for most places, especially big ones. It speeds up joining, saves memory, and raises frame rate.",
+    "Big games can be split into several places with teleporting between them, which lowers the first join time.",
+    "Use built-in materials when you can, since they use far less memory than custom textures.",
+    "Turn assets into packages and reuse the same meshes and textures instead of importing copies.",
+    "Keep transparency at 0 or 1 when possible. Partly see-through parts stacked together cost a lot.",
+    "In scripts, react to events instead of calculating every frame, break long work into chunks, disconnect events you no longer need, and keep server-only stuff in ServerStorage."
+  ],
+  "terms": {
+    "low-end device": "A cheaper or older device, like an old phone, with less memory and a slower chip.",
+    "baseline device": "The weakest device you promise your game will run well on. You test on it often.",
+    "OOM (out of memory)": "When a device runs out of memory and the game crashes.",
+    "draw call": "One request from the CPU telling the GPU to draw something. The page's example limit is 1,000 draw calls for a baseline device.",
+    "triangle": "The tiny flat shapes all 3D models are made of. More triangles means more work to draw.",
+    "streaming": "Loading only the parts of the world near the player and unloading far-away parts.",
+    "teleportation": "Moving players from one place in your game to another place.",
+    "package": "A reusable asset you can update once and have the change show everywhere it is used.",
+    "overdraw": "Drawing the same screen pixel many times, like when many see-through parts overlap.",
+    "event-driven": "Code that runs only when something happens, like a button being clicked, instead of checking every frame.",
+    "per-frame": "Runs every single frame, so 60 times a second at 60 FPS.",
+    "frame budget": "The time each frame has. At 60 FPS it is 16.67 ms. If your code takes 100 ms in one frame, that frame is very late.",
+    "Disconnect": "Stops a connected function from running the next time an event fires."
+  },
+  "example": {
+    "title": "Spread heavy work over many frames",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\n-- Count every part in the world without freezing the game\nlocal descendants = Workspace:GetDescendants()\nlocal partCount = 0\nlocal BATCH_SIZE = 500 -- how many objects to check before taking a break\n\nfor i, item in descendants do\n\tif item:IsA(\"BasePart\") then\n\t\tpartCount += 1\n\tend\n\t-- After every 500 objects, wait one frame so the game stays smooth\n\tif i % BATCH_SIZE == 0 then\n\t\ttask.wait()\n\tend\nend\n\nprint(\"Parts in the world:\", partCount)",
+    "explain": [
+      "We get a list of everything in the Workspace. In a big game this can be thousands of objects.",
+      "We go through the list and count the ones that are parts.",
+      "`i % BATCH_SIZE == 0` is true at objects 500, 1000, 1500, and so on.",
+      "At each of those points, `task.wait()` pauses until the next frame, so the game can keep running smoothly.",
+      "The job takes a few more frames to finish, but no single frame gets stuck doing all of it."
+    ]
+  },
+  "watchOut": [
+    "Trusting memory numbers from Studio. Studio runs server and client together, so test on a real device.",
+    "Putting everything in ReplicatedStorage. Players' devices load all of it. Keep server-only things in ServerStorage.",
+    "Running heavy code once a second instead of splitting it. That still causes a stutter every second.",
+    "Calling the same method over and over for a value that rarely changes. Store it in a variable and update it only when needed.",
+    "Importing the same texture many times. Each copy has a different ID and costs extra memory."
+  ]
+}

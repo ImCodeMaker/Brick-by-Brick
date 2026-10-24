@@ -1,0 +1,66 @@
+{
+  "name": "MemoryStoreService",
+  "simple": "MemoryStoreService gives your game a super-fast shared memory that every server can read and write. It is for short-lived information that changes a lot, like a matchmaking line or a live auction. Unlike data stores, everything in it disappears after a time limit you set (at most 45 days).",
+  "analogy": "If a data store is a filing cabinet for things you want to keep forever, a memory store is a whiteboard in the hallway that every classroom can see. It is quick to write on, and things get wiped off after a while.",
+  "whenToUse": [
+    "A matchmaking queue: players from many servers line up, and a lobby server takes them in order.",
+    "A live leaderboard for an event that only lasts a day.",
+    "Sharing quick information between servers, like which servers have space.",
+    "Not for saving player progress forever. Use DataStoreService for that."
+  ],
+  "where": "Server only. Get it with `game:GetService(\"MemoryStoreService\")` in a Script.",
+  "terms": {
+    "server": "The Roblox computer in charge of one copy of your game. A popular game runs many servers at the same time, each with its own group of players.",
+    "memory store": "Fast, temporary storage shared by all servers of your game. Items vanish after their expiration time.",
+    "expiration": "How many seconds an item lives before it is deleted automatically. The maximum is 45 days (3,888,000 seconds).",
+    "hash map": "A simple 'label to value' storage, like a dictionary. You look things up by key. Usually the best choice when you do not need sorting.",
+    "sorted map": "Like a hash map, but it keeps items sorted by key (or by a sort key), so you can get the top or bottom items.",
+    "queue": "A waiting line. Items added first come out first, like a line at a lunch counter.",
+    "invisibility timeout": "For queues: after a server reads an item, the item hides from other servers for this many seconds. If the server does not remove it in time, it reappears so another server can handle it.",
+    "pcall": "Short for 'protected call'. It runs a function and catches errors instead of crashing your script. It returns `true` and the results if it worked, or `false` and the error message if it failed.",
+    "async / yield": "Functions ending in `Async` talk to other computers over the internet. Your script pauses (yields) until the answer comes back.",
+    "quota": "The total amount your whole game is allowed to use. For memory stores it grows with the number of players in your game."
+  },
+  "examples": [
+    {
+      "title": "Share a value between all servers for 10 minutes",
+      "place": "Script in ServerScriptService",
+      "code": "local MemoryStoreService = game:GetService(\"MemoryStoreService\")\nlocal eventMap = MemoryStoreService:GetHashMap(\"LiveEvent\")\n\n-- Write: visible to every server, auto-deleted after 600 seconds\nlocal ok, err = pcall(function()\n\teventMap:SetAsync(\"BossHealth\", 5000, 600)\nend)\nif not ok then warn(err) end\n\n-- Read it back (any server could do this)\nlocal ok2, health = pcall(function()\n\treturn eventMap:GetAsync(\"BossHealth\")\nend)\nprint(\"Boss health:\", ok2 and health)",
+      "explain": [
+        "`GetHashMap(\"LiveEvent\")` opens a shared memory area named LiveEvent. Every server using that name sees the same data.",
+        "`SetAsync(key, value, 600)` stores the value for 600 seconds (10 minutes). After that it is gone.",
+        "Calls go over the internet, so we wrap them in pcall."
+      ]
+    },
+    {
+      "title": "A simple matchmaking line",
+      "place": "Script in ServerScriptService",
+      "code": "local MemoryStoreService = game:GetService(\"MemoryStoreService\")\nlocal Players = game:GetService(\"Players\")\n\n-- Items read from this queue hide from other servers for 30 seconds\nlocal matchQueue = MemoryStoreService:GetQueue(\"Matchmaking\", 30)\n\n-- Add players to the line when they join (expires after 5 minutes)\nPlayers.PlayerAdded:Connect(function(player)\n\tpcall(function()\n\t\tmatchQueue:AddAsync(player.UserId, 300)\n\tend)\nend)\n\n-- Every 10 seconds, try to take 2 players from the front of the line\nwhile true do\n\ttask.wait(10)\n\tlocal ok, items, readId = pcall(function()\n\t\treturn matchQueue:ReadAsync(2, true, 0)\n\tend)\n\tif ok and items and #items == 2 then\n\t\tprint(\"Match found:\", items[1], \"vs\", items[2])\n\t\t-- Remove them so nobody else matches them\n\t\tpcall(function()\n\t\t\tmatchQueue:RemoveAsync(readId)\n\t\tend)\n\tend\nend",
+      "explain": [
+        "`AddAsync` puts a UserId at the back of the line.",
+        "`ReadAsync(2, true, 0)` asks for exactly 2 items (true means all or nothing) without waiting.",
+        "After using them, `RemoveAsync(readId)` takes them out. If we forgot, they would reappear after 30 seconds."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Everything expires. Never keep the only copy of important data (like a player's coins) in a memory store.",
+    "Server only, and wrap every call in pcall.",
+    "There are limits: memory for your whole game is about 64 KB + 1.2 KB per player, and about 1000 + 120 per player requests per minute.",
+    "The same name means the same data in every server and every place of your game. Pick clear, unique names."
+  ],
+  "members": {
+    "MemoryStoreService:GetHashMap": {
+      "simple": "Gives you a hash map: shared 'key to value' storage you look up by name. Same name = same hash map in every server.",
+      "example": "-- Script in ServerScriptService\nlocal MemoryStoreService = game:GetService(\"MemoryStoreService\")\nlocal serverInfo = MemoryStoreService:GetHashMap(\"ServerInfo\")\n\npcall(function()\n\t-- game.JobId is this server's unique id; keep for 2 minutes\n\tserverInfo:SetAsync(game.JobId, #game:GetService(\"Players\"):GetPlayers(), 120)\nend)"
+    },
+    "MemoryStoreService:GetQueue": {
+      "simple": "Gives you a queue: a shared waiting line. The second number is the invisibility timeout in seconds (default 30): how long an item you read stays hidden from other servers before coming back if you do not remove it.",
+      "example": "-- Script in ServerScriptService\nlocal MemoryStoreService = game:GetService(\"MemoryStoreService\")\nlocal jobs = MemoryStoreService:GetQueue(\"Jobs\", 60)\n\npcall(function()\n\tjobs:AddAsync(\"give-reward\", 3600) -- stays in line up to 1 hour\nend)"
+    },
+    "MemoryStoreService:GetSortedMap": {
+      "simple": "Gives you a sorted map: shared storage that keeps its items in order, so you can quickly get the first or last few. Good for short-lived leaderboards.",
+      "example": "-- Script in ServerScriptService\nlocal MemoryStoreService = game:GetService(\"MemoryStoreService\")\nlocal board = MemoryStoreService:GetSortedMap(\"DailyScores\")\n\npcall(function()\n\tboard:SetAsync(\"Player_1\", 250, 86400) -- keep for 1 day\nend)\n\nlocal ok, items = pcall(function()\n\treturn board:GetRangeAsync(Enum.SortDirection.Ascending, 10)\nend)\nif ok then\n\tfor _, item in items do\n\t\tprint(item.key, item.value)\n\tend\nend"
+    }
+  }
+}

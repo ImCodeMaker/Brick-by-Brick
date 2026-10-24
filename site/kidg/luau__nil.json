@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/luau/nil.md",
+  "simple": "`nil` means nothing at all, like an empty box. You can set a variable or table entry to `nil` to clear it. Setting a part's `Parent` to `nil` takes it out of the game world, and you can put it back later. When nothing in your scripts points to something anymore, Luau cleans it up to free memory.",
+  "analogy": "`nil` is like an empty parking space. The space exists, but there is no car in it. Setting something to `nil` is like driving the car away.",
+  "keyPoints": [
+    "`nil` means non-existence or nothingness. It is not the same as `0`, `false`, or an empty string.",
+    "Only `nil` and `false` count as false in an `if` check. Everything else counts as true.",
+    "Set a variable to `nil` to clear it, like `score = nil`.",
+    "Set a table key to `nil` to remove it, like `days.Tuesday = nil`.",
+    "Setting a part's `Parent` to `nil` removes it from view, but it still exists if a variable still points to it.",
+    "You can bring it back by setting `Parent` again, like `part.Parent = workspace`.",
+    "The garbage collector deletes data no script can reach anymore. Setting big unused variables to `nil` helps it."
+  ],
+  "terms": {
+    "nil": "The value that means \"nothing here\". Reading a variable that was never set gives `nil`.",
+    "evaluate to true": "What a value counts as in an `if` check. `5` counts as true; `nil` counts as false.",
+    "garbage collector": "Luau's automatic cleaner. It deletes values that no script can reach anymore, to free memory.",
+    "reference": "A variable that points to a value or object. While a reference exists, the object is kept.",
+    "Parent": "The object something sits inside in the Explorer. A part with Parent `nil` is not in the game world.",
+    "memory": "The space the computer uses to hold your game's data while it runs."
+  },
+  "example": {
+    "title": "Hide a part and bring it back",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = Workspace -- now you can see it\n\ntask.wait(2)\npart.Parent = nil -- gone from the world, but the variable still holds it\n\ntask.wait(2)\npart.Parent = Workspace -- it comes back\n\ntask.wait(2)\npart.Parent = nil\npart = nil -- no more references, so the garbage collector can delete it",
+    "explain": [
+      "The script makes a part and puts it in Workspace so you can see it.",
+      "After 2 seconds, setting `Parent` to `nil` removes it from the world.",
+      "Because the variable `part` still points to it, you can bring it back by setting `Parent` again.",
+      "At the end, setting both `Parent` and `part` to `nil` lets Luau clean it up."
+    ]
+  },
+  "watchOut": [
+    "Thinking `0` or `\"\"` is like `nil`. In Luau they both count as true.",
+    "Using a value that might be `nil`, like `part.Name` when `part` is `nil`. That causes an error, so check `if part then` first.",
+    "Thinking `Parent = nil` deletes an object forever. It just removes it from the world; use `:Destroy()` to really get rid of it."
+  ]
+}

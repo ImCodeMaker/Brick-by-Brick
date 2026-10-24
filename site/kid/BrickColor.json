@@ -1,0 +1,120 @@
+{
+  "name": "BrickColor",
+  "simple": "A BrickColor is a color picked from Roblox's fixed list of named colors, like \"Bright red\", \"Lime green\", or \"Pastel Blue\". Each one has a name and a number. It is the older, simpler way to color parts. For any exact color you want, use Color3 instead.",
+  "analogy": "BrickColor is like a box of crayons with a set number of colors, each with a name printed on it. Color3 is like a paint mixer where you can make any shade.",
+  "whenToUse": [
+    "Coloring a part by a friendly name, like BrickColor.new(\"Really red\")",
+    "Picking a random color from the list with BrickColor.random()",
+    "Checking a team's color, since Team.TeamColor is a BrickColor",
+    "Matching a part to the palette shown in Studio's color picker"
+  ],
+  "where": "Works in any script on the server or client. Make one with BrickColor.new, BrickColor.palette, BrickColor.random, or shortcuts like BrickColor.Red().",
+  "terms": {
+    "named color": "One of the colors in Roblox's built-in list, each with an exact name like \"Bright blue\".",
+    "Number": "Every BrickColor has an ID number. For example \"Pastel Blue\" is number 11.",
+    "palette": "A grid of 128 BrickColors, the same ones shown in Studio's BrickColor picker. Palette spots are numbered 0 to 127.",
+    "Color3": "The more flexible color type that can be any mix of red, green, and blue.",
+    "read-only": "You can look at the value but not change it."
+  },
+  "examples": [
+    {
+      "title": "Color a part three different ways",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = workspace\n\npart.BrickColor = BrickColor.new(\"Really red\") -- by name\ntask.wait(1)\npart.BrickColor = BrickColor.new(11)           -- by number (Pastel Blue)\ntask.wait(1)\npart.BrickColor = BrickColor.random()          -- a surprise color\nprint(part.BrickColor.Name)",
+      "explain": [
+        "We make an anchored part so it floats in place.",
+        "BrickColor.new(\"Really red\") picks a color by its exact name.",
+        "BrickColor.new(11) picks by number. 11 is Pastel Blue.",
+        "BrickColor.random() picks a random color from the 128-color palette, and we print its name."
+      ]
+    },
+    {
+      "title": "Turn a part a random color when touched",
+      "place": "Script inside a Part in Workspace",
+      "code": "local part = script.Parent\n\npart.Touched:Connect(function(otherPart)\n\t-- Only react to players, not other parts\n\tlocal humanoid = otherPart.Parent:FindFirstChildOfClass(\"Humanoid\")\n\tif humanoid then\n\t\tpart.BrickColor = BrickColor.random()\n\tend\nend)",
+      "explain": [
+        "script.Parent is the part this Script is inside.",
+        "Touched fires whenever something bumps the part.",
+        "We check for a Humanoid so only characters change the color.",
+        "BrickColor.random() gives a new random named color."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Names must match exactly, including spaces and capitals. If the name is wrong, you silently get \"Medium stone grey\" instead of an error.",
+    "BrickColor only has a fixed list of colors. If you need an exact shade, use part.Color with a Color3.",
+    "BrickColor.palette(n) errors if n is not between 0 and 127."
+  ],
+  "members": {
+    "BrickColor.new": {
+      "simple": "Makes a BrickColor. You can give it a name (\"Bright red\"), an ID number (11), three numbers from 0 to 1 for red, green, blue, or a Color3. With colors, it finds the closest named color in the list. If the name or number does not exist, you get \"Medium stone grey\".",
+      "example": "local byName = BrickColor.new(\"Pastel Blue\")\nlocal byNumber = BrickColor.new(11)               -- also Pastel Blue\nlocal byRGB = BrickColor.new(0.502, 0.734, 0.859) -- closest match: Pastel Blue\nlocal byColor3 = BrickColor.new(Color3.fromRGB(255, 0, 0)) -- closest to pure red\nprint(byName, byNumber, byRGB)",
+      "gotcha": "A typo in the name gives gray, not an error. Print the result if a color looks wrong."
+    },
+    "BrickColor.palette": {
+      "simple": "Makes a BrickColor from its spot in the 128-color palette (the grid in Studio's color picker). Spots go from 0 to 127.",
+      "example": "local gold = BrickColor.palette(70)\nprint(gold) --> Gold",
+      "gotcha": "Numbers outside 0 to 127 throw an error."
+    },
+    "BrickColor.random": {
+      "simple": "Gives a random BrickColor from the 128-color palette. Each call can give a different one.",
+      "example": "local part = workspace:FindFirstChild(\"Part\")\nif part then\n\tpart.BrickColor = BrickColor.random()\nend"
+    },
+    "BrickColor.White": {
+      "simple": "A shortcut that gives the \"White\" BrickColor.",
+      "example": "local part = Instance.new(\"Part\")\npart.BrickColor = BrickColor.White()\npart.Parent = workspace"
+    },
+    "BrickColor.Gray": {
+      "simple": "A shortcut that gives \"Medium stone grey\", the default gray. It is also what you get when a name or number is not found.",
+      "example": "print(BrickColor.Gray()) --> Medium stone grey"
+    },
+    "BrickColor.DarkGray": {
+      "simple": "A shortcut that gives the \"Dark stone grey\" BrickColor.",
+      "example": "print(BrickColor.DarkGray()) --> Dark stone grey"
+    },
+    "BrickColor.Black": {
+      "simple": "A shortcut that gives the \"Black\" BrickColor.",
+      "example": "print(BrickColor.Black()) --> Black"
+    },
+    "BrickColor.Red": {
+      "simple": "A shortcut that gives the \"Bright red\" BrickColor.",
+      "example": "print(BrickColor.Red()) --> Bright red"
+    },
+    "BrickColor.Yellow": {
+      "simple": "A shortcut that gives the \"Bright yellow\" BrickColor.",
+      "example": "print(BrickColor.Yellow()) --> Bright yellow"
+    },
+    "BrickColor.Green": {
+      "simple": "A shortcut that gives the \"Dark green\" BrickColor. Note it is dark green, not bright green.",
+      "example": "print(BrickColor.Green()) --> Dark green"
+    },
+    "BrickColor.Blue": {
+      "simple": "A shortcut that gives the \"Bright blue\" BrickColor.",
+      "example": "print(BrickColor.Blue()) --> Bright blue"
+    },
+    "BrickColor.Number": {
+      "simple": "The ID number of this BrickColor, the same number you can pass to BrickColor.new. Read-only.",
+      "example": "print(BrickColor.new(\"Pastel Blue\").Number) --> 11"
+    },
+    "BrickColor.r": {
+      "simple": "How much red is in this BrickColor, from 0 to 1. Same as .Color.R. Read-only.",
+      "example": "print(BrickColor.new(\"Really red\").r) --> 1"
+    },
+    "BrickColor.g": {
+      "simple": "How much green is in this BrickColor, from 0 to 1. Same as .Color.G. Read-only.",
+      "example": "print(BrickColor.new(\"Lime green\").g) --> 1"
+    },
+    "BrickColor.b": {
+      "simple": "How much blue is in this BrickColor, from 0 to 1. Same as .Color.B. Read-only.",
+      "example": "print(BrickColor.new(\"Really blue\").b) --> 1"
+    },
+    "BrickColor.Name": {
+      "simple": "The name of this BrickColor, like \"Pastel Blue\". It is the same text you can give to BrickColor.new. Read-only.",
+      "example": "local c = BrickColor.random()\nprint(\"You got: \" .. c.Name)"
+    },
+    "BrickColor.Color": {
+      "simple": "The same color as a Color3. Use it when something needs a Color3, like a GUI background, but you started with a BrickColor. Read-only.",
+      "example": "local label = Instance.new(\"TextLabel\")\nlabel.BackgroundColor3 = BrickColor.new(\"Bright orange\").Color"
+    }
+  }
+}

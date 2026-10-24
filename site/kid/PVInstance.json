@@ -1,0 +1,64 @@
+{
+  "name": "PVInstance",
+  "simple": "PVInstance is the family name for things that have a place in the 3D world, mainly parts and models. You never make one directly. Its job is to give parts and models two super useful tools: `GetPivot` (where is it?) and `PivotTo` (move it there).",
+  "analogy": "Think of a pivot like the handle on a suitcase. Wherever you carry the handle, the whole suitcase comes along. `PivotTo` moves the handle, and everything attached moves with it, keeping the same shape.",
+  "whenToUse": [
+    "Move a whole Model (like a car or a house) to a new spot with `PivotTo`.",
+    "Teleport a player's character by calling `PivotTo` on the character model.",
+    "Find out where a model or part is (and which way it faces) with `GetPivot`."
+  ],
+  "where": "Built into every BasePart (Part, MeshPart, and so on) and every Model. Works in both Scripts (server) and LocalScripts (client).",
+  "terms": {
+    "pivot": "The handle point of a part or model. It has a position and a facing direction. For a plain part it is at the very center unless you change `PivotOffset`.",
+    "CFrame": "Short for coordinate frame. One value that holds BOTH a position (where) and a rotation (which way it faces).",
+    "Model": "A container that groups several parts into one object, like a car made of wheels, seats, and a body.",
+    "stud": "Roblox's unit of distance. A default Part is 4 studs long, 1 stud tall, and 2 studs wide.",
+    "world space": "Positions measured from the center of the whole map, the point (0, 0, 0).",
+    "abstract class": "A family name that groups related classes. You cannot create one with `Instance.new`; you create one of its members instead.",
+    "radians": "Another way to measure turning. A full circle is about 6.28 radians instead of 360 degrees. `math.rad(90)` converts 90 degrees to radians."
+  },
+  "examples": [
+    {
+      "title": "Teleport a player when they touch a pad",
+      "place": "Script inside a Part named TeleportPad in Workspace",
+      "code": "local pad = script.Parent\nlocal destination = CFrame.new(0, 50, 0) -- 50 studs above the center of the map\n\npad.Touched:Connect(function(hit)\n\tlocal character = hit.Parent\n\tlocal humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n\tif humanoid then\n\t\t-- Move the WHOLE character model, keeping its body parts together\n\t\tcharacter:PivotTo(destination)\n\tend\nend)",
+      "explain": [
+        "When something touches the pad, `hit` is the body part that touched it, and `hit.Parent` is the character model.",
+        "We check for a Humanoid so we only teleport characters, not random parts.",
+        "`PivotTo` moves the character's pivot to (0, 50, 0). Every body part moves by the same amount, so the character stays in one piece."
+      ]
+    },
+    {
+      "title": "Slide a model 10 studs to the right",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\nlocal house = Workspace:WaitForChild(\"House\") -- a Model\n\nlocal current = house:GetPivot()            -- where it is now\nprint(current.Position)                       -- e.g. 20, 0, 5\n\n-- Add an offset of (10, 0, 0): 10 studs along the world X axis\nhouse:PivotTo(current + Vector3.new(10, 0, 0))\nprint(house:GetPivot().Position)              -- 30, 0, 5",
+      "explain": [
+        "`GetPivot()` gives the model's current CFrame (position + rotation).",
+        "Adding a Vector3 to a CFrame moves it without turning it. A pivot at (20, 0, 5) plus (10, 0, 0) lands at (30, 0, 5).",
+        "`PivotTo` moves the model there. Its rotation stays the same."
+      ]
+    }
+  ],
+  "gotchas": [
+    "To move a Model, use `PivotTo`. Do not set each part's Position one by one; the parts can get out of line.",
+    "Calling `PivotTo` on a part that is welded to others also moves those welded parts, because they are attached.",
+    "`PivotTo` does not fire the Position or Orientation changed events on the parts it moves, only the CFrame one."
+  ],
+  "members": {
+    "PVInstance.Origin": {
+      "simple": "Studio-only. In the Properties window it shows as Origin Position and Origin Orientation: where the pivot is in the world. Changing it in Studio moves the whole object. Scripts cannot use it; use `GetPivot` and `PivotTo` instead."
+    },
+    "PVInstance.Pivot Offset": {
+      "simple": "Studio-only. In the Properties window it shows as Pivot Position and Pivot Orientation: where the pivot sits compared to the object itself. Changing it moves just the handle, not the object. Scripts cannot use it here; on a part, use `BasePart.PivotOffset` instead."
+    },
+    "PVInstance:GetPivot": {
+      "simple": "Gives you the pivot as a CFrame: where the object's handle point is in the world, and which way it faces. For a plain part this is the same as its CFrame.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal car = Workspace:WaitForChild(\"Car\")\nlocal pivot = car:GetPivot()\nprint(\"Car is at\", pivot.Position)\nprint(\"Car is facing\", pivot.LookVector)"
+    },
+    "PVInstance:PivotTo": {
+      "simple": "Moves (and turns) the object so its pivot ends up exactly at the CFrame you give. Everything inside a model moves along with it and keeps the same shape. This is the main way to move models from code.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal car = Workspace:WaitForChild(\"Car\")\n-- Put the car at (0, 5, 0), turned 90 degrees to the left\ncar:PivotTo(CFrame.new(0, 5, 0) * CFrame.Angles(0, math.rad(90), 0))",
+      "gotcha": "`CFrame.Angles` takes radians, not degrees. Use `math.rad(90)` to turn 90 degrees into radians."
+    }
+  }
+}

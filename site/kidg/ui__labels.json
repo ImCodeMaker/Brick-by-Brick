@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/ui/labels.md",
+  "simple": "Labels are how you show words and pictures in your game's UI. A `TextLabel` is a box with text in it, and an `ImageLabel` is a box with a picture in it. You can put them on the player's screen or on the side of a part, like a poster. Players can look at labels, but they cannot click them; for that you would use a button.",
+  "analogy": "Labels are like the signs and stickers in a store: they tell you things and show pictures, but pressing them does nothing.",
+  "keyPoints": [
+    "`TextLabel` is the main way to show text in a game, and `ImageLabel` shows a picture.",
+    "For on-screen labels: add a `ScreenGui` to `StarterGui`, then add a `TextLabel` or `ImageLabel` inside it.",
+    "For labels on a part: add a `SurfaceGui` to the part, then add the label inside the `SurfaceGui`.",
+    "If you cannot see a label on a part, try a different `Face` on the `SurfaceGui`.",
+    "Images must be imported to Studio as assets before an `ImageLabel` can show them.",
+    "Images stretch to fit the box but look best at their original size.",
+    "`ImageColor3` tints the image, `ImageTransparency` fades it, and `BackgroundTransparency` set to 1 hides the box behind it."
+  ],
+  "terms": {
+    "GuiObject": "Any 2D UI piece, like a label, button, or frame.",
+    "asset": "A file uploaded to Roblox, like an image, with its own ID.",
+    "native resolution": "The image's real size in pixels. A 256 by 256 image looks sharpest when shown at 256 by 256.",
+    "transparency": "How see-through something is. 0 is solid, 1 is invisible, 0.5 is half see-through.",
+    "ImageColor3": "A color mixed over the image. White leaves it unchanged; red makes it reddish.",
+    "SurfaceGui": "A container that puts UI onto one face of a part."
+  },
+  "example": {
+    "title": "Show a coin counter on screen",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal player = Players.LocalPlayer\nlocal playerGui = player:WaitForChild(\"PlayerGui\")\n\n-- A ScreenGui holds on-screen UI\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Name = \"CoinGui\"\nscreenGui.Parent = playerGui\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.fromOffset(200, 50) -- 200 pixels wide, 50 tall\nlabel.Position = UDim2.fromOffset(20, 20) -- 20 pixels from top-left\nlabel.BackgroundTransparency = 1 -- hide the box, keep the text\nlabel.TextColor3 = Color3.fromRGB(255, 215, 0) -- gold\nlabel.TextSize = 32\nlabel.Text = \"Coins: 0\"\nlabel.Parent = screenGui",
+    "explain": [
+      "We find this player's `PlayerGui`, where on-screen UI lives.",
+      "We create a `ScreenGui` to hold our label.",
+      "We create a `TextLabel`, size it, and place it near the top-left corner.",
+      "We hide the background box, color the text gold, and set the text.",
+      "Later, you can change `label.Text` to show the new coin count."
+    ]
+  },
+  "watchOut": [
+    "Labels cannot be clicked. If you need clicks, use a `TextButton` or `ImageButton`.",
+    "An `ImageLabel` with a blank `Image` shows only a plain box. Make sure you set a real image asset ID.",
+    "If the white box behind your text looks ugly, set `BackgroundTransparency` to 1."
+  ]
+}

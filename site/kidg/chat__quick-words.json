@@ -1,0 +1,32 @@
+{
+  "path": "content/en-us/chat/quick-words.md",
+  "simple": "Quick Words is Roblox's built-in set of ready-made chat phrases that players of all ages can send safely. You can add your own Quick Words for your game, like \"Defend the flag\" or \"Ready\", from the Creator Hub. Roblox checks them against its safety rules before they go live. It is the easy way to help players team up without building your own preset system.",
+  "analogy": "Quick Words are like the quick-reply buttons on a phone that say \"On my way\" or \"OK\": tap once and the message is sent, no typing needed.",
+  "keyPoints": [
+    "Go to Creator Hub, pick your game, then Configure, Chat, Quick Words.",
+    "Add up to 3 custom categories, each with 3 to 10 Quick Words.",
+    "Each Quick Word must be under 25 characters and written in English. Roblox translates them into each player's chat language automatically.",
+    "Custom categories replace Roblox's default categories, but the General category stays available everywhere.",
+    "When you publish, Roblox reviews your Quick Words against the preset system guidelines. If one is not approved, fix it and publish again.",
+    "Approved Quick Words show up in the Here and Global tabs of the chat window.",
+    "You can save a draft before publishing, and you can revert to Roblox's default Quick Words anytime.",
+    "Quick Words move through four states: Draft, Pending, Not approved, and Published."
+  ],
+  "terms": {
+    "Quick Words": "Roblox's built-in set of safe, ready-made phrases players can send.",
+    "preset system": "Any feature that lets players send pre-written messages instead of typing.",
+    "category": "A group of related Quick Words, like a Coordination group with \"Follow me\" and \"Wait\".",
+    "Creator Hub": "Roblox's website for managing your games, at create.roblox.com.",
+    "draft": "Saved changes that are not live yet.",
+    "pending": "Roblox is still checking your Quick Words.",
+    "policy check": "Roblox's review that makes sure your phrases follow its safety rules.",
+    "character": "One letter, number, space, or symbol. \"Need help\" is 9 characters."
+  },
+  "watchOut": [
+    "Writing open-ended questions or social phrases like \"How are you\". They will not be approved; stick to gameplay.",
+    "Phrases that are 25 characters or longer. Keep them short.",
+    "Writing Quick Words in a language other than English. Enter them in English and let Roblox translate.",
+    "Forgetting that custom categories replace Roblox's default ones. Make sure your set covers what players need.",
+    "Expecting changes right away. They must pass review (Pending) before they are Published."
+  ]
+}

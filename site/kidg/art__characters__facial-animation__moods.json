@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/art/characters/facial-animation/moods.md",
+  "simple": "A mood is a facial expression that keeps playing on a character with an animated head, like a smile or an open mouth. It loops forever and plays together with walking, climbing, and swimming. This page shows how to make your own mood in the Face Animation Editor, how to give characters a mood with a script, and how to turn moods off.",
+  "analogy": "A mood is like the expression you wear all day. You can still walk, run, and jump, but your face keeps that same look until something changes it.",
+  "keyPoints": [
+    "Moods only work on dynamic heads, which are heads that can animate.",
+    "A mood is one kind of facial animation. Any animation that moves the face is a facial animation, but only the one in the mood slot is the mood.",
+    "To make one: open the Animation Editor from the Avatar tab, select your character, click Face, and move sliders for the face parts.",
+    "Save it with the ... button > Save. It appears under `AnimSaves` in the rig. Save to Roblox gives it an asset ID you can use in any game.",
+    "Each animated-head character has an `Animate` LocalScript with a `mood` StringValue. Its `Animation1.AnimationId` decides the mood.",
+    "Change a mood by setting that `AnimationId` in a server Script when the character's appearance loads.",
+    "Disable moods by destroying the `mood` object under `Animate`."
+  ],
+  "terms": {
+    "mood": "A face animation that loops forever on a character, like a constant smile.",
+    "dynamic head": "A character head that can move its face, like blinking or smiling.",
+    "facial animation": "Any animation that moves parts of the face, such as eyebrows, eyes, or mouth.",
+    "loop": "Play again from the start every time it ends, over and over.",
+    "blend": "Mix two animations together. A walk animation with a face part mixes with the mood.",
+    "Face Animation Editor": "A Studio panel with sliders for each face part, used to make face animations.",
+    "keyframe": "A saved pose at a certain moment. The animation moves smoothly between keyframes.",
+    "AnimationId": "The asset ID of an animation, written like `rbxassetid://7715145252`.",
+    "StringValue": "An object that holds a piece of text. Here, the `mood` StringValue holds the mood animation.",
+    "CharacterAppearanceLoaded": "An event that fires when a player's character has finished loading its look, including the Animate script."
+  },
+  "example": {
+    "title": "Give every player an open-mouth mood",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal OPEN_MOUTH_MOOD = \"rbxassetid://7715145252\"\n\nlocal function onCharacterLoaded(character)\n\tlocal animateScript = character:WaitForChild(\"Animate\")\n\tlocal mood = animateScript:FindFirstChild(\"mood\")\n\tif mood then\n\t\t-- Swap the mood animation for our own\n\t\tmood.Animation1.AnimationId = OPEN_MOUTH_MOOD\n\tend\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAppearanceLoaded:Connect(onCharacterLoaded)\nend)",
+    "explain": [
+      "When a player joins, we wait for their character's look to finish loading.",
+      "We find the `Animate` script and the `mood` object inside it.",
+      "We set `mood.Animation1.AnimationId` to the open-mouth animation, so the character's face keeps that look.",
+      "This only shows on characters with animated heads."
+    ]
+  },
+  "watchOut": [
+    "Trying to edit the code that plays moods. It is hidden inside Roblox. Change the `mood` StringValue instead.",
+    "Using `CharacterAdded` and finding no `Animate` script yet. `CharacterAppearanceLoaded` waits until the look is ready.",
+    "Expecting moods on classic non-animated heads. Only dynamic heads can show them."
+  ]
+}

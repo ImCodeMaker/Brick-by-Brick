@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/luau/scope.md",
+  "simple": "Scope means where in your script a variable can be seen and used. A `local` variable only exists inside the block of code where you made it, like inside a function or loop. Inner blocks can see variables from outer blocks, but outer blocks cannot peek inside inner ones. Understanding scope stops a lot of confusing bugs, like a variable suddenly being `nil`.",
+  "analogy": "Scope is like rooms in a house with one-way windows. From a small inner room you can look out and see everything in the bigger rooms around you, but people in the big rooms cannot see into the small room.",
+  "keyPoints": [
+    "A block is the body of a function, loop, or `if` statement.",
+    "Local variables can be used in the block where they are made and in any blocks inside it, but not outside.",
+    "Global variables (no `local`) can be used anywhere in the same script, but not from other scripts.",
+    "Prefer `local`: it is faster (globals can make a busy loop more than 10% slower) and is cleaned up when its block ends.",
+    "To share values between scripts, use a ModuleScript.",
+    "Capturing: a function can use a local variable from the block around it. That captured variable is called an upvalue.",
+    "Shadowing: making a new `local` with the same name inside an inner block. The outer one is not changed.",
+    "`const` variables follow the same scope rules as `local` ones."
+  ],
+  "terms": {
+    "scope": "The area of code where a variable or function can be used.",
+    "block": "A chunk of code inside a function, loop, or `if`, usually ending with `end`.",
+    "parent block / child block": "A child block sits inside a parent block. A loop inside a function is the function's child block.",
+    "local scope": "Only usable in the block where it was made (and blocks inside it).",
+    "global scope": "Usable anywhere in the same script.",
+    "hash lookup": "A slower way Luau finds global variables, by searching for the name each time.",
+    "capture": "When a function uses a local variable from outside itself.",
+    "upvalue": "A local variable from an outer block that a function uses (captures).",
+    "shadowing": "Making a new local with the same name in an inner block. Inside, the new one hides the outer one; outside, the outer one is unchanged.",
+    "ModuleScript": "A special script that returns values or functions other scripts can load with `require`."
+  },
+  "example": {
+    "title": "See scope and shadowing in action",
+    "place": "Script in ServerScriptService",
+    "code": "local score = 10 -- local to the whole script\n\nlocal function addBonus()\n\t-- This function can see score from the outer block (capture)\n\tscore += 5\n\tlocal bonusText = \"Bonus added!\" -- only exists inside this function\n\tprint(bonusText)\nend\n\naddBonus()\nprint(score) --> 15\nprint(bonusText) --> nil (it was local to addBonus)\n\nfor i = 1, 2 do\n\tlocal score = 100 -- a new shadow variable, only inside the loop\n\tprint(\"Loop score:\", score) --> 100\nend\n\nprint(\"Real score:\", score) --> 15 (unchanged by the loop)",
+    "explain": [
+      "`score` is made at the top, so everything below can use it.",
+      "`addBonus` captures `score` and changes it from 10 to 15.",
+      "`bonusText` lives only inside `addBonus`, so printing it outside gives `nil`.",
+      "Inside the loop, `local score = 100` makes a separate variable that hides the outer one.",
+      "After the loop, the original `score` is still 15."
+    ]
+  },
+  "watchOut": [
+    "Using a variable outside the block it was made in. It will be `nil`; declare it in an outer block instead.",
+    "Accidentally shadowing. Writing `local score = ...` inside a function makes a new variable instead of changing the outer one.",
+    "Forgetting `local` inside a function. That makes a global by mistake.",
+    "Expecting another script to see your variables. Use a ModuleScript to share them."
+  ]
+}

@@ -1,0 +1,307 @@
+{
+  "name": "GuiObject",
+  "simple": "GuiObject is the base for every visible 2D UI piece: Frame, TextLabel, TextButton, TextBox, ImageLabel, ImageButton, ScrollingFrame and more. It gives all of them the important stuff: where they are (Position), how big they are (Size), which point they are placed by (AnchorPoint), which one is drawn on top (ZIndex), their background color, and whether they show at all (Visible). Learn these once and you know them for every UI object.",
+  "analogy": "Think of a bulletin board covered in paper notes. Every note, whether it's a picture, a sticky note, or a button, has a spot on the board, a size, a color, and can be on top of or under other notes. GuiObject is the rules every note follows.",
+  "whenToUse": [
+    "Placing UI on the screen with Position and sizing it with Size",
+    "Centering something with AnchorPoint",
+    "Making one piece of UI draw on top of another with ZIndex",
+    "Showing or hiding UI with Visible",
+    "Changing background color or making a background see-through",
+    "Reacting when the mouse hovers over, or a finger touches, any UI piece"
+  ],
+  "where": "Client side, inside a ScreenGui (on the screen), SurfaceGui (on a part's face), or BillboardGui (floating over something in the world). You can't create a plain GuiObject; you create a Frame, TextLabel, and so on. UI code goes in a LocalScript, for example inside StarterGui or in StarterPlayerScripts.",
+  "terms": {
+    "UI / GUI": "User Interface / Graphical User Interface: the buttons, menus, health bars and text drawn on top of the game.",
+    "UDim2": "The kind of value Position and Size use. It holds 4 numbers: X Scale, X Offset, Y Scale, Y Offset. UDim2.new(0.5, 20, 0, 100) means X = 50% + 20 pixels, Y = 0% + 100 pixels.",
+    "Scale": "A fraction of the PARENT's size, from 0 to 1. 0.5 means 50% (half) of the parent. On a 1000-pixel-wide screen, X Scale 0.5 = 500 pixels. On a 2000-pixel screen it becomes 1000 pixels, so it grows with the screen.",
+    "Offset": "An exact number of pixels that never changes with screen size. X Offset 20 always means 20 pixels.",
+    "parent": "The object something is placed inside. A Frame inside a ScreenGui has the ScreenGui as its parent. Scale is measured against the parent's size.",
+    "AnchorPoint": "The point on the object that Position puts in place. (0, 0) is the top-left corner (the default), (0.5, 0.5) is the exact middle, (1, 1) is the bottom-right corner.",
+    "ZIndex": "A layer number. Higher numbers are drawn on top of lower numbers, like stacking paper.",
+    "pixel": "One tiny dot on the screen.",
+    "transparency": "How see-through something is. 0 = fully solid, 1 = fully invisible, 0.5 = half see-through.",
+    "Color3": "A color made from red, green and blue. Color3.fromRGB(255, 0, 0) is bright red.",
+    "Vector2": "Two numbers together: X (left-right) and Y (up-down).",
+    "LocalScript": "A script that runs on the player's own device. All UI code goes in LocalScripts, because each player has their own copy of the UI.",
+    "event": "Something that happens, like a mouse entering a button. You use :Connect(function) to run your code when it happens.",
+    "sink input": "To 'catch' a click or touch so it doesn't also go through to the 3D world behind the UI.",
+    "gamepad": "A game controller.",
+    "clip": "To cut off and hide the parts that stick outside the edges.",
+    "descendant": "Anything inside an object: children, grandchildren, and so on.",
+    "tween": "A smooth animation from one value to another over time, done with TweenService.",
+    "deprecated": "Old and replaced by something better. Don't use it in new code."
+  },
+  "examples": [
+    {
+      "title": "Position and Size: Scale vs Offset with real numbers",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\n-- A ScreenGui is the 'canvas' that shows UI on the player's screen\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Name = \"SizeDemo\"\nscreenGui.Parent = playerGui\n\n-- Offset only: always exactly 200 x 100 pixels, 50 pixels from the left and top\nlocal fixedBox = Instance.new(\"Frame\")\nfixedBox.Size = UDim2.fromOffset(200, 100)    -- same as UDim2.new(0, 200, 0, 100)\nfixedBox.Position = UDim2.fromOffset(50, 50)  -- same as UDim2.new(0, 50, 0, 50)\nfixedBox.BackgroundColor3 = Color3.fromRGB(255, 80, 80)\nfixedBox.Parent = screenGui\n\n-- Scale only: always a quarter of the screen wide and tall\nlocal stretchyBox = Instance.new(\"Frame\")\nstretchyBox.Size = UDim2.fromScale(0.25, 0.25)   -- 25% of the screen width and height\nstretchyBox.Position = UDim2.fromScale(0.7, 0.1) -- starts 70% across, 10% down\nstretchyBox.BackgroundColor3 = Color3.fromRGB(80, 160, 255)\nstretchyBox.Parent = screenGui\n\n-- Mixed: half the screen wide plus 20 pixels, and exactly 40 pixels tall\nlocal bar = Instance.new(\"Frame\")\nbar.Size = UDim2.new(0.5, 20, 0, 40)\nbar.Position = UDim2.new(0, 50, 1, -60) -- 50 px from left, 60 px up from the BOTTOM\nbar.BackgroundColor3 = Color3.fromRGB(80, 220, 120)\nbar.Parent = screenGui",
+      "explain": [
+        "Imagine the screen area is 1000 pixels wide and 600 pixels tall.",
+        "fixedBox uses Offset only. It is 200x100 pixels at (50, 50) on every screen, big or small.",
+        "stretchyBox uses Scale only. 0.25 of 1000 = 250 pixels wide, 0.25 of 600 = 150 pixels tall. Its left edge is at 0.7 x 1000 = 700 pixels, top edge at 0.1 x 600 = 60 pixels. On a bigger screen it gets bigger too.",
+        "bar mixes both. Width = 0.5 x 1000 + 20 = 520 pixels. Height = 0 x 600 + 40 = 40 pixels.",
+        "bar's Position Y is (1, -60): Scale 1 means 'the very bottom' (100% down = 600 pixels), then Offset -60 moves it 60 pixels back up, so its top edge is at 540 pixels. This is a great trick for sticking things near the bottom or right edge.",
+        "UDim2.fromOffset(x, y) and UDim2.fromScale(x, y) are shortcuts when you only need one kind."
+      ]
+    },
+    {
+      "title": "Center a frame with AnchorPoint",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Name = \"CenterDemo\"\nscreenGui.Parent = playerGui\n\nlocal popup = Instance.new(\"Frame\")\npopup.Size = UDim2.fromOffset(300, 200)       -- 300 wide, 200 tall\npopup.AnchorPoint = Vector2.new(0.5, 0.5)     -- place it by its MIDDLE, not its top-left\npopup.Position = UDim2.fromScale(0.5, 0.5)    -- put that middle at the middle of the screen\npopup.BackgroundColor3 = Color3.fromRGB(40, 40, 60)\npopup.BackgroundTransparency = 0              -- 0 = solid\npopup.Parent = screenGui\n\nprint(\"Top-left corner really is at\", popup.AbsolutePosition)",
+      "explain": [
+        "Say the screen area is 1000 x 600 pixels. Position (0.5, 0.5) is the point (500, 300), the center of the screen.",
+        "Without AnchorPoint (the default is (0, 0), the top-left corner), the frame's TOP-LEFT corner would sit at (500, 300). The frame would hang down and to the right, not centered.",
+        "With AnchorPoint (0.5, 0.5), the frame's MIDDLE sits at (500, 300). Half the width (150) goes left and half the height (100) goes up, so the top-left corner ends up at (350, 200). Perfectly centered on any screen size.",
+        "AbsolutePosition prints the real top-left corner, (350, 200) on our pretend screen.",
+        "Same trick for other spots: AnchorPoint (1, 1) with Position (1, 1) sticks something into the bottom-right corner."
+      ]
+    },
+    {
+      "title": "Layer things with ZIndex and see-through backgrounds",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal back = Instance.new(\"Frame\")\nback.Size = UDim2.fromOffset(200, 200)\nback.Position = UDim2.fromOffset(100, 100)\nback.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- red\nback.ZIndex = 1\nback.Parent = screenGui\n\nlocal front = Instance.new(\"Frame\")\nfront.Size = UDim2.fromOffset(200, 200)\nfront.Position = UDim2.fromOffset(180, 180) -- overlaps the red one\nfront.BackgroundColor3 = Color3.fromRGB(0, 0, 255) -- blue\nfront.BackgroundTransparency = 0.5 -- half see-through, so you can see red behind it\nfront.ZIndex = 2 -- higher number = drawn on top\nfront.Parent = screenGui\n\ntask.wait(3)\nfront.Visible = false -- hide the blue frame after 3 seconds",
+      "explain": [
+        "Both frames are siblings (they share the same parent), so ZIndex decides who is on top. Blue has ZIndex 2, red has 1, so blue is drawn over red.",
+        "BackgroundTransparency 0.5 makes the blue background half see-through. 0 would be solid, 1 would be completely invisible.",
+        "task.wait(3) pauses for 3 seconds, then Visible = false hides the blue frame (and anything inside it)."
+      ]
+    },
+    {
+      "title": "Make a box grow when the mouse hovers over it",
+      "place": "LocalScript inside a Frame (in a ScreenGui in StarterGui)",
+      "code": "local TweenService = game:GetService(\"TweenService\")\nlocal frame = script.Parent\n\nlocal normalSize = frame.Size\nlocal bigSize = UDim2.new(normalSize.X.Scale * 1.1, normalSize.X.Offset * 1.1, normalSize.Y.Scale * 1.1, normalSize.Y.Offset * 1.1)\nlocal info = TweenInfo.new(0.15) -- animation takes 0.15 seconds\n\nframe.MouseEnter:Connect(function()\n\tTweenService:Create(frame, info, {Size = bigSize}):Play()\nend)\n\nframe.MouseLeave:Connect(function()\n\tTweenService:Create(frame, info, {Size = normalSize}):Play()\nend)",
+      "explain": [
+        "We remember the frame's starting Size, then make a version 10% bigger.",
+        "MouseEnter fires when the mouse moves onto the frame; we smoothly grow it with TweenService.",
+        "MouseLeave fires when the mouse moves off; we shrink it back.",
+        "Tip: set AnchorPoint to (0.5, 0.5) so it grows from the middle instead of from the top-left corner."
+      ]
+    }
+  ],
+  "gotchas": [
+    "UI code belongs in a LocalScript (or a Script with RunContext set to Client). A normal server Script can't see the player's screen or mouse.",
+    "Scale is a fraction from 0 to 1, not a percent. 0.5 means half. Typing 50 into Scale means 50 times the parent size, way off the screen.",
+    "Offset-only UI looks tiny on big monitors and huge on small phones. Use Scale for things that should fit any screen, and Offset for small fixed things like padding.",
+    "Scale is measured against the PARENT, not always the whole screen. A child frame with Size (0.5, 0.5) inside a 200x200 frame is 100x100 pixels.",
+    "AnchorPoint changes which point Position sets. If something looks shifted, check AnchorPoint before changing Position.",
+    "ZIndex only compares siblings by default (ZIndexBehavior Sibling). Children are always drawn on top of their parent, no matter their ZIndex.",
+    "BackgroundTransparency 1 hides the background AND the border, but not text or images. Use Visible = false to hide the whole thing and everything inside it.",
+    "LayoutOrder and ZIndex are different: LayoutOrder decides the order in a list or grid layout, ZIndex decides what is drawn on top."
+  ],
+  "members": {
+    "GuiObject.Active": {
+      "simple": "Decides whether this UI 'catches' clicks so they don't fall through to 3D things behind it (like a ClickDetector on a part). For buttons, it also decides whether the Activated event fires.",
+      "example": "local panel = script.Parent -- a Frame\npanel.Active = true -- clicks on this panel won't reach parts behind it",
+      "gotcha": "For finer control there is the newer InputSink property."
+    },
+    "GuiObject.AnchorPoint": {
+      "simple": "Chooses which point of the object Position puts in place, as fractions of the object's own size from 0 to 1. (0, 0) is the top-left corner (default), (0.5, 0.5) is the center, (1, 1) is the bottom-right. Size also grows outward from this point. For a 200x100 frame, AnchorPoint (0.5, 0.5) means the point 100 pixels in and 50 pixels down.",
+      "example": "local frame = script.Parent\n-- Perfectly center the frame on the screen\nframe.AnchorPoint = Vector2.new(0.5, 0.5)\nframe.Position = UDim2.fromScale(0.5, 0.5)",
+      "gotcha": "Changing AnchorPoint makes the frame jump, because Position now places a different point. Set both together."
+    },
+    "GuiObject.AutomaticSize": {
+      "simple": "Lets the object grow to fit what's inside it, like text that gets longer. Choose X (grow wider), Y (grow taller), XY (both) or None (default). The normal Size then acts as the smallest it can be.",
+      "example": "local label = script.Parent -- a TextLabel\nlabel.Size = UDim2.fromOffset(200, 0) -- 200 wide, no minimum height\nlabel.TextWrapped = true\nlabel.AutomaticSize = Enum.AutomaticSize.Y -- grows taller to fit all the text\nlabel.Text = \"This is a long message that will wrap onto several lines.\"",
+      "gotcha": "Don't use AutomaticSize and TextScaled together on the same label; they fight each other."
+    },
+    "GuiObject.BackgroundColor": {
+      "simple": "Old — use BackgroundColor3 instead."
+    },
+    "GuiObject.BackgroundColor3": {
+      "simple": "The fill color of the object's background rectangle. Pick colors that contrast with any text on top so it's easy to read.",
+      "example": "local frame = script.Parent\nframe.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- dark gray"
+    },
+    "GuiObject.BackgroundTransparency": {
+      "simple": "How see-through the background (and border) is. 0 = completely solid, 1 = completely invisible, 0.5 = half see-through. It does NOT affect text or images on the object; those have their own transparency.",
+      "example": "local label = script.Parent -- a TextLabel\nlabel.BackgroundTransparency = 1 -- hide the box, show only the text",
+      "gotcha": "Want to hide everything, including text and children? Use Visible = false instead."
+    },
+    "GuiObject.BorderColor": {
+      "simple": "Old — use BorderColor3 instead."
+    },
+    "GuiObject.BorderColor3": {
+      "simple": "The color of the simple rectangle border around the object. You won't see it if BorderSizePixel is 0.",
+      "example": "local frame = script.Parent\nframe.BorderSizePixel = 3\nframe.BorderColor3 = Color3.fromRGB(255, 255, 255) -- white border",
+      "gotcha": "For rounded or fancier borders, add a UIStroke instead."
+    },
+    "GuiObject.BorderMode": {
+      "simple": "Decides where the simple border is drawn: Outline (outside the edge, default), Middle (half in, half out), or Inset (inside the edge).",
+      "example": "local frame = script.Parent\nframe.BorderMode = Enum.BorderMode.Inset -- border stays inside the frame's size"
+    },
+    "GuiObject.BorderSizePixel": {
+      "simple": "How thick the simple border is, in pixels. 0 means no border at all.",
+      "example": "local frame = script.Parent\nframe.BorderSizePixel = 0 -- no border, clean look"
+    },
+    "GuiObject.ClipsDescendants": {
+      "simple": "When true, anything inside this object that sticks out past its edges gets cut off and hidden, like looking through a window frame. Great for health bars and sliding panels.",
+      "example": "local window = script.Parent\nwindow.ClipsDescendants = true -- children can't draw outside this frame",
+      "gotcha": "It doesn't clip to rounded UICorner corners, and it may be ignored if this object or a parent is rotated."
+    },
+    "GuiObject.Draggable": {
+      "simple": "Old — use a UIDragDetector instead."
+    },
+    "GuiObject.GuiState": {
+      "simple": "Read-only. Tells you what is happening to this object right now: Idle, Hover, Press, or NonInteractable (when Interactable is false).",
+      "example": "local button = script.Parent\nbutton:GetPropertyChangedSignal(\"GuiState\"):Connect(function()\n\tprint(\"Button state is now\", button.GuiState)\nend)"
+    },
+    "GuiObject.InputSink": {
+      "simple": "A more detailed version of Active. Decides how much input this object catches so it doesn't go through to things behind it. None = catches nothing, Activate = catches presses and taps used to click it (the default for buttons), All = catches everything over it.",
+      "example": "local panel = script.Parent\npanel.InputSink = Enum.InputSink.All -- nothing passes through this panel"
+    },
+    "GuiObject.Interactable": {
+      "simple": "When false, a button can't be clicked or pressed at all, and GuiState stays NonInteractable. Handy for greying out a 'Buy' button the player can't afford.",
+      "example": "local buyButton = script.Parent -- a TextButton\nbuyButton.Interactable = false -- can't be clicked right now\nbuyButton.BackgroundTransparency = 0.5 -- look faded so the player knows"
+    },
+    "GuiObject.LayoutOrder": {
+      "simple": "A number that decides the order this object appears in when a UIListLayout, UIGridLayout or UIPageLayout is arranging it, and that layout's SortOrder is LayoutOrder. Lower numbers come first. Equal numbers fall back to the order they were added.",
+      "example": "-- Three buttons inside a Frame that has a UIListLayout with SortOrder = LayoutOrder\nlocal frame = script.Parent\nframe.PlayButton.LayoutOrder = 100     -- first\nframe.SettingsButton.LayoutOrder = 200 -- second\nframe.QuitButton.LayoutOrder = 300     -- third",
+      "gotcha": "Does nothing without a layout object next to it. Use gaps like 100, 200, 300 so you can slip something in between later (150). Not the same as ZIndex, which is about what's drawn on top."
+    },
+    "GuiObject.NextSelectionDown": {
+      "simple": "For gamepad players: which UI object gets selected when they press DOWN while this one is selected. Empty means pressing down won't move here.",
+      "example": "local playButton = script.Parent.PlayButton\nlocal quitButton = script.Parent.QuitButton\nplayButton.NextSelectionDown = quitButton"
+    },
+    "GuiObject.NextSelectionLeft": {
+      "simple": "For gamepad players: which UI object gets selected when they press LEFT while this one is selected.",
+      "example": "local rightButton = script.Parent.RightButton\nrightButton.NextSelectionLeft = script.Parent.LeftButton"
+    },
+    "GuiObject.NextSelectionRight": {
+      "simple": "For gamepad players: which UI object gets selected when they press RIGHT while this one is selected.",
+      "example": "local leftButton = script.Parent.LeftButton\nleftButton.NextSelectionRight = script.Parent.RightButton"
+    },
+    "GuiObject.NextSelectionUp": {
+      "simple": "For gamepad players: which UI object gets selected when they press UP while this one is selected.",
+      "example": "local quitButton = script.Parent.QuitButton\nquitButton.NextSelectionUp = script.Parent.PlayButton"
+    },
+    "GuiObject.Position": {
+      "simple": "Where the object goes inside its parent, as a UDim2: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction of the parent's size, Offset is extra pixels. On a 1000x600 screen, UDim2.new(0.5, 20, 0, 100) puts the object's AnchorPoint at x = 0.5 x 1000 + 20 = 520 and y = 0 x 600 + 100 = 100.",
+      "example": "local frame = script.Parent\nframe.Position = UDim2.new(0.5, 20, 0, 100) -- 50% across + 20 px, 100 px down\nframe.Position = UDim2.fromScale(0.1, 0.1)  -- 10% across, 10% down\nframe.Position = UDim2.fromOffset(50, 50)   -- exactly 50 px across, 50 px down",
+      "gotcha": "Position places the AnchorPoint, which is the top-left corner unless you changed it. Inside a list or grid layout, Position is ignored."
+    },
+    "GuiObject.Rotation": {
+      "simple": "Turns the object by this many degrees, clockwise, around its CENTER (not around the AnchorPoint). 90 is a quarter turn.",
+      "example": "local arrow = script.Parent -- an ImageLabel of an arrow\narrow.Rotation = 45 -- tilt it diagonally",
+      "gotcha": "Rotation and ClipsDescendants don't always work well together."
+    },
+    "GuiObject.Selectable": {
+      "simple": "Whether a gamepad player can select (highlight) this object. Turn it off to temporarily skip a button during gamepad navigation.",
+      "example": "local lockedButton = script.Parent\nlockedButton.Selectable = false -- gamepad selection skips it"
+    },
+    "GuiObject.SelectionImageObject": {
+      "simple": "Lets you replace the default gamepad highlight around this object with your own UI object (like a glowing frame). Size the custom highlight with Scale so it fits the button.",
+      "example": "local button = script.Parent\nlocal glow = Instance.new(\"Frame\")\nglow.Size = UDim2.fromScale(1, 1) -- same size as the button\nglow.BackgroundColor3 = Color3.fromRGB(255, 220, 0)\nglow.BackgroundTransparency = 0.6\nbutton.SelectionImageObject = glow"
+    },
+    "GuiObject.SelectionOrder": {
+      "simple": "When gamepad selection first starts (or GuiService:Select is called on a parent), objects with a lower SelectionOrder get picked first. Default is 0. It doesn't change what happens when the player presses a direction.",
+      "example": "local playButton = script.Parent.PlayButton\nplayButton.SelectionOrder = -1 -- picked before buttons with 0"
+    },
+    "GuiObject.Size": {
+      "simple": "How big the object is, as a UDim2: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction of the PARENT's size, Offset is extra pixels. Inside a 1000x600 screen, UDim2.new(0.5, 0, 0, 50) is 500 pixels wide and 50 pixels tall. UDim2.fromScale(1, 1) fills the whole parent.",
+      "example": "local frame = script.Parent\nframe.Size = UDim2.fromScale(0.5, 0.25)  -- half as wide, a quarter as tall as the parent\nframe.Size = UDim2.fromOffset(200, 100)  -- exactly 200 x 100 pixels\nframe.Size = UDim2.new(1, -20, 0, 40)    -- full width minus 20 px, 40 px tall",
+      "gotcha": "The real pixel size is in AbsoluteSize. A grid layout or size constraint can override Size."
+    },
+    "GuiObject.SizeConstraint": {
+      "simple": "Decides which side of the parent the Scale parts of Size follow. RelativeXY (default) uses width for X and height for Y. RelativeXX uses the parent's WIDTH for both, RelativeYY uses the parent's HEIGHT for both. Using one side for both keeps an object's shape (like a perfect square) on any screen.",
+      "example": "local square = script.Parent\nsquare.SizeConstraint = Enum.SizeConstraint.RelativeYY\nsquare.Size = UDim2.fromScale(0.2, 0.2) -- 20% of the parent's HEIGHT both ways = always a square",
+      "gotcha": "A UIAspectRatioConstraint is often an easier way to keep a shape."
+    },
+    "GuiObject.Transparency": {
+      "simple": "Old — use BackgroundTransparency (and TextTransparency for text) instead."
+    },
+    "GuiObject.Visible": {
+      "simple": "Whether the object and everything inside it is drawn. false hides it all, and list or grid layouts skip it as if it wasn't there.",
+      "example": "local menu = script.Parent\nmenu.Visible = not menu.Visible -- toggle: show if hidden, hide if shown"
+    },
+    "GuiObject.ZIndex": {
+      "simple": "A layer number for drawing order. Objects with a higher ZIndex are drawn on top of objects with a lower one. By default it compares siblings (objects with the same parent); a child is always drawn above its parent.",
+      "example": "local background = script.Parent.Background\nlocal title = script.Parent.Title\nbackground.ZIndex = 1\ntitle.ZIndex = 2 -- title is drawn on top of the background",
+      "gotcha": "Use gaps like 100, 200, 300 so you can add layers in between later. Not the same as LayoutOrder."
+    },
+    "GuiObject:TweenPosition": {
+      "simple": "Old — use TweenService:Create(gui, TweenInfo.new(...), {Position = ...}) instead."
+    },
+    "GuiObject:TweenSize": {
+      "simple": "Old — use TweenService:Create(gui, TweenInfo.new(...), {Size = ...}) instead."
+    },
+    "GuiObject:TweenSizeAndPosition": {
+      "simple": "Old — use TweenService:Create(gui, TweenInfo.new(...), {Size = ..., Position = ...}) instead."
+    },
+    "GuiObject.DragBegin": {
+      "simple": "Old — use a UIDragDetector instead."
+    },
+    "GuiObject.DragStopped": {
+      "simple": "Old — use a UIDragDetector instead."
+    },
+    "GuiObject.InputBegan": {
+      "simple": "Fires when the player starts any input on this object: a mouse button pressed down, a finger touching it, and similar. It gives you an InputObject that says what kind of input it was. Works on any UI object, not just buttons.",
+      "example": "-- LocalScript inside a Frame\nlocal frame = script.Parent\nframe.InputBegan:Connect(function(input)\n\tif input.UserInputType == Enum.UserInputType.MouseButton1 then\n\t\tprint(\"Mouse pressed on the frame\")\n\telseif input.UserInputType == Enum.UserInputType.Touch then\n\t\tprint(\"Finger touched the frame\")\n\tend\nend)",
+      "gotcha": "For simple button clicks, GuiButton.Activated is easier and works on every device."
+    },
+    "GuiObject.InputChanged": {
+      "simple": "Fires when an input on this object changes, for example the mouse moving across it or the mouse wheel turning. You get the InputObject so you can check what changed.",
+      "example": "local frame = script.Parent\nframe.InputChanged:Connect(function(input)\n\tif input.UserInputType == Enum.UserInputType.MouseMovement then\n\t\tprint(\"Mouse moved to\", input.Position.X, input.Position.Y)\n\tend\nend)"
+    },
+    "GuiObject.InputEnded": {
+      "simple": "Fires when an input on this object stops: a mouse button let go, a finger lifted, and similar. Pair it with InputBegan to know when something is being held.",
+      "example": "local frame = script.Parent\nframe.InputEnded:Connect(function(input)\n\tif input.UserInputType == Enum.UserInputType.MouseButton1 then\n\t\tprint(\"Mouse button released\")\n\tend\nend)"
+    },
+    "GuiObject.MouseEnter": {
+      "simple": "Fires when the mouse pointer moves onto this object. It gives the mouse's x and y in pixels. Great for hover effects like highlighting a button.",
+      "example": "local button = script.Parent\nbutton.MouseEnter:Connect(function(x, y)\n\tbutton.BackgroundColor3 = Color3.fromRGB(255, 255, 150) -- light yellow on hover\nend)",
+      "gotcha": "The x and y may be a little off from the exact edge if the mouse moves fast. It also fires even if another UI object is covering this one."
+    },
+    "GuiObject.MouseLeave": {
+      "simple": "Fires when the mouse pointer moves off this object. Use it to undo a hover effect.",
+      "example": "local button = script.Parent\nbutton.MouseLeave:Connect(function(x, y)\n\tbutton.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- back to white\nend)"
+    },
+    "GuiObject.MouseMoved": {
+      "simple": "Fires again and again while the mouse moves around inside this object. Gives the mouse's x and y in screen pixels.",
+      "example": "local frame = script.Parent\nframe.MouseMoved:Connect(function(x, y)\n\tprint(\"Mouse at\", x, y)\nend)",
+      "gotcha": "x and y include the top bar area, but AbsolutePosition doesn't, so subtract GuiService:GetGuiInset() if you compare them."
+    },
+    "GuiObject.MouseWheelBackward": {
+      "simple": "Fires when the player scrolls the mouse wheel back (toward themselves) while the mouse is over this object.",
+      "example": "local zoomBox = script.Parent\nzoomBox.MouseWheelBackward:Connect(function(x, y)\n\tprint(\"Scrolled back - zoom out\")\nend)"
+    },
+    "GuiObject.MouseWheelForward": {
+      "simple": "Fires when the player scrolls the mouse wheel forward (away from themselves) while the mouse is over this object.",
+      "example": "local zoomBox = script.Parent\nzoomBox.MouseWheelForward:Connect(function(x, y)\n\tprint(\"Scrolled forward - zoom in\")\nend)"
+    },
+    "GuiObject.SelectionGained": {
+      "simple": "Fires when a gamepad player's selection highlight moves onto this object.",
+      "example": "local button = script.Parent\nbutton.SelectionGained:Connect(function()\n\tbutton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)\nend)"
+    },
+    "GuiObject.SelectionLost": {
+      "simple": "Fires when a gamepad player's selection highlight moves off this object.",
+      "example": "local button = script.Parent\nbutton.SelectionLost:Connect(function()\n\tbutton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)\nend)"
+    },
+    "GuiObject.TouchLongPress": {
+      "simple": "On touch screens: fires when the player holds a finger on this object for a moment. It fires with state Begin, then Change if the finger moves, then End when it lets go. Gives a table of finger positions and the state.",
+      "example": "local card = script.Parent\ncard.TouchLongPress:Connect(function(touchPositions, state)\n\tif state == Enum.UserInputState.Begin then\n\t\tprint(\"Long press started - show item details\")\n\tend\nend)"
+    },
+    "GuiObject.TouchPan": {
+      "simple": "On touch screens: fires while the player slides a finger across this object. Gives finger positions, totalTranslation (how far it moved in total, as a Vector2), velocity (how fast), and state. Useful for dragging things around.",
+      "example": "local map = script.Parent\nmap.TouchPan:Connect(function(touchPositions, totalTranslation, velocity, state)\n\tprint(\"Dragged by\", totalTranslation)\nend)"
+    },
+    "GuiObject.TouchPinch": {
+      "simple": "On touch screens: fires when the player pinches two fingers together or spreads them apart on this object. Gives a scale number (bigger than 1 = spreading apart), velocity, and state. Often used for zooming.",
+      "example": "local map = script.Parent\nmap.TouchPinch:Connect(function(touchPositions, scale, velocity, state)\n\tprint(\"Pinch scale:\", scale)\nend)",
+      "gotcha": "Use the scale by multiplying (newSize = startSize * scale), not adding."
+    },
+    "GuiObject.TouchRotate": {
+      "simple": "On touch screens: fires when the player twists two fingers on this object. Gives rotation (how much the twist turned), velocity, and state.",
+      "example": "local dial = script.Parent\ndial.TouchRotate:Connect(function(touchPositions, rotation, velocity, state)\n\tprint(\"Twisted by\", rotation)\nend)"
+    },
+    "GuiObject.TouchSwipe": {
+      "simple": "On touch screens: fires when the player quickly swipes across this object. Gives the direction (Up, Down, Left, Right) and how many fingers were used. Great for flipping between tabs or pages.",
+      "example": "local pages = script.Parent\npages.TouchSwipe:Connect(function(swipeDirection, numberOfTouches)\n\tif swipeDirection == Enum.SwipeDirection.Left then\n\t\tprint(\"Next page\")\n\tend\nend)"
+    },
+    "GuiObject.TouchTap": {
+      "simple": "On touch screens: fires when the player quickly taps this object without moving their finger. Gives a table of finger positions.",
+      "example": "local frame = script.Parent\nframe.TouchTap:Connect(function(touchPositions)\n\tprint(\"Tapped!\")\nend)",
+      "gotcha": "For buttons, use GuiButton.Activated so it also works with mouse and gamepad."
+    }
+  }
+}

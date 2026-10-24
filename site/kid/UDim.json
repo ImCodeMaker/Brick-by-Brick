@@ -1,0 +1,75 @@
+{
+  "name": "UDim",
+  "simple": "A UDim is one measurement for on-screen UI, like a width, a height, or how round a corner is. It is made of two numbers: a Scale (a fraction of the parent's size) and an Offset (exact pixels). Roblox adds them together to get the final size in pixels. Two UDims together make a UDim2, which is what you use for Size and Position.",
+  "analogy": "A UDim is like saying how much pizza you want as \"half the pizza plus 2 extra bites\". The half part (Scale) depends on how big the pizza is. The 2 bites part (Offset) is always the same.",
+  "whenToUse": [
+    "Setting how round corners are with UICorner.CornerRadius",
+    "Setting space inside a frame with UIPadding (PaddingTop, PaddingLeft, and so on)",
+    "Setting space between items with UIListLayout.Padding",
+    "Reading one axis (X or Y) out of a UDim2"
+  ],
+  "where": "Works in any script (Script, LocalScript, or ModuleScript). Make one with UDim.new(scale, offset). UI usually runs in LocalScripts because each player has their own screen.",
+  "terms": {
+    "Scale": "A fraction of the parent's size. 0 means nothing, 0.5 means half, 1 means all of it. On a screen 1000 pixels wide, Scale 0.5 = 500 pixels. On a phone 400 pixels wide, the same Scale 0.5 = 200 pixels. It grows and shrinks with the screen.",
+    "Offset": "An exact number of pixels that never changes. Offset 20 is always 20 pixels, on a giant monitor or a tiny phone.",
+    "pixel": "One tiny dot on the screen. A normal computer screen is around 1920 pixels wide; a phone held sideways might be around 800.",
+    "parent": "The thing a UI object sits inside. For a Frame directly inside a ScreenGui, the parent is the whole screen. For a button inside a Frame, the parent is that Frame.",
+    "GuiObject": "Any 2D thing you can see on the screen in Roblox UI, like a Frame, TextLabel, TextButton, or ImageLabel.",
+    "read-only": "You can look at the value but you cannot change it directly. To get a different value, make a new one.",
+    "final pixel value": "The real size Roblox draws. It is worked out as Scale x (parent size) + Offset. Example: UDim.new(0.5, 10) inside a 400-pixel-wide parent = 0.5 x 400 + 10 = 210 pixels.",
+    "UICorner": "An object you put inside a Frame or button to round its corners.",
+    "UIPadding": "An object you put inside a Frame to add empty space between its edges and the things inside it."
+  },
+  "examples": [
+    {
+      "title": "Round the corners of a button",
+      "place": "LocalScript in StarterGui (with a ScreenGui that has a TextButton named PlayButton)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\nlocal playerGui = player:WaitForChild(\"PlayerGui\")\n\n-- Find the button (change these names to match your game)\nlocal screenGui = playerGui:WaitForChild(\"ScreenGui\")\nlocal button = screenGui:WaitForChild(\"PlayButton\")\n\n-- Make a UICorner and put it inside the button\nlocal corner = Instance.new(\"UICorner\")\ncorner.CornerRadius = UDim.new(0, 12) -- 0 scale, 12 pixels: always 12 pixels round\ncorner.Parent = button",
+      "explain": [
+        "We get the LocalPlayer and wait for their PlayerGui, which is where their screen UI lives.",
+        "We find the ScreenGui and the button inside it.",
+        "UDim.new(0, 12) means Scale 0 (no fraction) and Offset 12 (exactly 12 pixels).",
+        "Putting the UICorner inside the button makes its corners round by 12 pixels on every device."
+      ]
+    },
+    {
+      "title": "See how Scale and Offset add up",
+      "place": "Script in ServerScriptService (just prints numbers)",
+      "code": "local width = UDim.new(0.5, 10) -- half the parent, plus 10 pixels\n\n-- Pretend the parent is 1000 pixels wide\nlocal parentWidth = 1000\nlocal pixels = width.Scale * parentWidth + width.Offset\nprint(pixels) --> 510\n\n-- Now pretend the parent is a small phone, 400 pixels wide\nparentWidth = 400\npixels = width.Scale * parentWidth + width.Offset\nprint(pixels) --> 210",
+      "explain": [
+        "Scale 0.5 means half of the parent. Offset 10 means 10 more pixels.",
+        "On a 1000-pixel parent: 0.5 x 1000 = 500, plus 10 = 510 pixels.",
+        "On a 400-pixel parent: 0.5 x 400 = 200, plus 10 = 210 pixels.",
+        "The Scale part changed with the size. The Offset part (10) stayed the same."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Scale is a fraction, not a percent. Use 0.5 for half, not 50. UDim.new(50, 0) would be 50 times the parent size.",
+    "Offset is always a whole number of pixels. UDim.new(0, 10.7) stores 10, not 10.7.",
+    "You cannot change .Scale or .Offset after making a UDim. Make a new one with UDim.new instead."
+  ],
+  "members": {
+    "UDim.new": {
+      "simple": "Makes a new UDim from a Scale (fraction of the parent) and an Offset (exact pixels). Both are optional and start at 0, so UDim.new() is the same as UDim.new(0, 0).",
+      "example": "local full = UDim.new(1, 0)    -- all of the parent, no extra pixels\nlocal fixed = UDim.new(0, 200) -- always 200 pixels\nlocal mixed = UDim.new(0.5, 20) -- half the parent, plus 20 pixels\nprint(mixed) --> 0.5, 20",
+      "gotcha": "The order is Scale first, then Offset. UDim.new(20, 0.5) means 20 times the parent plus 0 pixels, which is huge."
+    },
+    "UDim.Scale": {
+      "simple": "The fraction part of the UDim. 1 means the whole parent size, 0.5 means half, 0 means this part adds nothing. On a 1000-pixel parent, Scale 0.25 = 250 pixels. It is read-only.",
+      "example": "local size = UDim.new(0.25, 0)\nprint(size.Scale) --> 0.25 (a quarter of the parent)"
+    },
+    "UDim.Offset": {
+      "simple": "The exact-pixels part of the UDim. It is added after the Scale part is worked out. Offset 20 is always 20 pixels, no matter the screen. It is read-only.",
+      "example": "local size = UDim.new(0.5, 20)\nprint(size.Offset) --> 20 (always 20 pixels extra)"
+    },
+    "op:UDim+UDim": {
+      "simple": "Adds two UDims. The Scales are added together and the Offsets are added together, separately. UDim.new(0.5, 10) + UDim.new(0.25, 5) gives UDim.new(0.75, 15).",
+      "example": "local a = UDim.new(0.5, 10)\nlocal b = UDim.new(0.25, 5)\nprint(a + b) --> 0.75, 15"
+    },
+    "op:UDim-UDim": {
+      "simple": "Subtracts one UDim from another. Scale minus Scale, and Offset minus Offset, separately. UDim.new(1, 0) - UDim.new(0, 20) gives UDim.new(1, -20), which means \"the whole parent, minus 20 pixels\".",
+      "example": "local full = UDim.new(1, 0)\nlocal margin = UDim.new(0, 20)\nprint(full - margin) --> 1, -20 (whole parent minus 20 pixels)"
+    }
+  }
+}

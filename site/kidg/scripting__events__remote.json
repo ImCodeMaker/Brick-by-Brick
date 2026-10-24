@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/scripting/events/remote.md",
+  "simple": "Roblox games run on a server plus each player's device, and remote events let those talk to each other. A player's device can tell the server 'I pressed the buy button', and the server can tell players 'the round ends in 5 seconds'. `RemoteEvent` sends one-way messages, `RemoteFunction` asks and waits for an answer, and `UnreliableRemoteEvent` is for fast, unimportant updates. The server should always double-check what players ask for, so nobody can cheat.",
+  "analogy": "It is like a restaurant: customers (clients) send orders to the kitchen (server) through a waiter (the RemoteEvent). The kitchen decides what actually gets cooked, and can call out announcements to one table or the whole room.",
+  "keyPoints": [
+    "Put RemoteEvents and RemoteFunctions where both sides can see them, usually ReplicatedStorage.",
+    "Client to server: the client calls `FireServer(...)`; the server listens with `OnServerEvent`, and the first value it gets is always the `player` who sent it.",
+    "Server to one client: `FireClient(player, ...)`. Server to everyone: `FireAllClients(...)`. Clients listen with `OnClientEvent`.",
+    "Clients cannot message other clients directly; send it through the server instead.",
+    "`RemoteFunction:InvokeServer(...)` waits for the server's answer from `OnServerInvoke`. Avoid `InvokeClient`: if the client errors, leaves, or never answers, the server breaks or waits forever.",
+    "RemoteEvents are reliable and arrive in order. UnreliableRemoteEvents can drop or reorder messages (and anything over 1,000 bytes), but are lighter on the network.",
+    "Never trust the client. The server should check that a request makes sense, like whether the player really owns the potion they want to drink.",
+    "Passed data has limits: functions arrive as `nil`, objects the other side cannot see arrive as `nil`, tables are copied, and metatables are lost."
+  ],
+  "terms": {
+    "server": "Roblox's computer running the real game for everyone. It is the source of truth.",
+    "client": "One player's device, like their phone or PC.",
+    "client-server boundary": "The divide between the server and players' devices. Remotes are the way across it.",
+    "RemoteEvent": "An object for sending one-way messages between the server and clients.",
+    "RemoteFunction": "An object for asking the other side something and waiting for the answer.",
+    "UnreliableRemoteEvent": "A faster RemoteEvent that might lose or shuffle messages. Good for things like constant position updates.",
+    "fire": "Send a message through an event.",
+    "invoke": "Call a RemoteFunction and wait for its answer.",
+    "yield": "Pause until something happens, like waiting for an answer.",
+    "source of truth": "The one place that decides what is really true. In Roblox games, that should be the server.",
+    "server verification": "The server checking a player's request before doing it, to stop cheating.",
+    "reliable / ordered": "Reliable means messages are resent if lost. Ordered means they arrive in the order sent.",
+    "throttling": "A speed limit on how many messages a client can send.",
+    "payload": "The data inside a message. Unreliable messages over 1,000 bytes get dropped.",
+    "replicate": "Copy something so the other side can see it. Things in ServerStorage do not replicate to clients."
+  },
+  "example": {
+    "title": "Ask the server to change your team color (with a safety check)",
+    "place": "RemoteEvent named ChangeColor in ReplicatedStorage, a Script in ServerScriptService, and a LocalScript in StarterPlayerScripts",
+    "code": "-- Script in ServerScriptService\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal changeColor = ReplicatedStorage:WaitForChild(\"ChangeColor\")\n\nlocal allowedColors = {\n\tRed = Color3.fromRGB(255, 0, 0),\n\tBlue = Color3.fromRGB(0, 100, 255),\n}\n\nchangeColor.OnServerEvent:Connect(function(player, colorName)\n\t-- Never trust the client: check the request first\n\tlocal color = allowedColors[colorName]\n\tif not color then\n\t\treturn\n\tend\n\tlocal character = player.Character\n\tlocal head = character and character:FindFirstChild(\"Head\")\n\tif head then\n\t\thead.Color = color\n\tend\nend)\n\n--[[ LocalScript in StarterPlayerScripts (separate script):\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal changeColor = ReplicatedStorage:WaitForChild(\"ChangeColor\")\n\ntask.wait(3)\nchangeColor:FireServer(\"Blue\") -- ask the server nicely\n]]",
+    "explain": [
+      "The LocalScript runs on the player's device and calls `FireServer(\"Blue\")` to send a request.",
+      "The server's `OnServerEvent` function receives `player` first (added automatically) and then `\"Blue\"`.",
+      "The server checks that the color name is on its allowed list. A cheater sending something else gets ignored.",
+      "If it is allowed, the server colors the player's head. Because the server did it, every player sees the change."
+    ]
+  },
+  "watchOut": [
+    "On the server, the first parameter of `OnServerEvent` is always the player. Forgetting it shifts all your other values by one.",
+    "Do not let the client decide important things like damage, coins, or prices. Send a request and let the server decide.",
+    "Avoid `InvokeClient`. If the client never answers, the server script waits forever. Use `FireClient` instead.",
+    "Parts created by a LocalScript do not exist on the server, so sending them through a remote arrives as `nil`.",
+    "Do not use UnreliableRemoteEvents for things that must arrive, like purchases or level completion."
+  ]
+}

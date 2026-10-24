@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/effects/light-sources.md",
+  "simple": "This page explains the three kinds of lights you can put on objects: point lights, spotlights, and surface lights. These local lights glow from a specific object, unlike the overall sky lighting. They let you build cozy torch-lit caves, neon cities, or spooky flashlight scenes. You can set each light's color, brightness, range, and shadows.",
+  "analogy": "It is like lighting a room for a play: a bare bulb lights everything around it, a flashlight only lights where it points, and a glowing TV screen lights up whatever is in front of it.",
+  "keyPoints": [
+    "`PointLight` glows equally in all directions from one point. Use it for bulbs, torches, and fireballs.",
+    "`SpotLight` shines in a cone. Use it for street lamps, flashlights, and headlights. `Angle` controls how wide the cone is, up to 180 (a full half-sphere).",
+    "`SurfaceLight` glows from a whole face of a part. Use it for screens, signs, and light panels.",
+    "`Face` on spotlights and surface lights picks which side of the part the light comes out of.",
+    "`Range` is how far the light reaches, in studs. A range of 12 lights up things up to 12 studs away.",
+    "All lights share `Color`, `Brightness`, and `Shadows`. Brightness is strongest at the center but never reaches farther than the range.",
+    "To insert a light, add it into an Attachment or a part in the Explorer. Attachments are best for a light from one exact spot.",
+    "Turn on Show Light Guides in Studio Settings to see where each light reaches."
+  ],
+  "terms": {
+    "local light": "A light that comes from a specific object, as opposed to global lighting from the `Lighting` service that lights the whole world.",
+    "range": "How far, in studs, the light reaches from its source. Outside that distance it adds no light at all.",
+    "brightness": "How strong the light is near its center. Turning brightness from 2 to 10 makes the lit area brighter, not bigger.",
+    "cone": "An ice-cream-cone shape. Spotlights shine out in this shape from their tip.",
+    "apex": "The pointed tip of the cone, where the spotlight's light starts.",
+    "angle": "How wide the light spreads. A spotlight with Angle 30 is a narrow beam; 75 is much wider.",
+    "Color3": "A color made of red, green, and blue numbers. [255, 100, 50] is an orange.",
+    "shadows": "Dark areas where an object blocks the light. Turning `Shadows` on makes blocked areas dark.",
+    "Face": "One side of a part, like Top, Bottom, Left, Right, Front, or Back."
+  },
+  "example": {
+    "title": "Add an orange torch glow to a part",
+    "place": "Script inside a Part in Workspace",
+    "code": "local part = script.Parent\n\nlocal light = Instance.new(\"PointLight\")\nlight.Color = Color3.fromRGB(255, 100, 50) -- warm orange\nlight.Brightness = 2\nlight.Range = 12 -- lights things up to 12 studs away\nlight.Shadows = true\nlight.Parent = part\n\n-- Make it flicker like a real flame\nwhile true do\n\tlight.Brightness = 1.5 + math.random() -- between 1.5 and 2.5\n\ttask.wait(0.1)\nend",
+    "explain": [
+      "We create a `PointLight` so it glows in every direction.",
+      "`Color3.fromRGB(255, 100, 50)` makes a warm orange color.",
+      "`Range = 12` means the light reaches 12 studs from the part.",
+      "Putting the light inside the part makes it glow from there.",
+      "The loop changes the brightness a little every 0.1 seconds, so it flickers like fire."
+    ]
+  },
+  "watchOut": [
+    "Raising `Brightness` will not make a light reach farther. Raise `Range` for that.",
+    "A spotlight pointing the wrong way usually has the wrong `Face`. Change `Face` or rotate the part.",
+    "Lots of lights with shadows on can slow down weaker devices. Use only what you need."
+  ]
+}

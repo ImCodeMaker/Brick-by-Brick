@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/chat/chat-window.md",
+  "simple": "This page shows how to change the look of the chat window in your game so it matches your style. You can turn the chat window, input bar, and channel tabs on or off, and change colors, fonts, text size, and position. You can also color player names, add gradient or rich text effects, and send special messages from the game itself or from an NPC, like a statue that greets players. All of this works on top of Roblox's normal chat, so filtering and safety still happen for you.",
+  "analogy": "It is like decorating your locker: the locker (chat) still works the same and the school rules still apply, but you choose the colors, stickers, and labels.",
+  "keyPoints": [
+    "The chat UI has three parts: the chat window, the input bar, and optional channel tabs (off by default).",
+    "Turn parts on or off in Studio under `TextChatService`, or from a client script by setting `Enabled` on `ChatWindowConfiguration`, `ChatInputBarConfiguration`, or `ChannelTabsConfiguration`.",
+    "With tabs on, `RBXGeneral` and `RBXSystem` share the General tab, `RBXTeam` is Team, `RBXWhisper` shows the other player's name, and custom channels use their `Name`.",
+    "`ChatWindowConfiguration` sets things like `BackgroundColor3`, `BackgroundTransparency` (default 0.3), `TextSize` (default 14), `FontFace`, alignment, and `WidthScale`/`HeightScale`.",
+    "`ChatInputBarConfiguration` controls the typing bar, including `AutocompleteEnabled` for emojis (`:`) and commands (`/`) and `KeyboardKeyCode` (default Slash) to jump into chat.",
+    "Use `TextChatService.OnChatWindowAdded` with `ChatWindowMessageProperties` to color names, add a `UIGradient`, or use rich text. This only affects the chat window, not bubbles.",
+    "Use `TextChannel:DisplaySystemMessage()` on the `RBXGeneral` channel to show a message from the game, and `TextChatService:DisplayBubble()` to show a chat bubble over an NPC or object.",
+    "Default system messages are translated for each player, so identify them with `TextChatMessage.Metadata` instead of their text."
+  ],
+  "terms": {
+    "chat window": "The box where chat messages appear.",
+    "input bar": "The box where players type their message.",
+    "channel tabs": "Buttons at the top of chat to switch between channels like General and Team.",
+    "configuration": "An object full of settings for one part of the chat, like `ChatWindowConfiguration`.",
+    "prefix": "The part before the message text, usually the sender's display name.",
+    "callback": "A function you give Roblox that it calls when something happens, using what you return.",
+    "DeriveNewMessageProperties": "A method that makes a fresh settings object based on the chat window's current look, which you can then change.",
+    "UIGradient": "An object that blends colors across UI, like red to yellow to pink across a name.",
+    "system message": "A message from the game itself, not from a player, like \"[Guide] Welcome Alex\".",
+    "metadata": "Extra hidden info attached to a message, used to tell what kind of message it is.",
+    "localized": "Translated into each player's language.",
+    "scale": "A size compared to the screen. `WidthScale` 1 is the normal width; 0.5 would be half.",
+    "transparency": "How see-through something is: 0 is solid, 1 is invisible. A background of 0.3 is a little see-through."
+  },
+  "example": {
+    "title": "Restyle chat and greet the player",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\nlocal TextChatService = game:GetService(\"TextChatService\")\n\nlocal player = Players.LocalPlayer\n\n-- Change the chat window look\nlocal windowConfig = TextChatService:FindFirstChildOfClass(\"ChatWindowConfiguration\")\nif windowConfig then\n\twindowConfig.BackgroundColor3 = Color3.fromRGB(20, 30, 60) -- dark blue\n\twindowConfig.BackgroundTransparency = 0.2\n\twindowConfig.TextSize = 18\nend\n\n-- Show the channel tabs (off by default)\nlocal tabsConfig = TextChatService:FindFirstChildOfClass(\"ChannelTabsConfiguration\")\nif tabsConfig then\n\ttabsConfig.Enabled = true\nend\n\n-- Send a welcome message only this player sees\nlocal generalChannel = TextChatService:WaitForChild(\"TextChannels\"):WaitForChild(\"RBXGeneral\")\ngeneralChannel:DisplaySystemMessage(\"[Guide] Welcome \" .. player.DisplayName)",
+    "explain": [
+      "We find the `ChatWindowConfiguration` inside `TextChatService` and change its background color, transparency, and text size.",
+      "We find `ChannelTabsConfiguration` and set `Enabled` to true so channel tabs appear.",
+      "We wait for the default `RBXGeneral` channel inside the `TextChannels` folder.",
+      "`DisplaySystemMessage` shows a message to this player only, with their display name added."
+    ]
+  },
+  "watchOut": [
+    "Changing these from a server Script. Chat window settings and callbacks belong in a LocalScript, for example in StarterPlayerScripts.",
+    "Expecting `OnChatWindowAdded` to change chat bubbles too. It only changes the chat window; bubbles have their own settings.",
+    "Checking system message text to find them. That text is translated, so use `Metadata` instead.",
+    "Trying to use a gradient inside rich text. Rich text does not support gradients; use a `UIGradient` on the prefix instead.",
+    "Assuming `RBXGeneral` exists. It only does when `CreateDefaultTextChannels` is true."
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "name": "Random",
+  "simple": "Random is a random number machine. You make one with Random.new(), then ask it for random whole numbers, random decimals, random directions, or to shuffle a list. If you give it a seed number, it gives the exact same \"random\" results every time, which is great for things like generating the same map twice.",
+  "analogy": "Random is like a deck of cards. Random.new() shuffles it in a surprise way. Random.new(42) always shuffles it in the same way, so if you and a friend both use 42, you draw the same cards in the same order.",
+  "whenToUse": [
+    "Rolling dice or picking a random number for loot",
+    "Picking a random spawn point or player",
+    "Shuffling a list, like the order of mini-games",
+    "Making a procedural map that is the same every time for the same seed"
+  ],
+  "where": "Works in any script on server or client. Make one with Random.new() or Random.new(seed). Keep it in a variable and reuse it instead of making a new one every time.",
+  "terms": {
+    "pseudorandom": "Numbers that look random but are made by a math recipe. With the same starting seed you get the same numbers.",
+    "seed": "The starting number for the recipe. Same seed = same sequence of results.",
+    "integer": "A whole number, like 3 or -7, with no decimal part.",
+    "inclusive": "The end numbers count too. NextInteger(1, 6) can give 1 and can give 6.",
+    "unit vector": "An arrow with a length of exactly 1. It only says which way, not how far.",
+    "shuffle": "Mix up the order of the items in a list.",
+    "Vector3": "Three numbers (X, Y, Z) for a position or direction in 3D."
+  },
+  "examples": [
+    {
+      "title": "Roll a dice and pick a random prize",
+      "place": "Script in ServerScriptService",
+      "code": "local rng = Random.new() -- a surprise seed each server\n\n-- Roll a 6-sided dice\nlocal roll = rng:NextInteger(1, 6)\nprint(\"You rolled a\", roll)\n\n-- Pick a random prize from a list\nlocal prizes = { \"Sword\", \"Shield\", \"Potion\", \"Hat\" }\nlocal prize = prizes[rng:NextInteger(1, #prizes)]\nprint(\"You won a\", prize)\n\n-- A random decimal between 0.5 and 2 for a size\nlocal size = rng:NextNumber(0.5, 2)\nprint(\"Random size:\", size)",
+      "explain": [
+        "Random.new() with no seed gives different results each time the game runs.",
+        "NextInteger(1, 6) gives a whole number from 1 to 6, and both 1 and 6 are possible.",
+        "#prizes is how many items are in the list (4), so we pick a random spot from 1 to 4.",
+        "NextNumber(0.5, 2) gives a decimal, like 1.37."
+      ]
+    },
+    {
+      "title": "Same seed, same results",
+      "place": "Script in ServerScriptService",
+      "code": "local a = Random.new(42)\nlocal b = Random.new(42)\n\nprint(a:NextInteger(1, 100), b:NextInteger(1, 100)) -- the same two numbers\nprint(a:NextInteger(1, 100), b:NextInteger(1, 100)) -- the same again",
+      "explain": [
+        "Both machines start with seed 42.",
+        "Because they follow the same recipe, they give the same numbers in the same order.",
+        "This is how games can rebuild the exact same random world from one saved seed."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Do not make a new Random.new() every time you need a number. Make one and keep using it.",
+    "Seeds are rounded toward zero, so seeds 0 and 0.99 give the same results.",
+    "Shuffle only works on lists without gaps (no nil holes in the middle). It changes the list itself and returns nothing."
+  ],
+  "members": {
+    "Random.new": {
+      "simple": "Makes a new random number machine. With no seed, Roblox picks a surprise starting point. With a seed number, you get the same results every time for that seed.",
+      "example": "local surprise = Random.new()  -- different every time\nlocal repeatable = Random.new(12345) -- same every time",
+      "gotcha": "Decimal seeds are cut down to whole numbers, so 7 and 7.9 are the same seed."
+    },
+    "Random:NextInteger": {
+      "simple": "Gives a random whole number from min to max, and both ends can come up. If you accidentally give the bigger number first, it swaps them for you.",
+      "example": "local rng = Random.new()\nlocal dice = rng:NextInteger(1, 6) -- 1, 2, 3, 4, 5, or 6\nprint(dice)"
+    },
+    "Random:NextNumber": {
+      "simple": "Gives a random decimal number. With no arguments it is between 0 and 1. With min and max, it is between those two.",
+      "example": "local rng = Random.new()\nprint(rng:NextNumber())        -- like 0.4821\nprint(rng:NextNumber(10, 20))  -- like 13.77"
+    },
+    "Random:Shuffle": {
+      "simple": "Mixes up the order of a list, right in place (the list itself is changed). Every order is equally likely.",
+      "example": "local rng = Random.new()\nlocal games = { \"Obby\", \"Race\", \"Tag\", \"Hide and Seek\" }\nrng:Shuffle(games)\nprint(table.concat(games, \", \")) -- a new random order",
+      "gotcha": "The list must not have nil gaps in the middle, or it errors. It returns nothing, so do not write `games = rng:Shuffle(games)`."
+    },
+    "Random:NextUnitVector": {
+      "simple": "Gives a random direction as a Vector3 arrow of length 1. Every direction in 3D is equally likely. Multiply it to make it longer.",
+      "example": "local rng = Random.new()\nlocal direction = rng:NextUnitVector()\n-- A random spot 10 studs away from the center\nlocal spot = Vector3.new(0, 10, 0) + direction * 10\nprint(spot)"
+    },
+    "Random:Clone": {
+      "simple": "Makes a copy of this random machine at exactly the same point in its recipe. From then on, both give the same next numbers, but using one does not change the other.",
+      "example": "local rng = Random.new(7)\nlocal copy = rng:Clone()\nprint(rng:NextInteger(1, 100) == copy:NextInteger(1, 100)) --> true"
+    }
+  }
+}

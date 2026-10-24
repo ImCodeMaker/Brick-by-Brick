@@ -1,0 +1,162 @@
+{
+  "name": "LuaGlobals",
+  "simple": "Lua globals are the built-in functions that come with the Luau language itself, ready to use in any script without `game:GetService`. They include `print` to show messages, `pairs` and `ipairs` for loops, `pcall` to catch errors, `tonumber`/`tostring` to convert values, and `require` to load ModuleScripts.",
+  "analogy": "Lua globals are like the basic tools that come in every toolbox before you buy anything extra: a hammer (print), a screwdriver (pairs), a measuring tape (type). Every script has them.",
+  "whenToUse": [
+    "Show messages in Output while testing (`print`).",
+    "Go through every item in a table (`pairs`, `ipairs`).",
+    "Run risky code safely, like data store calls (`pcall`).",
+    "Turn text into numbers and back (`tonumber`, `tostring`).",
+    "Load shared code from a ModuleScript (`require`)."
+  ],
+  "where": "Available everywhere: Scripts, LocalScripts and ModuleScripts. Just type the name, for example `print(\"hi\")`.",
+  "terms": {
+    "global": "Something you can use anywhere in any script without getting it first, like `print`.",
+    "function": "A named set of instructions you can run, like `print(\"hi\")`.",
+    "argument": "A value you give to a function inside the parentheses. In `print(\"hi\")`, \"hi\" is the argument.",
+    "return": "What a function hands back. `tonumber(\"5\")` returns the number 5.",
+    "table": "Luau's container for many values. A list like `{\"a\", \"b\"}` or a dictionary like `{coins = 10}`.",
+    "nil": "Luau's word for nothing or no value.",
+    "error": "When something goes wrong and a script stops with a red message in Output.",
+    "pcall": "Short for 'protected call'. Runs a function and catches errors, so your script keeps going.",
+    "iterator / loop": "A `for` loop that goes through items one by one. `pairs` and `ipairs` help a loop walk through a table.",
+    "metatable": "A secret helper table that changes how another table behaves, for example what happens when you add two tables. Advanced.",
+    "metamethod": "A special function in a metatable, like `__index` or `__tostring`, that Roblox runs in certain situations. Advanced.",
+    "ModuleScript": "A script that holds shared code. Other scripts load it with `require` and get back what it returns.",
+    "Output": "The Studio window (View > Output) where `print`, `warn` and errors show up."
+  },
+  "examples": [
+    {
+      "title": "The everyday globals in one script",
+      "place": "Script in ServerScriptService",
+      "code": "local scores = { Ava = 30, Ben = 12 }\nlocal fruits = { \"apple\", \"banana\", \"cherry\" }\n\n-- pairs: every key and value in a dictionary (any order)\nfor name, score in pairs(scores) do\n\tprint(name, score)\nend\n\n-- ipairs: a list in order 1, 2, 3...\nfor index, fruit in ipairs(fruits) do\n\tprint(index, fruit)\nend\n\n-- tonumber / tostring\nlocal typed = \"42\"\nlocal n = tonumber(typed) -- 42 as a number, or nil if it is not a number\nprint(n + 1) --> 43\nprint(\"Score: \" .. tostring(n)) --> Score: 42\n\n-- pcall: catch an error instead of crashing\nlocal ok, message = pcall(function()\n\terror(\"Oops!\")\nend)\nprint(ok, message) --> false  ...Oops!\n\n-- type: what kind of value is this?\nprint(type(fruits)) --> table",
+      "explain": [
+        "`pairs` goes through every key/value pair in a table.",
+        "`ipairs` goes through a list from 1 upward, in order.",
+        "`tonumber` turns text into a number (or nil if it cannot).",
+        "`pcall` runs a function safely; if it errors, you get false and the error message instead of a crash."
+      ]
+    }
+  ],
+  "gotchas": [
+    "In modern Luau you can loop over a table directly: `for key, value in myTable do`. `pairs`/`ipairs` still work fine.",
+    "`tonumber` returns nil for text that is not a number, so check before doing math with it.",
+    "`pcall` returns `false` plus the error on failure. Do not ignore the first value.",
+    "Use `typeof` (a Roblox global) instead of `type` to tell Roblox types apart, like Vector3 vs Part."
+  ],
+  "members": {
+    "_G": {
+      "simple": "A shared table every script on the same side (all server Scripts, or all of one player's LocalScripts) can read and write. A quick way to share values, but a ModuleScript is usually cleaner.",
+      "example": "-- Script A in ServerScriptService\n_G.gameMode = \"Hard\"\n\n-- Script B in ServerScriptService (runs later)\ntask.wait(1)\nprint(_G.gameMode) --> Hard",
+      "gotcha": "Server `_G` and client `_G` are separate. It also depends on which script runs first. Prefer ModuleScripts."
+    },
+    "_VERSION": {
+      "simple": "A text value (not a function) that says which language version is running. In Roblox it prints something like `Luau`.",
+      "example": "-- Any script\nprint(_VERSION) --> Luau"
+    },
+    "assert": {
+      "simple": "Checks that something is true. If it is false or nil, it stops the script with an error message you choose. Great for catching mistakes early.",
+      "example": "-- Any script\nlocal part = workspace:FindFirstChild(\"Door\")\nassert(part, \"Could not find the Door part!\") -- errors if part is nil\nprint(\"Found the door\")"
+    },
+    "collectgarbage": {
+      "simple": "Old — it only works with \"count\" in Roblox; use gcinfo() to see memory use instead."
+    },
+    "error": {
+      "simple": "Stops the current code on purpose and shows an error message. Often used with `pcall` to report problems.",
+      "example": "-- Any script\nlocal function setSpeed(speed)\n\tif type(speed) ~= \"number\" then\n\t\terror(\"speed must be a number!\")\n\tend\n\tprint(\"Speed set to\", speed)\nend\n\nlocal ok, err = pcall(setSpeed, \"fast\")\nprint(ok, err) --> false  ...speed must be a number!"
+    },
+    "gcinfo": {
+      "simple": "Tells you how much memory your scripts are using right now, in kilobytes (KB). Useful for spotting leaks while testing.",
+      "example": "-- Any script\nprint(\"Lua memory used: \" .. gcinfo() .. \" KB\")"
+    },
+    "getfenv": {
+      "simple": "Old — don't use it; it slows scripts down. Use ModuleScripts and local variables instead."
+    },
+    "getmetatable": {
+      "simple": "Gets the metatable (secret helper table) of a table, if it has one. Advanced; used when building your own object types.",
+      "example": "-- Any script\nlocal helper = { __index = { greet = function() return \"hi\" end } }\nlocal obj = setmetatable({}, helper)\nprint(getmetatable(obj) == helper) --> true"
+    },
+    "ipairs": {
+      "simple": "Used in a `for` loop to go through a list in order: item 1, item 2, item 3... It stops at the first gap (nil).",
+      "example": "-- Any script\nlocal players = { \"Ava\", \"Ben\", \"Cy\" }\nfor index, name in ipairs(players) do\n\tprint(index, name) --> 1 Ava, 2 Ben, 3 Cy\nend"
+    },
+    "loadstring": {
+      "simple": "Turns text containing Luau code into a function you can run. It is turned off by default for safety, and only the server can turn it on.",
+      "example": "-- Script in ServerScriptService (only if LoadStringEnabled is on)\nlocal fn = loadstring(\"return 2 + 3\")\nif fn then\n\tprint(fn()) --> 5\nend",
+      "gotcha": "Running code from players is very dangerous. Almost every game should leave this off."
+    },
+    "newproxy": {
+      "simple": "Makes a blank special object (userdata). Advanced; sometimes used as a unique marker or with a metatable for custom behavior.",
+      "example": "-- Any script\nlocal marker = newproxy()\nprint(type(marker)) --> userdata"
+    },
+    "next": {
+      "simple": "Gets the next key and value from a table after the one you give it. `pairs` uses it under the hood. A common trick: `next(t) == nil` means the table is empty.",
+      "example": "-- Any script\nlocal bag = {}\nprint(next(bag) == nil) --> true, the bag is empty\nbag.apple = 1\nprint(next(bag)) --> apple 1"
+    },
+    "pairs": {
+      "simple": "Used in a `for` loop to go through every key and value in a table, including dictionaries. The order is not guaranteed.",
+      "example": "-- Any script\nlocal inventory = { Sword = 1, Potion = 3 }\nfor itemName, count in pairs(inventory) do\n\tprint(itemName, count)\nend"
+    },
+    "pcall": {
+      "simple": "Runs a function in 'safe mode'. If the function errors, your script does not crash; instead `pcall` returns false and the error message. If it works, it returns true plus the function's results. Use it for anything that can fail, like data stores and web requests.",
+      "example": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal store = DataStoreService:GetDataStore(\"PlayerCoins\")\n\nlocal ok, result = pcall(function()\n\treturn store:GetAsync(\"User_1\")\nend)\nif ok then\n\tprint(\"Loaded:\", result)\nelse\n\twarn(\"Failed:\", result) -- result is the error message here\nend",
+      "gotcha": "Only the code inside the function is protected. Keep the risky call inside it."
+    },
+    "print": {
+      "simple": "Shows values in the Output window. The number one tool for checking what your code is doing. You can give it many values separated by commas.",
+      "example": "-- Any script\nlocal coins = 10\nprint(\"Hello!\")\nprint(\"Coins:\", coins) --> Coins: 10"
+    },
+    "rawequal": {
+      "simple": "Checks if two values are exactly the same thing, ignoring any custom `==` rules from metatables. Advanced.",
+      "example": "-- Any script\nlocal a = {}\nlocal b = {}\nprint(rawequal(a, a)) --> true\nprint(rawequal(a, b)) --> false (two different tables)"
+    },
+    "rawget": {
+      "simple": "Reads a value from a table directly, skipping any metatable tricks like `__index`. Advanced.",
+      "example": "-- Any script\nlocal defaults = { speed = 16 }\nlocal settings = setmetatable({}, { __index = defaults })\nprint(settings.speed)          --> 16 (borrowed from defaults)\nprint(rawget(settings, \"speed\")) --> nil (not really inside settings)"
+    },
+    "rawlen": {
+      "simple": "Gets the length of a table or string, skipping any custom `__len` rule. Advanced.",
+      "example": "-- Any script\nprint(rawlen({ 1, 2, 3 })) --> 3\nprint(rawlen(\"hello\")) --> 5"
+    },
+    "rawset": {
+      "simple": "Puts a value into a table directly, skipping any `__newindex` metatable trick. Advanced.",
+      "example": "-- Any script\nlocal t = setmetatable({}, { __newindex = function() print(\"blocked!\") end })\nt.a = 1          --> blocked!\nrawset(t, \"a\", 1) -- really stores it\nprint(t.a)       --> 1"
+    },
+    "require": {
+      "simple": "Runs a ModuleScript and gives you what it returns (usually a table of functions). Runs the module only the first time; later requires on the same side get the same table.",
+      "example": "-- ModuleScript named \"MathHelpers\" in ReplicatedStorage:\n-- local MathHelpers = {}\n-- function MathHelpers.double(n) return n * 2 end\n-- return MathHelpers\n\n-- Script in ServerScriptService\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal MathHelpers = require(ReplicatedStorage:WaitForChild(\"MathHelpers\"))\nprint(MathHelpers.double(21)) --> 42",
+      "gotcha": "The server and each client get their own separate copy of a module. Changing it on one side does not change the other."
+    },
+    "select": {
+      "simple": "Picks values from a list of arguments. `select(2, a, b, c)` gives b and c. `select(\"#\", ...)` counts how many there are.",
+      "example": "-- Any script\nprint(select(2, \"a\", \"b\", \"c\"))   --> b c\nprint(select(\"#\", \"a\", \"b\", \"c\")) --> 3"
+    },
+    "setfenv": {
+      "simple": "Old — don't use it; it slows scripts down. Use ModuleScripts and local variables instead."
+    },
+    "setmetatable": {
+      "simple": "Gives a table a metatable (secret helper table) that changes how it behaves. Used to make your own object types with shared functions. Returns the same table.",
+      "example": "-- Any script\nlocal Dog = {}\nDog.__index = Dog\n\nfunction Dog.new(name)\n\treturn setmetatable({ name = name }, Dog)\nend\n\nfunction Dog:bark()\n\tprint(self.name .. \" says woof!\")\nend\n\nDog.new(\"Rex\"):bark() --> Rex says woof!"
+    },
+    "tonumber": {
+      "simple": "Turns a value into a number if it can. `tonumber(\"12\")` gives 12. If it cannot, you get nil. You can also give a base, like 16 for hex.",
+      "example": "-- Any script\nprint(tonumber(\"12\") + 1) --> 13\nprint(tonumber(\"hello\")) --> nil\nprint(tonumber(\"ff\", 16)) --> 255"
+    },
+    "tostring": {
+      "simple": "Turns any value into text. Useful for joining numbers or nil into a message with `..`.",
+      "example": "-- Any script\nlocal score = 99\nprint(\"Score: \" .. tostring(score)) --> Score: 99\nprint(tostring(nil)) --> nil"
+    },
+    "type": {
+      "simple": "Tells you the basic kind of a value as text: \"number\", \"string\", \"boolean\", \"table\", \"function\", \"nil\", \"userdata\" and a few more. For Roblox things it just says \"userdata\", so use `typeof` for those.",
+      "example": "-- Any script\nprint(type(5))        --> number\nprint(type(\"hi\"))     --> string\nprint(type(workspace)) --> userdata (use typeof to get \"Instance\")"
+    },
+    "unpack": {
+      "simple": "Takes the items out of a list and gives them as separate values. `unpack({1, 2, 3})` gives 1, 2, 3. Same as `table.unpack`.",
+      "example": "-- Any script\nlocal colors = { 255, 128, 0 }\nlocal c = Color3.fromRGB(unpack(colors))\nprint(c)"
+    },
+    "xpcall": {
+      "simple": "Like `pcall`, but you also give an error handler function that runs when something goes wrong, for example to add extra details to the error.",
+      "example": "-- Any script\nlocal ok, result = xpcall(function()\n\terror(\"broken!\")\nend, function(err)\n\treturn \"Handled: \" .. tostring(err)\nend)\nprint(ok, result) --> false  Handled: ...broken!"
+    }
+  }
+}

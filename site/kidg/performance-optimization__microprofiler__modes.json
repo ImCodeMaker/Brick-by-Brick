@@ -1,0 +1,29 @@
+{
+  "path": "content/en-us/performance-optimization/microprofiler/modes.md",
+  "simple": "The MicroProfiler can show the same timing data in several different ways, called modes. You switch between them with the Modes menu. Some modes show lists of tasks and how long they took, some show counters like memory, and some are only in the web version. Picking the right mode makes it easier to spot what is slowing your game down.",
+  "analogy": "It is like looking at your grades as a bar chart, a list, or a report card. It is the same information, just arranged differently so different things stand out.",
+  "keyPoints": [
+    "Open the MicroProfiler, then use the Modes menu to switch views.",
+    "Frame mode and detailed mode are explained on the main MicroProfiler page.",
+    "Timers mode lists task labels with their times and how many times they were called. Click a label to add it to the line graph.",
+    "Counters mode lists stats like instance counts and memory in bytes. Click the Graph column to add a small graph.",
+    "For memory problems, the Developer Console is still the best tool.",
+    "Groups mode and threads mode are only in the web UI. They show average, max, and total times by group or by thread.",
+    "Hidden mode is only in the desktop UI. It hides the bar graph to reduce clutter while keeping the menu open."
+  ],
+  "terms": {
+    "mode": "A different way of displaying the same profiler data.",
+    "label": "A name for a task in the profiler, like `Heartbeat` or a script name.",
+    "call count": "How many times a task ran. A label called 300 times in a frame is a clue it might be doing too much.",
+    "counter": "A number the profiler keeps track of, like how many instances exist or how many bytes of memory are used.",
+    "byte": "A tiny unit of memory. 1,048,576 bytes is 1 MiB.",
+    "thread": "One line of work the computer can do at the same time as others. Roblox splits work across several threads.",
+    "web UI": "The version of the MicroProfiler you open in a web browser from a saved dump file.",
+    "desktop UI": "The version of the MicroProfiler shown on top of the game itself."
+  },
+  "watchOut": [
+    "Looking for groups or threads mode in the in-game overlay. They only exist in the web UI from a saved dump.",
+    "Using counters mode as your main memory tool. Use the Developer Console Memory tab for memory issues.",
+    "Forgetting that timers mode shows the same info you get by hovering labels in detailed mode."
+  ]
+}

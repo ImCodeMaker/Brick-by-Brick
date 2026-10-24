@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/physics/constraints/torque.md",
+  "simple": "This page covers the `Torque` constraint, which keeps twisting a part with the same amount of force. The twist happens around the part's center of mass. Because it never stops twisting, the part spins faster and faster. You can choose if the twist direction follows the part, another attachment, or the world.",
+  "analogy": "It is like constantly flicking a fidget spinner: every flick adds more spin, so it keeps going faster unless friction slows it down.",
+  "keyPoints": [
+    "`Torque` applies a constant twisting force to an assembly from its center of mass.",
+    "Because the twist never lets up, spin speed keeps increasing. Use `AngularVelocity` for a steady spin.",
+    "For only a starting spin, set `AssemblyAngularVelocity` directly instead.",
+    "The `Torque` property is a `Vector3`: its direction is the spin axis and its size is the strength.",
+    "`RelativeTo = Attachment0` (default): the twist axis turns with the part.",
+    "`RelativeTo = World`: the twist axis stays fixed to the world.",
+    "`RelativeTo = Attachment1`: the twist axis follows the other attachment's rotation."
+  ],
+  "terms": {
+    "constraint": "An object that controls how parts move, like an invisible motor, rope, or hand pushing them. Mover constraints push or spin parts for you.",
+    "assembly": "A group of parts that are welded or joined together so physics moves them as one piece. A car body plus its welded seats is one assembly.",
+    "attachment": "A small invisible point you put inside a part. Constraints hook onto attachments, the same way a rope ties onto a hook.",
+    "Attachment0 / Attachment1": "The two attachment slots a constraint uses. Attachment0 is usually the one that gets pushed; Attachment1 is the other end or the reference point.",
+    "torque": "A twisting force that makes things rotate, like turning a steering wheel.",
+    "angular acceleration": "How quickly the spin speed changes. Constant torque means the spin keeps getting faster.",
+    "center of mass": "The balance point of an object. The `Torque` constraint twists the part around this point.",
+    "world coordinates": "Directions based on the fixed world axes. A torque of (0, 500, 0) in world space always spins around straight up.",
+    "relative to Attachment0": "The twist axis is measured from the attachment's own facing, so if the part tips sideways, the axis tips too."
+  },
+  "example": {
+    "title": "Give a part a constant twist",
+    "place": "Script inside a Part in Workspace (part not Anchored)",
+    "code": "local part = script.Parent\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal twist = Instance.new(\"Torque\")\ntwist.Attachment0 = attachment\ntwist.RelativeTo = Enum.ActuatorRelativeTo.World\ntwist.Torque = Vector3.new(0, 500, 0) -- twist around the up (Y) axis\ntwist.Parent = part",
+    "explain": [
+      "We add an attachment and connect a new `Torque` constraint to it.",
+      "`RelativeTo = World` keeps the twist axis pointing straight up in the world.",
+      "`Torque = (0, 500, 0)` twists around the Y axis. Bigger numbers twist harder.",
+      "The part spins faster and faster until friction or something else slows it."
+    ]
+  },
+  "watchOut": [
+    "Spin speed has no limit with `Torque`, so parts can spin wildly. Use `AngularVelocity` if you need a set speed.",
+    "Heavy parts need a much bigger torque number to spin at all. Try larger values if nothing happens.",
+    "Make sure the part is not Anchored, or it will not move."
+  ]
+}

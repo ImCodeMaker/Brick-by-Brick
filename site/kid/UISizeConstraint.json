@@ -1,0 +1,51 @@
+{
+  "name": "UISizeConstraint",
+  "simple": "A UISizeConstraint sets a smallest and biggest size, in pixels, for its parent UI object. If you size things with Scale, they can get tiny on phones or huge on big monitors; this keeps them in a sensible range.",
+  "analogy": "It's like a rule for a growing plant pot: 'never smaller than this, never bigger than that.' The plant can grow, but only so much.",
+  "whenToUse": [
+    "Stopping a Scale-sized menu from becoming giant on a TV",
+    "Making sure a button never gets too tiny to tap on a phone",
+    "Letting a grid item span more than one cell (MinSize bigger than CellSize)"
+  ],
+  "where": "Put it inside the UI object to limit. Create in Studio or with Instance.new in a LocalScript.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "constraint": "A rule that limits something. Here it limits size.",
+    "infinity (math.huge)": "A number bigger than any other. Using it for MaxSize means 'no maximum'."
+  },
+  "examples": [
+    {
+      "title": "A menu that grows with the screen, within limits",
+      "place": "LocalScript inside a Frame (in a ScreenGui in StarterGui)",
+      "code": "local menu = script.Parent\nmenu.Size = UDim2.fromScale(0.4, 0.5) -- 40% of screen width, 50% of height\n\nlocal limits = Instance.new(\"UISizeConstraint\")\nlimits.MinSize = Vector2.new(250, 200) -- never smaller than 250 x 200 pixels\nlimits.MaxSize = Vector2.new(600, 450) -- never bigger than 600 x 450 pixels\nlimits.Parent = menu",
+      "explain": [
+        "On a 1000x600 screen, Scale gives 400x300 pixels: inside the limits, so nothing changes.",
+        "On a small 500x400 phone, Scale would give 200x200, but MinSize bumps it up to 250x200.",
+        "On a huge 2560x1440 monitor, Scale would give 1024x720, but MaxSize caps it at 600x450."
+      ]
+    }
+  ],
+  "gotchas": [
+    "MinSize must be smaller than or equal to MaxSize on both X and Y.",
+    "The constraint beats list and grid layouts: it decides the final min and max size.",
+    "Sizes are in pixels, so think about both tiny phones and big screens."
+  ],
+  "members": {
+    "UISizeConstraint.MaxSize": {
+      "simple": "The biggest the parent can be, in pixels (X = width, Y = height). Must be at least as big as MinSize. Use math.huge for 'no limit'.",
+      "example": "local limits = script.Parent -- a UISizeConstraint\nlimits.MaxSize = Vector2.new(500, math.huge) -- at most 500 wide, any height"
+    },
+    "UISizeConstraint.MinSize": {
+      "simple": "The smallest the parent can be, in pixels (X = width, Y = height). Must be no bigger than MaxSize.",
+      "example": "local limits = script.Parent\nlimits.MinSize = Vector2.new(100, 40) -- at least 100 x 40 pixels"
+    }
+  }
+}

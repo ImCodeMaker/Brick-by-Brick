@@ -1,0 +1,90 @@
+{
+  "name": "UIStroke",
+  "simple": "A UIStroke draws an outline. Put it in a Frame or button and it outlines the border; put it in a TextLabel and it outlines the letters. You can pick the color, thickness and transparency, and it follows rounded UICorner corners too.",
+  "analogy": "A UIStroke is like tracing around a sticker with a marker, or outlining your bubble letters so they pop off the page.",
+  "whenToUse": [
+    "Outlined buttons and panels",
+    "Bold outlined text that's readable on any background",
+    "A glowing or colored border around a selected item",
+    "Rainbow outlines (add a UIGradient inside the UIStroke)"
+  ],
+  "where": "Put it inside the UI object to outline (Frame, TextLabel, TextButton, ImageLabel...). Create in Studio or with Instance.new in a LocalScript.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "stroke": "An outline line.",
+    "thickness": "How wide the outline is.",
+    "transparency": "How see-through. 0 = solid, 1 = invisible.",
+    "Color3": "A color made of red, green and blue amounts.",
+    "line join": "The shape of the outline at a corner: round, cut off (bevel), or pointy (miter).",
+    "tween": "Smoothly animate a value from one number to another.",
+    "beta": "A test feature you may need to turn on in Studio before it works."
+  },
+  "examples": [
+    {
+      "title": "Outlined text and an outlined rounded button",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\n-- Outlined title text\nlocal title = Instance.new(\"TextLabel\")\ntitle.Size = UDim2.fromOffset(400, 80)\ntitle.Position = UDim2.fromOffset(20, 20)\ntitle.BackgroundTransparency = 1\ntitle.Text = \"MEGA OBBY\"\ntitle.TextSize = 60\ntitle.TextColor3 = Color3.fromRGB(255, 220, 0)\ntitle.Parent = screenGui\n\nlocal textStroke = Instance.new(\"UIStroke\")\ntextStroke.Thickness = 3\ntextStroke.Color = Color3.fromRGB(0, 0, 0)\ntextStroke.Parent = title -- outlines the LETTERS\n\n-- Outlined rounded button\nlocal button = Instance.new(\"TextButton\")\nbutton.Size = UDim2.fromOffset(200, 50)\nbutton.Position = UDim2.fromOffset(20, 120)\nbutton.Text = \"Start\"\nbutton.Parent = screenGui\n\nInstance.new(\"UICorner\").Parent = button\n\nlocal border = Instance.new(\"UIStroke\")\nborder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- outline the BOX, not the text\nborder.Thickness = 2\nborder.Color = Color3.fromRGB(0, 170, 255)\nborder.Parent = button",
+      "explain": [
+        "A UIStroke inside a TextLabel outlines the text by default (ApplyStrokeMode Contextual).",
+        "On the button we set ApplyStrokeMode to Border so the outline goes around the box instead of the word.",
+        "Because the button also has a UICorner, the outline follows the rounded corners."
+      ]
+    }
+  ],
+  "gotchas": [
+    "On text objects, the stroke outlines the letters unless ApplyStrokeMode is Border.",
+    "Animating Thickness on text can be slow and flicker; avoid tweening it on text.",
+    "Several UIStrokes with the same ZIndex draw in an unpredictable order; give them different ZIndex values.",
+    "Some newer properties (BorderOffset, BorderStrokePosition, StrokeSizingMode) may need the Improved UIStrokes beta."
+  ],
+  "members": {
+    "UIStroke.ApplyStrokeMode": {
+      "simple": "For text objects: Contextual (default) outlines the letters, Border outlines the box around them. On a Frame it always outlines the border.",
+      "example": "local stroke = script.Parent -- a UIStroke inside a TextButton\nstroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border"
+    },
+    "UIStroke.BorderOffset": {
+      "simple": "Pushes the outline in or out from where it would normally be, as a UDim. Offset is pixels (negative moves it inward). Scale is a fraction of the parent's smaller side. UDim.new(0, -16) pulls the outline 16 pixels inside the edge.",
+      "example": "local stroke = script.Parent\nstroke.BorderOffset = UDim.new(0, 4) -- 4 px further out"
+    },
+    "UIStroke.BorderStrokePosition": {
+      "simple": "Where the outline sits on the edge: Outer (outside the edge), Center (half in, half out) or Inner (inside the edge).",
+      "example": "local stroke = script.Parent\nstroke.BorderStrokePosition = Enum.BorderStrokePosition.Inner"
+    },
+    "UIStroke.Color": {
+      "simple": "The outline's color. Put a UIGradient inside the UIStroke to make a multi-color outline.",
+      "example": "local stroke = script.Parent\nstroke.Color = Color3.fromRGB(255, 0, 0) -- red outline"
+    },
+    "UIStroke.Enabled": {
+      "simple": "Turns the outline on (true, default) or off (false) without deleting it. Handy for showing which item is selected.",
+      "example": "local stroke = script.Parent\nstroke.Enabled = false"
+    },
+    "UIStroke.LineJoinMode": {
+      "simple": "The shape of the outline at corners: Round (default, smooth), Bevel (cut flat) or Miter (sharp point).",
+      "example": "local stroke = script.Parent\nstroke.LineJoinMode = Enum.LineJoinMode.Miter"
+    },
+    "UIStroke.StrokeSizingMode": {
+      "simple": "Whether Thickness is measured in pixels (FixedSize, the default) or as a fraction of the parent's size (ScaledSize), so the outline grows with the object.",
+      "example": "local stroke = script.Parent\nstroke.StrokeSizingMode = Enum.StrokeSizingMode.ScaledSize\nstroke.Thickness = 0.05 -- 5% of the parent's size"
+    },
+    "UIStroke.Thickness": {
+      "simple": "How thick the outline is. In pixels by default (4 = a 4-pixel line), or a fraction of the parent if StrokeSizingMode is ScaledSize.",
+      "example": "local stroke = script.Parent\nstroke.Thickness = 4"
+    },
+    "UIStroke.Transparency": {
+      "simple": "How see-through the outline is, separate from the object itself. 0 = solid, 1 = invisible. With TextTransparency 1 and stroke Transparency 0 you get hollow, outline-only letters.",
+      "example": "local label = script.Parent.Parent -- the TextLabel the stroke is in\nlocal stroke = script.Parent\nlabel.TextTransparency = 1 -- hide the letter fill\nstroke.Transparency = 0    -- keep the outline: hollow letters!"
+    },
+    "UIStroke.ZIndex": {
+      "simple": "When there are several UIStrokes on the same object, decides which one is drawn on top. Lower numbers are drawn underneath.",
+      "example": "local thick = Instance.new(\"UIStroke\")\nthick.Thickness = 8\nthick.Color = Color3.fromRGB(0, 0, 0)\nthick.ZIndex = 1\nthick.Parent = script.Parent\n\nlocal thin = Instance.new(\"UIStroke\")\nthin.Thickness = 3\nthin.Color = Color3.fromRGB(255, 255, 255)\nthin.ZIndex = 2 -- drawn on top of the black one\nthin.Parent = script.Parent"
+    }
+  }
+}

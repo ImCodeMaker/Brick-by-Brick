@@ -1,0 +1,69 @@
+{
+  "name": "WeldConstraint",
+  "simple": "WeldConstraint glues two parts together so they move as one. Whatever space and angle is between them when you weld them, they keep forever, even if they are not touching. It is the easiest way to stick parts together with a script.",
+  "analogy": "WeldConstraint is like super glue on an invisible stick. Once glued, if you pick up one part, the other comes along exactly the same distance away.",
+  "whenToUse": [
+    "Stick a hat, sword or decoration onto a character or tool",
+    "Build models out of many unanchored parts that move together (cars, boats)",
+    "Attach a pickup item to a player's hand",
+    "Glue parts together in Studio with Model tab > Create > Weld"
+  ],
+  "where": "Works on the server and client. Make it with Instance.new(\"WeldConstraint\"), set Part0 and Part1, and put it in workspace (usually inside one of the parts). In Studio, use the Weld tool in the Model tab.",
+  "terms": {
+    "assembly": "A group of parts that are rigidly joined (for example by welds) so they move as one solid object. A force on any part moves the whole group.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "CFrame": "A position plus a rotation in one value. It says where something is and which way it faces.",
+    "parent": "The object something is placed inside in the Explorer. Setting `x.Parent = part` puts x inside part.",
+    "replicate": "Copy from the server to every player's computer automatically. A property marked 'not replicated' is not copied.",
+    "Part0 / Part1": "The two parts the weld glues together.",
+    "offset": "The distance and angle between the two parts. If part B is 3 studs above part A when welded, it stays 3 studs above A forever.",
+    "weld": "A joint that holds parts together rigidly, so they never bend or slide apart."
+  },
+  "examples": [
+    {
+      "title": "Glue a glowing gem on top of a box",
+      "place": "Script in ServerScriptService",
+      "code": "local box = Instance.new(\"Part\")\nbox.Size = Vector3.new(4, 4, 4)\nbox.Position = Vector3.new(0, 10, 0)\nbox.Parent = workspace\n\nlocal gem = Instance.new(\"Part\")\ngem.Size = Vector3.new(1, 1, 1)\ngem.Material = Enum.Material.Neon\ngem.Position = Vector3.new(0, 13, 0) -- 3 studs above the box's center\ngem.Parent = workspace\n\n-- Glue them in their current positions\nlocal weld = Instance.new(\"WeldConstraint\")\nweld.Part0 = box\nweld.Part1 = gem\nweld.Parent = box\n\n-- Both are unanchored, so they fall... together!",
+      "explain": [
+        "We place the gem first, 3 studs above the box, THEN create the weld. The weld remembers that gap.",
+        "Part0 and Part1 are the two parts being glued.",
+        "Both parts are unanchored, so gravity pulls them down, but they fall as one object and the gem stays exactly 3 studs above the box."
+      ]
+    },
+    {
+      "title": "Move a welded model the right way",
+      "place": "Script in ServerScriptService",
+      "code": "local box = workspace:WaitForChild(\"Box\") -- welded to a gem like above\n\n-- Changing CFrame moves the box AND everything welded to it\nbox.CFrame = box.CFrame + Vector3.new(0, 0, 10)\n\n-- Changing Position would move ONLY the box and re-measure the weld\n-- box.Position = box.Position + Vector3.new(0, 0, 10)",
+      "explain": [
+        "Setting CFrame moves the whole glued group by 10 studs along Z, keeping the gem on top.",
+        "Setting Position moves only that one part. The weld then just remembers the NEW gap, so the gem gets left behind."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Position the parts BEFORE creating the weld. The weld locks in whatever gap exists at that moment.",
+    "Move welded parts with CFrame, not Position. Position moves only one part and leaves the rest behind.",
+    "If any welded part is anchored, the whole group is stuck in place. Unanchor them all if it should move or fall.",
+    "A weld only works while both parts are in workspace."
+  ],
+  "members": {
+    "WeldConstraint.Active": {
+      "simple": "Read-only true/false: is the weld really holding right now? It is false if the weld or a part is not in workspace, or if the physics engine switched it off because it clashes with another weld between the same parts.",
+      "example": "local weld = workspace.Box.WeldConstraint\nprint(\"Weld working?\", weld.Active)",
+      "gotcha": "To turn the weld off yourself, use Enabled, not Active."
+    },
+    "WeldConstraint.Enabled": {
+      "simple": "The on/off switch. When true and both Part0 and Part1 are set, the parts are glued. Set it to false to unglue them (for example to make something break apart).",
+      "example": "local weld = workspace.Wall.WeldConstraint\nweld.Enabled = false -- the brick falls off the wall"
+    },
+    "WeldConstraint.Part0": {
+      "simple": "The first part being glued. If you change it to a different part, the weld instantly glues the new part instead and lets go of the old one.",
+      "example": "local weld = Instance.new(\"WeldConstraint\")\nweld.Part0 = workspace.Box\nweld.Part1 = workspace.Gem\nweld.Parent = workspace.Box"
+    },
+    "WeldConstraint.Part1": {
+      "simple": "The second part being glued. Like Part0, changing it re-glues to the new part straight away.",
+      "example": "-- Move the gem onto a different box\nlocal weld = workspace.Box.WeldConstraint\nweld.Part0 = workspace.OtherBox -- now glued to OtherBox at its current gap"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "name": "Color3",
+  "simple": "A Color3 is a color, made by mixing red, green, and blue light. Each of the three parts goes from 0 (none) to 1 (full). You use it to color parts, UI backgrounds, text, lights, and more, and you can pick any color you want, not just a fixed list.",
+  "analogy": "Color3 is like three flashlights (red, green, and blue) shining on the same spot, each with a brightness dial. All three dials at full makes white, all off makes black, and red plus green at full makes yellow.",
+  "whenToUse": [
+    "Changing the color of a part with BasePart.Color",
+    "Coloring UI with BackgroundColor3 or TextColor3",
+    "Picking an exact color from a hex code like #FF8800",
+    "Fading smoothly between two colors with Lerp"
+  ],
+  "where": "Works in any script on the server or the client. Make one with Color3.new, Color3.fromRGB, Color3.fromHSV, or Color3.fromHex.",
+  "terms": {
+    "RGB": "Short for Red, Green, Blue: the three light colors mixed to make every color on a screen.",
+    "0 to 1 vs 0 to 255": "Two ways to write the same brightness. Color3.new uses 0 to 1 (0.5 is half). Color3.fromRGB uses 0 to 255 (128 is about half). Most color pickers show 0 to 255.",
+    "hex code": "A color written as 6 letters and numbers, like FF0000 for red. The first two are red, the middle two are green, the last two are blue. Websites and art apps use these a lot.",
+    "HSV": "Another way to describe a color: Hue (which color on the rainbow), Saturation (how strong vs. grayish), and Value (how bright). In Roblox each goes from 0 to 1.",
+    "hue": "Where the color sits on the rainbow circle. 0 is red, about 0.33 is green, about 0.67 is blue, and 1 wraps back to red.",
+    "interpolate / lerp": "Find a value part of the way between two values. Halfway between white and black is gray.",
+    "BrickColor": "An older way to color parts using a fixed list of named colors, like \"Bright red\"."
+  },
+  "examples": [
+    {
+      "title": "Paint a part with three different color styles",
+      "place": "Script in ServerScriptService",
+      "code": "-- Make three parts in a row\nlocal function makePart(x, color)\n\tlocal part = Instance.new(\"Part\")\n\tpart.Anchored = true\n\tpart.Position = Vector3.new(x, 5, 0)\n\tpart.Color = color\n\tpart.Parent = workspace\nend\n\nmakePart(0, Color3.new(1, 0, 0))        -- red, using 0 to 1\nmakePart(5, Color3.fromRGB(0, 170, 255)) -- sky blue, using 0 to 255\nmakePart(10, Color3.fromHex(\"#FFAA00\"))  -- orange, using a hex code",
+      "explain": [
+        "makePart is a helper that builds an anchored part at a spot and colors it.",
+        "Color3.new(1, 0, 0) means full red, no green, no blue.",
+        "Color3.fromRGB(0, 170, 255) uses the 0 to 255 numbers you see in most color pickers.",
+        "Color3.fromHex(\"#FFAA00\") reads a web-style hex code."
+      ]
+    },
+    {
+      "title": "Rainbow part that cycles through every color",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = workspace\n\nlocal hue = 0\nwhile true do\n\t-- Full saturation and full brightness, only the hue changes\n\tpart.Color = Color3.fromHSV(hue, 1, 1)\n\thue = (hue + 0.01) % 1 -- go up a little, wrap back to 0 after 1\n\ttask.wait(0.05)\nend",
+      "explain": [
+        "Color3.fromHSV takes hue, saturation, and value, each from 0 to 1.",
+        "Only the hue changes, so the part walks around the rainbow: red, yellow, green, blue, purple, then red again.",
+        "% 1 keeps hue between 0 and 1 by wrapping it back to 0.",
+        "task.wait(0.05) pauses a tiny bit each time so the loop does not freeze the game."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Color3.new(255, 0, 0) is wrong: Color3.new expects 0 to 1. Use Color3.fromRGB(255, 0, 0) for 0 to 255 numbers.",
+    "Color3 values cannot be changed after they are made (part.Color.R = 1 does not work). Make a new Color3 instead.",
+    "Setting part.Color also changes part.BrickColor to the closest named color, and the other way around."
+  ],
+  "members": {
+    "Color3.new": {
+      "simple": "Makes a color from red, green, and blue amounts, each from 0 to 1. Leave them out and they are 0, so Color3.new() is black.",
+      "example": "local red = Color3.new(1, 0, 0)\nlocal gray = Color3.new(0.5, 0.5, 0.5) -- half of each\nlocal white = Color3.new(1, 1, 1)",
+      "gotcha": "Numbers above 1 are not the 0 to 255 style. Use fromRGB for that."
+    },
+    "Color3.fromRGB": {
+      "simple": "Makes a color from red, green, and blue amounts from 0 to 255. These are the numbers most color pickers (including Studio's) show you, so this is usually the easiest one.",
+      "example": "local part = Instance.new(\"Part\")\npart.Color = Color3.fromRGB(255, 170, 0) -- orange\npart.Parent = workspace"
+    },
+    "Color3.fromHSV": {
+      "simple": "Makes a color from hue (which rainbow color), saturation (how strong), and value (how bright), each from 0 to 1. Great for rainbow effects, because you only change one number to go around the rainbow.",
+      "example": "local red = Color3.fromHSV(0, 1, 1)\nlocal green = Color3.fromHSV(0.333, 1, 1)\nlocal white = Color3.fromHSV(0, 0, 1) -- no saturation = no color, full bright = white"
+    },
+    "Color3.fromHex": {
+      "simple": "Makes a color from a hex code string like \"FF0000\" or \"#FF0000\". A 3-letter short form also works: \"#FA0\" is the same as \"#FFAA00\". Capital or small letters both work.",
+      "example": "local magenta = Color3.fromHex(\"ec008c\")\nlocal white = Color3.fromHex(\"#FFF\")"
+    },
+    "Color3.R": {
+      "simple": "How much red is in the color, from 0 to 1. Read-only.",
+      "example": "local c = Color3.fromRGB(255, 0, 0)\nprint(c.R) --> 1"
+    },
+    "Color3.G": {
+      "simple": "How much green is in the color, from 0 to 1. Read-only.",
+      "example": "local c = Color3.fromRGB(0, 51, 0)\nprint(c.G) --> 0.2 (51 out of 255)"
+    },
+    "Color3.B": {
+      "simple": "How much blue is in the color, from 0 to 1. Read-only.",
+      "example": "local c = Color3.new(0, 0, 0.75)\nprint(c.B) --> 0.75"
+    },
+    "Color3:Lerp": {
+      "simple": "Gives a color part of the way between this color and another one. alpha 0 gives this color, 1 gives the other, 0.5 gives the mix halfway between. Handy for health bars that fade from green to red.",
+      "example": "local white = Color3.new(1, 1, 1)\nlocal black = Color3.new(0, 0, 0)\nprint(white:Lerp(black, 0.5)) --> 0.5, 0.5, 0.5 (gray)"
+    },
+    "Color3:ToHSV": {
+      "simple": "Gives back three numbers for this color: hue, saturation, and value (brightness), each 0 to 1. It is the reverse of Color3.fromHSV.",
+      "example": "local green = Color3.fromRGB(0, 255, 0)\nlocal h, s, v = green:ToHSV()\nprint(h, s, v) --> 0.3333333 1 1"
+    },
+    "Color3:ToHex": {
+      "simple": "Turns the color into a 6-character hex code string like \"ff0000\", with no # in front. You can give it back to Color3.fromHex to get the same color.",
+      "example": "local red = Color3.fromRGB(255, 0, 0)\nprint(red:ToHex()) --> ff0000"
+    },
+    "Color3.toHSV": {
+      "simple": "Old — use Color3:ToHSV instead."
+    }
+  }
+}

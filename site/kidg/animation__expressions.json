@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/animation/expressions.md",
+  "simple": "Expressions are tiny Luau-style formulas you type right inside the Animation Graph Editor. They read graph parameters, like `MovementSpeed`, and turn them into the number or true/false value a node or transition needs. For example, `math.clamp(MovementSpeed / MaxSpeed, 0, 1)` turns a speed into a 0 to 1 value for blending idle into run. This keeps the math next to the animation nodes instead of spread around your scripts.",
+  "analogy": "It is like a calculator that is glued to a slider: the calculator does the math from the numbers you feed it, and the slider moves to the answer.",
+  "keyPoints": [
+    "An expression reads graph parameters and returns a value for a node property or a state machine transition.",
+    "To make one, drag from a property pin (like a Blend1DNode's Position) and choose New Expression, then type the formula.",
+    "Click outside the box to refresh it. Your script updates the parameters with `AnimationTrack:SetParameter`.",
+    "You can use math (`+ - * / // % ^`), comparisons (`<`, `>=`, `==`, `~=`), and logic (`and`, `or`, `not`).",
+    "Inline `if ... then ... elseif ... else ...` works, and so does joining strings with `..`.",
+    "Most of the `math` library works, but not `math.frexp`, `math.noise`, or `math.randomseed`, and `math.modf` returns only the whole-number part.",
+    "You can build and read `Vector2`, `Vector3`, `Color3`, and `CFrame` values, like `MoveDirection.Magnitude` or `Color.R`.",
+    "Multi-line expressions can use `local` and `return`, but no nested `if` statements or locals inside an `if` body."
+  ],
+  "terms": {
+    "expression": "A small formula that gives back a value, like `Speed * 2`.",
+    "graph parameter": "A named value stored in the graph, like `MaxSpeed` = 16, that scripts can change.",
+    "math.clamp": "Keeps a number between a minimum and maximum. `math.clamp(1.5, 0, 1)` gives `1`, and `math.clamp(0.4, 0, 1)` gives `0.4`.",
+    "Blend1DNode": "A node that mixes animations along one number. At position 0 it plays idle, at 1 it plays run, at 0.5 it is half and half.",
+    "floor division": "The `//` operator: divide and round down. `10 // 3` is `3`.",
+    "modulo": "The `%` operator: the remainder after dividing. `7 % 3` is `1`.",
+    "short-circuit": "Logic stops early once the answer is known. In `IsGrounded and GroundSpeed or AirSpeed`, if `IsGrounded` is true you get `GroundSpeed`, otherwise `AirSpeed`.",
+    "truthiness": "Whether a value counts as true. In Luau only `false` and `nil` count as false; `0` counts as true.",
+    "concatenate": "Join strings together. `\"state_\" .. \"run\"` becomes `\"state_run\"`.",
+    "Magnitude": "The length of a vector. A `MoveDirection` of full forward has magnitude 1; standing still has 0."
+  },
+  "example": {
+    "title": "Feed speed values to a Blend1D expression",
+    "place": "LocalScript in StarterCharacterScripts (graph uses the expression `math.clamp(MovementSpeed / MaxSpeed, 0, 1)`)",
+    "code": "local RunService = game:GetService(\"RunService\")\n\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal animator = humanoid:WaitForChild(\"Animator\")\n\n-- Load your published graph (replace the ID)\nlocal animation = Instance.new(\"Animation\")\nanimation.AnimationId = \"rbxassetid://123456789\"\nlocal animationTrack = animator:LoadAnimation(animation)\nanimationTrack:Play()\n\nRunService.Stepped:Connect(function()\n\t-- MoveDirection.Magnitude is 0 when still, 1 when moving at full input\n\tanimationTrack:SetParameter(\"MovementSpeed\", humanoid.MoveDirection.Magnitude * humanoid.WalkSpeed)\n\tanimationTrack:SetParameter(\"MaxSpeed\", humanoid.WalkSpeed)\nend)",
+    "explain": [
+      "We load and play the graph on the character's `Animator`.",
+      "Every frame we send `MovementSpeed`: 0 when standing still, up to `WalkSpeed` (16 by default) when moving.",
+      "We send `MaxSpeed` as the `WalkSpeed`.",
+      "The graph's expression divides them, so standing gives 0 (idle) and full speed gives 1 (run). Walking at 8 out of 16 gives 0.5, a half-and-half blend.",
+      "`math.clamp` makes sure the value never goes below 0 or above 1."
+    ]
+  },
+  "watchOut": [
+    "Dividing by a parameter that could be 0, like `MaxSpeed`. Make sure it is set to a real number first.",
+    "Using unsupported math functions like `math.noise`. They will not work in graph expressions.",
+    "Thinking `0` is false. In Luau, `0` is true; only `false` and `nil` are false.",
+    "Writing nested `if` statements in a multi-line expression. Keep `if` bodies to a `return` or a single expression.",
+    "Forgetting to click outside the expression box after editing so it refreshes."
+  ]
+}

@@ -1,0 +1,339 @@
+{
+  "name": "Instance",
+  "simple": "Almost every thing in a Roblox game is an Instance: parts, scripts, sounds, lights, folders, even the Workspace itself. Every Instance has a Name, a Parent (the thing it sits inside), and can have children (things inside it). All those things sitting inside each other form a big family tree, which you see in the Explorer window. This page also covers `Instance.new`, the way your code makes brand-new objects.",
+  "analogy": "Instances are like folders and files on a computer. A folder (the parent) can hold files and other folders (its children). The full path to a file, like Workspace > House > Door, tells you exactly where it lives.",
+  "whenToUse": [
+    "Create new things while the game runs with `Instance.new`, like spawning a coin.",
+    "Find things in the game tree with `FindFirstChild`, `WaitForChild`, or dot access.",
+    "Move things around the tree by changing `Parent`, or remove them with `Destroy`.",
+    "Copy a whole object and everything inside it with `Clone`.",
+    "Store your own extra info on an object with attributes (`SetAttribute`), or label it with tags (`AddTag`).",
+    "React when things are added or removed with events like `ChildAdded` and `Destroying`."
+  ],
+  "where": "Instance is the base of nearly every class, so every object in Server and client code has these members. You never make a plain Instance; instead you call `Instance.new(\"Part\")` (or any other class name) to create a specific kind.",
+  "terms": {
+    "instance": "One object in the game, like one Part or one Script. Every object you see in the Explorer is an instance.",
+    "class": "The kind of an object, like Part, Script, or Sound. `ClassName` tells you which kind it is.",
+    "parent": "The object something sits directly inside. If Door is inside House, then House is Door's parent.",
+    "child": "An object that sits directly inside another one. Door is a child of House.",
+    "descendant": "Anything inside an object at any depth: its children, their children, and so on. A Knob inside Door inside House is a descendant of House.",
+    "ancestor": "Anything an object is inside, at any depth: its parent, its parent's parent, and so on, up to `game`. House and Workspace are both ancestors of Door.",
+    "hierarchy": "The whole family tree of objects inside each other. The Explorer window shows it.",
+    "DataModel / game": "The very top of the tree. In scripts it is called `game`. Services like Workspace and ReplicatedStorage are its children.",
+    "nil": "Luau's word for nothing or no value. A part whose Parent is nil is not in the game tree, so nobody can see it.",
+    "yield": "To pause the script and wait. `WaitForChild` yields until the child shows up.",
+    "thread": "One running piece of code. When a thread yields, only that piece pauses; the rest of the game keeps going.",
+    "client": "A player's own device (their computer, phone, or console). LocalScripts run there.",
+    "server": "Roblox's computer that runs the game for everyone in it. Scripts in ServerScriptService run there.",
+    "replicate": "To copy changes from the server to players' devices (or the other way) so everyone sees the same thing.",
+    "event / signal": "Something that announces \"this just happened!\". You `:Connect` a function to an event so your function runs every time it happens.",
+    "callback": "A function you hand to something else so it can call it later, for example the function you pass to `:Connect`.",
+    "attribute": "A custom value you stick on an object yourself, like `Coins = 5` or `IsLava = true`. It shows up in the Properties window.",
+    "tag": "A text label you put on objects, like \"Lava\", so you can find every object with that label at once.",
+    "deprecated": "Old and replaced by something newer. It may still work, but you should use the new version.",
+    "Archivable": "Whether an object can be copied by `Clone` and saved with the place."
+  },
+  "examples": [
+    {
+      "title": "Make a new part from code",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\n-- 1. Create a brand-new Part. It is not in the world yet (its Parent is nil).\nlocal part = Instance.new(\"Part\")\n\n-- 2. Set it up first\npart.Name = \"Gift\"\npart.Size = Vector3.new(4, 4, 4)\npart.Position = Vector3.new(0, 10, 0)\npart.Anchored = true\npart.BrickColor = BrickColor.new(\"Bright red\")\n\n-- 3. Set Parent LAST. This is the moment it appears in the world.\npart.Parent = Workspace",
+      "explain": [
+        "`Instance.new(\"Part\")` creates a Part, but it is floating in nowhere-land (Parent is nil), so nobody sees it yet.",
+        "We set its name, size, position, and color while it is still invisible. That is faster for the game.",
+        "Setting `Parent = Workspace` puts it in the 3D world. It appears at (0, 10, 0), 10 studs above the center of the map."
+      ]
+    },
+    {
+      "title": "Dot access vs FindFirstChild vs WaitForChild",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal Workspace = game:GetService(\"Workspace\")\n\n-- DOT ACCESS: short, but ERRORS if \"Baseplate\" does not exist\nlocal baseplate = Workspace.Baseplate\n\n-- FindFirstChild: looks once, right now. Gives nil if not found (no error)\nlocal coin = Workspace:FindFirstChild(\"Coin\")\nif coin then\n\tprint(\"Found a coin!\")\nelse\n\tprint(\"No coin right now\")\nend\n\n-- WaitForChild: waits (pauses this script) until the child exists\n-- Best on the client, because things from the server may arrive a little late\nlocal remote = ReplicatedStorage:WaitForChild(\"GiveCoin\")\nprint(\"Remote is ready:\", remote.Name)",
+      "explain": [
+        "`Workspace.Baseplate` is quick to type, but if nothing named Baseplate is there, the script stops with an error.",
+        "`FindFirstChild(\"Coin\")` checks one time. If there is no Coin, you get `nil` and can handle it with an `if`.",
+        "`WaitForChild(\"GiveCoin\")` pauses until GiveCoin appears. On a player's device, objects from the server can show up a moment after the script starts, so waiting is safer."
+      ]
+    },
+    {
+      "title": "Walk the family tree",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\n-- Build a small tree:  Workspace > House > Door > Knob\nlocal house = Instance.new(\"Model\")\nhouse.Name = \"House\"\nlocal door = Instance.new(\"Part\")\ndoor.Name = \"Door\"\ndoor.Anchored = true\nlocal knob = Instance.new(\"Part\")\nknob.Name = \"Knob\"\nknob.Anchored = true\n\nknob.Parent = door   -- Knob is a CHILD of Door\ndoor.Parent = house  -- Door is a CHILD of House\nhouse.Parent = Workspace\n\nprint(knob.Parent.Name)                 --> Door (its parent)\nprint(#house:GetChildren())             --> 1 (just Door)\nprint(#house:GetDescendants())          --> 2 (Door and Knob)\nprint(knob:IsDescendantOf(house))       --> true (House is an ancestor)\nprint(knob:FindFirstAncestor(\"House\"))  --> House\nprint(knob:GetFullName())               --> Workspace.House.Door.Knob",
+      "explain": [
+        "Children are only the things directly inside. House has 1 child (Door).",
+        "Descendants count everything inside at any depth. House has 2 (Door and Knob).",
+        "Ancestors go the other way, upward: Knob's ancestors are Door, House, Workspace, and game.",
+        "`GetFullName` shows the whole path, like an address."
+      ]
+    },
+    {
+      "title": "Copy a coin and clean it up later",
+      "place": "Script in ServerScriptService",
+      "code": "local ServerStorage = game:GetService(\"ServerStorage\")\nlocal Workspace = game:GetService(\"Workspace\")\n\n-- A Part named \"CoinTemplate\" is stored in ServerStorage\nlocal template = ServerStorage:WaitForChild(\"CoinTemplate\")\n\nfor i = 1, 5 do\n\tlocal coin = template:Clone()      -- copy it (and anything inside it)\n\tcoin.Name = \"Coin\" .. i\n\tcoin.Position = Vector3.new(i * 6, 3, 0) -- 6, 12, 18, 24, 30 studs along X\n\tcoin.Parent = Workspace\n\n\t-- Remove each coin after 10 seconds\n\ttask.delay(10, function()\n\t\tcoin:Destroy()\n\tend)\nend",
+      "explain": [
+        "`Clone` makes a full copy, including everything inside the template.",
+        "The copies start with no Parent, so we set Position first, then Parent them to Workspace.",
+        "`Destroy` removes the coin for good and frees up memory."
+      ]
+    },
+    {
+      "title": "Use attributes to store your own values",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal chest = Workspace:WaitForChild(\"Chest\")\n\n-- Store our own data on the chest\nchest:SetAttribute(\"Gold\", 50)\n\n-- Run code whenever Gold changes\nchest:GetAttributeChangedSignal(\"Gold\"):Connect(function()\n\tprint(\"Chest now has\", chest:GetAttribute(\"Gold\"), \"gold\")\nend)\n\nchest:SetAttribute(\"Gold\", 75)  --> Chest now has 75 gold",
+      "explain": [
+        "`SetAttribute` sticks a custom value named Gold onto the chest.",
+        "`GetAttributeChangedSignal(\"Gold\")` gives an event that fires only when Gold changes.",
+        "Changing Gold to 75 makes the connected function print the new amount."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Dot access (`Workspace.Coin`) errors if the child is missing. Use `FindFirstChild` and check for nil when something might not be there.",
+    "In LocalScripts, use `WaitForChild` for things that come from the server. They may not have arrived yet when your script starts.",
+    "Set `Parent` last when building a new object. Setting it first makes the game do extra work for every property you change after.",
+    "`WaitForChild` with no timeout can wait forever if you misspell the name. After 5 seconds it prints an \"Infinite yield possible\" warning in Output, which is a hint to check your spelling.",
+    "Names do not have to be unique. If two children are both called \"Coin\", `FindFirstChild(\"Coin\")` just gives you one of them.",
+    "Names with spaces or that start with a number cannot use dot access. Use `parent[\"My Part\"]` or `FindFirstChild(\"My Part\")` instead.",
+    "`Clone` returns nil if the object's `Archivable` is false.",
+    "Use `Destroy`, not `Parent = nil`, when you are done with something forever. Destroy also disconnects its events and frees memory."
+  ],
+  "members": {
+    "Instance.Archivable": {
+      "simple": "If true (the default), the object can be copied with `Clone` and saved when you publish. If false, `Clone` skips it, and calling `Clone` directly on it gives nil.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.Archivable = false\nprint(part:Clone()) --> nil, because it cannot be copied"
+    },
+    "Instance.archivable": {
+      "simple": "Old — use `Archivable` instead."
+    },
+    "Instance.Capabilities": {
+      "simple": "An experimental safety setting: the list of things scripts inside this object are allowed to do. It only takes effect when `Sandboxed` is turned on. Most games never touch it."
+    },
+    "Instance.IsInSandbox": {
+      "simple": "Studio-only info that shows true if this object or something it is inside has `Sandboxed` on. Scripts cannot read it."
+    },
+    "Instance.Name": {
+      "simple": "The object's name, like \"Door\" or \"Coin\". Scripts use names to find things. Names can be up to 100 characters and do not have to be unique.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.Name = \"LavaBlock\"\npart.Parent = Workspace\nprint(Workspace.LavaBlock == part) --> true",
+      "gotcha": "To use dot access like `Workspace.LavaBlock`, the name must start with a letter or underscore and have only letters, numbers, and underscores. Otherwise use `Workspace[\"Lava Block\"]`."
+    },
+    "Instance.Parent": {
+      "simple": "The object this one sits directly inside. Change it to move the object somewhere else in the tree. Set it to Workspace to put a part in the world; set it to nil to take it out (but `Destroy` is better for removing forever).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal part = Instance.new(\"Part\")\npart.Parent = Workspace          -- now in the 3D world\nprint(part.Parent.Name)          --> Workspace\npart.Parent = ReplicatedStorage  -- moved: no longer visible in the world",
+      "gotcha": "After `Destroy`, Parent is locked to nil and cannot be changed back."
+    },
+    "Instance.PredictionMode": {
+      "simple": "Read-only info used with an advanced physics mode called server-authoritative physics. It shows whether a player's device guesses ahead how this object moves. Scripts cannot read it; it is set with `RunService:SetPredictionMode()`."
+    },
+    "Instance.RobloxLocked": {
+      "simple": "Old — only used by Roblox's own plugins. You do not need it."
+    },
+    "Instance.Sandboxed": {
+      "simple": "An experimental setting that turns the object into a sandbox: scripts inside can only do things listed in `Capabilities`. Useful for running code you do not fully trust. Most games leave it off."
+    },
+    "Instance.UniqueId": {
+      "simple": "A hidden ID that is different for every object (unlike Name). You can see it in Studio, but scripts cannot read or change it."
+    },
+    "Instance:AddTag": {
+      "simple": "Puts a text label (a tag) on the object, like \"Lava\" or \"Coin\". Later you can find every object with that tag at once using CollectionService. Adding a tag it already has does nothing.",
+      "example": "local CollectionService = game:GetService(\"CollectionService\")\nlocal Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"RedFloor\")\npart:AddTag(\"Lava\")\nprint(#CollectionService:GetTagged(\"Lava\")) -- how many Lava objects exist",
+      "gotcha": "Tags added on a player's device can be wiped out if the server later changes that object's tags."
+    },
+    "Instance:children": {
+      "simple": "Old — use `GetChildren` instead."
+    },
+    "Instance:ClearAllChildren": {
+      "simple": "Destroys everything inside this object (all children and their children), but keeps the object itself.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal folder = Workspace:WaitForChild(\"Coins\")\nfolder:ClearAllChildren()\nprint(#folder:GetChildren()) --> 0"
+    },
+    "Instance:Clone": {
+      "simple": "Makes a copy of the object and everything inside it. The copy starts with no Parent, so set its Parent to make it show up. Great for spawning many copies of a template.",
+      "example": "local ServerStorage = game:GetService(\"ServerStorage\")\nlocal Workspace = game:GetService(\"Workspace\")\nlocal template = ServerStorage:WaitForChild(\"Zombie\")\nlocal zombie = template:Clone()\nzombie.Parent = Workspace",
+      "gotcha": "Returns nil if the object's `Archivable` is false. Children with Archivable false are skipped."
+    },
+    "Instance:clone": {
+      "simple": "Old — use `Clone` instead."
+    },
+    "Instance:Destroy": {
+      "simple": "Removes the object from the game for good. It sets Parent to nil and locks it, disconnects all its event connections, and destroys everything inside it too. This is the right way to get rid of things you no longer need, so they stop using memory.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.Parent = Workspace\ntask.wait(3)\npart:Destroy() -- gone after 3 seconds\npart = nil     -- also forget it in your variable",
+      "gotcha": "You cannot bring a destroyed object back. If you might need it again, move it to ServerStorage or ReplicatedStorage instead."
+    },
+    "Instance:destroy": {
+      "simple": "Old — use `Destroy` instead."
+    },
+    "Instance:FindFirstAncestor": {
+      "simple": "Climbs upward from this object (parent, then grandparent, and so on) and gives you the first one with the given Name, or nil if none.",
+      "example": "-- Script inside a part that is somewhere inside a model named \"Car\"\nlocal car = script.Parent:FindFirstAncestor(\"Car\")\nif car then\n\tprint(\"I am part of\", car.Name)\nend"
+    },
+    "Instance:FindFirstAncestorOfClass": {
+      "simple": "Climbs upward and gives you the first ancestor whose class is exactly the one you name, like \"Model\". Handy for finding which Model a part belongs to.",
+      "example": "-- Script inside a Part\nlocal model = script.Parent:FindFirstAncestorOfClass(\"Model\")\nprint(model and model.Name)"
+    },
+    "Instance:FindFirstAncestorWhichIsA": {
+      "simple": "Like `FindFirstAncestorOfClass`, but also counts related kinds. Asking for \"BasePart\" matches a Part, MeshPart, or WedgePart.",
+      "example": "-- Script inside an Attachment inside some kind of part\nlocal part = script.Parent:FindFirstAncestorWhichIsA(\"BasePart\")\nprint(part and part.Name)"
+    },
+    "Instance:FindFirstChild": {
+      "simple": "Looks for a child with the given name right now and gives it to you, or gives nil if there is none. It never errors, so it is the safe way to check whether something exists. Pass `true` as the second argument to search all descendants, not just direct children.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal coin = Workspace:FindFirstChild(\"Coin\")\nif coin then\n\tcoin:Destroy()\nend\n\n-- Search every level deep\nlocal knob = Workspace:FindFirstChild(\"Knob\", true)",
+      "gotcha": "It does not wait. If the object might still be loading (common in LocalScripts), use `WaitForChild` instead."
+    },
+    "Instance:findFirstChild": {
+      "simple": "Old — use `FindFirstChild` instead."
+    },
+    "Instance:FindFirstChildOfClass": {
+      "simple": "Gives the first child whose class is exactly the one you name, or nil. A common use is finding the Humanoid inside a character.",
+      "example": "-- Script in a Part: check if a character touched it\nscript.Parent.Touched:Connect(function(hit)\n\tlocal humanoid = hit.Parent:FindFirstChildOfClass(\"Humanoid\")\n\tif humanoid then\n\t\tprint(hit.Parent.Name, \"touched me\")\n\tend\nend)"
+    },
+    "Instance:FindFirstChildWhichIsA": {
+      "simple": "Gives the first child that is the kind you name OR a kind related to it. Asking for \"BasePart\" finds a Part, MeshPart, or any other part type. Pass `true` second to search all descendants.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal model = Workspace:WaitForChild(\"Tree\")\nlocal anyPart = model:FindFirstChildWhichIsA(\"BasePart\")\nprint(anyPart and anyPart.Name)"
+    },
+    "Instance:FindFirstDescendant": {
+      "simple": "Turned off and cannot be used. Use `FindFirstChild(name, true)` to search all descendants instead."
+    },
+    "Instance:GetActor": {
+      "simple": "For advanced multi-threaded scripts (Parallel Luau). Gives the Actor this object belongs to (itself if it is an Actor, otherwise the nearest Actor above it), or nil.",
+      "example": "local actor = script:GetActor()\nprint(actor) -- nil unless this script is inside an Actor"
+    },
+    "Instance:GetAttribute": {
+      "simple": "Reads a custom value (an attribute) you stored on the object. Gives nil if that attribute was never set.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal door = Workspace:WaitForChild(\"Door\")\ndoor:SetAttribute(\"Locked\", true)\nprint(door:GetAttribute(\"Locked\")) --> true\nprint(door:GetAttribute(\"Color\"))  --> nil (never set)"
+    },
+    "Instance:GetAttributeChangedSignal": {
+      "simple": "Gives you an event that fires only when ONE specific attribute changes. Connect a function to it to react.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal door = Workspace:WaitForChild(\"Door\")\ndoor:GetAttributeChangedSignal(\"Locked\"):Connect(function()\n\tprint(\"Locked is now\", door:GetAttribute(\"Locked\"))\nend)\ndoor:SetAttribute(\"Locked\", false)"
+    },
+    "Instance:GetAttributes": {
+      "simple": "Gives you a table of all the object's attributes, as name = value pairs.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart:SetAttribute(\"Speed\", 10)\npart:SetAttribute(\"CanUse\", true)\nfor name, value in part:GetAttributes() do\n\tprint(name, value)\nend"
+    },
+    "Instance:GetChildren": {
+      "simple": "Gives you a list (array) of everything directly inside this object. Only one level deep. Great for looping over things in a folder.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal coins = Workspace:WaitForChild(\"Coins\")\nfor _, coin in coins:GetChildren() do\n\tprint(coin.Name)\nend\nprint(\"Total:\", #coins:GetChildren())"
+    },
+    "Instance:getChildren": {
+      "simple": "Old — use `GetChildren` instead."
+    },
+    "Instance:GetDebugId": {
+      "simple": "Plugin-only. Gives an internal ID string used for debugging. Normal Scripts and LocalScripts get an error if they call it."
+    },
+    "Instance:GetDescendants": {
+      "simple": "Gives you a list of EVERYTHING inside this object at any depth: children, grandchildren, and so on. The list is in no particular order.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal map = Workspace:WaitForChild(\"Map\")\nfor _, thing in map:GetDescendants() do\n\tif thing:IsA(\"BasePart\") then\n\t\tthing.Anchored = true -- anchor every part in the map\n\tend\nend"
+    },
+    "Instance:GetFullName": {
+      "simple": "Gives the object's full path as text, like \"Workspace.House.Door\". Useful for printing and debugging. `game` itself is left out.",
+      "example": "print(script:GetFullName()) --> e.g. ServerScriptService.Script",
+      "gotcha": "Only use it for printing. Do not try to split the text to find objects."
+    },
+    "Instance:GetStyled": {
+      "simple": "Used with the UI styling system. Gives the property value after styles are applied (or the default if nothing styled it), which can differ from just reading the property.",
+      "example": "-- LocalScript with a TextLabel as its parent\nlocal label = script.Parent\nprint(label:GetStyled(\"BackgroundColor3\"))"
+    },
+    "Instance:GetStyledPropertyChangedSignal": {
+      "simple": "Gives an event that fires when one styled property changes on this object. The event does not tell you the new value, so read it with `GetStyled`.",
+      "example": "-- LocalScript with a TextLabel as its parent\nlocal label = script.Parent\nlabel:GetStyledPropertyChangedSignal(\"TextColor3\"):Connect(function()\n\tprint(\"New color:\", label:GetStyled(\"TextColor3\"))\nend)"
+    },
+    "Instance:GetTags": {
+      "simple": "Gives a list of all the tags on this object, as text.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart:AddTag(\"Lava\")\nprint(part:GetTags()) --> {\"Lava\"}",
+      "gotcha": "To check for one tag, `HasTag` is faster than searching this list."
+    },
+    "Instance:HasTag": {
+      "simple": "Gives true if the object has the tag you name.",
+      "example": "-- Script in a Part\nscript.Parent.Touched:Connect(function(hit)\n\tif hit:HasTag(\"Lava\") then\n\t\tprint(\"Ouch, lava!\")\n\tend\nend)"
+    },
+    "Instance:IsAncestorOf": {
+      "simple": "Gives true if this object is somewhere ABOVE the other one in the tree (the other one is inside it at any depth).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.Parent = Workspace\nprint(Workspace:IsAncestorOf(part)) --> true\nprint(part:IsAncestorOf(Workspace)) --> false"
+    },
+    "Instance:IsDescendantOf": {
+      "simple": "Gives true if this object is somewhere INSIDE the other one, at any depth. A common use: check if a part is still in the world with `part:IsDescendantOf(Workspace)`.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\nprint(part:IsDescendantOf(Workspace)) --> false\npart.Parent = Workspace\nprint(part:IsDescendantOf(Workspace)) --> true",
+      "gotcha": "Passing nil does not work for checking if something was removed. Check `part.Parent == nil` or `IsDescendantOf(game)` instead."
+    },
+    "Instance:isDescendantOf": {
+      "simple": "Old — use `IsDescendantOf` instead."
+    },
+    "Instance:IsPropertyModified": {
+      "simple": "Gives true if a property has been changed away from its starting value. Mostly useful together with the UI styling system.",
+      "example": "local part = Instance.new(\"Part\")\nprint(part:IsPropertyModified(\"Transparency\")) --> false\npart.Transparency = 0.5\nprint(part:IsPropertyModified(\"Transparency\")) --> true"
+    },
+    "Instance:QueryDescendants": {
+      "simple": "Searches everything inside this object using a short search code (a selector) and gives back a list of matches. For example `\"Part\"` finds parts, `\".Lava\"` finds things tagged Lava, `\"#Coin\"` finds things named Coin, and `\"[Anchored = false]\"` finds things with that property value.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\n-- every descendant tagged \"Lava\"\nlocal lava = Workspace:QueryDescendants(\".Lava\")\n-- every BasePart that is not anchored\nlocal loose = Workspace:QueryDescendants(\"BasePart[Anchored = false]\")\n-- direct children of any Model that are tagged \"SwordPart\"\nlocal swords = Workspace:QueryDescendants(\"Model > .SwordPart\")\nprint(#lava, #loose, #swords)"
+    },
+    "Instance:Remove": {
+      "simple": "Old — use `Destroy` instead (or set `Parent` to nil)."
+    },
+    "Instance:remove": {
+      "simple": "Old — use `Destroy` instead."
+    },
+    "Instance:RemoveTag": {
+      "simple": "Takes a tag off the object. No error if the object did not have that tag.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart:RemoveTag(\"Lava\")\nprint(part:HasTag(\"Lava\")) --> false"
+    },
+    "Instance:ResetPropertyToDefault": {
+      "simple": "Sets a property back to its normal starting value. Useful with the UI styling system, so styles can take over that property again.",
+      "example": "local label = Instance.new(\"TextLabel\")\nlabel.Rotation = 45\nlabel:ResetPropertyToDefault(\"Rotation\")\nprint(label.Rotation) --> 0"
+    },
+    "Instance:SetAttribute": {
+      "simple": "Stores your own custom value on the object, like `Health = 100` or `Team = \"Red\"`. Setting it to nil removes it. Attributes show up in Studio's Properties window and are copied from server to players.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart:SetAttribute(\"Damage\", 25)\npart:SetAttribute(\"SpawnPoint\", Vector3.new(0, 10, 0))\npart:SetAttribute(\"Damage\", nil) -- removes it",
+      "gotcha": "Names can use only letters, numbers, `_`, `-`, `.`, and `/` (no spaces), up to 100 characters. Not every type can be stored; for example you cannot store another Instance or a table."
+    },
+    "Instance:WaitForChild": {
+      "simple": "Gives you the child with this name. If it is not there yet, it pauses (yields) your script until it shows up. This is very important in LocalScripts, because things from the server can arrive on a player's device a little later and in any order. Pass a number of seconds as the second argument to give up after that long and get nil.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal remote = ReplicatedStorage:WaitForChild(\"ScoreEvent\")\n\n-- give up after 5 seconds\nlocal maybe = ReplicatedStorage:WaitForChild(\"Bonus\", 5)\nif maybe == nil then\n\tprint(\"Bonus never showed up\")\nend",
+      "gotcha": "A typo in the name means it waits forever. After 5 seconds with no timeout set, Output warns \"Infinite yield possible\"."
+    },
+    "Instance.AncestryChanged": {
+      "simple": "Fires when this object or anything above it gets moved to a new parent. It gives you the object that moved and its new parent.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.AncestryChanged:Connect(function(child, parent)\n\tprint(child.Name, \"is now inside\", parent and parent.Name or \"nothing\")\nend)\npart.Parent = Workspace --> Part is now inside Workspace",
+      "gotcha": "To catch `Destroy` specifically, use `Destroying` instead."
+    },
+    "Instance.AttributeChanged": {
+      "simple": "Fires whenever ANY attribute on the object changes (including being removed). It gives you the attribute's name.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Workspace:WaitForChild(\"Part\")\npart.AttributeChanged:Connect(function(name)\n\tprint(name, \"changed to\", part:GetAttribute(name))\nend)\npart:SetAttribute(\"Speed\", 20)"
+    },
+    "Instance.ChildAdded": {
+      "simple": "Fires right after something is put directly inside this object. It gives you the new child.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nWorkspace.ChildAdded:Connect(function(child)\n\tprint(child.Name, \"was added to Workspace\")\nend)",
+      "gotcha": "Only direct children count. On a player's device, use `WaitForChild` to get things inside the new child, since they may still be arriving."
+    },
+    "Instance.childAdded": {
+      "simple": "Old — use `ChildAdded` instead."
+    },
+    "Instance.ChildRemoved": {
+      "simple": "Fires right after a direct child leaves this object, whether it was moved somewhere else or destroyed.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal coins = Workspace:WaitForChild(\"Coins\")\ncoins.ChildRemoved:Connect(function(child)\n\tprint(child.Name, \"is gone.\", #coins:GetChildren(), \"coins left\")\nend)"
+    },
+    "Instance.DescendantAdded": {
+      "simple": "Fires when something is added anywhere inside this object, at any depth. If you add a model with 3 parts inside, it fires 4 times (once for the model, once per part).",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nWorkspace.DescendantAdded:Connect(function(thing)\n\tif thing:IsA(\"BasePart\") then\n\t\tprint(\"New part somewhere in the world:\", thing.Name)\n\tend\nend)"
+    },
+    "Instance.DescendantRemoving": {
+      "simple": "Fires just BEFORE something inside this object (at any depth) is taken out. Because it fires before, the object still has its old Parent when your code runs.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nWorkspace.DescendantRemoving:Connect(function(thing)\n\tprint(thing:GetFullName(), \"is about to leave the world\")\nend)"
+    },
+    "Instance.Destroying": {
+      "simple": "Fires when the object is being destroyed with `Destroy`. Use it to clean up things you made for this object, like extra effects or saved info.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.Parent = Workspace\npart.Destroying:Connect(function()\n\tprint(\"Goodbye,\", part.Name)\nend)\npart:Destroy()",
+      "gotcha": "Deleting something by hand in Studio's Explorer does not call Destroy (it just sets Parent to nil), so this event will not fire then. Also, a script listening to its OWN Destroying may be stopped before it runs."
+    },
+    "Instance.StyledPropertiesChanged": {
+      "simple": "Fires whenever any styled property on the object changes. Used with the UI styling system.",
+      "example": "-- LocalScript with a TextLabel as its parent\nlocal label = script.Parent\nlabel.StyledPropertiesChanged:Connect(function()\n\tprint(\"A styled property changed\")\nend)"
+    },
+    "Instance.new": {
+      "simple": "Creates a brand-new object of the kind you name, like `\"Part\"`, `\"Folder\"`, or `\"Sound\"`. It starts with no Parent, so it is not in the game until you set its Parent.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.Anchored = true\npart.Position = Vector3.new(0, 5, 0)\npart.Parent = Workspace -- set Parent last (recommended)",
+      "gotcha": "There is an optional second argument for the parent, `Instance.new(\"Part\", Workspace)`, but Roblox recommends setting `Parent` last instead because it is faster. You also cannot create services (like Workspace) or abstract classes (like BasePart) this way."
+    },
+    "Instance.fromExisting": {
+      "simple": "Makes a new object of the same kind with the same property values as an existing one, but WITHOUT copying the things inside it. Most of the time you want `Clone` instead.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal original = Workspace:WaitForChild(\"Lamp\")\nlocal copy = Instance.fromExisting(original) -- same properties, no children\ncopy.Parent = Workspace",
+      "gotcha": "Unlike `Clone`, it ignores `Archivable` and never copies children."
+    }
+  }
+}

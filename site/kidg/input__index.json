@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/input/index.md",
+  "simple": "Input is how players control your game: keyboard and mouse, touch screens, gamepads, and VR. Because Roblox players switch between phones, PCs, and consoles, your game should work with all of them. This page explains the Input Action System for mapping actions to many devices, and the `PreferredInput` property for figuring out which device a player is mainly using right now. It also lists the default controls Roblox already gives you.",
+  "analogy": "It is like a TV you can control with the remote, the buttons on the TV, or a phone app. The action \"volume up\" is the same, but each device has its own way to do it.",
+  "keyPoints": [
+    "Roblox supports mouse and keyboard, touch, gamepads, and VR.",
+    "The Input Action System lets you define actions like jump or sprint, then bind many devices to each action.",
+    "Check `UserInputService.PreferredInput` to learn the player's main input: `Touch`, `KeyboardAndMouse`, or `Gamepad`.",
+    "`PreferredInput` changes when a player plugs in or uses another device, like a gamepad on a PC.",
+    "Watch it with `GetPropertyChangedSignal(\"PreferredInput\")` so your UI can switch layouts.",
+    "Do not use `TouchEnabled` as an \"is mobile\" check. Touch-screen laptops also report `true`.",
+    "`GetLastInputType()` flips back and forth a lot and can make UI flicker. Use it only for advanced cases.",
+    "Roblox has default controls for moving and the camera. Some keys, like Esc and F9, are reserved and cannot be changed."
+  ],
+  "terms": {
+    "input": "Anything the player does to control the game, like pressing a key, tapping, or moving a thumbstick.",
+    "cross-platform": "Working on many kinds of devices, like phones, PCs, and consoles.",
+    "action": "Something the player wants to do in your game, like jump or shoot, no matter which button they use.",
+    "binding": "A link between a real button, like Space or gamepad A, and an action.",
+    "PreferredInput": "A read-only property that tells you the player's main input type right now.",
+    "read-only": "You can read it, but your script cannot change it.",
+    "gamepad": "A game controller, like an Xbox or PlayStation controller.",
+    "thrashing": "Quickly switching back and forth over and over, which can make things flicker.",
+    "reserved input": "A key Roblox keeps for itself, like Esc for the menu or F9 for the Developer Console."
+  },
+  "example": {
+    "title": "React to the player's main input device",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nlocal function updateForInput()\n\tlocal preferred = UserInputService.PreferredInput\n\n\tif preferred == Enum.PreferredInput.Touch then\n\t\tprint(\"Show big on-screen buttons\")\n\telseif preferred == Enum.PreferredInput.Gamepad then\n\t\tprint(\"Show gamepad button hints\")\n\telseif preferred == Enum.PreferredInput.KeyboardAndMouse then\n\t\tprint(\"Show keyboard key hints\")\n\tend\nend\n\n-- Check once at the start\nupdateForInput()\n\n-- Check again whenever it changes\nUserInputService:GetPropertyChangedSignal(\"PreferredInput\"):Connect(updateForInput)",
+    "explain": [
+      "`updateForInput` reads `PreferredInput` and picks what to show for that device.",
+      "We call it once right away so the UI is correct from the start.",
+      "`GetPropertyChangedSignal` runs it again whenever the player switches devices, like picking up a gamepad."
+    ]
+  },
+  "watchOut": [
+    "Using `TouchEnabled` to decide if a player is on a phone. Touch-screen laptops will fool it.",
+    "Only checking input once. Players can plug in a controller mid-game, so listen for changes.",
+    "Overriding the default movement controls without a good reason. Players already know them."
+  ]
+}

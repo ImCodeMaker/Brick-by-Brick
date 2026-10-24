@@ -1,0 +1,29 @@
+{
+  "path": "content/en-us/ui/styling/compatibility.md",
+  "simple": "This page is a big lookup list of which UI objects and which of their properties can be controlled by UI styling. If you write a style rule for a property that is not on this list, it will not work. Use it like a dictionary: when a style is not applying, check here first. Roblox says more properties may be added over time.",
+  "analogy": "It is like the list of toppings a pizza shop offers. You can only order what is on the menu; asking for something not listed will not get you anything.",
+  "keyPoints": [
+    "The list is grouped into UI objects, appearance modifiers, layout structures, and size modifiers and constraints.",
+    "`GuiObject` properties like `AnchorPoint`, `BackgroundColor3`, `BackgroundTransparency`, `Position`, `Rotation`, and `Size` can be styled, and most UI objects inherit these.",
+    "Text objects like `TextLabel` and `TextButton` can have their font, `Text`, `TextColor3`, `TextSize`, wrapping, and alignment styled.",
+    "Image objects like `ImageLabel` can have `Image`, `ImageColor3`, `ImageTransparency`, `ScaleType`, and 9-slice settings like `SliceCenter` styled.",
+    "Appearance modifiers like `UICorner`, `UIGradient`, `UIPadding`, `UIShadow`, and `UIStroke` can be styled too.",
+    "Layouts like `UIListLayout` and `UIGridLayout`, and constraints like `UIAspectRatioConstraint`, `UISizeConstraint`, `UITextSizeConstraint`, `UIScale`, and `UIFlexItem` are included.",
+    "`StyleQuery` has its own condition properties such as `MinSize`, `MaxSize`, `AspectRatioRange`, `PreferredInputType`, `ReduceMotionEnabled`, and `ViewportDisplaySize`."
+  ],
+  "terms": {
+    "property": "A setting on an object, like `Size` or `TextColor3`. Styling can only change the properties listed here.",
+    "abstract class": "A kind of base class you never insert directly. `GuiObject` is abstract; Frames, labels, and buttons are built on top of it and get its properties.",
+    "inherit": "Get features from a parent class. Because `TextButton` inherits from `GuiObject`, it also has `Size` and `Position`.",
+    "appearance modifier": "A small add-on object that changes how its parent looks, like `UICorner` for rounded corners or `UIStroke` for an outline.",
+    "layout structure": "An object like `UIListLayout` that arranges sibling UI items automatically in a list or grid.",
+    "constraint": "An object that limits size, like `UISizeConstraint` keeping a frame between a `MinSize` and `MaxSize`.",
+    "breakpoint": "A point where the style changes, like \"when the container is at least 400 pixels wide, switch to the big layout\".",
+    "type": "What kind of value a property takes, like boolean (true or false), float (a decimal like 0.5), `Color3` (a color), or `UDim2` (a UI size or position)."
+  },
+  "watchOut": [
+    "Trying to style a property that is not in the tables. It will be ignored, so check this page or use a script instead.",
+    "Using the wrong value type in a rule, like a number where a `Color3` is expected. Match the type shown in the table.",
+    "Assuming the list never changes. Roblox adds support over time, so check back if something you need is missing."
+  ]
+}

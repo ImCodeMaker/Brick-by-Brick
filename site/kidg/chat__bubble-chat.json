@@ -1,0 +1,47 @@
+{
+  "path": "content/en-us/chat/bubble-chat.md",
+  "simple": "Bubble chat shows speech bubbles above characters' heads when they talk, like in a comic book. This page shows how to turn bubbles on and change their colors, fonts, size, and shape. You can also style one bubble differently from the others, like gold bubbles for VIPs. And you can make NPCs say things in bubbles too.",
+  "analogy": "Think of comic book speech balloons. The artist decides the balloon shape, font, and color for the whole comic, but can also draw a spiky red balloon when a character is shouting.",
+  "keyPoints": [
+    "Turn bubbles on by selecting `BubbleChatConfiguration` under `TextChatService` in the Explorer and checking `Enabled`.",
+    "Basic styling, like `TextColor3`, `TextSize`, `FontFace`, and `BackgroundColor3`, is done in the Properties window or from a LocalScript.",
+    "Behavior settings control how bubbles act, like `BubbleDuration` (30 seconds by default) and `MaxBubbles` (3 by default).",
+    "For fancier looks, add `ImageLabel`, `UIGradient`, `UICorner`, or `UIPadding` as children of `BubbleChatConfiguration`.",
+    "A LocalScript in StarterPlayerScripts can set these at runtime, and it overrides the Studio settings.",
+    "To style single bubbles, set the `TextChatService.OnBubbleAdded` callback and return a `BubbleChatMessageProperties` object.",
+    "To make NPCs talk, call `TextChatService:DisplayBubble(partOrCharacter, message)`. It only works in client-side scripts."
+  ],
+  "terms": {
+    "adornee": "The thing a bubble is stuck to. By default it is the character's `HumanoidRootPart`.",
+    "AdorneeName": "The name of the body part or Attachment the bubble attaches to. If you set it to `Head`, bubbles float above the head part.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "VerticalStudsOffset": "Extra space between the bubble and the thing it is attached to. Setting it to 2 lifts every bubble 2 studs higher than normal.",
+    "LocalPlayerStudsOffset": "Moves your own bubbles, measured in studs from your character, and turned to match the camera's direction. `(0, 1, 0)` would push your own bubbles 1 stud up on screen.",
+    "MaxDistance": "How far from the camera, in studs, bubbles still show. Default is 100, so a player 120 studs away shows no bubble.",
+    "MinimizeDistance": "Past this distance (default 40 studs), bubbles shrink into a small bubble with three dots, just to show someone is talking.",
+    "pixel": "One tiny dot on the screen. `BubblesSpacing` of 6 means 6 dots of gap between stacked bubbles.",
+    "padding": "Empty space between the text and the edge of the bubble. A padding of `UDim.new(0, 8)` means 8 pixels of space.",
+    "callback": "A function you hand to Roblox that Roblox calls for you at the right moment. `OnBubbleAdded` is called every time a new bubble appears.",
+    "9-slice": "A way to stretch an image so the corners stay sharp and only the middle stretches. Used with `ScaleType` set to `Slice`.",
+    "client-side": "Code that runs on the player's own device, like a LocalScript, instead of on Roblox's server.",
+    "NPC": "Non-player character. A character in your game that is controlled by your scripts, not by a person."
+  },
+  "example": {
+    "title": "Make an NPC say hello",
+    "place": "LocalScript in StarterPlayerScripts (the NPC model `SomeNPC` in Workspace has a ProximityPrompt and a Head part)",
+    "code": "local TextChatService = game:GetService(\"TextChatService\")\nlocal Workspace = game:GetService(\"Workspace\")\n\n-- Find the NPC's prompt and head\nlocal npc = Workspace:WaitForChild(\"SomeNPC\")\nlocal prompt = npc:WaitForChild(\"ProximityPrompt\")\nlocal head = npc:WaitForChild(\"Head\")\n\n-- When the player presses the prompt, show a bubble above the head\nprompt.Triggered:Connect(function()\n\tTextChatService:DisplayBubble(head, \"Hello world!\")\nend)",
+    "explain": [
+      "We get `TextChatService`, which handles chat and bubbles.",
+      "We wait for the NPC, its `ProximityPrompt`, and its `Head` part to load.",
+      "`prompt.Triggered` fires when the player uses the prompt (for example, pressing E near the NPC).",
+      "`DisplayBubble(head, \"Hello world!\")` makes a speech bubble pop up above the head.",
+      "This must be a LocalScript (or a Script with `RunContext` set to Client) because `DisplayBubble` only works on the client."
+    ]
+  },
+  "watchOut": [
+    "Calling `DisplayBubble` from a normal server Script. It only works on the client, so use a LocalScript.",
+    "Forgetting to return the `BubbleChatMessageProperties` object from `OnBubbleAdded`. If you do not return it, your style is not used.",
+    "Assuming the player always has a character. In the low health idea, check that `player.Character` exists before searching it.",
+    "Adding two `UICorner` objects. Use `FindFirstChildOfClass` first, like the page does, so you change the existing one."
+  ]
+}

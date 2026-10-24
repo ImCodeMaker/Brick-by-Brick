@@ -1,0 +1,101 @@
+{
+  "name": "AlignOrientation",
+  "simple": "AlignOrientation turns a part to face a goal direction and keeps it facing that way. The goal can be another attachment's direction or a rotation you type in. It only turns the part; it does not move it. For moving, use AlignPosition.",
+  "analogy": "AlignOrientation is like a compass needle or a sunflower: wherever it is, it keeps turning to point the right way.",
+  "whenToUse": [
+    "Keep a vehicle or hoverboard upright",
+    "Make a turret or pet face a target",
+    "Rotate a floating platform smoothly to a new angle",
+    "Pair with AlignPosition for full physics-based control"
+  ],
+  "where": "Create with Instance.new(\"AlignOrientation\"), set Attachment0 to an attachment in the part to turn, then set Attachment1 (copy that attachment's direction) or Mode = OneAttachment and use CFrame. Usually from a Script on the server.",
+  "terms": {
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "angular velocity": "How fast something spins, and around which axis, measured in radians per second. 2 x pi (about 6.28) radians per second is one full turn every second.",
+    "radians": "Another way to measure angles. A full circle is 2 x pi (about 6.28) radians, which is 360 degrees. `math.rad(90)` turns 90 degrees into radians.",
+    "CFrame": "A position plus a rotation in one value. It says where something is and which way it faces.",
+    "Vector3": "Three numbers (X, Y, Z) bundled together. Used for positions, directions, forces and speeds. Y is up.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "center of mass": "The balance point of an object. Pushing exactly through it moves the object without spinning it; pushing off to the side also makes it spin.",
+    "world space": "Directions measured using the whole game world's fixed arrows: Y is always straight up toward the sky, no matter how a part is turned.",
+    "Responsiveness": "How quickly an Align constraint tries to reach its goal, from 5 (slow and gentle) to 200 (fast and snappy).",
+    "axis": "An imaginary line something turns around or slides along. An attachment's X axis is its main arrow.",
+    "deprecated": "Old and replaced by something better. It may still work, but you should not use it in new games.",
+    "replicate": "Copy from the server to every player's computer automatically. A property marked 'not replicated' is not copied.",
+    "orientation": "Which way something is turned or facing.",
+    "primary axis": "An attachment's main arrow (its X direction). The secondary axis is its Y direction.",
+    "AlignType": "Picks how strict the turning is: AllAxes (match the full rotation), PrimaryAxisParallel (only make the main arrows point the same way), PrimaryAxisPerpendicular (make them point at right angles), PrimaryAxisLookAt (point the main arrow at a spot).",
+    "MaxTorque": "The most twisting strength it may use to turn the part.",
+    "MaxAngularVelocity": "The fastest it may spin (radians per second) while turning toward the goal."
+  },
+  "examples": [
+    {
+      "title": "Turn a floating part to face a new direction",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Size = Vector3.new(4, 1, 2)\npart.Position = Vector3.new(0, 10, 0)\npart.Anchored = false\npart.Parent = workspace\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\n-- Keep it floating in place\nlocal hold = Instance.new(\"AlignPosition\")\nhold.Attachment0 = attachment\nhold.Mode = Enum.PositionAlignmentMode.OneAttachment\nhold.Position = part.Position\nhold.MaxForce = 100000\nhold.Parent = part\n\nlocal turn = Instance.new(\"AlignOrientation\")\nturn.Attachment0 = attachment\nturn.Mode = Enum.OrientationAlignmentMode.OneAttachment\nturn.Responsiveness = 15\nturn.MaxTorque = 100000\nturn.Parent = part\n\n-- Every 2 seconds, turn another 90 degrees around the up axis\nlocal angle = 0\nwhile true do\n\tangle += 90\n\tturn.CFrame = CFrame.Angles(0, math.rad(angle), 0)\n\ttask.wait(2)\nend",
+      "explain": [
+        "AlignPosition holds the part in the air; AlignOrientation only handles the turning.",
+        "In OneAttachment mode, the goal rotation comes from the CFrame property. Only its rotation is used; its position is ignored.",
+        "CFrame.Angles(0, math.rad(90), 0) means 'turned 90 degrees around Y'. math.rad converts degrees to radians.",
+        "Each loop adds 90 degrees, so the part smoothly turns a quarter turn every 2 seconds."
+      ]
+    }
+  ],
+  "gotchas": [
+    "CFrame, PrimaryAxis, SecondaryAxis and LookAtPosition only matter when Mode is OneAttachment.",
+    "If the part turns too slowly or not at all, raise MaxTorque (or Responsiveness).",
+    "AlignOrientation does not hold a part up. A loose part will still fall unless something else holds it.",
+    "Angles in CFrame.Angles are radians. Use math.rad(degrees)."
+  ],
+  "members": {
+    "AlignOrientation.AlignType": {
+      "simple": "How the part should line up with the goal: AllAxes (match the full rotation exactly), PrimaryAxisParallel (main arrows point the same way, free to roll around it), PrimaryAxisPerpendicular (main arrows at a right angle), or PrimaryAxisLookAt (point the main arrow at LookAtPosition).",
+      "example": "workspace.Turret.AlignOrientation.AlignType = Enum.AlignType.PrimaryAxisParallel"
+    },
+    "AlignOrientation.CFrame": {
+      "simple": "The goal rotation, when Mode is OneAttachment. Only the rotation part is used; the position inside the CFrame is ignored.",
+      "example": "workspace.Board.AlignOrientation.CFrame = CFrame.Angles(0, math.rad(45), 0) -- face 45 degrees"
+    },
+    "AlignOrientation.LookAtPosition": {
+      "simple": "A spot in the world for the main arrow to point at. Only used when AlignType is PrimaryAxisLookAt and Mode is OneAttachment. Not copied to players' devices automatically (not replicated).",
+      "example": "local turn = workspace.Turret.AlignOrientation\nturn.Mode = Enum.OrientationAlignmentMode.OneAttachment\nturn.AlignType = Enum.AlignType.PrimaryAxisLookAt\nturn.LookAtPosition = Vector3.new(0, 5, 50) -- aim at this spot"
+    },
+    "AlignOrientation.MaxAngularVelocity": {
+      "simple": "The fastest it may spin (radians per second) while turning to the goal, when RigidityEnabled is false. A cap, not the exact speed.",
+      "example": "workspace.Turret.AlignOrientation.MaxAngularVelocity = math.pi -- at most half a turn per second"
+    },
+    "AlignOrientation.MaxTorque": {
+      "simple": "The most twisting strength it may use, when RigidityEnabled is false. A cap; Responsiveness decides how much is really used.",
+      "example": "workspace.Turret.AlignOrientation.MaxTorque = 50000"
+    },
+    "AlignOrientation.Mode": {
+      "simple": "TwoAttachment (default): turn Attachment0 to match Attachment1's direction. OneAttachment: ignore Attachment1 and match the CFrame (or PrimaryAxis/SecondaryAxis) property instead.",
+      "example": "workspace.Board.AlignOrientation.Mode = Enum.OrientationAlignmentMode.OneAttachment"
+    },
+    "AlignOrientation.PrimaryAxis": {
+      "simple": "In OneAttachment mode, the direction the goal's main (X) arrow should point, as a length-1 Vector3. Not replicated.",
+      "example": "workspace.Board.AlignOrientation.PrimaryAxis = Vector3.new(0, 0, -1)"
+    },
+    "AlignOrientation.PrimaryAxisOnly": {
+      "simple": "Old — use AlignType (PrimaryAxisParallel, PrimaryAxisPerpendicular or PrimaryAxisLookAt) instead."
+    },
+    "AlignOrientation.ReactionTorqueEnabled": {
+      "simple": "If false (default), only Attachment0's part is turned. If true, Attachment1's part is twisted the opposite way too.",
+      "example": "workspace.PartA.AlignOrientation.ReactionTorqueEnabled = true"
+    },
+    "AlignOrientation.Responsiveness": {
+      "simple": "How quickly it turns to the goal, from 5 (slow and smooth) to 200 (fast and snappy).",
+      "example": "workspace.Turret.AlignOrientation.Responsiveness = 40"
+    },
+    "AlignOrientation.RigidityEnabled": {
+      "simple": "If true, the physics engine turns the part to the goal as fast and hard as it can, ignoring MaxTorque, MaxAngularVelocity and Responsiveness. If false (default), those settings control it.",
+      "example": "workspace.Board.AlignOrientation.RigidityEnabled = true -- lock the rotation tightly"
+    },
+    "AlignOrientation.SecondaryAxis": {
+      "simple": "In OneAttachment mode, the direction the goal's secondary (Y) arrow should point, as a length-1 Vector3. Not replicated.",
+      "example": "workspace.Board.AlignOrientation.SecondaryAxis = Vector3.new(0, 1, 0) -- keep 'up' pointing up"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "path": "content/en-us/ui/page-layouts.md",
+  "simple": "A `UIPageLayout` turns each UI item in a container into its own page, and only shows one page at a time. You use scripts to flip to the next or previous page. It is great for tutorials, menus with tabs, or character customization screens. You can also flip pages in Studio with the Command Bar to check your work without playing.",
+  "analogy": "A page layout is like a picture book: all the pages are there, but you only see one at a time, and you turn to the next or previous page.",
+  "keyPoints": [
+    "Put a `UIPageLayout` inside a container; every sibling `GuiObject` becomes a separate page.",
+    "Use `:Next()` and `:Previous()` in a script to move between pages.",
+    "`:JumpToIndex(0)` goes to the first page (pages are counted starting from 0).",
+    "Good for tutorials, tabbed menus, and step-by-step screens.",
+    "In Studio, select the `UIPageLayout`, open the Command Bar, and run `game:GetService(\"Selection\"):Get()[1]:Next()` to preview the next page."
+  ],
+  "terms": {
+    "sibling": "An object with the same parent. Each sibling of the `UIPageLayout` becomes a page.",
+    "index": "A page's number in order. Here the first page is index 0, the second is 1.",
+    "Command Bar": "A Studio box where you can type and run one line of Lua right away, even without playing.",
+    "Selection": "The Studio service that knows which objects you have selected in the Explorer.",
+    "client-side script": "A script that runs on the player's device, like a `LocalScript`."
+  },
+  "example": {
+    "title": "Next and Back buttons for a tutorial",
+    "place": "LocalScript inside a Frame named Tutorial (inside a ScreenGui in StarterGui). The Frame holds a Frame named Pages (with a UIPageLayout and page frames) and two TextButtons named NextButton and BackButton.",
+    "code": "local tutorial = script.Parent\nlocal pages = tutorial:WaitForChild(\"Pages\")\nlocal pageLayout = pages:FindFirstChildWhichIsA(\"UIPageLayout\")\n\nlocal nextButton = tutorial:WaitForChild(\"NextButton\")\nlocal backButton = tutorial:WaitForChild(\"BackButton\")\n\nnextButton.Activated:Connect(function()\n\tpageLayout:Next() -- go forward one page\nend)\n\nbackButton.Activated:Connect(function()\n\tpageLayout:Previous() -- go back one page\nend)",
+    "explain": [
+      "We find the Pages frame and the `UIPageLayout` inside it.",
+      "We keep the buttons outside the Pages frame, so they are not turned into pages themselves.",
+      "Clicking Next calls `:Next()`, and clicking Back calls `:Previous()`."
+    ]
+  },
+  "watchOut": [
+    "Every sibling of the `UIPageLayout` becomes a page, including buttons. Keep your navigation buttons in a different container.",
+    "Page numbers start at 0, so the first page is `JumpToIndex(0)`, not 1.",
+    "The Command Bar trick only works when the `UIPageLayout` is the first thing selected in the Explorer."
+  ]
+}

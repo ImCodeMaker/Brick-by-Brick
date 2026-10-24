@@ -1,0 +1,38 @@
+{
+  "name": "Part",
+  "simple": "Part is the basic building block of Roblox: the plain block you get when you click Part in Studio. It can be one of five shapes: Block, Ball, Cylinder, Wedge, or CornerWedge. Everything a part can do (Position, Color, Anchored, Touched, and more) comes from BasePart.",
+  "analogy": "Parts are like LEGO bricks. You can make them any size and color and stack them to build anything, and the Shape setting is like choosing a square brick, a round one, or a ramp piece.",
+  "whenToUse": [
+    "Build floors, walls, platforms, and obstacles.",
+    "Spawn simple objects from code, like coins, bullets, or falling blocks.",
+    "Make a round ball or a ramp by changing `Shape`."
+  ],
+  "where": "Lives in Workspace to be seen and do physics. Create one in code with `Instance.new(\"Part\")`, or insert it in Studio from the Home or Model tab.",
+  "terms": {
+    "BasePart": "The family that Part belongs to. Look there for Position, Size, Color, Anchored, Touched, and other shared features.",
+    "Enum": "A fixed list of choices. `Enum.PartType` is the list of shapes a Part can be.",
+    "stud": "Roblox's unit of distance. A brand-new Part is 4 studs long, 1 stud tall, and 2 studs wide."
+  },
+  "examples": [
+    {
+      "title": "Rain bouncy balls from the sky",
+      "place": "Script in ServerScriptService",
+      "code": "local Workspace = game:GetService(\"Workspace\")\n\nfor i = 1, 10 do\n\tlocal ball = Instance.new(\"Part\")\n\tball.Shape = Enum.PartType.Ball\n\tball.Size = Vector3.new(3, 3, 3)\n\tball.Color = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))\n\t-- random spot 40 studs up, somewhere between -20 and 20 on X and Z\n\tball.Position = Vector3.new(math.random(-20, 20), 40, math.random(-20, 20))\n\tball.Parent = Workspace -- not anchored, so it falls\n\ttask.wait(0.5)\nend",
+      "explain": [
+        "`Instance.new(\"Part\")` makes a part; setting `Shape` to Ball makes it round.",
+        "Each ball gets a random color and a random spot 40 studs up.",
+        "They are not anchored, so gravity pulls them down. One drops every half second."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A Ball always stays perfectly round, so its three Size numbers are kept equal. Use a MeshPart if you want an oval.",
+    "New parts are not anchored, so they fall. Set `Anchored = true` for things that should stay put."
+  ],
+  "members": {
+    "Part.Shape": {
+      "simple": "Which shape the part is: Block (box, the default), Ball (sphere), Cylinder (tube lying along the X axis), Wedge (a ramp), or CornerWedge (a corner ramp). For fancier shapes use a MeshPart or solid modeling.",
+      "example": "local Workspace = game:GetService(\"Workspace\")\nlocal part = Instance.new(\"Part\")\npart.Shape = Enum.PartType.Cylinder\npart.Size = Vector3.new(6, 2, 2) -- 6 long along X, 2 across\npart.Anchored = true\npart.Parent = Workspace"
+    }
+  }
+}

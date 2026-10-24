@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/players/leaderboards.md",
+  "simple": "The leaderboard is the list in the top-right corner that shows players and their stats, like Gold or Kills. This page shows how to add your own stats with a folder called `leaderstats`, how to change them during play, and how to set their order. It also explains Friends and Global rankings, which use saved scores so players can compare with people outside their server.",
+  "analogy": "It is like the scoreboard at a sports game. The Here view is the board in your own gym today. The Friends and Global views are like a league table that remembers scores from every game ever played.",
+  "keyPoints": [
+    "The PlayerList has three views: Here (players in this server), Friends, and Global.",
+    "To show stats in Here, a server Script puts a `Folder` named `leaderstats` inside each player.",
+    "Add value objects like `IntValue` to `leaderstats`. Their `Name` is the column title, and their `Value` is the number shown.",
+    "To change a stat, change its `Value`, for example `goldStat.Value += 10`.",
+    "Control column order by adding stats in order, by adding a `BoolValue` named `IsPrimary`, or a `NumberValue` named `Priority`.",
+    "Hide the leaderboard from a client script with `StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)`.",
+    "Friends and Global (beta) read scores from an ordered data store that you register in Creator Hub. Only one can be active per game.",
+    "You still save, fix, and check the scores yourself on the server. Creator Hub only shows them."
+  ],
+  "terms": {
+    "leaderstats": "A folder inside a player that Roblox reads to fill the leaderboard. It must be spelled all lowercase: `leaderstats`.",
+    "IntValue": "An object that holds one whole number, like `0` or `25`, in its `Value` property.",
+    "value object": "An object whose only job is to hold one value, such as `IntValue`, `NumberValue`, `StringValue`, or `BoolValue`.",
+    "session": "One visit to a server. Session stats reset when the player leaves unless you save them.",
+    "persistent": "Saved and remembered after the player leaves, so it is still there next time.",
+    "data store": "Roblox's online storage where your game can save information about players.",
+    "ordered data store": "A data store that holds numbers and can sort them, like highest score first.",
+    "key": "The name used to find a saved entry, like a label on a locker. Here it should include the player's user ID, such as `\"12345\"`.",
+    "beta": "A feature that is still being tested and may change.",
+    "source of truth": "The one official place where the real data lives. Here, that is your ordered data store.",
+    "CoreGui": "The built-in Roblox screens, like the chat, backpack, and player list."
+  },
+  "example": {
+    "title": "Give every player a Gold stat",
+    "place": "Script named Leaderboard in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal function leaderboardSetup(player)\n\t-- The folder must be named exactly \"leaderstats\"\n\tlocal leaderstats = Instance.new(\"Folder\")\n\tleaderstats.Name = \"leaderstats\"\n\tleaderstats.Parent = player\n\n\t-- This becomes the \"Gold\" column\n\tlocal gold = Instance.new(\"IntValue\")\n\tgold.Name = \"Gold\"\n\tgold.Value = 0\n\tgold.Parent = leaderstats\n\n\t-- Add 1 gold every 5 seconds while the player is here\n\ttask.spawn(function()\n\t\twhile player.Parent do\n\t\t\ttask.wait(5)\n\t\t\tgold.Value += 1\n\t\tend\n\tend)\nend\n\nPlayers.PlayerAdded:Connect(leaderboardSetup)",
+    "explain": [
+      "When a player joins, we make a `Folder` called `leaderstats` and put it inside them.",
+      "We make an `IntValue` named `Gold`, start it at `0`, and put it in the folder. A Gold column appears.",
+      "`task.spawn` starts a loop that runs on its own, so it does not block other code.",
+      "Every 5 seconds the loop adds 1 to `gold.Value`, and the leaderboard updates by itself.",
+      "The loop stops when the player leaves, because `player.Parent` becomes `nil`."
+    ]
+  },
+  "watchOut": [
+    "Spelling the folder `Leaderstats` or `leaderStats`. It must be all lowercase or nothing shows up.",
+    "Writing `gold = 10` instead of `gold.Value = 10`. You must change the `Value` property.",
+    "Changing stats from a LocalScript. Only that player sees it, and it will not be trusted. Change stats in a server Script.",
+    "Expecting `leaderstats` to save by itself. It resets when the player leaves unless you also save it in a data store."
+  ]
+}

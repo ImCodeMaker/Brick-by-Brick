@@ -1,0 +1,51 @@
+{
+  "path": "content/en-us/parts/materials.md",
+  "simple": "A material is what a part or terrain is made of, like Wood, Ice, Metal or Neon. In Roblox, materials change both how things look and how they behave: Concrete is heavy and sinks in water, Ice is slippery, Rubber is bouncy. You can also make your own custom materials with your own images and physics settings. Picking the right material makes your world look real and feel right to play in.",
+  "analogy": "Choosing a material is like choosing what a toy is made of. A wooden ball and a rubber ball might look the same size, but one is light and barely bounces while the other bounces all over the room.",
+  "keyPoints": [
+    "New parts start as Plastic. Change material with the Material button or the Material Manager (Window > 3D > Material).",
+    "Each material has physical properties: density (how heavy), friction (how grippy), and elasticity (how bouncy).",
+    "Custom materials are MaterialVariant objects inside MaterialService. You give them texture images and can change their physics.",
+    "Set a custom material as an override to make it replace a base material everywhere, including terrain. Overrides are the only way to use custom materials on terrain.",
+    "Physics settings are chosen in this order: the part's own CustomPhysicalProperties first, then its custom material, then a material override, then the default material.",
+    "A part stores its custom material by name. Renaming a MaterialVariant after using it means parts lose it until you re-apply it.",
+    "Because materials are linked by name, you can restyle a whole map by swapping which set of same-named MaterialVariants is in MaterialService (adaptive materials).",
+    "If you insert a model that uses custom materials, copy its MaterialVariant objects into MaterialService or they will not show."
+  ],
+  "terms": {
+    "material": "What a part is made of. It sets the look and the physics. A new part is Plastic.",
+    "physical properties": "The numbers that control how something behaves in physics: density, friction and elasticity.",
+    "density": "How heavy each stud of material is. Mass = volume x density. A 2 x 2 x 2 block (volume 8) of Plastic (density 0.7) has mass 5.6, but the same block of Metal (density 7.85) has mass 62.8.",
+    "friction": "How grippy a surface is. Plastic is 0.3 and Ice is 0.02, so things slide about 15 times more easily on Ice.",
+    "elasticity": "How bouncy something is, from 0 (no bounce) to 1. Plastic is 0.5 and Rubber is 0.95.",
+    "FrictionWeight / ElasticityWeight": "When two materials touch, these decide whose friction or bounce counts more. A bigger weight wins more of the mix.",
+    "MaterialService": "The service that holds custom materials (MaterialVariant objects) and override settings.",
+    "MaterialVariant": "A custom material. It has its own texture images and can have its own physics.",
+    "base material": "One of Roblox's built-in materials, like Wood or Slate. A custom material is built on top of one and copies its physics unless changed.",
+    "material override": "Telling Roblox: wherever this base material is used, use my custom material instead.",
+    "texture map": "An image that controls one part of the look, like Color or Normal (fake bumps).",
+    "PBR": "Physically based rendering, a way to draw realistic surfaces using several texture maps.",
+    "Studs Per Tile": "How many studs wide one copy of the material's image is before it repeats.",
+    "TerrainDetail": "An object that lets a custom material look different on the top, sides and bottom of terrain.",
+    "CustomPhysicalProperties": "A part setting that lets you give just that one part its own density, friction and bounce.",
+    "adaptive materials": "Because parts remember a custom material by name, any MaterialVariant with that name in MaterialService is used."
+  },
+  "example": {
+    "title": "Make a bouncy, slippery pad with custom physics",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal pad = Instance.new(\"Part\")\npad.Size = Vector3.new(12, 1, 12)\npad.Position = Vector3.new(0, 0.5, 20)\npad.Anchored = true\npad.Material = Enum.Material.Ice\npad.Parent = Workspace\n\n-- Default Ice: density 0.919, friction 0.02, elasticity 0.15\nprint(\"Ice friction:\", pad.CurrentPhysicalProperties.Friction)\n\n-- Give just this part its own physics:\n-- PhysicalProperties.new(density, friction, elasticity, frictionWeight, elasticityWeight)\npad.CustomPhysicalProperties = PhysicalProperties.new(0.9, 0, 1, 100, 100)\n\n-- A test ball dropped onto the pad\nlocal ball = Instance.new(\"Part\")\nball.Shape = Enum.PartType.Ball\nball.Size = Vector3.new(3, 3, 3)\nball.Material = Enum.Material.Plastic  -- elasticity 0.5\nball.Position = Vector3.new(0, 30, 20)\nball.Parent = Workspace",
+    "explain": [
+      "The pad starts as Ice, which already has very low friction (0.02) and a small bounce (0.15).",
+      "`CustomPhysicalProperties` overrides the material just for this part. Friction 0 means no grip at all, and elasticity 1 is the bounciest possible value.",
+      "The ball is Plastic (elasticity 0.5, weight 1).",
+      "The weights of 100 make the pad's values win when something touches it, so the ball bounces much more than it would on a normal floor.",
+      "When two things touch, the bounce is mixed using the weights: (1 x 100 + 0.5 x 1) / (100 + 1) is about 0.995, so the ball bounces almost perfectly. On a normal Plastic floor it would only be 0.5."
+    ]
+  },
+  "watchOut": [
+    "Changing material changes weight. A car built from Metal (7.85) instead of Plastic (0.7) is over 11 times heavier and may not move with the same engine settings.",
+    "Renaming a custom material after applying it breaks the link. Re-apply it to the parts afterward.",
+    "Models from the Creator Store that use custom materials look plain until you move their MaterialVariant objects into MaterialService.",
+    "Terrain can have only one variant of each base material per place, set through an override."
+  ]
+}

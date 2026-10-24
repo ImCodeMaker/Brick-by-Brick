@@ -1,0 +1,48 @@
+{
+  "name": "OrderedDataStore",
+  "simple": "An OrderedDataStore is a special data store that only holds whole numbers and can give them back sorted. That makes it perfect for global leaderboards like 'Top 10 most wins of all time'.",
+  "analogy": "An OrderedDataStore is like a high-score board at an arcade that automatically keeps everyone's score in order, so you can just read off the top names.",
+  "whenToUse": [
+    "Global leaderboards across every server (most wins, most coins, fastest time).",
+    "Any list of whole numbers you want sorted.",
+    "Not for whole player saves: it cannot store tables or text, and it has no versions."
+  ],
+  "where": "Server only. Get it with `game:GetService(\"DataStoreService\"):GetOrderedDataStore(\"Name\")`. It also has GetAsync, SetAsync, IncrementAsync, UpdateAsync and RemoveAsync from GlobalDataStore.",
+  "terms": {
+    "data store": "Roblox's save system. It keeps information (like coins or levels) even after players leave and servers shut down, and every server of your game shares it.",
+    "key": "The name you save a value under, like a label on a locker. A common key is `\"User_\" .. player.UserId`, for example `User_12345`.",
+    "value": "The thing stored under a key, like a number, text, true/false, or a table.",
+    "server": "The Roblox computer in charge of one copy of your game. Data stores can only be used from server Scripts.",
+    "pcall": "Short for 'protected call'. It runs a function and catches any error instead of letting your whole script crash. It gives back `true` plus the results if it worked, or `false` plus the error message if it failed.",
+    "async / yield": "Functions ending in `Async` talk to Roblox's computers over the internet, so they take a moment. While waiting, your script pauses (yields), then carries on when the answer arrives.",
+    "rate limit / budget": "How many data store requests a server is allowed to make per minute. For normal reads and writes the default is 60 + 40 for each player, so a server with 10 players can do 460 reads per minute. If you go over, requests are slowed down or dropped.",
+    "UserId": "A player's permanent ID number. It never changes, even if they change their name, so it makes a great key.",
+    "ascending / descending": "Ascending means smallest first (1, 2, 3). Descending means biggest first (3, 2, 1). For 'top scores' you want descending.",
+    "pages": "The sorted list comes back in pages, like a book. Each page holds up to 100 entries.",
+    "integer": "A whole number, like 7 or -20. Not 7.5."
+  },
+  "examples": [
+    {
+      "title": "Top 10 most wins",
+      "place": "Script in ServerScriptService",
+      "code": "local DataStoreService = game:GetService(\"DataStoreService\")\nlocal winsStore = DataStoreService:GetOrderedDataStore(\"TotalWins\")\n\n-- Give a player a win (IncrementAsync adds to their number)\nlocal function addWin(player)\n\tpcall(function()\n\t\twinsStore:IncrementAsync(tostring(player.UserId), 1)\n\tend)\nend\n\n-- Print the top 10\nlocal function printTop10()\n\tlocal ok, pages = pcall(function()\n\t\treturn winsStore:GetSortedAsync(false, 10) -- false = biggest first\n\tend)\n\tif not ok then return end\n\tfor rank, entry in pages:GetCurrentPage() do\n\t\t-- entry.key is the key, entry.value is the number\n\t\tprint(rank .. \". User \" .. entry.key .. \" - \" .. entry.value .. \" wins\")\n\tend\nend\n\nwhile true do\n\tprintTop10()\n\ttask.wait(60) -- refresh once a minute, not every frame\nend",
+      "explain": [
+        "Each player's key is their UserId as text, and the value is their number of wins.",
+        "`GetSortedAsync(false, 10)` asks for one page of 10 entries, biggest first.",
+        "We refresh only once a minute because sorted reads have a small budget (about 5 + 2 per player per minute)."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Values must be whole numbers. Tables, text and decimals will not work.",
+    "There are no versions: setting or removing a key replaces it for good.",
+    "Sorted reads have a small budget, so refresh leaderboards every minute or so, not constantly.",
+    "Only works from server Scripts, and calls should be wrapped in pcall."
+  ],
+  "members": {
+    "OrderedDataStore:GetSortedAsync": {
+      "simple": "Gives back the entries sorted by their number. First value: true for smallest first, false for biggest first. Second: how many per page (up to 100). Optional third and fourth: a minimum and maximum value to filter by.",
+      "example": "-- Script in ServerScriptService\nlocal DataStoreService = game:GetService(\"DataStoreService\")\nlocal timeStore = DataStoreService:GetOrderedDataStore(\"FastestTimes\")\n\n-- Smallest times first (fastest runs), only between 1 and 600 seconds\nlocal ok, pages = pcall(function()\n\treturn timeStore:GetSortedAsync(true, 5, 1, 600)\nend)\nif ok then\n\tfor _, entry in pages:GetCurrentPage() do\n\t\tprint(entry.key, entry.value)\n\tend\n\tif not pages.IsFinished then\n\t\t-- pages:AdvanceToNextPageAsync() would load the next 5\n\tend\nend"
+    }
+  }
+}

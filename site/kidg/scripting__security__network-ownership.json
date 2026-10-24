@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/scripting/security/network-ownership.md",
+  "simple": "To keep physics smooth, Roblox lets each player's device run the physics for their own character and for loose parts near them. That is called network ownership. It makes the game feel fast, but it also means a cheater can control those parts however they like. This page explains what cheaters can do with that power and how to think about checking player movement on the server.",
+  "analogy": "It is like letting each kid hold the scorecard for their own game of catch to save the referee time. It is faster, but a dishonest kid can just write whatever score they want.",
+  "keyPoints": [
+    "The player who owns a part or assembly controls its physics completely.",
+    "By default, the server gives ownership of unanchored parts to players whose characters are nearby, to share the physics work.",
+    "Players always control their own character, so cheaters can teleport, fly, change their speed, play any animation, and walk through walls.",
+    "Cheaters can set owned parts to crazy values like `Inf` or `NaN`, or huge speeds, to fling other players and parts.",
+    "Cheaters can also fake Touched events, or stop them from firing.",
+    "If loose parts are important to gameplay, use the network ownership API, like `BasePart:SetNetworkOwner()`, to control who owns them.",
+    "Checking movement on the server is tricky. Simple speed checks can flag players with laggy internet, so average over time and allow for real teleports in your game.",
+    "Server authority, which runs movement on the server, is coming and is the most reliable fix. It is in beta."
+  ],
+  "terms": {
+    "network ownership": "Which computer (the server or one player's device) is in charge of simulating a part's physics.",
+    "assembly": "A group of parts joined together that move as one object, like a car made of many parts welded together.",
+    "unanchored": "A part with `Anchored` set to false, so gravity and physics can move it.",
+    "physics simulation": "The math that decides how parts fall, bounce, roll, and collide each frame.",
+    "WalkSpeed": "A Humanoid property for how fast a character walks. The default is 16 studs per second, but a cheater can set their own to anything.",
+    "Inf / NaN": "Inf means infinity, a number too big to use. NaN means \"not a number\", a broken value. Both can mess up physics.",
+    "fling": "To launch a character or part away at a huge speed.",
+    "latency": "The delay for data to travel between the player and the server. It makes positions arrive a little late.",
+    "heuristic": "A rule of thumb used to guess something, like \"moving more than 100 studs in 1 second is suspicious\".",
+    "leaky bucket": "A counter that fills up when a player moves fast and slowly drains over time. Short bursts are fine, but staying too fast fills it and triggers a flag.",
+    "XZ plane": "The flat ground directions (X and Z), ignoring up and down (Y). Checking only XZ avoids punishing players who jump or fall.",
+    "server authority": "A new beta system where the server runs physics and movement, so players cannot fake them."
+  },
+  "example": {
+    "title": "Keep an important ball owned by the server",
+    "place": "Script in ServerScriptService (add an unanchored Part named GameBall to Workspace)",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal ball = Workspace:WaitForChild(\"GameBall\")\n\n-- Passing nil makes the server own this part's physics,\n-- so no player's device can control where it goes\nif ball:CanSetNetworkOwnership() then\n\tball:SetNetworkOwner(nil)\nend",
+    "explain": [
+      "The script finds the unanchored ball in Workspace.",
+      "`CanSetNetworkOwnership()` checks that ownership can be set for this part. It fails for anchored parts, for example.",
+      "`SetNetworkOwner(nil)` makes the server the owner, so a cheater near the ball cannot teleport or fling it.",
+      "The trade-off: the ball may look a bit less smooth to players because the server is doing the physics."
+    ]
+  },
+  "watchOut": [
+    "Thinking players cannot change their own speed or position. They own their character, so the server must check anything important.",
+    "Making speed checks too strict. Players with laggy internet can look like they are teleporting; average over time.",
+    "Punishing jumping or falling. Check only ground movement on the XZ plane if your game is ground-based.",
+    "Forgetting your own teleports. If your game teleports players, tell your movement checker to allow it."
+  ]
+}

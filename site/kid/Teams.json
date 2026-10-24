@@ -1,0 +1,40 @@
+{
+  "name": "Teams",
+  "simple": "Teams is the service that holds all the Team objects in your game. As soon as it has teams inside, Roblox colors player names, groups the player list by team, and can auto-sort new players onto teams.",
+  "analogy": "Teams is like the bulletin board in the gym where all the team sign-up sheets are pinned. Each sheet (Team) lists who's on it.",
+  "whenToUse": [
+    "Hold your game's teams (add Team objects inside it).",
+    "Get a list of every team (GetTeams), for example to show a team picker."
+  ],
+  "where": "A service you see in the Explorer. Get it with `local Teams = game:GetService(\"Teams\")`. Works on the server and the client.",
+  "terms": {
+    "service": "A big built-in object that does one job for the whole game. Get it with game:GetService.",
+    "Team": "One group of players, with a name and a color.",
+    "player list": "The list of names in the top-right corner of the screen during a game."
+  },
+  "examples": [
+    {
+      "title": "Print every team and how many players are on it",
+      "place": "Script in ServerScriptService",
+      "code": "local Teams = game:GetService(\"Teams\")\n\nwhile true do\n    task.wait(10) -- every 10 seconds\n    for _, team in Teams:GetTeams() do\n        print(team.Name .. \": \" .. #team:GetPlayers() .. \" players\")\n    end\nend",
+      "explain": [
+        "GetTeams gives a list of every Team inside the Teams service.",
+        "For each team we count its players with #team:GetPlayers().",
+        "task.wait(10) pauses 10 seconds between reports."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Only Teams that are direct children of the Teams service count. Don't put Teams inside folders or inside each other.",
+    "With no teams, everybody is neutral and team features are off."
+  ],
+  "members": {
+    "Teams:GetTeams": {
+      "simple": "Gives a list of all Team objects directly inside the Teams service.",
+      "example": "local Teams = game:GetService(\"Teams\")\nfor _, team in Teams:GetTeams() do\n    print(team.Name, team.TeamColor)\nend"
+    },
+    "Teams:RebalanceTeams": {
+      "simple": "Old — write your own team balancing code instead (it no longer works properly)."
+    }
+  }
+}

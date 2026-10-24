@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/input/micro-gamepad.md",
+  "simple": "A micro gamepad is a small controller with only arrow buttons and a few others, like a TV remote. Some players play Roblox on a TV with just a remote, so your menus should work with up, down, left, right, select, and back. Right now remote buttons show up in scripts as normal gamepad buttons, so this page shows a trick to tell a remote apart from a full controller and how to bind actions for both.",
+  "analogy": "Playing with a TV remote is like getting around a building using only the elevator buttons: up, down, open, and close. Your game has to make sure every room can be reached with just those.",
+  "keyPoints": [
+    "Micro gamepads, like TV remotes, usually have a directional pad, a center button, and a back button.",
+    "`Enum.PreferredInput.MicroGamepad` exists but is not set yet, so detect remotes another way for now.",
+    "`Gamepad1` is always the player's main controller. If it supports neither `Thumbstick1` nor `Thumbstick2`, it is a micro gamepad.",
+    "If it also supports `ButtonCenter`, it is a TV remote.",
+    "For now, remote buttons arrive as legacy gamepad buttons: Center becomes `ButtonA`, Back becomes `ButtonB`, and arrows become D-pad or thumbstick input depending on context.",
+    "Do not use those legacy keycodes alone to spot a remote, because a full gamepad sends the same ones.",
+    "Bind actions with the Input Action System for new games, or keep `ContextActionService` if you already use it.",
+    "Design TV menus with a clear highlighted item, everything reachable with arrows, center to select, back to close, and big buttons.",
+    "Test with the Device Emulator set to Android TV and the Controller Emulator's TV Remote."
+  ],
+  "terms": {
+    "micro gamepad": "A small controller made for moving around menus, with arrows and a few buttons but no thumbsticks.",
+    "D-pad": "The plus-shaped arrow buttons: up, down, left, and right.",
+    "legacy keycode": "An older button name that Roblox currently sends instead of the remote's own button name, like `ButtonA` for the center button.",
+    "Gamepad1": "The slot for the player's main controller. Roblox has slots `Gamepad1` to `Gamepad8`.",
+    "focus": "Which button or item in a menu is currently selected and will react when you press select.",
+    "ContextActionService": "An older service for binding keys and buttons to named actions.",
+    "Sink / Pass": "In `ContextActionService`, `Sink` means your code used the input, so stop there. `Pass` lets other actions handle it too.",
+    "10-foot experience": "Designing for someone sitting about 10 feet (3 meters) from a TV, so text and buttons must be big."
+  },
+  "example": {
+    "title": "Detect a TV remote or micro gamepad",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nlocal function isMicroGamepadPreferred()\n\tlocal gamepad = Enum.UserInputType.Gamepad1\n\tif not UserInputService:GetGamepadConnected(gamepad) then\n\t\treturn false\n\tend\n\t-- A micro gamepad has no thumbsticks\n\tlocal hasLeftStick = UserInputService:GamepadSupports(gamepad, Enum.KeyCode.Thumbstick1)\n\tlocal hasRightStick = UserInputService:GamepadSupports(gamepad, Enum.KeyCode.Thumbstick2)\n\treturn not hasLeftStick and not hasRightStick\nend\n\nlocal function isTVRemotePreferred()\n\treturn isMicroGamepadPreferred()\n\t\tand UserInputService:GamepadSupports(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonCenter)\nend\n\n-- The remote's center button currently arrives as ButtonA\nUserInputService.InputBegan:Connect(function(input, gameProcessed)\n\tif gameProcessed then\n\t\treturn\n\tend\n\tif input.KeyCode == Enum.KeyCode.ButtonA then\n\t\tif isMicroGamepadPreferred() then\n\t\t\tprint(\"Select the highlighted menu item\")\n\t\telse\n\t\t\tprint(\"Normal gamepad: jump or confirm\")\n\t\tend\n\tend\nend)\n\nprint(\"TV remote?\", isTVRemotePreferred())",
+    "explain": [
+      "`isMicroGamepadPreferred` checks the main controller slot, `Gamepad1`.",
+      "If that controller has no left or right thumbstick, it must be a micro gamepad.",
+      "`isTVRemotePreferred` also checks for a center button, which TV remotes have.",
+      "When `ButtonA` is pressed, we check which device it came from and do the right thing: select a menu item for remotes, or jump for full gamepads."
+    ]
+  },
+  "watchOut": [
+    "Assuming `ButtonA` means a full gamepad. A TV remote's center button sends `ButtonA` too.",
+    "Relying on `PreferredInput.MicroGamepad` today. It is not set yet, so use the thumbstick check.",
+    "Making menus that need a mouse or thumbstick to reach some buttons. Every item must be reachable with arrows.",
+    "Using the same input context for menu navigation and gameplay, so one button press does two things. Keep them separate."
+  ]
+}

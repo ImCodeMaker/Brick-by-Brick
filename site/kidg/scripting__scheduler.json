@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/scripting/scheduler.md",
+  "simple": "This page is about deciding when your code runs. Sometimes you want code to wait a few seconds, run a little later, or run right now without blocking the rest of the script. The `task` library gives you simple tools for all of these. Using them keeps your game smooth and your code up to date.",
+  "analogy": "Think of a teacher handing out jobs. `task.spawn` means \"do this right now\", `task.defer` means \"do this as soon as I finish talking\", `task.delay` means \"do this in 5 minutes\", and `task.wait` means \"everyone pause for 5 minutes\".",
+  "keyPoints": [
+    "The `task` library is the modern way to schedule code in Roblox.",
+    "Old global functions like `wait()`, `spawn()`, and `delay()` still work but are slower and less flexible, so use `task.wait()`, `task.defer()`, and `task.delay()` instead.",
+    "`task.spawn(f, ...)` starts a function right away, so a slow function will not hold up the rest of your loop.",
+    "`task.defer(f, ...)` runs a function a tiny bit later, after the current code finishes, but still in the same frame.",
+    "`task.delay(seconds, f, ...)` runs a function after a number of seconds.",
+    "`task.wait(seconds)` pauses the current script, then gives back how long it really waited.",
+    "Real wait times are never exact. `task.wait(2)` might really take about 2.08 seconds.",
+    "`task.wait()` with no number waits just one step, like waiting for the next `Heartbeat`."
+  ],
+  "terms": {
+    "schedule": "To set up code so it runs at a certain time, like later or after something else finishes.",
+    "thread": "One line of work your script is doing. Roblox can keep many threads going and switch between them.",
+    "yield": "To pause. A function that yields stops and waits (for example for 2 seconds) before it keeps going.",
+    "resume": "To un-pause a thread so it keeps running from where it stopped.",
+    "frame": "One tiny slice of game time. Roblox runs about 60 frames every second.",
+    "Heartbeat": "An event from `RunService` that fires once every frame, after physics is done. `task.wait` and `task.delay` resume on the next Heartbeat.",
+    "defer": "To put something off until a little later. `task.defer` runs your function after the code that is running right now is done.",
+    "legacy": "Old. Legacy methods like `wait()` still work but newer ones are better.",
+    "task scheduler": "The part of the Roblox engine that decides what work happens in each frame and in what order.",
+    "throttling": "Slowing things down on purpose. The old `wait()` could be slowed down by the engine; `task.wait()` is not."
+  },
+  "example": {
+    "title": "Countdown and a delayed message",
+    "place": "Script in ServerScriptService",
+    "code": "-- Count down from 3, then announce a start after a short delay\nfor i = 3, 1, -1 do\n\tprint(i)\n\ttask.wait(1) -- pause this script for about 1 second\nend\n\n-- Run a function 2 seconds from now, without pausing this script\ntask.delay(2, function()\n\tprint(\"Bonus round starts now!\")\nend)\n\n-- Run a function right away in its own thread\ntask.spawn(function()\n\tprint(\"Go!\")\nend)\n\nprint(\"This prints before the bonus message\")",
+    "explain": [
+      "The `for` loop prints 3, 2, 1 and uses `task.wait(1)` to pause about one second between numbers.",
+      "`task.delay(2, ...)` sets up a function to run in about 2 seconds. The script does not stop to wait for it.",
+      "`task.spawn` runs its function right now, so \"Go!\" prints immediately.",
+      "The last `print` runs before the bonus message, because `task.delay` did not pause the script."
+    ]
+  },
+  "watchOut": [
+    "Using old `wait()`, `spawn()`, or `delay()`. Swap them for `task.wait()`, `task.defer()`, and `task.delay()`.",
+    "Expecting exact timing. `task.wait(2)` waits at least 2 seconds, usually a little more. Use the number it returns if you need the real time.",
+    "Putting a slow function in a loop and wondering why the loop is slow. Wrap the call in `task.spawn` so each one starts right away.",
+    "Thinking `task.defer` runs instantly. It runs after the current code finishes, so its print may come after lines written below it."
+  ]
+}

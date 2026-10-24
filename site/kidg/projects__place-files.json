@@ -1,0 +1,34 @@
+{
+  "path": "content/en-us/projects/place-files.md",
+  "simple": "A place file is the saved copy of one place in your game. Studio saves it to Roblox's servers when you save or publish, but you can also download a copy to your computer. This page explains the two file types, where Studio keeps backup files if saving fails, and what to do if your place gets too big (over 100 MB). Big places save slowly and can even stop saving, so it is good to know how to slim them down.",
+  "analogy": "A place file is like a packed suitcase for your level. If it gets too heavy, the airline will not take it, so you look for doubled-up clothes, fold things flatter, or split your stuff into two suitcases.",
+  "keyPoints": [
+    "Each place is saved to Roblox when you use Save or Publish in the File menu.",
+    "To keep a copy on your computer, use File > Save to File or Download a Copy.",
+    "`.rbxl` files are small binary files you cannot read as text. `.rbxlx` files are XML text files that are much larger.",
+    "If saving fails because the place is too big, Studio makes recovery files (backups) in an AutoSaves folder on your computer.",
+    "Check models from the Creator Store for scrambled, unreadable script text. It can be a backdoor that lets someone control your game, so delete and report it.",
+    "Look for doubled parts in the same spot and extra unused textures or SurfaceAppearances, and delete them.",
+    "Keep terrain simple, prefer flat horizontal layers underground, and fix hidden holes or stray water.",
+    "Setting mesh CollisionFidelity to Box or Hull uses less memory. If all else fails, split one huge place into several places joined by teleports."
+  ],
+  "terms": {
+    "place file": "The saved data for one place: every part, script, and setting in it.",
+    "binary": "Stored as computer-only data (ones and zeros), not readable text. It takes less space.",
+    "XML": "A text format with tags, like `<Part>`. You can read it, but it takes more space.",
+    "version control system": "A tool such as Git that keeps track of every change to your files so you can go back or compare.",
+    "recovery file": "An automatic backup Studio makes so you do not lose work if a save fails. With collaboration on, it keeps the last 3 failed save attempts.",
+    "obfuscated": "Code scrambled on purpose so people cannot read it. In free models it often hides something sneaky.",
+    "backdoor": "Hidden code that lets someone else secretly control or change your game.",
+    "redundant": "Extra and not needed. Two identical parts in the exact same spot means one is redundant.",
+    "compress": "Squeeze data so it takes less space. Simple repeating things, like flat terrain layers, squeeze well.",
+    "collision fidelity": "How exactly the game matches a mesh's real shape when things bump into it. `Box` uses a simple box around it, `Hull` a tight wrapper shape, and both save memory compared to the default.",
+    "teleport": "Sending players from one place to another place in the same game.",
+    "serialization": "Turning the objects in your place into a file so it can be saved or uploaded."
+  },
+  "watchOut": [
+    "Adding lots of free models without checking their scripts. Some contain hidden backdoors and also bloat your file. Look inside before you keep them.",
+    "Panicking when a save fails. Check the AutoSaves folder for your recovery file before redoing work.",
+    "Filling the underground with detailed, sloped terrain nobody will see. It makes the file much larger for no benefit."
+  ]
+}

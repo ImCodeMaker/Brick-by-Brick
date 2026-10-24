@@ -1,0 +1,60 @@
+{
+  "path": "content/en-us/performance-optimization/improve.md",
+  "simple": "Once you know what is slowing your game down, this page tells you how to fix it. It goes through the most common problem areas: scripts, memory leaks, physics, Humanoids, rendering, networking, asset memory, and load times. For each one it lists the usual mistakes and the fixes. You do not need to read it all at once; jump to the section that matches your problem.",
+  "analogy": "It is like a repair manual for a car. Once the mechanic knows the brakes are the problem, they flip to the brakes chapter for the usual causes and how to fix them.",
+  "keyPoints": [
+    "Scripts: avoid heavy work in every-frame `RunService` events, split big jobs with `task.wait()`, and use multithreading for heavy math that does not touch the game world.",
+    "Memory leaks: disconnect connections you do not need, remove table entries when players leave, and turn on `Workspace.PlayerCharacterDestroyBehavior` (or destroy Player objects and characters yourself).",
+    "Physics: anchor parts that do not need to move, keep adaptive timestepping, use fewer joints, and use Box or Hull collision fidelity instead of Precise when you can.",
+    "Humanoids: turn off states NPCs do not need with `Humanoid:SetStateEnabled()`, use `AnimationController` for NPCs that do not need a Humanoid, play NPC animations on the client, and reuse (pool) NPCs instead of respawning them.",
+    "Rendering: reuse the same mesh asset so Roblox can draw copies in one draw call, limit shadows and lights, avoid stacked see-through parts, and use streaming with SLIM level of detail.",
+    "Networking: send only what changed, not big data every frame, run tweens and visual effects on the client, and load huge maps in pieces.",
+    "Asset memory: turn on instance streaming, upload each asset only once, and keep most images at 512x512 or smaller (small ones under 256x256).",
+    "Load times: turn on streaming, keep ReplicatedStorage and ReplicatedFirst small, and only preload the assets you really need right away."
+  ],
+  "terms": {
+    "synchronous": "Runs start to finish without stopping. While it runs, nothing else on that thread can happen, so a slow script freezes the frame.",
+    "yield": "To pause and let other things run, like with `task.wait()`.",
+    "serialization": "Turning a table into a string or data that can be saved or sent. Doing it to huge tables is slow.",
+    "deep clone": "Making a full copy of a table and every table inside it.",
+    "multithreading": "Running code on several threads at the same time. In Roblox this is called Parallel Luau.",
+    "native code generation": "A setting that turns a script into machine code so it can run faster on the server.",
+    "garbage collector": "The part of Luau that frees memory nobody is using anymore. It cannot free things your code still points to.",
+    "connection": "What you get from `:Connect()`. It stays alive, holding memory, until it is disconnected or its instance is destroyed.",
+    "LuaHeap": "A Developer Console number for memory used by your scripts. If it keeps climbing, you may have a leak.",
+    "anchor": "Locking a part in place so physics does not move it. Anchored parts cost almost nothing for physics.",
+    "Hz": "Times per second. Physics at 240 Hz means 240 updates each second, which is 4 per frame at 60 FPS.",
+    "adaptive timestepping": "Physics picks 60, 120, or 240 updates per second depending on how tricky a mechanism is, instead of always using 240.",
+    "collision fidelity": "How detailed a mesh's invisible collision shape is. Box is a simple box (cheap); Precise follows every bump (expensive).",
+    "pooling": "Keeping used objects, like defeated NPCs, hidden and ready to reuse instead of destroying and making new ones.",
+    "draw call": "One instruction to the graphics chip to draw something. Fewer draw calls means faster frames.",
+    "instancing": "Drawing many copies of the same mesh with the same texture in a single draw call. Only works if they share the same asset ID.",
+    "culling": "Skipping objects that cannot be seen, like ones behind the camera or hidden behind walls.",
+    "level of detail (LOD)": "Using simpler versions of models when they are far away. SLIM is Roblox's lightweight version.",
+    "overdraw": "Drawing the same screen pixel many times, like when several see-through windows overlap.",
+    "texture resolution": "How many pixels an image has. A 1024x1024 image uses 4 times the memory of a 512x512 one.",
+    "trim sheet": "One texture with many strips of detail that many models share, so you need fewer textures.",
+    "sprite sheet": "Many small UI pictures packed into one image. You show just one part using `ImageRectOffset` and `ImageRectSize`.",
+    "preload": "Downloading assets before they are needed, with `ContentProvider:PreloadAsync()`. Preloading too much makes loading slower."
+  },
+  "example": {
+    "title": "Clean up players and characters to prevent leaks",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\n-- Extra info we keep while each player is here\nlocal playerInfo = {}\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayerInfo[player] = { coinsCollected = 0 }\n\n\t-- When a character is removed, destroy it so its connections are freed\n\tplayer.CharacterRemoving:Connect(function(character)\n\t\ttask.defer(character.Destroy, character)\n\tend)\nend)\n\nPlayers.PlayerRemoving:Connect(function(player)\n\t-- Forget our table entry for this player\n\tplayerInfo[player] = nil\n\t-- Destroy the Player object so its connections are freed\n\ttask.defer(player.Destroy, player)\nend)",
+    "explain": [
+      "We keep a table of info for each player while they are in the server.",
+      "When a character is removed (like after respawning), we destroy it. Destroying an instance disconnects its events.",
+      "`task.defer` runs the destroy a moment later, after Roblox finishes its own leaving steps.",
+      "When a player leaves, we remove their entry from the table and destroy their Player object.",
+      "Roblox does not destroy Player objects and characters for you unless `PlayerCharacterDestroyBehavior` is on, so without this, a server running for days slowly fills up memory."
+    ]
+  },
+  "watchOut": [
+    "Assuming Roblox cleans up `Player` objects when someone leaves. It does not by default, so their connections keep using memory.",
+    "Running heavy code in `Heartbeat` or `PreRender` every frame when it could run less often.",
+    "Importing a whole map at once. Every repeated floor tile becomes its own asset, costing extra memory and draw calls. Import pieces and duplicate them in Studio.",
+    "Tweening objects from the server. The changes are sent to every player every frame and look jittery. Tween on the client instead.",
+    "Preloading the whole Workspace for a loading screen. It makes loading much slower. Only preload what the first screen needs.",
+    "Thinking a smaller image file means less memory. Memory depends on pixel count, not file size."
+  ]
+}

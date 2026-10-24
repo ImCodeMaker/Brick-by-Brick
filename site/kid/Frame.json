@@ -1,0 +1,50 @@
+{
+  "name": "Frame",
+  "simple": "A Frame is a plain rectangle. It's the most basic UI building block: use it as a colored box, a background panel, or a container that holds other UI like buttons and text. Health bars, menu windows and pop-ups usually start as a Frame.",
+  "analogy": "A Frame is like a piece of cardboard. You can paint it, cut it to any size, and glue other things (labels, buttons, pictures) onto it.",
+  "whenToUse": [
+    "A background panel behind a menu",
+    "A container that groups buttons and text so you can move or hide them together",
+    "A simple colored bar, like the filling of a health bar",
+    "A box to hold a UIListLayout or UIGridLayout"
+  ],
+  "where": "Inside a ScreenGui (on screen), SurfaceGui (on a part) or BillboardGui (floating). Create it in Studio under StarterGui or with Instance.new(\"Frame\") in a LocalScript.",
+  "terms": {
+    "UI / GUI": "User Interface: the buttons, menus, text and pictures drawn on the screen or on things in the game.",
+    "LocalScript": "A script that runs on the player's own device. All UI code goes in LocalScripts.",
+    "ScreenGui": "The invisible container that holds UI shown on the player's screen. It must be inside the player's PlayerGui (put it in StarterGui in Studio).",
+    "parent": "The object something is placed inside.",
+    "UDim2": "The value used for Size and Position: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction (0 to 1) of the parent's size; Offset is exact pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "transparency": "How see-through something is. 0 = solid, 1 = invisible.",
+    "Color3": "A color made of red, green and blue amounts, like Color3.fromRGB(255, 0, 0) for red.",
+    "container": "Something that holds other things. Moving or hiding a container moves or hides everything in it.",
+    "Scale": "A fraction of the parent's size. Size X Scale 0.5 = half the parent's width.",
+    "Offset": "Exact pixels that don't change with screen size."
+  },
+  "examples": [
+    {
+      "title": "A health bar that shrinks when you get hurt",
+      "place": "LocalScript in StarterCharacterScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Name = \"HealthGui\"\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\n-- The dark background of the bar\nlocal back = Instance.new(\"Frame\")\nback.Size = UDim2.fromOffset(300, 30)\nback.AnchorPoint = Vector2.new(0.5, 1)\nback.Position = UDim2.new(0.5, 0, 1, -20) -- bottom middle, 20 px up from the bottom\nback.BackgroundColor3 = Color3.fromRGB(40, 40, 40)\nback.Parent = screenGui\n\n-- The green filling, sized as a fraction of the background\nlocal fill = Instance.new(\"Frame\")\nfill.Size = UDim2.fromScale(1, 1) -- start full\nfill.BackgroundColor3 = Color3.fromRGB(60, 200, 80)\nfill.BorderSizePixel = 0\nfill.Parent = back\n\nlocal function update()\n\tlocal percent = humanoid.Health / humanoid.MaxHealth -- a number from 0 to 1\n\tfill.Size = UDim2.fromScale(percent, 1)\nend\n\nhumanoid.HealthChanged:Connect(update)\nupdate()",
+      "explain": [
+        "StarterCharacterScripts puts this LocalScript inside your character, so script.Parent is the character.",
+        "back is a 300x30 pixel dark bar at the bottom middle of the screen.",
+        "fill is INSIDE back, so its Scale is measured against back. Scale 1 = 300 pixels wide, Scale 0.5 = 150 pixels.",
+        "Health / MaxHealth gives a number from 0 to 1. At 50 of 100 health, percent = 0.5, so the green part is half the bar.",
+        "HealthChanged runs update every time health changes."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Children's Scale sizes are a fraction of the Frame, not the screen.",
+    "To hide only the box but keep its children, use BackgroundTransparency = 1. To hide everything, use Visible = false.",
+    "Children can spill outside the frame. Turn on ClipsDescendants to cut them off."
+  ],
+  "members": {
+    "Frame.Style": {
+      "simple": "Picks one of Roblox's old built-in looks for the frame (like a dark rounded box). The default, Custom, lets you style it yourself with BackgroundColor3 and friends, which is what most games do.",
+      "example": "local frame = script.Parent\nframe.Style = Enum.FrameStyle.Custom -- style it yourself"
+    }
+  }
+}

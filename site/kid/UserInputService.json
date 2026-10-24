@@ -1,0 +1,355 @@
+{
+  "name": "UserInputService",
+  "simple": "UserInputService tells your game what the player is pressing, clicking, tapping or tilting. It can tell you when a key goes down or up, where the mouse is, if a finger touches the screen, and what kind of device the player has (keyboard, gamepad, touch screen). It only works in code that runs on the player's own device.",
+  "analogy": "UserInputService is like a security guard watching every button on the player's keyboard, mouse, controller and screen. Whenever something is pressed, released or moved, the guard radios your script and tells it exactly what happened.",
+  "whenToUse": [
+    "Do something when the player presses a key, like E to open a door or Shift to sprint",
+    "Check if a key is being held down right now",
+    "Find where the mouse is on the screen, or lock it in the middle for a first-person game",
+    "React to taps, swipes and pinches on phones and tablets",
+    "Find out if the player is using a keyboard, gamepad or touch screen so you can show the right buttons"
+  ],
+  "where": "Client only. Use it in a LocalScript (for example in StarterPlayerScripts or StarterCharacterScripts) with game:GetService(\"UserInputService\"). It does not work in server Scripts, because the server has no keyboard.",
+  "terms": {
+    "input": "Anything the player does with a device: pressing a key, clicking, moving the mouse, touching the screen, pushing a joystick.",
+    "InputObject": "A little package of information about one input. It has `KeyCode` (which key or button), `UserInputType` (keyboard, mouse, touch, gamepad...), `UserInputState` (began, changed, ended) and `Position`.",
+    "KeyCode": "The name of a key or button, like `Enum.KeyCode.E`, `Enum.KeyCode.Space` or `Enum.KeyCode.ButtonA` on a gamepad.",
+    "UserInputType": "What kind of input it was, like `Enum.UserInputType.Keyboard`, `MouseButton1` (left click), `Touch` or `Gamepad1`.",
+    "gameProcessedEvent": "True if Roblox already used this input for something else, like typing in the chat box or clicking a GUI button. Usually you should ignore those inputs so pressing E while chatting does not open a door.",
+    "client": "The player's own device (computer, phone, console). LocalScripts run here.",
+    "server": "Roblox's computer that runs the game for everyone. It cannot see a player's keyboard.",
+    "gamepad": "A game controller, like an Xbox or PlayStation controller.",
+    "accelerometer": "A sensor in phones that feels how fast the phone is speeding up or shaking.",
+    "gyroscope": "A sensor in phones that feels how the phone is turning or tilting.",
+    "focus": "Which thing is currently \"selected\" to receive typing. A TextBox has focus when you click it to type. The game window has focus when it is the window in front.",
+    "pixels": "The tiny dots that make up your screen. Screen positions are measured in pixels from the top-left corner (0, 0).",
+    "Vector2": "Two numbers together, X (left-right) and Y (up-down), used for screen positions.",
+    "debounce": "A simple on/off check that stops code from running many times in a row too quickly.",
+    "event": "A signal that something happened. You `:Connect` a function to it and it runs each time.",
+    "deprecated": "Old. Still there so old games do not break, but you should use the newer thing instead."
+  },
+  "examples": [
+    {
+      "title": "Press E to say hello",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nUserInputService.InputBegan:Connect(function(input, gameProcessedEvent)\n    -- if the player was typing in chat (or clicking a button), ignore it\n    if gameProcessedEvent then\n        return\n    end\n\n    if input.KeyCode == Enum.KeyCode.E then\n        print(\"You pressed E!\")\n    elseif input.UserInputType == Enum.UserInputType.MouseButton1 then\n        print(\"You clicked the left mouse button\")\n    end\nend)",
+      "explain": [
+        "`InputBegan` fires the moment any key, button or touch starts.",
+        "`input` tells us what it was. `gameProcessedEvent` is true if Roblox already used it, for example the player was typing in the chat.",
+        "We check `input.KeyCode` for keys, and `input.UserInputType` for mouse buttons."
+      ]
+    },
+    {
+      "title": "Hold Shift to sprint",
+      "place": "LocalScript in StarterCharacterScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nlocal humanoid = script.Parent:WaitForChild(\"Humanoid\")\n\nlocal NORMAL_SPEED = 16\nlocal SPRINT_SPEED = 28\n\nUserInputService.InputBegan:Connect(function(input, gameProcessedEvent)\n    if gameProcessedEvent then return end\n    if input.KeyCode == Enum.KeyCode.LeftShift then\n        humanoid.WalkSpeed = SPRINT_SPEED -- key went down: run\n    end\nend)\n\nUserInputService.InputEnded:Connect(function(input, gameProcessedEvent)\n    if input.KeyCode == Enum.KeyCode.LeftShift then\n        humanoid.WalkSpeed = NORMAL_SPEED -- key came up: walk\n    end\nend)",
+      "explain": [
+        "A LocalScript in StarterCharacterScripts is placed inside the character, so `script.Parent` is the character.",
+        "`InputBegan` fires when Shift goes down, `InputEnded` when it comes back up.",
+        "Changing WalkSpeed from the player's own device works for their own character's movement."
+      ]
+    },
+    {
+      "title": "Show the right hint for the player's device",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nlocal function showHint()\n    local preferred = UserInputService.PreferredInput\n    if preferred == Enum.PreferredInput.Touch then\n        print(\"Tap the button to jump\")\n    elseif preferred == Enum.PreferredInput.Gamepad then\n        print(\"Press A to jump\")\n    else\n        print(\"Press Space to jump\")\n    end\nend\n\nshowHint()\n-- update the hint if the player switches, e.g. picks up a controller\nUserInputService:GetPropertyChangedSignal(\"PreferredInput\"):Connect(showHint)",
+      "explain": [
+        "`PreferredInput` is Roblox's best guess at what the player is mainly using right now.",
+        "We show a hint that matches it, and listen for changes so the hint updates when they switch devices."
+      ]
+    }
+  ],
+  "gotchas": [
+    "It only works on the client. Putting this code in a server Script does nothing useful. Use a LocalScript.",
+    "Always check `gameProcessedEvent`. Otherwise typing \"e\" in chat will also trigger your E-key action.",
+    "Key presses only change things for that player. To change something for everyone (give coins, open a shared door), send a RemoteEvent to the server.",
+    "`InputBegan` does not catch mouse wheel scrolling; use `InputChanged` for that.",
+    "To lock the mouse with `MouseBehavior`, you may need to set it again every frame, because the default camera scripts can change it back.",
+    "Many touch and window events only fire while the Roblox window is in focus (in front)."
+  ],
+  "members": {
+    "UserInputService.AccelerometerEnabled": {
+      "simple": "True if the device has an accelerometer (a shake/speed sensor, found in most phones). Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService.AccelerometerEnabled) -- true on most phones"
+    },
+    "UserInputService.GamepadEnabled": {
+      "simple": "True if the device has a game controller available. Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nif UserInputService.GamepadEnabled then\n    print(\"A controller is available\")\nend"
+    },
+    "UserInputService.GyroscopeEnabled": {
+      "simple": "True if the device has a gyroscope (a sensor that feels tilting and turning, found in most phones). Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService.GyroscopeEnabled)"
+    },
+    "UserInputService.KeyboardEnabled": {
+      "simple": "True if the device has a keyboard. Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nif UserInputService.KeyboardEnabled then\n    print(\"Use WASD to move\")\nend"
+    },
+    "UserInputService.ModalEnabled": {
+      "simple": "Old — use `GuiService.TouchControlsEnabled` instead."
+    },
+    "UserInputService.MouseBehavior": {
+      "simple": "Controls what the mouse cursor does: `Default` (moves freely), `LockCenter` (stuck in the middle of the screen, good for first-person games) or `LockCurrentPosition` (stuck where it is now).",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter",
+      "gotcha": "The default camera scripts can reset this. If it keeps unlocking, set it again every frame in `RunService.PreRender`."
+    },
+    "UserInputService.MouseDeltaSensitivity": {
+      "simple": "A multiplier from 0 to 10 for how big the numbers from `GetMouseDelta` are. 1 is normal, 2 doubles them. It does not change how fast the cursor or camera moves.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.MouseDeltaSensitivity = 2 -- GetMouseDelta values are doubled"
+    },
+    "UserInputService.MouseEnabled": {
+      "simple": "True if the device has a mouse. Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService.MouseEnabled)"
+    },
+    "UserInputService.MouseIcon": {
+      "simple": "The image used for the mouse cursor, as an asset ID text. Leave it blank for the normal arrow. Buttons and text boxes still show their own cursor when hovered.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.MouseIcon = \"rbxassetid://1234567890\" -- replace with your image ID",
+      "gotcha": "To hide the cursor, set `MouseIconEnabled` to false instead of using a see-through image."
+    },
+    "UserInputService.MouseIconContent": {
+      "simple": "Same idea as `MouseIcon` (the cursor image), but uses the newer Content type. Only asset IDs work here.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.MouseIconContent = Content.fromUri(\"rbxassetid://1234567890\")"
+    },
+    "UserInputService.MouseIconEnabled": {
+      "simple": "Whether the mouse cursor is visible. Set it to false to hide the cursor.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.MouseIconEnabled = false -- hide the cursor"
+    },
+    "UserInputService.OnScreenKeyboardPosition": {
+      "simple": "Where the on-screen (phone) keyboard is, in pixels. It is (0, 0) when the keyboard is hidden. Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService.OnScreenKeyboardPosition)"
+    },
+    "UserInputService.OnScreenKeyboardSize": {
+      "simple": "How big the on-screen (phone) keyboard is, in pixels. It is (0, 0) when hidden. Useful to move your GUI up so the keyboard does not cover it. Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService.OnScreenKeyboardSize.Y) -- keyboard height in pixels"
+    },
+    "UserInputService.OnScreenKeyboardVisible": {
+      "simple": "True if the on-screen keyboard is showing right now. Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService.OnScreenKeyboardVisible)"
+    },
+    "UserInputService.PreferredInput": {
+      "simple": "Roblox's best guess at what the player is mainly using right now: `KeyboardAndMouse`, `Gamepad`, `Touch` or `MicroGamepad`. It changes when they switch, like picking up a controller. The best way to decide which button hints to show. Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService.PreferredInput) -- e.g. Enum.PreferredInput.Touch"
+    },
+    "UserInputService.TouchEnabled": {
+      "simple": "True if the device has a touch screen. Note: some touch-screen laptops still report false, so they keep normal computer controls. Read-only.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nif UserInputService.TouchEnabled then\n    print(\"Tap to play\")\nend"
+    },
+    "UserInputService.TouchScreenEnabled": {
+      "simple": "Used by Roblox's own scripts to know if the device truly has a touch screen. Normal game scripts cannot read it; use `TouchEnabled` or `PreferredInput`."
+    },
+    "UserInputService.UserHeadCFrame": {
+      "simple": "Old — use `VRService:GetUserCFrame()` instead."
+    },
+    "UserInputService.VREnabled": {
+      "simple": "Old — use `VRService.VREnabled` instead."
+    },
+    "UserInputService:CreateVirtualInput": {
+      "simple": "Makes a VirtualInput object that can pretend to be a player clicking, typing and moving the mouse. It is meant for automatic testing of your own game's GUI. It can return nil, so check before using it.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nlocal virtual = UserInputService:CreateVirtualInput()\nif virtual then\n    print(\"Ready to simulate input for testing\")\nend"
+    },
+    "UserInputService:GamepadSupports": {
+      "simple": "Asks whether a certain controller has a certain button. Returns true or false.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService:GamepadSupports(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonX))"
+    },
+    "UserInputService:GetConnectedGamepads": {
+      "simple": "Gives you a list of all controllers that are plugged in right now, like `{Enum.UserInputType.Gamepad1}`. Empty if none.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nfor _, pad in UserInputService:GetConnectedGamepads() do\n    print(\"Connected:\", pad)\nend"
+    },
+    "UserInputService:GetDeviceAcceleration": {
+      "simple": "Gives an InputObject describing how the phone is accelerating (speeding up or shaking) right now. Its `Position` holds the numbers. Needs an accelerometer.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nif UserInputService.AccelerometerEnabled then\n    local accel = UserInputService:GetDeviceAcceleration()\n    print(accel.Position)\nend"
+    },
+    "UserInputService:GetDeviceGravity": {
+      "simple": "Gives an InputObject showing which way gravity pulls on the phone, so you can tell how it is tilted. For example, a phone standing straight up (portrait) gives (0, 0, -9.81) in its `Position`.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nlocal gravity = UserInputService:GetDeviceGravity()\nprint(gravity.Position)"
+    },
+    "UserInputService:GetDeviceRotation": {
+      "simple": "Gives two things: an InputObject and a CFrame describing how the device is turned right now. Needs a gyroscope.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nif UserInputService.GyroscopeEnabled then\n    local input, rotation = UserInputService:GetDeviceRotation()\n    print(rotation)\nend"
+    },
+    "UserInputService:GetFocusedTextBox": {
+      "simple": "Returns the TextBox the player is typing in right now, or nil if they are not typing in one.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nlocal box = UserInputService:GetFocusedTextBox()\nif box then\n    print(\"Typing in\", box.Name)\nend"
+    },
+    "UserInputService:GetGamepadConnected": {
+      "simple": "True if the given controller (like `Gamepad1`) is plugged in.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService:GetGamepadConnected(Enum.UserInputType.Gamepad1))"
+    },
+    "UserInputService:GetGamepadState": {
+      "simple": "Gives a list of InputObjects, one for every button and stick on a controller, showing their latest state.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nfor _, input in UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1) do\n    print(input.KeyCode, input.UserInputState)\nend"
+    },
+    "UserInputService:GetImageForKeyCode": {
+      "simple": "Gives an image of a controller button that matches the player's controller (Xbox, PlayStation, etc.), so your button hints look right.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nlocal image = Instance.new(\"ImageLabel\")\nimage.Image = UserInputService:GetImageForKeyCode(Enum.KeyCode.ButtonA)"
+    },
+    "UserInputService:GetKeysPressed": {
+      "simple": "Gives a list of InputObjects for every keyboard key being held down right now.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nfor _, key in UserInputService:GetKeysPressed() do\n    print(key.KeyCode.Name, \"is held\")\nend"
+    },
+    "UserInputService:GetLastInputType": {
+      "simple": "Tells you the type of the last thing the player did, for example `Enum.UserInputType.Keyboard` if they just pressed a key.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService:GetLastInputType())"
+    },
+    "UserInputService:GetMouseButtonsPressed": {
+      "simple": "Gives a list of mouse buttons being held down right now (left, right or middle). Empty if none.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nfor _, button in UserInputService:GetMouseButtonsPressed() do\n    print(button.UserInputType.Name)\nend"
+    },
+    "UserInputService:GetMouseDelta": {
+      "simple": "How far the mouse moved in the last frame, in pixels, as a Vector2. It only works when the mouse is locked with `MouseBehavior`; otherwise you get (0, 0). Useful for first-person look controls.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter\nlocal delta = UserInputService:GetMouseDelta()\nprint(delta.X, delta.Y)"
+    },
+    "UserInputService:GetMouseLocation": {
+      "simple": "Where the mouse is on the screen, in pixels, counted from the top-left corner. (0, 0) is the top-left; bigger X is further right, bigger Y is further down.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nlocal pos = UserInputService:GetMouseLocation()\nprint(\"Mouse at\", pos.X, pos.Y)",
+      "gotcha": "It ignores the top bar area. If your GUI positions do not line up, look at `GuiService:GetGuiInset()`."
+    },
+    "UserInputService:GetNavigationGamepads": {
+      "simple": "Lists controllers that are allowed to move the selection around menus (GUI), most important first.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService:GetNavigationGamepads())"
+    },
+    "UserInputService:GetStringForKeyCode": {
+      "simple": "Gives the text of the key the player should press for a KeyCode, matching their keyboard layout. For example on a French keyboard, `KeyCode.Q` gives \"A\" because the keys are in different places.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(\"Press \" .. UserInputService:GetStringForKeyCode(Enum.KeyCode.E) .. \" to open\")"
+    },
+    "UserInputService:GetSupportedGamepadKeyCodes": {
+      "simple": "Lists every button (KeyCode) a controller has. Empty if that controller is not connected.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nfor _, code in UserInputService:GetSupportedGamepadKeyCodes(Enum.UserInputType.Gamepad1) do\n    print(code.Name)\nend"
+    },
+    "UserInputService:GetUserCFrame": {
+      "simple": "Old — use `VRService:GetUserCFrame()` instead."
+    },
+    "UserInputService:IsGamepadButtonDown": {
+      "simple": "True if a certain button on a certain controller is held down right now.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nif UserInputService:IsGamepadButtonDown(Enum.UserInputType.Gamepad1, Enum.KeyCode.ButtonA) then\n    print(\"A is held\")\nend"
+    },
+    "UserInputService:IsKeyDown": {
+      "simple": "True if a certain keyboard key is held down right now. Great for checking keys inside a frame loop.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nlocal RunService = game:GetService(\"RunService\")\nRunService.PreRender:Connect(function()\n    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then\n        print(\"Space is held\")\n    end\nend)"
+    },
+    "UserInputService:IsMouseButtonPressed": {
+      "simple": "True if a certain mouse button is held down right now. Use `Enum.UserInputType.MouseButton1` for left, `MouseButton2` for right.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1))"
+    },
+    "UserInputService:IsNavigationGamepad": {
+      "simple": "True if a controller is allowed to move the selection around menus.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nprint(UserInputService:IsNavigationGamepad(Enum.UserInputType.Gamepad1))"
+    },
+    "UserInputService:RecenterUserHeadCFrame": {
+      "simple": "For VR headsets: makes the way the player is facing right now count as \"straight ahead\". Same as `VRService:RecenterUserHeadCFrame()`.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService:RecenterUserHeadCFrame()"
+    },
+    "UserInputService:SetNavigationGamepad": {
+      "simple": "Turns on or off whether a controller can move the selection around menus.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService:SetNavigationGamepad(Enum.UserInputType.Gamepad1, true)"
+    },
+    "UserInputService.DeviceAccelerationChanged": {
+      "simple": "Fires when a phone with an accelerometer is moved or shaken. Gives an InputObject; its `Position` has the acceleration numbers.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.DeviceAccelerationChanged:Connect(function(acceleration)\n    if acceleration.Position.Magnitude > 2 then -- Magnitude = total strength\n        print(\"You shook the phone!\")\n    end\nend)"
+    },
+    "UserInputService.DeviceGravityChanged": {
+      "simple": "Fires when the pull of gravity changes direction compared to the phone, which happens when the phone is tilted. Gives an InputObject whose `Position` shows the gravity direction.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.DeviceGravityChanged:Connect(function(gravity)\n    print(\"Tilt:\", gravity.Position)\nend)"
+    },
+    "UserInputService.DeviceRotationChanged": {
+      "simple": "Fires when a device with a gyroscope is turned. Gives an InputObject and a CFrame describing the new rotation.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.DeviceRotationChanged:Connect(function(rotation, cframe)\n    print(\"Device turned:\", cframe)\nend)"
+    },
+    "UserInputService.GamepadConnected": {
+      "simple": "Fires when a controller is plugged in. Tells you which one (like `Gamepad1`).",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.GamepadConnected:Connect(function(gamepad)\n    print(gamepad.Name, \"connected\")\nend)"
+    },
+    "UserInputService.GamepadDisconnected": {
+      "simple": "Fires when a controller is unplugged. Tells you which one.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.GamepadDisconnected:Connect(function(gamepad)\n    print(gamepad.Name, \"disconnected\")\nend)"
+    },
+    "UserInputService.InputBegan": {
+      "simple": "Fires when the player STARTS an input: presses a key, clicks, touches the screen or presses a controller button. Gives the InputObject and gameProcessedEvent (true if Roblox already used it, like chat typing). Does not catch the mouse wheel.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.InputBegan:Connect(function(input, gameProcessedEvent)\n    if gameProcessedEvent then return end\n    if input.KeyCode == Enum.KeyCode.F then\n        print(\"F pressed\")\n    end\nend)",
+      "gotcha": "Forgetting the gameProcessedEvent check means typing in chat triggers your controls."
+    },
+    "UserInputService.InputChanged": {
+      "simple": "Fires when an input CHANGES while happening: the mouse moves, the mouse wheel scrolls, a joystick tilts, or a finger slides.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.InputChanged:Connect(function(input, gameProcessedEvent)\n    if input.UserInputType == Enum.UserInputType.MouseWheel then\n        print(\"Scrolled:\", input.Position.Z) -- 1 = up, -1 = down\n    end\nend)"
+    },
+    "UserInputService.InputEnded": {
+      "simple": "Fires when the player STOPS an input: lets go of a key or button, or lifts a finger.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.InputEnded:Connect(function(input, gameProcessedEvent)\n    if input.KeyCode == Enum.KeyCode.F then\n        print(\"F released\")\n    end\nend)"
+    },
+    "UserInputService.JumpRequest": {
+      "simple": "Fires when the player tries to jump (Space, the jump button on phones, or A on a controller).",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nlocal lastJump = 0\nUserInputService.JumpRequest:Connect(function()\n    if os.clock() - lastJump > 0.5 then -- debounce: only once every half second\n        lastJump = os.clock()\n        print(\"Jump requested\")\n    end\nend)",
+      "gotcha": "It can fire many times for one press, so use a debounce (a short cooldown)."
+    },
+    "UserInputService.LastInputTypeChanged": {
+      "simple": "Fires when the player switches to a different kind of input, like going from keyboard to controller.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.LastInputTypeChanged:Connect(function(inputType)\n    print(\"Now using\", inputType.Name)\nend)"
+    },
+    "UserInputService.PointerAction": {
+      "simple": "Fires for mouse wheel and trackpad gestures. Gives `wheel` (scroll amount), `pan` (two-finger slide, as a Vector2), `pinch` (zoom amount) and gameProcessedEvent.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.PointerAction:Connect(function(wheel, pan, pinch, gameProcessedEvent)\n    print(\"wheel\", wheel, \"pan\", pan, \"pinch\", pinch)\nend)"
+    },
+    "UserInputService.TextBoxFocused": {
+      "simple": "Fires when the player clicks or taps a TextBox to start typing in it. Gives the TextBox.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TextBoxFocused:Connect(function(box)\n    print(\"Started typing in\", box.Name)\nend)"
+    },
+    "UserInputService.TextBoxFocusReleased": {
+      "simple": "Fires when the player stops typing in a TextBox, for example by pressing Enter or clicking somewhere else.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TextBoxFocusReleased:Connect(function(box)\n    print(\"Done typing:\", box.Text)\nend)"
+    },
+    "UserInputService.TouchDrag": {
+      "simple": "Fires on touch screens when the player starts dragging a finger in a direction. Gives the direction (Up, Down, Left, Right), how many fingers, and gameProcessedEvent. For a finished quick swipe, use `TouchSwipe`.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchDrag:Connect(function(direction, fingers, gameProcessedEvent)\n    print(\"Dragging\", direction.Name)\nend)"
+    },
+    "UserInputService.TouchEnded": {
+      "simple": "Fires when a finger is lifted off a touch screen. Gives the InputObject for that finger.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchEnded:Connect(function(touch, gameProcessedEvent)\n    print(\"Finger lifted at\", touch.Position)\nend)"
+    },
+    "UserInputService.TouchLongPress": {
+      "simple": "Fires when the player holds a finger on the screen for a short while. Gives the finger positions, the state (Begin, Change or End) and gameProcessedEvent.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchLongPress:Connect(function(positions, state, gameProcessedEvent)\n    if state == Enum.UserInputState.Begin then\n        print(\"Long press!\")\n    end\nend)"
+    },
+    "UserInputService.TouchMoved": {
+      "simple": "Fires when a finger slides on the screen. Gives the InputObject; `Position` is where the finger is now, `Delta` is how far it moved.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchMoved:Connect(function(touch, gameProcessedEvent)\n    print(\"Finger at\", touch.Position)\nend)"
+    },
+    "UserInputService.TouchPan": {
+      "simple": "Fires while the player drags one or more fingers across the screen. Gives the finger positions, total distance moved so far (Vector2), speed, state and gameProcessedEvent.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchPan:Connect(function(positions, totalTranslation, velocity, state, gameProcessedEvent)\n    print(\"Panned\", totalTranslation)\nend)"
+    },
+    "UserInputService.TouchPinch": {
+      "simple": "Fires when the player pinches two fingers together or apart (like zooming a photo). `scale` is bigger than 1 when fingers spread apart and smaller than 1 when they pinch together.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchPinch:Connect(function(positions, scale, velocity, state, gameProcessedEvent)\n    print(\"Pinch scale\", scale)\nend)"
+    },
+    "UserInputService.TouchRotate": {
+      "simple": "Fires when the player twists two fingers on the screen. `rotation` is how much they turned, in degrees.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchRotate:Connect(function(positions, rotation, velocity, state, gameProcessedEvent)\n    print(\"Rotated\", rotation)\nend)"
+    },
+    "UserInputService.TouchStarted": {
+      "simple": "Fires when a finger first touches the screen. Gives the InputObject for that finger.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchStarted:Connect(function(touch, gameProcessedEvent)\n    if gameProcessedEvent then return end\n    print(\"Touched at\", touch.Position)\nend)"
+    },
+    "UserInputService.TouchSwipe": {
+      "simple": "Fires after a quick swipe: finger down, slide fast, lift. Gives the direction (Up, Down, Left, Right), how many fingers, and gameProcessedEvent.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchSwipe:Connect(function(direction, fingers, gameProcessedEvent)\n    if direction == Enum.SwipeDirection.Left then\n        print(\"Swiped left\")\n    end\nend)"
+    },
+    "UserInputService.TouchTap": {
+      "simple": "Fires when the player taps the screen, either on the 3D world or on a GUI. Gives a list of tap positions and gameProcessedEvent.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchTap:Connect(function(positions, gameProcessedEvent)\n    print(\"Tapped at\", positions[1])\nend)"
+    },
+    "UserInputService.TouchTapInWorld": {
+      "simple": "Fires when the player taps the 3D world (not a GUI button). Gives the screen position and whether a GUI used the tap.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.TouchTapInWorld:Connect(function(position, processedByUI)\n    if not processedByUI then\n        print(\"Tapped the world at\", position)\n    end\nend)"
+    },
+    "UserInputService.UserCFrameChanged": {
+      "simple": "Old — use `VRService.UserCFrameChanged` instead."
+    },
+    "UserInputService.WindowFocused": {
+      "simple": "Fires when the Roblox window becomes the active window again (the player clicks back into the game).",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.WindowFocused:Connect(function()\n    print(\"Welcome back!\")\nend)"
+    },
+    "UserInputService.WindowFocusReleased": {
+      "simple": "Fires when the Roblox window stops being the active window, for example the player clicks another app or minimizes. Handy for auto-pausing.",
+      "example": "local UserInputService = game:GetService(\"UserInputService\")\nUserInputService.WindowFocusReleased:Connect(function()\n    print(\"Player tabbed out\")\nend)"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "name": "Tween",
+  "simple": "A Tween is one ready-to-play smooth animation of an object's properties. You get one from `TweenService:Create()`, then you can Play, Pause or Cancel it, and listen for when it is Completed. Once made, its settings cannot be changed; make a new Tween if you need different goals.",
+  "analogy": "A Tween is like a recorded TV show. TweenService records it, and the Tween is the remote control: play, pause, stop, and a light that tells you when the show is over.",
+  "whenToUse": [
+    "Start a smooth change with `:Play()`",
+    "Pause a moving platform with `:Pause()` and resume it later with `:Play()`",
+    "Stop an animation with `:Cancel()`",
+    "Do something after an animation ends using `Completed`"
+  ],
+  "where": "Server and client. You cannot use `Instance.new(\"Tween\")`; you must make it with `game:GetService(\"TweenService\"):Create(...)`.",
+  "terms": {
+    "tween": "Short for \"in-between\". A smooth change of a property from its current value to a goal value over time.",
+    "read-only": "You can look at the value, but you cannot change it.",
+    "PlaybackState": "Where the tween is in its life: `Begin` (made but never played), `Delayed` (waiting for its delay time), `Playing`, `Paused`, `Completed` (finished normally) or `Cancelled` (stopped early).",
+    "event": "Something that happens in the game that your code can listen for, like a doorbell. You `:Connect` a function to run when it rings.",
+    "inherits": "Gets features from a parent class. Tween gets Play, Pause, Cancel, PlaybackState and Completed from a class called TweenBase.",
+    "TweenInfo": "The settings that say how a tween moves: time, easing style, easing direction, repeat count, reverses, and delay."
+  },
+  "examples": [
+    {
+      "title": "Play, pause and resume a moving platform",
+      "place": "Script inside a Part (in Workspace)",
+      "code": "local TweenService = game:GetService(\"TweenService\")\n\nlocal platform = script.Parent\nplatform.Anchored = true\n\nlocal info = TweenInfo.new(4, Enum.EasingStyle.Linear)\nlocal tween = TweenService:Create(platform, info, {\n    Position = platform.Position + Vector3.new(30, 0, 0),\n})\n\ntween:Play()\ntask.wait(2)        -- let it move for 2 seconds (about halfway)\ntween:Pause()       -- freeze where it is\nprint(tween.PlaybackState) -- Enum.PlaybackState.Paused\ntask.wait(3)\ntween:Play()        -- carries on from where it stopped\n\ntween.Completed:Connect(function(state)\n    print(\"Tween ended with state:\", state) -- Enum.PlaybackState.Completed\nend)",
+      "explain": [
+        "We make a 4-second tween that slides the platform 30 studs along X.",
+        "After 2 seconds we pause it. Pausing keeps its progress.",
+        "Calling `Play` again continues from where it paused.",
+        "`Completed` tells us when it is finished and why (Completed or Cancelled)."
+      ]
+    }
+  ],
+  "gotchas": [
+    "`Pause` keeps the progress; `Cancel` throws the progress away. After a Cancel, `Play` starts over and takes the full time again.",
+    "`Cancel` does NOT put the part back to where it started. It just stops it where it is.",
+    "`Pause` does not fire the `Completed` event, but `Cancel` does.",
+    "Calling `Play` on a tween that is already playing does nothing.",
+    "You cannot change a tween's goal or time after making it. Create a new tween instead."
+  ],
+  "members": {
+    "Tween.Instance": {
+      "simple": "The object this tween is changing, like the Part or Frame you passed to `TweenService:Create()`. Read-only.",
+      "example": "local TweenService = game:GetService(\"TweenService\")\nlocal tween = TweenService:Create(workspace.Part, TweenInfo.new(1), {Transparency = 1})\nprint(tween.Instance.Name) -- Part"
+    },
+    "Tween.TweenInfo": {
+      "simple": "The TweenInfo settings this tween was made with: its time, easing style, easing direction, repeat count, reverses and delay. Read-only.",
+      "example": "local TweenService = game:GetService(\"TweenService\")\nlocal tween = TweenService:Create(workspace.Part, TweenInfo.new(3), {Transparency = 1})\nprint(tween.TweenInfo.Time) -- 3 (seconds)\nprint(tween.TweenInfo.EasingStyle) -- Enum.EasingStyle.Quad (the default)"
+    },
+    "TweenBase.PlaybackState": {
+      "simple": "Tells you what the tween is doing right now: Begin, Delayed, Playing, Paused, Completed or Cancelled. Read-only; change it by calling Play, Pause or Cancel.",
+      "example": "local TweenService = game:GetService(\"TweenService\")\nlocal tween = TweenService:Create(workspace.Part, TweenInfo.new(2), {Transparency = 1})\nprint(tween.PlaybackState) -- Enum.PlaybackState.Begin\ntween:Play()\nprint(tween.PlaybackState) -- Enum.PlaybackState.Playing"
+    },
+    "TweenBase:Play": {
+      "simple": "Starts the tween, or continues it after a Pause. If it is already playing, nothing happens.",
+      "example": "local TweenService = game:GetService(\"TweenService\")\nlocal tween = TweenService:Create(workspace.Part, TweenInfo.new(1), {Transparency = 1})\ntween:Play() -- the part fades out over 1 second"
+    },
+    "TweenBase:Pause": {
+      "simple": "Freezes the tween where it is and remembers its progress, so `Play` continues from that spot. Does not fire `Completed`.",
+      "example": "tween:Play()\ntask.wait(0.5)\ntween:Pause() -- freeze halfway\ntask.wait(2)\ntween:Play()  -- continue from halfway",
+      "gotcha": "Only a tween that is currently playing can be paused."
+    },
+    "TweenBase:Cancel": {
+      "simple": "Stops the tween and forgets its progress. The object stays where it was when you cancelled; it does not jump back. If you `Play` again later, it takes the full time to reach the goal. Fires `Completed` with the state Cancelled.",
+      "example": "tween:Play()\ntask.wait(1)\ntween:Cancel() -- stop now; the part stays wherever it got to",
+      "gotcha": "Cancel does not undo the changes. If you want the part back at the start, set its property back yourself or tween it back."
+    },
+    "TweenBase.Completed": {
+      "simple": "An event that fires when the tween finishes, or when it is cancelled. It tells you which one happened by giving you a PlaybackState (Completed or Cancelled). Pausing does not fire it.",
+      "example": "tween.Completed:Connect(function(playbackState)\n    if playbackState == Enum.PlaybackState.Completed then\n        print(\"Finished all the way!\")\n    end\nend)\ntween:Play()"
+    }
+  }
+}

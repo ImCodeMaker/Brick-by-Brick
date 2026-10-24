@@ -1,0 +1,43 @@
+{
+  "name": "Script",
+  "simple": "A Script holds Luau code that runs on the server: Roblox's computer that runs the game for everyone at once. Things a Script changes, like moving a part or giving points, are seen by every player. Use Scripts for the important rules of your game, like scoring, damage, and saving data.",
+  "analogy": "The server is like the referee of a soccer game. Players (clients) can ask for things, but the referee makes the final decisions that everybody has to follow. A Script is the referee's rulebook.",
+  "whenToUse": [
+    "Game rules everyone shares: giving points, dealing damage, spawning enemies, opening doors for everybody.",
+    "Anything secret or important that players should not be able to cheat, like saving data or awarding badges.",
+    "Reacting to players joining and leaving."
+  ],
+  "where": "A Script runs on the SERVER when it is inside Workspace or ServerScriptService (and its Enabled is on). It does NOT run inside ReplicatedStorage, ServerStorage, or the Starter folders with its default RunContext of Legacy. The best place for most Scripts is ServerScriptService. Its RunContext property can be changed to Client or Server to make it run in other places, but beginners can leave it alone.",
+  "terms": {
+    "server": "Roblox's computer that runs the one shared copy of the game for everyone in the server. What happens here is the truth everyone sees.",
+    "client": "One player's own device (computer, phone, tablet, or console). Each player has their own client.",
+    "Luau": "The programming language Roblox uses. It is based on Lua.",
+    "RunContext": "A Script setting that decides where it runs. Legacy (the default) means: on the server, from Workspace or ServerScriptService.",
+    "ServerScriptService": "A service made just for server Scripts. Players cannot see what is inside, which keeps your code private.",
+    "thread": "One running piece of code. Each Script runs in its own thread.",
+    "Enabled": "A Script setting. If false, the script does not run."
+  },
+  "examples": [
+    {
+      "title": "Welcome every player and give them points",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- Make a leaderboard folder (it must be named exactly \"leaderstats\")\n\tlocal leaderstats = Instance.new(\"Folder\")\n\tleaderstats.Name = \"leaderstats\"\n\tleaderstats.Parent = player\n\n\tlocal points = Instance.new(\"IntValue\")\n\tpoints.Name = \"Points\"\n\tpoints.Value = 0\n\tpoints.Parent = leaderstats\n\n\tprint(\"Welcome,\", player.Name)\n\n\t-- Give 1 point every 5 seconds while they are in the game\n\twhile player.Parent do\n\t\ttask.wait(5)\n\t\tpoints.Value += 1\n\tend\nend)",
+      "explain": [
+        "`PlayerAdded` fires on the server whenever someone joins.",
+        "A Folder named leaderstats inside the player shows up on the leaderboard, and the IntValue inside it is a column called Points.",
+        "Because this runs on the server, everyone sees the same scores, and players cannot just change their own points."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A Script in ReplicatedStorage or ServerStorage will not run (with the default RunContext). Put it in ServerScriptService.",
+    "Scripts cannot see a player's own screen or input directly. Things like the mouse, keyboard, and camera belong to LocalScripts.",
+    "Do not trust what players send you through RemoteEvents; check it in your Script first.",
+    "A Script inside a model in Workspace runs too, but keeping Scripts in ServerScriptService keeps them organized and hidden from players."
+  ],
+  "members": {
+    "Script.Source": {
+      "simple": "The text of the code inside the script. You edit it in Studio's script editor. Normal running Scripts and LocalScripts get an error if they try to read or change it; only plugins can use it."
+    }
+  }
+}

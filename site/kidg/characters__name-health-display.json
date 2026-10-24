@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/characters/name-health-display.md",
+  "simple": "Above every character's head, Roblox can show a name and a health bar. This page shows how to control them with `Humanoid` properties: how far away they can be seen, when the health bar appears, whether walls hide them, and what name shows. This is handy for hiding enemy names in a stealth game, giving guards a generic name, or letting players pick a roleplay name.",
+  "analogy": "It is like name tags at a big event. You can decide how close someone has to be to read your tag, whether your tag shows how tired you are, and whether people behind a wall can still see it.",
+  "keyPoints": [
+    "The name and health bar only show if the `Humanoid` is inside a `Model` that also has a part named `Head`, both at the same level.",
+    "`DisplayDistanceType` decides whose distance counts: `Viewer` (the person looking), `Subject` (the character being looked at), or `None` (never show).",
+    "`NameDisplayDistance` and `HealthDisplayDistance` set how many studs away the name and health bar can be seen, such as 20 and 15.",
+    "`HealthDisplayType` can be `AlwaysOn`, `DisplayWhenDamaged`, or `AlwaysOff`. The bar goes from green to yellow to red as health drops.",
+    "`NameOcclusion` decides if walls hide the name: `NoOcclusion`, `OccludeAll`, or `EnemyOcclusion` (hidden only from players on other teams).",
+    "Walls with `Transparency` above 0.99, and other characters, do not hide names.",
+    "Change players' displays in a server Script using `PlayerAdded` and `CharacterAdded`. For NPCs, just edit the Humanoid in the Properties window.",
+    "You can set `Humanoid.DisplayName` to any name. If players type the name, send it to the server and filter it with `TextService` first."
+  ],
+  "terms": {
+    "Humanoid": "The object inside a character that gives it health, movement, and the name/health display.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "Viewer": "The character doing the looking. With this setting, the viewer's own distance numbers decide what they see.",
+    "Subject": "The character being looked at. With this setting, its own distance numbers decide who can see its name.",
+    "occlusion": "Being hidden because something is in the way, like a name hidden behind a stone column.",
+    "line-of-sight": "A straight, clear path between the camera and the character.",
+    "MaxHealth": "The most health a character can have, often 100. At 50 health out of 100 the bar is half full and yellow.",
+    "Display Name": "The friendly name on a Roblox account. It is different from the Username, which is unique and used to log in.",
+    "filter": "Run text through Roblox's safety check so bad words or personal info get hidden with hashtags.",
+    "RemoteEvent": "An object that carries a message from a player's device to the server, or back."
+  },
+  "example": {
+    "title": "Show names close up and health only when hurt",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal function onCharacterAdded(character)\n\tlocal humanoid = character:WaitForChild(\"Humanoid\")\n\n\t-- Each character controls who can see its own name and health\n\thumanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Subject\n\thumanoid.NameDisplayDistance = 20 -- visible from 20 studs\n\thumanoid.HealthDisplayDistance = 15 -- health visible from 15 studs\n\n\t-- Only show the health bar when hurt\n\thumanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.DisplayWhenDamaged\n\n\t-- Hide names behind walls from players on other teams\n\thumanoid.NameOcclusion = Enum.NameOcclusion.EnemyOcclusion\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(onCharacterAdded)\nend)",
+    "explain": [
+      "Every time a player's character spawns, we find its `Humanoid`.",
+      "`Subject` means other players see this name only when within 20 studs of this character.",
+      "The health bar shows within 15 studs, and only when health is below max.",
+      "`EnemyOcclusion` hides the name behind walls from enemies, but teammates still see it."
+    ]
+  },
+  "watchOut": [
+    "Building an NPC without a part named exactly `Head`. No name or health bar will appear.",
+    "Setting display properties only once. Characters are rebuilt when they respawn, so set them in `CharacterAdded`.",
+    "Putting a player-typed name straight onto `DisplayName`. Always filter it on the server first.",
+    "Using a see-through wall and expecting it to hide names. Walls above 0.99 transparency do not count."
+  ]
+}

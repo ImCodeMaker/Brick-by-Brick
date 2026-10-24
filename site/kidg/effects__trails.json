@@ -1,0 +1,40 @@
+{
+  "path": "content/en-us/effects/trails.md",
+  "simple": "A `Trail` leaves a streak behind something as it moves, like the swoosh behind a sword, the glow behind a fireball, or tire tracks. It uses two attachments, and the distance between them sets how wide the streak is. You can choose its texture, color, transparency, and how long it lasts. Trails make movement look fast and exciting.",
+  "analogy": "It is like dragging a wide paintbrush through the air: the brush's width is the gap between the two attachments, and the paint slowly fades away after a few seconds.",
+  "keyPoints": [
+    "A trail is drawn between and behind two attachments as they move. If either attachment is removed, the trail stops showing.",
+    "To build one: add two attachments and a Trail to a part, set the trail's `Attachment0` and `Attachment1`, then spread the attachments apart.",
+    "The farther apart the attachments, the wider the trail.",
+    "`Lifetime` is how many seconds each bit of trail lasts. Shorter lifetime means a shorter, snappier trail.",
+    "`Color` and `Transparency` can be one value or change over the trail's lifetime, like fading out at the tail.",
+    "`TextureMode` changes how the picture behaves: Stretch stretches it, Wrap tiles it, and Static stamps it in place (great for footprints or tire marks).",
+    "`FaceCamera = true` keeps the flat trail facing the camera so it stays visible."
+  ],
+  "terms": {
+    "attachment": "An invisible point inside a part. A trail needs two, and the gap between them is the trail's width.",
+    "lifetime": "How long, in seconds, a piece of the trail stays before disappearing. Lifetime 0.5 makes a quick swoosh; 3 makes a long tail.",
+    "texture": "The image drawn along the trail.",
+    "ColorSequence": "A color gradient over time, like white at the front fading to blue at the tail.",
+    "NumberSequence": "A set of numbers that change over the trail's life, used for fading transparency from 0 to 1.",
+    "TextureLength": "How long one copy of the texture is (Wrap or Static) or how many times it repeats (Stretch).",
+    "Static mode": "The texture stays put where it was drawn, like stamped footprints, until its lifetime ends."
+  },
+  "example": {
+    "title": "Add a trail to a player's character",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(function(character)\n\t\tlocal root = character:WaitForChild(\"HumanoidRootPart\")\n\n\t\t-- Two attachments 2 studs apart make a 2-stud-wide trail\n\t\tlocal top = Instance.new(\"Attachment\")\n\t\ttop.Position = Vector3.new(0, 1, 0)\n\t\ttop.Parent = root\n\n\t\tlocal bottom = Instance.new(\"Attachment\")\n\t\tbottom.Position = Vector3.new(0, -1, 0)\n\t\tbottom.Parent = root\n\n\t\tlocal trail = Instance.new(\"Trail\")\n\t\ttrail.Attachment0 = top\n\t\ttrail.Attachment1 = bottom\n\t\ttrail.Lifetime = 0.5 -- each piece lasts half a second\n\t\ttrail.Color = ColorSequence.new(Color3.fromRGB(0, 170, 255))\n\t\ttrail.Transparency = NumberSequence.new(0, 1) -- fade at the tail\n\t\ttrail.Parent = root\n\tend)\nend)",
+    "explain": [
+      "Every time a player's character spawns, we find its `HumanoidRootPart`.",
+      "We add one attachment 1 stud above its center and one 1 stud below, so they are 2 studs apart.",
+      "The trail uses those two attachments, so it is 2 studs tall.",
+      "`Lifetime = 0.5` keeps the trail short, and the transparency sequence fades it out at the end.",
+      "Now a blue streak follows the player wherever they run."
+    ]
+  },
+  "watchOut": [
+    "If the two attachments are in the same spot, the trail has no width and you will not see it.",
+    "A trail only appears while the attachments move. Standing still shows nothing.",
+    "A very long `Lifetime` on many players can look messy and cost performance. Keep it short."
+  ]
+}

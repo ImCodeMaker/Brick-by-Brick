@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/scripting/security/access-control.md",
+  "simple": "This page is about secrets: what players can see in your game, even things you think are hidden. Anything that gets sent to a player's device can be dug out by a cheater, including LocalScripts and ModuleScripts. Cheaters can also jump into other places in your game that you meant to lock. Knowing this helps you keep unreleased content and server code safe.",
+  "analogy": "Sending something to a player's device is like mailing someone a locked diary. The lock looks nice, but once the diary is in their house, they can break it open. Truly secret stuff should never leave your own house (the server).",
+  "keyPoints": [
+    "Cheaters can see everything that replicates to their device, even if it is invisible or unused.",
+    "Cheaters can decompile LocalScripts, client Scripts, and ModuleScripts that reach their device, even if they are disabled or never run.",
+    "Scripts in ServerScriptService and ServerStorage never go to players, so they cannot be decompiled.",
+    "Do not mix server code and client code in one ModuleScript in ReplicatedStorage. Cheaters can read the server half, including any passwords.",
+    "If a player can join one place in your universe, they can try to teleport to any other place in it. Turning off \"Direct Access\" only hides the Join button.",
+    "Kicking players from a secret place is too late: content starts copying to them as soon as they join.",
+    "Best fix: in the Creator Dashboard, set Access Control for Places to \"Secure within universe only\", so only the server can teleport players into subplaces.",
+    "Keep test and unreleased content in a separate private universe, and do not use super obvious names for important remotes and scripts."
+  ],
+  "terms": {
+    "confidentiality": "Keeping secret things secret.",
+    "replicate": "To copy something from the server to players' devices. Anything that replicates can be seen by a cheater.",
+    "replication container": "A top-level service, like ReplicatedStorage or Workspace, whose contents get copied to every player.",
+    "decompile": "To turn compiled script data back into readable code.",
+    "universe": "Your whole game, which can include a main place plus extra places (subplaces) players teleport between.",
+    "subplace": "An extra place in your universe that is not the start place, like a lobby's separate arena.",
+    "root place / start place": "The place players land in when they first join your game.",
+    "Direct Access": "A setting that shows or hides the Join button for a subplace on the website. It does not stop teleports.",
+    "secure teleport": "A setting where only the server can send players to subplaces. Players cannot teleport there by themselves.",
+    "streaming": "Only sending the parts of the world near the player, instead of the whole map at once.",
+    "server-authoritative": "The server's version is the real one. Things must be created or changed on the server to show up for everyone.",
+    "data-mine": "Digging through game files to find hidden or unreleased content.",
+    "production": "The live, published version of your game that real players use.",
+    "defense-in-depth": "Using several layers of protection, so if one fails the others still help."
+  },
+  "watchOut": [
+    "Thinking a disabled LocalScript is hidden. If it is sent to the player, it can be read.",
+    "Putting a password or secret logic in a ModuleScript in ReplicatedStorage. Keep it in ServerScriptService or ServerStorage.",
+    "Uploading unreleased items to your live game and hiding them. Cheaters will find and leak them.",
+    "Relying on kicks to protect secret places. Turn on \"Secure within universe only\" instead.",
+    "Letting players in when your check fails with an error. Default to not allowing them in."
+  ]
+}

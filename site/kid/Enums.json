@@ -1,0 +1,36 @@
+{
+  "name": "Enums",
+  "simple": "Enums is the big collection of every Enum in Roblox. You use it all the time without noticing: it is the global word `Enum` that you type before Enum.Material or Enum.KeyCode. It also has GetEnums to list every Enum that exists.",
+  "analogy": "If each Enum is a menu, Enums is the whole food court holding every menu. You walk up to the food court (Enum) and pick a menu by name (Material, KeyCode).",
+  "whenToUse": [
+    "Getting any Enum by name, like Enum.Material",
+    "Listing every Enum that exists with Enum:GetEnums(), for example to explore what is available"
+  ],
+  "where": "Available everywhere as the global variable `Enum`. You never make one yourself.",
+  "terms": {
+    "global": "Something you can use in any script without creating or requiring it first.",
+    "enum": "A fixed list of named options, like Enum.Material.",
+    "array": "A list in Lua, numbered 1, 2, 3, and so on."
+  },
+  "examples": [
+    {
+      "title": "Count every Enum in Roblox",
+      "place": "Script in ServerScriptService",
+      "code": "local allEnums = Enum:GetEnums()\nprint(\"Roblox has\", #allEnums, \"enums\")\n\n-- Print the first five names\nfor i = 1, 5 do\n\tprint(allEnums[i])\nend",
+      "explain": [
+        "Enum here is the Enums collection.",
+        "GetEnums gives a list of every Enum, like Material, KeyCode, and EasingStyle.",
+        "#allEnums is how many there are, and the loop prints the first five."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The global is spelled `Enum`, not `Enums`. Enums is just the name of its type."
+  ],
+  "members": {
+    "Enums:GetEnums": {
+      "simple": "Gives a list of every Enum that exists in Roblox.",
+      "example": "for _, e in Enum:GetEnums() do\n\tprint(e) -- prints each Enum, like Material or KeyCode\nend"
+    }
+  }
+}

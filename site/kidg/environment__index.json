@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/environment/index.md",
+  "simple": "This page is an overview of how to make your game world look amazing. The `Lighting` service controls the time of day and how bright everything is. You can add atmosphere for haze and glowing sunsets, a sky with clouds that drift in the wind, and post-processing effects that work like photo filters. Good lighting can make a simple map feel like a real place.",
+  "analogy": "Lighting and effects are like the lights, fog machine, backdrop, and camera filters on a movie set. The actors and props (your parts) stay the same, but the mood changes completely.",
+  "keyPoints": [
+    "The `Lighting` service holds the settings for your whole world's light, like `ClockTime` and `Brightness`.",
+    "`ClockTime` sets the time of day: 0 is midnight and 6.3 is about 6:18 AM, around sunrise.",
+    "You can also add light sources to parts, like lamps, torches, and spotlights.",
+    "An `Atmosphere` object inside Lighting adds air effects like haze, glare, and colored skies.",
+    "A `Sky` object makes the skybox with a sun, moon, and stars.",
+    "A `Clouds` object adds real 3D clouds that slowly drift with global wind.",
+    "Post-processing effects in Lighting or the Camera act like screen filters: glow, blur, color mood, and sun rays."
+  ],
+  "terms": {
+    "Lighting service": "The service in the Explorer that controls global light, sky, atmosphere, and screen effects.",
+    "global lighting": "Light settings that affect the whole world at once, like the sun's brightness.",
+    "ClockTime": "A Lighting property for the time of day, as a number of hours. 12 is noon, 18 is 6 PM.",
+    "Brightness": "How strong the light from the sun or moon is. Higher numbers make the world brighter.",
+    "light source": "An object like a PointLight or SpotLight attached to a part to light up the area around it.",
+    "atmosphere": "The air in your world. It can scatter sunlight to make haze, glare, and colorful sunsets.",
+    "skybox": "The big background picture around your world that shows the sky, sun, moon, and stars.",
+    "global wind": "A wind setting that pushes clouds, grass, and particles in one direction.",
+    "post-processing effect": "A filter applied to the final picture on screen, like a camera filter.",
+    "Gaussian blur": "A smooth, soft blur, like looking through a foggy window."
+  },
+  "example": {
+    "title": "Set a sunset mood",
+    "place": "Script in ServerScriptService",
+    "code": "local Lighting = game:GetService(\"Lighting\")\n\n-- 17.8 hours is about 5:48 PM, close to sunset\nLighting.ClockTime = 17.8\nLighting.Brightness = 2\n\n-- Add an atmosphere for haze if there is not one already\nlocal atmosphere = Lighting:FindFirstChildOfClass(\"Atmosphere\")\nif not atmosphere then\n\tatmosphere = Instance.new(\"Atmosphere\")\n\tatmosphere.Parent = Lighting\nend\natmosphere.Haze = 2",
+    "explain": [
+      "The script gets the `Lighting` service.",
+      "Setting `ClockTime` to 17.8 moves the sun low in the sky for a sunset look.",
+      "`Brightness` sets how strong the sunlight is.",
+      "It finds or creates an `Atmosphere` and turns up `Haze` for a dreamy, hazy look."
+    ]
+  },
+  "watchOut": [
+    "Changing lighting from a LocalScript and expecting everyone to see it. Changes on the client only show for that one player.",
+    "Stacking too many post-processing effects. It can look messy; add them one at a time and compare."
+  ]
+}

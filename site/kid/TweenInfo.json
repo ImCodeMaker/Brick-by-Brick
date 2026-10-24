@@ -1,0 +1,86 @@
+{
+  "name": "TweenInfo",
+  "simple": "A TweenInfo is the instruction card for a tween. A tween is a smooth animation that slides a property (like a part's position, size, or color) from where it is now to a new value. TweenInfo says how long it takes, what style of motion to use, how many times to repeat, whether to go back, and how long to wait before starting.",
+  "analogy": "TweenInfo is like the settings on a playground swing ride: how long one swing takes, whether it starts slow or fast, how many times it swings, whether it swings back, and how long you wait before it starts. The ride (the tween) follows the card.",
+  "whenToUse": [
+    "Making a door slide open smoothly",
+    "Making a platform float up and down forever",
+    "Fading a part or UI in and out",
+    "Making a menu slide onto the screen"
+  ],
+  "where": "Works in any script. Make one with TweenInfo.new(...) and give it to TweenService:Create(object, tweenInfo, goals). Get TweenService with game:GetService(\"TweenService\").",
+  "terms": {
+    "tween": "A smooth change of a property from one value to another over time, made by TweenService. Short for \"in-between\".",
+    "easing": "How the speed changes during the tween. Linear moves at the same speed the whole time. Others start slow, end slow, bounce, or overshoot.",
+    "EasingStyle": "The shape of the motion, like Linear, Sine, Quad, Back, Bounce, or Elastic.",
+    "EasingDirection": "Which end the easing style happens at: In (at the start), Out (at the end), or InOut (both ends).",
+    "Enum": "A fixed list of named choices Roblox gives you, like Enum.EasingStyle.Bounce.",
+    "TweenService": "The Roblox service that creates and plays tweens.",
+    "read-only": "You can look at the value but not change it. To change TweenInfo settings, make a new TweenInfo."
+  },
+  "examples": [
+    {
+      "title": "A floating platform that bobs up and down forever",
+      "place": "Script in ServerScriptService",
+      "code": "local TweenService = game:GetService(\"TweenService\")\n\n-- Make the platform\nlocal platform = Instance.new(\"Part\")\nplatform.Size = Vector3.new(8, 1, 8)\nplatform.Anchored = true -- tweens work best on anchored parts\nplatform.Position = Vector3.new(0, 5, 0)\nplatform.Parent = workspace\n\nlocal tweenInfo = TweenInfo.new(\n\t2,                          -- time: each trip takes 2 seconds\n\tEnum.EasingStyle.Sine,      -- easingStyle: smooth, gentle curve\n\tEnum.EasingDirection.InOut, -- easingDirection: slow at start AND end\n\t-1,                         -- repeatCount: -1 means repeat forever\n\ttrue,                       -- reverses: come back down after going up\n\t0.5                         -- delayTime: wait half a second before starting\n)\n\n-- Goal: move up to a height of 15\nlocal goal = { Position = Vector3.new(0, 15, 0) }\nlocal tween = TweenService:Create(platform, tweenInfo, goal)\ntween:Play()",
+      "explain": [
+        "time = 2: going from height 5 to height 15 takes 2 seconds.",
+        "easingStyle = Sine: the motion follows a soft wave shape instead of a stiff straight line.",
+        "easingDirection = InOut: it eases in at the start and out at the end, so it speeds up gently and slows down gently.",
+        "repeatCount = -1: it never stops repeating. A number like 3 would repeat 3 more times after the first play.",
+        "reverses = true: after reaching the goal it plays backwards to where it started, so the platform comes back down.",
+        "delayTime = 0.5: it waits half a second before it begins moving.",
+        "TweenService:Create builds the tween from the part, the TweenInfo, and a table of goal values. tween:Play() starts it."
+      ]
+    },
+    {
+      "title": "Slide a menu onto the screen",
+      "place": "LocalScript in StarterGui (with a ScreenGui that has a Frame named Menu)",
+      "code": "local TweenService = game:GetService(\"TweenService\")\nlocal Players = game:GetService(\"Players\")\n\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nlocal menu = playerGui:WaitForChild(\"ScreenGui\"):WaitForChild(\"Menu\")\n\n-- Start off-screen to the left\nmenu.Position = UDim2.fromScale(-0.5, 0.25)\n\n-- Only time and style given; the rest use their defaults\nlocal tweenInfo = TweenInfo.new(0.6, Enum.EasingStyle.Back)\n\nlocal tween = TweenService:Create(menu, tweenInfo, {\n\tPosition = UDim2.fromScale(0.25, 0.25),\n})\ntween:Play()",
+      "explain": [
+        "The menu starts at X Scale -0.5, which is off the left side of the screen.",
+        "TweenInfo.new(0.6, Enum.EasingStyle.Back) lasts 0.6 seconds and uses Back, which overshoots a tiny bit and then settles, like a spring.",
+        "Things you leave out use defaults: direction Out, repeat 0, reverses false, delay 0.",
+        "The tween slides the menu to X Scale 0.25 so it lands on screen."
+      ]
+    }
+  ],
+  "gotchas": [
+    "You cannot change a TweenInfo after making it. If you need a different time, make a new TweenInfo.",
+    "The order of the six settings matters: time, easingStyle, easingDirection, repeatCount, reverses, delayTime.",
+    "RepeatCount 0 means play once (no extra repeats). -1 means forever. A forever tween runs until you call tween:Cancel().",
+    "Enum.EasingStyle.Bezier and Enum.EasingStyle.Spring cause an error in TweenInfo.new.",
+    "If physics is moving a part (it is not Anchored), physics and the tween fight. Anchor parts you tween."
+  ],
+  "members": {
+    "TweenInfo.new": {
+      "simple": "Makes a new TweenInfo. All six settings are optional and go in this order: time (seconds, default 1), easingStyle (default Quad), easingDirection (default Out), repeatCount (default 0, -1 for forever), reverses (default false), delayTime (seconds, default 0).",
+      "example": "-- Every setting, one by one\nlocal info = TweenInfo.new(\n\t1.5,                       -- takes 1.5 seconds\n\tEnum.EasingStyle.Bounce,   -- bouncy motion\n\tEnum.EasingDirection.Out,  -- the bounce happens at the end\n\t2,                         -- repeat 2 more times\n\tfalse,                     -- do not play backwards\n\t1                          -- wait 1 second before starting\n)\nlocal simple = TweenInfo.new(0.5) -- just a half-second tween, defaults for the rest",
+      "gotcha": "Passing Enum.EasingStyle.Bezier or Enum.EasingStyle.Spring throws an error."
+    },
+    "TweenInfo.Time": {
+      "simple": "How many seconds one play of the tween takes. Time 2 means the part takes 2 seconds to reach its goal. Read-only.",
+      "example": "local info = TweenInfo.new(2)\nprint(info.Time) --> 2"
+    },
+    "TweenInfo.EasingStyle": {
+      "simple": "The shape of the motion. Linear is a steady speed. Sine and Quad are smooth. Back overshoots a little. Bounce bounces at the end. Elastic wobbles like a rubber band. Read-only.",
+      "example": "local info = TweenInfo.new(1, Enum.EasingStyle.Elastic)\nprint(info.EasingStyle) --> Enum.EasingStyle.Elastic"
+    },
+    "TweenInfo.EasingDirection": {
+      "simple": "Which end of the tween the easing style happens at. In puts the effect at the start, Out at the end (the default), and InOut at both ends. Example: Bounce with Out bounces when it lands. Read-only.",
+      "example": "local info = TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out)\nprint(info.EasingDirection) --> Enum.EasingDirection.Out"
+    },
+    "TweenInfo.RepeatCount": {
+      "simple": "How many extra times the tween repeats after the first play. 0 plays once, 3 plays 4 times in total, -1 repeats forever. Read-only.",
+      "example": "local info = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1)\nprint(info.RepeatCount) --> -1 (forever)"
+    },
+    "TweenInfo.Reverses": {
+      "simple": "If true, once the tween reaches its goal it plays backwards to where it started, like a door that opens and then closes. Read-only.",
+      "example": "local info = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, true)\nprint(info.Reverses) --> true"
+    },
+    "TweenInfo.DelayTime": {
+      "simple": "How many seconds to wait after tween:Play() before the movement actually starts. Read-only.",
+      "example": "local info = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, false, 3)\nprint(info.DelayTime) --> 3 (waits 3 seconds first)"
+    }
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "name": "AnimationTrack",
+  "simple": "An AnimationTrack is the controller for one loaded animation. You get it from Animator:LoadAnimation. With it you can play, stop, speed up, slow down, loop, and listen for when the animation ends or reaches a marked moment.",
+  "analogy": "An AnimationTrack is like the remote control for one video: Play, Stop, fast-forward (AdjustSpeed), volume (AdjustWeight), and a clock showing how far in you are (TimePosition).",
+  "whenToUse": [
+    "Start and stop an animation (Play, Stop).",
+    "Make an animation faster, slower, paused or backward (AdjustSpeed).",
+    "Do something at a certain moment in an animation, like a footstep sound (GetMarkerReachedSignal).",
+    "Wait for an animation to finish before doing the next thing (Stopped, Ended)."
+  ],
+  "where": "You can't create one with Instance.new. Get it from `animator:LoadAnimation(animation)`. Use it in the same kind of script that loaded it: a LocalScript for the player's own character, a server Script for NPCs.",
+  "terms": {
+    "animation": "A recorded set of body movements, like a wave or a dance, saved on Roblox with an ID number.",
+    "Animation (object)": "A small object that just holds an animation's ID. It doesn't play anything by itself.",
+    "Animator": "The object inside a Humanoid (or AnimationController) that actually plays animations on a character.",
+    "AnimationTrack": "The 'remote control' for one loaded animation. You get it from Animator:LoadAnimation and call Play and Stop on it.",
+    "asset ID": "The number that identifies something uploaded to Roblox. Animations use it like `rbxassetid://507770239`.",
+    "rig": "A model set up with joints so it can be animated, like a character.",
+    "keyframe": "A saved pose at a certain moment in an animation. The animation smoothly moves between keyframes.",
+    "fade time": "How many seconds an animation takes to smoothly blend in or out, instead of snapping.",
+    "weight": "How strongly an animation affects the body, from 0 (not at all) to 1 (fully). Used when mixing animations.",
+    "priority": "Which animation wins when two want to move the same body part. Higher priority (like Action) beats lower (like Idle).",
+    "replicate": "Copy across the internet so the server and other players see it too.",
+    "client": "The player's own device. LocalScripts run there.",
+    "server": "The Roblox computer that runs the game for everyone.",
+    "marker": "A named point you add to an animation in the Animation Editor, like \"Footstep\" or \"HitFrame\". Scripts can listen for it.",
+    "animation graph": "An advanced animation that mixes several animations based on values (parameters) you set from code.",
+    "parameter": "A named value you send into an animation graph to control it, like a speed number."
+  },
+  "examples": [
+    {
+      "title": "Play a wave animation when you press E",
+      "place": "LocalScript in StarterPlayer > StarterCharacterScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal animator = humanoid:WaitForChild(\"Animator\")\n\n-- 1. Make an Animation object that points to the animation's ID\nlocal waveAnimation = Instance.new(\"Animation\")\nwaveAnimation.AnimationId = \"rbxassetid://507770239\" -- Roblox's default R15 wave\n\n-- 2. Load it onto the Animator ONCE to get a track (a remote control)\nlocal waveTrack = animator:LoadAnimation(waveAnimation)\nwaveTrack.Priority = Enum.AnimationPriority.Action -- beat walking/idle animations\n\n-- 3. Play it whenever E is pressed\nUserInputService.InputBegan:Connect(function(input, typing)\n    if typing then\n        return -- ignore keys pressed while typing in chat\n    end\n    if input.KeyCode == Enum.KeyCode.E and not waveTrack.IsPlaying then\n        waveTrack:Play()\n    end\nend)\n\nwaveTrack.Stopped:Connect(function()\n    print(\"Done waving\")\nend)",
+      "explain": [
+        "Three pieces work together: an Animation (holds the ID) -> the Animator (plays it) -> an AnimationTrack (controls it).",
+        "Because this script is in StarterCharacterScripts, it is copied into the character each spawn, so script.Parent is the character.",
+        "We call LoadAnimation once and reuse the track. Loading again every time would make lots of extra tracks.",
+        "Priority Action makes the wave show over the normal walking and idle animations.",
+        "Animations a player plays on their own character from a LocalScript are copied to the server and everyone else automatically.",
+        "You can only play animations you or your group own (or Roblox's own), otherwise they won't load."
+      ]
+    },
+    {
+      "title": "Speed, markers, and waiting for the end",
+      "place": "LocalScript in StarterPlayer > StarterCharacterScripts",
+      "code": "local character = script.Parent\nlocal animator = character:WaitForChild(\"Humanoid\"):WaitForChild(\"Animator\")\n\nlocal animation = Instance.new(\"Animation\")\nanimation.AnimationId = \"rbxassetid://507770239\" -- replace with your own animation\nlocal track = animator:LoadAnimation(animation)\n\n-- Runs when the animation reaches a marker named \"Clap\" (added in the Animation Editor)\ntrack:GetMarkerReachedSignal(\"Clap\"):Connect(function(value)\n    print(\"Clap! Marker value: \" .. tostring(value))\nend)\n\ntrack:Play(0.2, 1, 2) -- fade in over 0.2 s, full weight, double speed\nprint(\"Length at speed 1: \" .. track.Length .. \" seconds\")\n\ntrack.Stopped:Wait() -- pause this script until the animation finishes\nprint(\"Finished!\")",
+      "explain": [
+        "Play takes three optional numbers: fade time (seconds to blend in), weight (0 to 1), and speed (1 is normal, 2 is twice as fast).",
+        "Length is how long the animation takes at speed 1. At speed 2 it takes half as long. Length is 0 until the animation has loaded.",
+        "GetMarkerReachedSignal fires when the animation passes a named marker. Great for sounds and effects at the exact right moment.",
+        "Stopped:Wait() pauses the script until the track stops playing."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Load the track once and reuse it. Calling LoadAnimation again makes a new track each time.",
+    "Length is 0 until the animation finishes loading. Wait or check that it's above 0.",
+    "If two animations move the same body part, the higher Priority wins. Set Priority to Action for attacks and emotes so walking doesn't override them.",
+    "Set TimePosition only after calling Play.",
+    "After Stop, call Play again before using AdjustWeight."
+  ],
+  "members": {
+    "AnimationTrack.Animation": {
+      "simple": "Read-only. The Animation object this track was loaded from.",
+      "example": "print(track.Animation.AnimationId)"
+    },
+    "AnimationTrack.IsPlaying": {
+      "simple": "Read-only. True while the track is playing. Check it to avoid restarting an animation that's already going.",
+      "example": "if not track.IsPlaying then\n    track:Play()\nend"
+    },
+    "AnimationTrack.Length": {
+      "simple": "Read-only. How many seconds the animation lasts at normal speed. It's 0 until the animation has loaded.",
+      "example": "print(\"Animation lasts \" .. track.Length .. \" seconds\")"
+    },
+    "AnimationTrack.Looped": {
+      "simple": "If true, the animation starts over each time it ends. It starts as whatever was set in the Animation Editor. Changing it while playing takes effect when the current loop ends.",
+      "example": "track.Looped = true"
+    },
+    "AnimationTrack.Priority": {
+      "simple": "How important this animation is when several play at once. From highest to lowest: Action4, Action3, Action2, Action, Movement, Idle, Core. The higher one controls any body part both try to move.",
+      "example": "track.Priority = Enum.AnimationPriority.Action"
+    },
+    "AnimationTrack.Speed": {
+      "simple": "Read-only. The current playback speed. 1 is normal, 2 is double, 0 is paused, negative plays backward. Change it with AdjustSpeed. Real play time = Length divided by Speed.",
+      "example": "print(track.Speed)"
+    },
+    "AnimationTrack.TimePosition": {
+      "simple": "How many seconds into the animation the track is right now. Set it to jump to a moment (the track must be playing).",
+      "example": "track:Play()\ntrack.TimePosition = 1.5 -- jump to 1.5 seconds in\ntrack:AdjustSpeed(0)     -- freeze on that pose"
+    },
+    "AnimationTrack.WeightCurrent": {
+      "simple": "Read-only. How strongly the animation is affecting the body right now (0 to 1). It slides toward WeightTarget over the fade time.",
+      "example": "print(track.WeightCurrent)"
+    },
+    "AnimationTrack.WeightTarget": {
+      "simple": "Read-only. The weight the track is fading toward. Set by Play, Stop, and AdjustWeight.",
+      "example": "print(track.WeightTarget)",
+      "gotcha": "Weights are decimal numbers, so compare with a small range (like math.abs(a - b) < 0.001) instead of ==."
+    },
+    "AnimationTrack:AdjustSpeed": {
+      "simple": "Changes how fast the animation plays. 1 is normal, 2 is twice as fast, 0.5 is half speed, 0 pauses, and negative numbers play it backward.",
+      "example": "track:AdjustSpeed(0.5) -- slow motion"
+    },
+    "AnimationTrack:AdjustWeight": {
+      "simple": "Changes how strongly the animation shows (0 = not at all, 1 = fully), blending over fadeTime seconds. Used to mix animations of the same priority.",
+      "example": "track:AdjustWeight(0.5, 0.3) -- half strength, over 0.3 seconds"
+    },
+    "AnimationTrack:GetMarkerReachedSignal": {
+      "simple": "Gives an event that fires when the animation reaches a marker with the given name. The marker's value text is passed along. Markers are added in the Animation Editor.",
+      "example": "track:GetMarkerReachedSignal(\"Footstep\"):Connect(function(value)\n    print(\"Step!\")\nend)"
+    },
+    "AnimationTrack:GetParameter": {
+      "simple": "For animation graphs: reads back a parameter value you set with SetParameter. Gives nil if it was never set.",
+      "example": "print(track:GetParameter(\"Speed\"))"
+    },
+    "AnimationTrack:GetParameterDefaults": {
+      "simple": "For animation graphs: gives a table of all parameters the graph has and their starting values. Empty if it's a normal animation.",
+      "example": "for name, value in track:GetParameterDefaults() do\n    print(name, value)\nend"
+    },
+    "AnimationTrack:GetTimeOfKeyframe": {
+      "simple": "Gives the time (in seconds) of the first keyframe with a certain name. Errors if the name doesn't exist or the animation hasn't loaded (Length is still 0).",
+      "example": "local t = track:GetTimeOfKeyframe(\"Jump\")"
+    },
+    "AnimationTrack:Play": {
+      "simple": "Starts the animation. Optional: fadeTime (seconds to blend in, default 0.1), weight (default 1), speed (default 1).",
+      "example": "track:Play() -- normal\ntrack:Play(0.5, 1, 1.5) -- blend in over half a second, 1.5x speed"
+    },
+    "AnimationTrack:SetParameter": {
+      "simple": "For animation graphs: sets a named parameter that controls the graph. Can be set before or during playback.",
+      "example": "track:SetParameter(\"Speed\", 10)"
+    },
+    "AnimationTrack:Stop": {
+      "simple": "Stops the animation, fading it out over fadeTime seconds (default 0.1).",
+      "example": "track:Stop(0.5) -- fade out over half a second"
+    },
+    "AnimationTrack.DidLoop": {
+      "simple": "Fires each time a looped animation finishes one loop and starts again.",
+      "example": "local loops = 0\ntrack.DidLoop:Connect(function()\n    loops += 1\n    print(\"Loop #\" .. loops)\nend)"
+    },
+    "AnimationTrack.Ended": {
+      "simple": "Fires when the track is completely done: finished playing, finished fading out, and the body is back to normal. Good for cleanup.",
+      "example": "track.Ended:Connect(function()\n    print(\"Fully done\")\nend)"
+    },
+    "AnimationTrack.KeyframeReached": {
+      "simple": "Old — use AnimationTrack:GetMarkerReachedSignal instead."
+    },
+    "AnimationTrack.Stopped": {
+      "simple": "Fires as soon as the track stops playing (it may still be fading out). Great for playing animations one after another.",
+      "example": "track.Stopped:Connect(function()\n    nextTrack:Play() -- start the next animation\nend)"
+    }
+  }
+}

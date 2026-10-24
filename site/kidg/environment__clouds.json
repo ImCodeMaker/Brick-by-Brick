@@ -1,0 +1,27 @@
+{
+  "path": "content/en-us/environment/clouds.md",
+  "simple": "Dynamic clouds are real-looking 3D clouds that drift slowly across your game's sky. You add them with a `Clouds` object placed inside `Terrain`. Then you can change how much of the sky they cover, how thick and dark they are, and their color. They are an easy way to make your sky feel alive, stormy, or even alien.",
+  "analogy": "The `Clouds` object is like a weather dial for your sky. Turn up \"cover\" for a cloudy day, turn up \"density\" for dark storm clouds, and change the color for a purple alien sunset.",
+  "keyPoints": [
+    "Clouds only show up when the `Clouds` object is inside `Terrain`.",
+    "To add them: in the Explorer, hover over Terrain, click the plus button, and insert Clouds.",
+    "Change how they look in the Properties window, then use global wind to make them move.",
+    "`Cover` goes from 0 (just a few clouds) to 1 (the whole sky covered).",
+    "`Density` changes how see-through clouds are. Low values are light and wispy; high values are heavy, dark, and stormy.",
+    "`Color` sets the clouds' color, but Lighting and Atmosphere settings also change how the color looks.",
+    "Global wind controls which way and how fast the clouds drift."
+  ],
+  "terms": {
+    "dynamic clouds": "3D clouds that move and change, instead of a flat picture painted on the sky.",
+    "Terrain": "The object inside Workspace that holds land like hills, water, and grass. Clouds must go inside it.",
+    "Cover": "How much of the sky has clouds. 0.65 is partly cloudy; 0.8 is mostly cloudy.",
+    "Density": "How thick each cloud is. 0.1 is light and see-through; 0.3 is thicker and darker.",
+    "translucent": "Partly see-through, like frosted glass.",
+    "global wind": "A Workspace setting for the direction and strength of wind, which pushes the clouds."
+  },
+  "watchOut": [
+    "Putting `Clouds` in Lighting or Workspace and wondering why nothing shows. It must be inside `Terrain`.",
+    "Expecting clouds to move on their own. Set `Workspace.GlobalWind` to make them drift.",
+    "Getting weird cloud colors. Remember Lighting and Atmosphere also affect them, so tweak those too."
+  ]
+}

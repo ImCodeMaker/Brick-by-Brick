@@ -1,0 +1,75 @@
+{
+  "name": "Content",
+  "simple": "A Content points to something like an image, mesh, or sound for Roblox to show or play. It can point to an uploaded asset (with an asset ID or a link like rbxassetid://123) or to an object inside the game, like an EditableImage you are drawing on. SourceType tells you which kind it is.",
+  "analogy": "A Content is like a label on a box saying where to find the picture: either \"it's in the Roblox warehouse, shelf 12345\" (an asset ID) or \"it's right here in this room\" (an object in the game).",
+  "whenToUse": [
+    "Setting content properties like ImageLabel.ImageContent from an asset ID",
+    "Showing an EditableImage you created with code",
+    "Checking whether a content property is empty (Content.none)"
+  ],
+  "where": "Works in any script. Make one with Content.fromAssetId, Content.fromUri, or Content.fromObject, or use Content.none for empty.",
+  "terms": {
+    "asset": "A file stored by Roblox, like an image, mesh, sound, or font. Each one has an ID number.",
+    "asset ID": "The number for an uploaded asset, like 1234567.",
+    "URI": "A text link to an asset, like rbxassetid://1234567.",
+    "EditableImage": "An image you can draw on with code, pixel by pixel.",
+    "replicate": "Copy from the server to every player's game automatically. Content objects (like EditableImages) are not copied yet.",
+    "server / client": "The server is Roblox's computer running the game for everyone. The client is each player's own device.",
+    "garbage collected": "Cleaned up and deleted automatically by Roblox when nothing uses it anymore.",
+    "nil": "Lua's word for \"nothing\"."
+  },
+  "examples": [
+    {
+      "title": "Show an uploaded image",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\nlocal picture = Instance.new(\"ImageLabel\")\npicture.Size = UDim2.fromOffset(200, 200)\npicture.Parent = screenGui\n\nlocal IMAGE_ID = 0 -- replace 0 with your own image asset ID\npicture.ImageContent = Content.fromAssetId(IMAGE_ID)\n\nprint(picture.ImageContent.SourceType) -- Enum.ContentSourceType.Uri (or None while the ID is 0)",
+      "explain": [
+        "We make an ImageLabel 200 by 200 pixels.",
+        "Content.fromAssetId turns the number into a Content that points to rbxassetid://<your ID>.",
+        "If the ID is 0, you get Content.none (empty) instead.",
+        "SourceType tells us what kind of Content it is."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Content made from an object (fromObject) does not copy from the server to players yet. Players see a cyan and magenta checkerboard. Do EditableImage and EditableMesh work in LocalScripts instead.",
+    "Content.fromAssetId(0) and Content.fromUri(\"\") give Content.none (empty), not an error.",
+    "A Content made with fromObject keeps that object alive as long as the Content is used."
+  ],
+  "members": {
+    "Content.fromUri": {
+      "simple": "Makes a Content from an asset link like \"rbxassetid://1234567\". An empty string gives Content.none.",
+      "example": "local c = Content.fromUri(\"rbxassetid://0\") -- replace 0 with a real asset ID\nprint(c.SourceType)"
+    },
+    "Content.fromAssetId": {
+      "simple": "Makes a Content from an asset ID number. It is a shortcut for Content.fromUri(\"rbxassetid://\" .. id). An ID of 0 gives Content.none.",
+      "example": "local c = Content.fromAssetId(1234567) -- use your own asset ID\nprint(c.Uri) --> rbxassetid://1234567",
+      "gotcha": "math.huge or 0/0 are not real numbers for an ID and cause an error."
+    },
+    "Content.fromObject": {
+      "simple": "Makes a Content that points to an object in the game, like an EditableImage you made with code. While the Content exists, the object will not be cleaned up.",
+      "example": "-- LocalScript\nlocal AssetService = game:GetService(\"AssetService\")\n\nlocal editable = AssetService:CreateEditableImage({ Size = Vector2.new(64, 64) })\nif editable then\n\tlocal c = Content.fromObject(editable)\n\tprint(c.SourceType) --> Enum.ContentSourceType.Object\nend",
+      "gotcha": "Passing nil causes an error. Object Content does not copy from server to players yet, so use it on the client."
+    },
+    "Content.none": {
+      "simple": "An empty Content that points to nothing. Its SourceType is None. Use it to clear a content property or to check if one is empty.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nlocal label = playerGui:WaitForChild(\"ScreenGui\"):WaitForChild(\"ImageLabel\")\n\nif label.ImageContent == Content.none then\n\tprint(\"No image set yet\")\nend"
+    },
+    "Content.SourceType": {
+      "simple": "Tells you what kind of Content this is: None (empty), Uri (an asset link), Object (an object in the game), or Opaque. It also tells you which of Uri, Object, or Opaque has a value.",
+      "example": "local c = Content.fromAssetId(1234567)\nif c.SourceType == Enum.ContentSourceType.Uri then\n\tprint(\"Points to an asset:\", c.Uri)\nend"
+    },
+    "Content.Uri": {
+      "simple": "The asset link text, like \"rbxassetid://1234567\", if SourceType is Uri. Otherwise nil.",
+      "example": "local c = Content.fromAssetId(1234567)\nprint(c.Uri) --> rbxassetid://1234567"
+    },
+    "Content.Object": {
+      "simple": "The object this Content points to (like an EditableImage), if SourceType is Object. Otherwise nil.",
+      "example": "local c = Content.fromAssetId(1234567)\nprint(c.Object) --> nil (this one is a Uri, not an Object)"
+    },
+    "Content.Opaque": {
+      "simple": "Holds a special kind of content when SourceType is Opaque, otherwise nil. Most scripts never need it.",
+      "example": "local c = Content.none\nprint(c.Opaque) --> nil"
+    }
+  }
+}

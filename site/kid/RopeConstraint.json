@@ -1,0 +1,92 @@
+{
+  "name": "RopeConstraint",
+  "simple": "RopeConstraint works like a rope between two attachments: they can get closer together, but never farther apart than Length. Both ends can swing and turn freely. It can also act like a winch that reels the rope in or out by itself.",
+  "analogy": "RopeConstraint is like a dog leash. The dog can run right up to you, but can never get farther away than the leash is long. A winch is like a retractable leash that reels in.",
+  "whenToUse": [
+    "Swinging ropes and vines",
+    "Hanging lamps, signs and pendulums",
+    "Grappling hooks",
+    "Cranes and winches that lift things (WinchEnabled)"
+  ],
+  "where": "Make it with Instance.new(\"RopeConstraint\"), set Attachment0 and Attachment1 (one in each part) and put it in workspace. Set Visible = true to draw the rope in the game.",
+  "terms": {
+    "constraint": "An invisible rule or connector that the physics engine follows, like 'these two parts must stay stuck together' or 'push this part upward'.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "stud": "Roblox's unit of length. A default baseplate grid square is 1 stud; a classic character is about 5 studs tall.",
+    "force": "A push or pull. In Roblox it is measured in Roblox force units (mass x studs per second per second). A bigger number is a harder push.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "restitution": "Bounciness, from 0 (no bounce, just stops) to 1 (bounces back as hard as it hit).",
+    "winch": "A motor that winds a rope in or lets it out, like on a crane or a tow truck.",
+    "WinchTarget": "The rope length (in studs) the winch tries to reach.",
+    "responsiveness": "How sharply the winch reaches its target. Higher numbers react faster."
+  },
+  "examples": [
+    {
+      "title": "A swinging ball on a rope",
+      "place": "Script in ServerScriptService",
+      "code": "local ceiling = workspace:WaitForChild(\"Ceiling\") -- anchored part\nlocal ball = workspace:WaitForChild(\"Ball\")       -- unanchored part\n\nlocal a0 = Instance.new(\"Attachment\")\na0.Parent = ceiling\nlocal a1 = Instance.new(\"Attachment\")\na1.Parent = ball\n\nlocal rope = Instance.new(\"RopeConstraint\")\nrope.Attachment0 = a0\nrope.Attachment1 = a1\nrope.Length = 10      -- never more than 10 studs apart\nrope.Visible = true   -- draw the rope\nrope.Thickness = 0.2\nrope.Parent = ceiling",
+      "explain": [
+        "The ball can swing anywhere within 10 studs of the ceiling attachment, like a pendulum.",
+        "If the ball is pushed toward the ceiling, the rope goes slack, just like a real rope.",
+        "Visible = true draws the rope so players can see it."
+      ]
+    },
+    {
+      "title": "A crane winch that lifts a crate",
+      "place": "Script in ServerScriptService",
+      "code": "local rope = workspace:WaitForChild(\"Crane\"):WaitForChild(\"RopeConstraint\")\n\nrope.WinchEnabled = true\nrope.WinchForce = 100000      -- strong enough to lift the crate\nrope.WinchSpeed = 4           -- reel at 4 studs per second\nrope.WinchResponsiveness = 45\n\nrope.WinchTarget = 2          -- reel in to 2 studs (lift!)\ntask.wait(6)\nrope.WinchTarget = 15         -- let it back out to 15 studs (lower)",
+      "explain": [
+        "With WinchEnabled on, the rope changes its own length toward WinchTarget.",
+        "WinchSpeed is how fast it reels, always a positive number. Whether it reels in or out depends on whether the target is shorter or longer.",
+        "WinchForce must be more than the crate's weight (mass x 196.2) to lift it."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A rope only stops things from getting FARTHER apart. To keep things a fixed distance (no slack), use RodConstraint.",
+    "Ropes are invisible in the game unless Visible = true.",
+    "WinchSpeed must be positive. A negative speed becomes 0; it does not reverse the winch. Change WinchTarget instead.",
+    "If the winch cannot lift something, raise WinchForce."
+  ],
+  "members": {
+    "RopeConstraint.CurrentDistance": {
+      "simple": "Read-only: how far apart the two attachments are right now, in studs.",
+      "example": "local rope = workspace.Ceiling.RopeConstraint\nif rope.CurrentDistance >= rope.Length - 0.1 then\n\tprint(\"The rope is tight!\")\nend"
+    },
+    "RopeConstraint.Length": {
+      "simple": "The longest the rope can be, in studs. The attachments can never get farther apart than this.",
+      "example": "workspace.Ceiling.RopeConstraint.Length = 12"
+    },
+    "RopeConstraint.Restitution": {
+      "simple": "How bouncy the rope is when it snaps tight at full Length, from 0 (no bounce) to 1 (full bounce).",
+      "example": "workspace.Bungee.RopeConstraint.Restitution = 0.8 -- bungee bounce"
+    },
+    "RopeConstraint.Thickness": {
+      "simple": "How thick the rope looks when drawn. Only changes the look.",
+      "example": "workspace.Ceiling.RopeConstraint.Thickness = 0.3"
+    },
+    "RopeConstraint.WinchEnabled": {
+      "simple": "Turns on the winch motor, which reels the rope in or out toward WinchTarget.",
+      "example": "workspace.Crane.RopeConstraint.WinchEnabled = true"
+    },
+    "RopeConstraint.WinchForce": {
+      "simple": "The most force the winch can pull with. To lift something it must be more than that thing's weight (mass x 196.2).",
+      "example": "local rope = workspace.Crane.RopeConstraint\nlocal crate = workspace.Crate\nrope.WinchForce = crate.AssemblyMass * workspace.Gravity * 3 -- 3 times its weight"
+    },
+    "RopeConstraint.WinchResponsiveness": {
+      "simple": "How sharply the winch reaches WinchTarget. Higher numbers react faster and harder.",
+      "example": "workspace.Crane.RopeConstraint.WinchResponsiveness = 60"
+    },
+    "RopeConstraint.WinchSpeed": {
+      "simple": "How fast the winch changes the rope's length, in studs per second. Always positive.",
+      "example": "workspace.Crane.RopeConstraint.WinchSpeed = 6",
+      "gotcha": "Negative values turn into 0. To reverse, change WinchTarget."
+    },
+    "RopeConstraint.WinchTarget": {
+      "simple": "The rope length, in studs, the winch is trying to reach.",
+      "example": "workspace.Crane.RopeConstraint.WinchTarget = 3 -- reel in to 3 studs"
+    }
+  }
+}

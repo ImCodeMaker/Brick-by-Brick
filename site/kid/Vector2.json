@@ -1,0 +1,165 @@
+{
+  "name": "Vector2",
+  "simple": "A Vector2 is two numbers grouped together: X and Y. It is the flat, 2D cousin of Vector3. Roblox uses it mostly for things on your screen: where the mouse is, where a button sits, and how big a GUI box is in pixels. It can mean a SPOT on a flat surface or an ARROW (a direction with a length).",
+  "analogy": "A Vector2 is like a spot on a sheet of graph paper: how far across (X) and how far down (Y). It is a map with no height.",
+  "whenToUse": [
+    "Reading the mouse position with `UserInputService:GetMouseLocation()`.",
+    "Reading a GUI object's `AbsolutePosition` or `AbsoluteSize` (in pixels).",
+    "Measuring the distance between two points on the screen.",
+    "Any 2D math, like a minimap or a top-down game."
+  ],
+  "where": "Vector2 is a built-in data type that works in Scripts and LocalScripts. Most screen and GUI uses happen in LocalScripts, because only the player's own device knows about its screen and mouse. Make one with `Vector2.new(x, y)`.",
+  "terms": {
+    "vector": "A group of numbers that can mean a spot or an arrow with a direction and a length. A Vector2 has 2 numbers.",
+    "component": "One of the numbers inside a vector: X or Y.",
+    "pixel": "One tiny dot on your screen. GUI positions like AbsolutePosition are measured in pixels.",
+    "screen coordinates": "On the screen, X grows to the RIGHT and Y grows DOWNWARD, starting at the top-left corner (0, 0).",
+    "magnitude": "The length of the arrow; for a difference of two points, it is the distance between them.",
+    "unit vector": "An arrow with length exactly 1. It keeps only the direction.",
+    "dot product": "One number showing how much two arrows point the same way: positive = same-ish, 0 = right angle, negative = opposite-ish.",
+    "cross product (2D)": "For Vector2 it is a single number: positive if the second arrow is turned counter-clockwise from the first, negative if clockwise, 0 if they point along the same line.",
+    "radians": "The angle unit Roblox math uses. 180 degrees is pi (about 3.1416) radians. Use `math.deg` to convert to degrees.",
+    "lerp / interpolate": "Find a spot part-way between two vectors. 0.5 means halfway.",
+    "epsilon": "A tiny amount of difference you are willing to ignore, like 0.00001.",
+    "NaN": "Not a Number. A broken number, for example from making a zero-length arrow into a unit vector.",
+    "UDim2": "A different type used to SET GUI positions and sizes (with Scale and Offset). Vector2 is mostly what you READ back in pixels."
+  },
+  "examples": [
+    {
+      "title": "Print where the mouse is",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\n\nwhile true do\n\tlocal mouse = UserInputService:GetMouseLocation() -- a Vector2, in pixels\n\tprint(\"Mouse is at X =\", mouse.X, \"Y =\", mouse.Y)\n\ttask.wait(1)\nend",
+      "explain": [
+        "`GetMouseLocation` gives a Vector2: X pixels from the left edge, Y pixels from the top edge.",
+        "This has to be a LocalScript, because only the player's own computer knows where its mouse is."
+      ]
+    },
+    {
+      "title": "Is the mouse near a button?",
+      "place": "LocalScript inside a TextButton in a ScreenGui in StarterGui",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\nlocal GuiService = game:GetService(\"GuiService\")\nlocal button = script.Parent\n\nwhile true do\n\t-- GetMouseLocation counts the top bar, AbsolutePosition does not, so remove the top bar inset.\n\tlocal inset = GuiService:GetGuiInset()\n\tlocal mouse = UserInputService:GetMouseLocation() - inset\n\n\t-- Center of the button = top-left corner + half the size\n\tlocal center = button.AbsolutePosition + button.AbsoluteSize / 2\n\tlocal distance = (mouse - center).Magnitude\n\n\tif distance < 100 then\n\t\tbutton.Text = \"Getting warmer!\"\n\telse\n\t\tbutton.Text = \"Come closer\"\n\tend\n\ttask.wait(0.1)\nend",
+      "explain": [
+        "`AbsolutePosition` is the button's top-left corner in pixels, and `AbsoluteSize` is its width and height.",
+        "Adding half the size to the corner finds the middle of the button.",
+        "Subtracting two Vector2s gives the arrow between them; `.Magnitude` is how many pixels apart they are."
+      ]
+    }
+  ],
+  "gotchas": [
+    "On the screen, Y goes DOWN, not up. (0, 0) is the top-left corner.",
+    "You cannot change one number in place: `v.X = 5` errors. Make a new Vector2.",
+    "To set a GUI's position or size you usually use UDim2, not Vector2. Vector2 is what you get back from AbsolutePosition and AbsoluteSize.",
+    "`.Unit` of (0, 0) gives NaN. Check `.Magnitude > 0` first.",
+    "`Vector2 * Vector2` multiplies matching numbers; it is not the dot product. Use `:Dot`.",
+    "Angles from `:Angle` are in radians. Use `math.deg` for degrees."
+  ],
+  "members": {
+    "Vector2.new": {
+      "simple": "Makes a new Vector2 from an X and a Y number. Anything left out is 0.",
+      "example": "local a = Vector2.new(3, 4)\nprint(a.X, a.Y) --> 3 4\nlocal b = Vector2.new() --> 0, 0"
+    },
+    "Vector2.zero": {
+      "simple": "A ready-made Vector2 of (0, 0).",
+      "example": "local origin = Vector2.zero -- 0, 0"
+    },
+    "Vector2.one": {
+      "simple": "A ready-made Vector2 of (1, 1).",
+      "example": "print(Vector2.one * 5) --> 5, 5"
+    },
+    "Vector2.xAxis": {
+      "simple": "A ready-made Vector2 of (1, 0): a 1-long arrow pointing along +X (to the right on screen).",
+      "example": "print(Vector2.xAxis * 10) --> 10, 0"
+    },
+    "Vector2.yAxis": {
+      "simple": "A ready-made Vector2 of (0, 1): a 1-long arrow pointing along +Y (DOWN on the screen).",
+      "example": "print(Vector2.yAxis * 10) --> 0, 10"
+    },
+    "Vector2.X": {
+      "simple": "The first number: how far across (left to right).",
+      "example": "print(Vector2.new(3, 4).X) --> 3"
+    },
+    "Vector2.Y": {
+      "simple": "The second number: how far down on the screen (or up, in your own 2D math).",
+      "example": "print(Vector2.new(3, 4).Y) --> 4"
+    },
+    "Vector2.Magnitude": {
+      "simple": "The LENGTH of the arrow: square root of (X*X + Y*Y). Subtract two points and take the Magnitude to get the distance between them.",
+      "example": "print(Vector2.new(3, 4).Magnitude) --> 5\nlocal a, b = Vector2.new(10, 10), Vector2.new(13, 14)\nprint((b - a).Magnitude) --> 5  (5 pixels apart)"
+    },
+    "Vector2.Unit": {
+      "simple": "A copy of the arrow with length exactly 1, pointing the same way. Use it when you only need the direction.",
+      "example": "local v = Vector2.new(3, 4)\nprint(v.Unit)           --> 0.6, 0.8\nprint(v.Unit.Magnitude) --> 1",
+      "gotcha": "A (0, 0) vector has no direction, so `.Unit` gives NaN."
+    },
+    "Vector2:Cross": {
+      "simple": "The 2D cross product. Gives ONE number: X1*Y2 - Y1*X2. Positive means the second arrow is turned counter-clockwise from the first, negative means clockwise, 0 means they lie on the same line.",
+      "example": "local a = Vector2.new(1, 0)\nlocal b = Vector2.new(0, 1)\nprint(a:Cross(b)) -->  1\nprint(b:Cross(a)) --> -1"
+    },
+    "Vector2:Abs": {
+      "simple": "Removes minus signs from both numbers. (-2, 4) becomes (2, 4).",
+      "example": "print(Vector2.new(-2, 4):Abs()) --> 2, 4"
+    },
+    "Vector2:Ceil": {
+      "simple": "Rounds both numbers UP to whole numbers. (-2.6, 5.1) becomes (-2, 6).",
+      "example": "print(Vector2.new(-2.6, 5.1):Ceil()) --> -2, 6"
+    },
+    "Vector2:Floor": {
+      "simple": "Rounds both numbers DOWN to whole numbers. (-2.6, 5.1) becomes (-3, 5).",
+      "example": "print(Vector2.new(-2.6, 5.1):Floor()) --> -3, 5"
+    },
+    "Vector2:Sign": {
+      "simple": "Turns each number into -1 (negative), 0 (zero) or 1 (positive). (-2.6, 5.1) becomes (-1, 1).",
+      "example": "print(Vector2.new(-2.6, 5.1):Sign()) --> -1, 1"
+    },
+    "Vector2:Angle": {
+      "simple": "The angle between two arrows in radians. Normally always positive (0 to pi). Pass `true` as the second value to get a signed angle, which is negative when the turn is clockwise.",
+      "example": "local a = Vector2.new(1, 0)\nlocal b = Vector2.new(0, 1)\nprint(math.deg(a:Angle(b))) --> 90\nprint(math.deg(b:Angle(a, true))) -- signed: about -90 (clockwise)"
+    },
+    "Vector2:Dot": {
+      "simple": "One number that says how much two arrows point the same way: X1*X2 + Y1*Y2. With 1-length arrows: 1 = same way, 0 = right angle, -1 = opposite.",
+      "example": "local a = Vector2.new(1, 0)\nprint(a:Dot(Vector2.new(0, 1)))  --> 0  (right angle)\nprint(a:Dot(Vector2.new(-1, 0))) --> -1 (opposite)"
+    },
+    "Vector2:Lerp": {
+      "simple": "Finds a point part-way from this vector to `v`. `alpha` 0 is the start, 1 is the end, 0.5 is halfway. Great for sliding a 2D thing smoothly.",
+      "example": "local a = Vector2.new(0, 0)\nlocal b = Vector2.new(4, 8)\nprint(a:Lerp(b, 0.5))  --> 2, 4\nprint(a:Lerp(b, 0.25)) --> 1, 2",
+      "gotcha": "`alpha` is not limited to 0 to 1. Values outside that go past the ends."
+    },
+    "Vector2:Max": {
+      "simple": "Picks the BIGGER X and the BIGGER Y from all the vectors you give it. You can pass more than one.",
+      "example": "print(Vector2.new(1, 2):Max(Vector2.new(2, 1))) --> 2, 2"
+    },
+    "Vector2:Min": {
+      "simple": "Picks the SMALLER X and the SMALLER Y from all the vectors you give it. You can pass more than one.",
+      "example": "print(Vector2.new(1, 2):Min(Vector2.new(2, 1))) --> 1, 1"
+    },
+    "Vector2:FuzzyEq": {
+      "simple": "Checks if two Vector2s are ALMOST equal: each number must be within `epsilon` of its partner (default 0.00001). Useful because tiny rounding errors make `==` unreliable.",
+      "example": "local a = Vector2.new(1, 2)\nlocal b = Vector2.new(1.000009, 2.000009)\nprint(a:FuzzyEq(b))           --> true\nprint(a:FuzzyEq(b, 0.000001)) --> false",
+      "gotcha": "`epsilon` must be a positive number no bigger than 0.1."
+    },
+    "op:Vector2+Vector2": {
+      "simple": "Adds matching numbers: X+X, Y+Y.",
+      "example": "print(Vector2.new(1, 2) + Vector2.new(10, 20)) --> 11, 22"
+    },
+    "op:Vector2-Vector2": {
+      "simple": "Subtracts matching numbers. `b - a` is the arrow from a to b; take `.Magnitude` for the distance.",
+      "example": "print(Vector2.new(13, 14) - Vector2.new(10, 10)) --> 3, 4  (and its Magnitude is 5)"
+    },
+    "op:Vector2*Vector2": {
+      "simple": "Multiplies matching numbers: X*X, Y*Y.",
+      "example": "print(Vector2.new(2, 3) * Vector2.new(4, 5)) --> 8, 15"
+    },
+    "op:Vector2/Vector2": {
+      "simple": "Divides matching numbers: X/X, Y/Y.",
+      "example": "print(Vector2.new(10, 9) / Vector2.new(2, 3)) --> 5, 3"
+    },
+    "op:Vector2*number": {
+      "simple": "Multiplies both numbers by the same amount, making the arrow longer or shorter.",
+      "example": "print(Vector2.new(3, 4) * 2) --> 6, 8"
+    },
+    "op:Vector2/number": {
+      "simple": "Divides both numbers by the same amount. Dividing a size by 2 finds the halfway point, like the middle of a GUI box.",
+      "example": "print(Vector2.new(200, 100) / 2) --> 100, 50"
+    }
+  }
+}

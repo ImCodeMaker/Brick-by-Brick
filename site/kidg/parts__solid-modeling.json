@@ -1,0 +1,52 @@
+{
+  "path": "content/en-us/parts/solid-modeling.md",
+  "simple": "Solid modeling lets you combine simple parts into new shapes. You can glue parts into one piece (union), keep only the overlapping bit (intersect), or cut one shape out of another (negate), which is how you make doorways, windows, bowls and pipes. You can do this with buttons in Studio, or with code while the game runs, so players can even cut, slice or shatter things. It is a quick way to build shapes that basic blocks alone cannot make.",
+  "analogy": "It is like playing with cookie dough: you can squish two lumps into one (union), use a cookie cutter to keep just the shape where the cutter and dough overlap (intersect), or punch a hole out of the middle of the dough (negate).",
+  "keyPoints": [
+    "Union (Shift+Ctrl+G) joins parts into one solid UnionOperation.",
+    "Intersect (Shift+Ctrl+I) keeps only the space where the selected parts overlap.",
+    "Negate (Shift+Ctrl+N) marks a part as a hole (it turns see-through red). Union it with another part to cut that shape out.",
+    "Separate (Shift+Ctrl+U) breaks a union or intersection back into its original parts.",
+    "In scripts, GeometryService has `UnionAsync`, `IntersectAsync` and `SubtractAsync`. Wrap them in `pcall`, then parent the new parts yourself and destroy the originals.",
+    "With a beta feature on, you can also use meshes, sweep a part along a path to make a slice shape (`SweepPartAsync`), and shatter parts into pieces (`FragmentAsync`).",
+    "Meshes used in solid modeling must be watertight: fully closed, with no holes and no faces poking through each other.",
+    "Results get the main part's color, material, transparency, CanCollide and Anchored. Results over 20,000 triangles get simplified."
+  ],
+  "terms": {
+    "solid modeling": "Building new shapes by combining or cutting existing parts.",
+    "CSG (Constructive Solid Geometry)": "The fancy name for building shapes with union, intersect and subtract.",
+    "boolean operation": "An operation that works like \"and\", \"or\" and \"minus\" on shapes. Union is A or B, intersect is A and B, subtract is A minus B.",
+    "union": "Two or more parts merged into one piece. Two overlapping 4-stud cubes become one L or block shape.",
+    "intersect": "Keeping only the overlap. If a cube and a ball overlap, you get the rounded piece that was inside both.",
+    "negate / subtract": "Cutting one shape out of another. Subtracting a 4 x 7 stud block from a 10 x 10 wall leaves a door-shaped hole.",
+    "main part": "The first part you select in Studio, or the first part you pass to a GeometryService method. The result takes its properties.",
+    "watertight": "A mesh with no gaps, like a balloon that could hold water. Each edge is shared by exactly 2 triangles.",
+    "vertex / edge / face": "A vertex is a corner point, an edge is a line between two vertices, and a face is a flat triangle between three vertices.",
+    "asynchronous (Async)": "The work happens in the background and your script waits for it to finish. It can take a moment and might fail.",
+    "pcall": "A protected call. It runs a function and catches errors, so a failed operation does not crash your script. It returns `true` or `false` first.",
+    "sweep": "Dragging a shape along a path and keeping every spot it passed through, like the trail of a sword swing.",
+    "fragment / voronoi": "Breaking a part into natural-looking pieces. Voronoi means each piece is the area closest to one chosen point (a site).",
+    "triangle count": "Meshes are made of tiny triangles. More triangles mean more detail but more work. Results are capped at 20,000.",
+    "SmoothingAngle": "A union setting in degrees. Edges sharper than this stay sharp and softer ones look smooth. 30 to 70 usually looks good.",
+    "UVs / boxmapped": "UVs decide how a flat image wraps onto a shape. Boxmapped means each face gets the image projected from one of six directions, which can stretch it."
+  },
+  "example": {
+    "title": "Cut a doorway into a wall while the game runs",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\nlocal GeometryService = game:GetService(\"GeometryService\")\n\n-- A 10 x 10 x 1 wall standing on the ground\nlocal wall = Instance.new(\"Part\")\nwall.Size = Vector3.new(10, 10, 1)\nwall.Position = Vector3.new(0, 5, 0)       -- bottom at Y = 0\nwall.Anchored = true\nwall.BrickColor = BrickColor.new(\"Brick yellow\")\nwall.Parent = Workspace\n\n-- A 4 x 7 x 2 \"cutter\" block where the door should be\nlocal cutter = Instance.new(\"Part\")\ncutter.Size = Vector3.new(4, 7, 2)         -- 2 thick so it fully pokes through the 1 thick wall\ncutter.Position = Vector3.new(0, 3.5, 0)   -- bottom also at Y = 0\n\nlocal success, newParts = pcall(function()\n\treturn GeometryService:SubtractAsync(wall, { cutter })\nend)\n\nif success and newParts then\n\tfor _, newPart in newParts do\n\t\tnewPart.Parent = wall.Parent\n\t\tnewPart.CFrame = wall.CFrame\n\t\tnewPart.Anchored = wall.Anchored\n\tend\n\twall:Destroy()\n\tcutter:Destroy()\nelse\n\twarn(\"Subtract failed:\", newParts)\nend",
+    "explain": [
+      "The wall is 10 studs tall with its center at Y = 5, so it stands on the ground from Y = 0 to Y = 10.",
+      "The cutter is 7 studs tall with its center at Y = 3.5, so it covers Y = 0 to Y = 7. That is a 4 wide by 7 tall doorway, tall enough for a 5-stud character.",
+      "The cutter is 2 studs thick so it sticks out of both sides of the 1-stud wall. If it were thinner, it would only carve a dent.",
+      "`SubtractAsync` returns a list of new parts that are not in the world yet, so we parent them and copy the wall's CFrame and Anchored.",
+      "The original wall and cutter still exist after the operation, so we destroy them. `pcall` catches any failure and we print a warning instead of crashing."
+    ]
+  },
+  "watchOut": [
+    "The new parts from GeometryService have no parent. If you forget to set `Parent`, nothing appears.",
+    "The original parts are not removed for you. Destroy them, or you will see the old wall overlapping the new one.",
+    "Calling `UnionAsync` many times in a row can slow your game down. Space them out.",
+    "If you shatter parts with `FragmentAsync`, you can create hundreds of pieces. Clean them up after a while, for example with the Debris service.",
+    "Operations done on the client only work on parts the client created, and they do not copy to the server."
+  ]
+}

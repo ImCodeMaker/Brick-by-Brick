@@ -1,0 +1,36 @@
+{
+  "path": "content/en-us/scripting/capabilities.md",
+  "simple": "Script capabilities let you decide exactly what certain scripts are allowed to do. Normally any script in your game can do anything. With this feature, you can put scripts in a locked box and only give them the powers they need, like playing audio or using physics. This helps keep free models from the Toolbox, or code written by players, from messing up your game. It is still an experimental beta feature.",
+  "analogy": "It is like giving a guest a hotel key card that only opens their room and the pool, not every door in the building. The scripts in the box can only use the \"doors\" (capabilities) you put on their card.",
+  "keyPoints": [
+    "To turn it on, select Workspace and change its `SandboxedInstanceMode` property from `Default` to `Experimental`.",
+    "Models, Folders, and Scripts get a `Sandboxed` property. Turning it on makes that object a sandboxed container.",
+    "The container's `Capabilities` property lists what scripts inside it may do, such as `Audio`, `Physics`, `DataStore`, or `Network`.",
+    "If a script tries something not on its list, Roblox shows an error naming the missing capability, like \"lacking capability CreateInstances\".",
+    "`RunServerScript` and `RunClientScript` decide whether scripts in the box may run on the server or the client at all.",
+    "Without `AccessOutsideWrite`, scripts can only see things inside their own box. Things outside show up as `nil`.",
+    "A box inside another box only gets the capabilities both boxes share.",
+    "The safest way for boxed scripts to talk to the rest of your game is through `BindableEvent` and `BindableFunction`."
+  ],
+  "terms": {
+    "capability": "One permission a script can have, like `Audio` (use sounds) or `CreateInstances` (make new objects).",
+    "sandbox / sandboxed container": "A Model, Folder, or Script with `Sandboxed` turned on. Scripts inside it are only allowed the capabilities you give it.",
+    "Toolbox model": "A free model made by someone else that you add to your game. It might contain scripts you did not write.",
+    "malicious code": "Code made on purpose to do something bad, like break or take over your game.",
+    "all-or-nothing": "The normal setup where a script can either do everything or not run at all.",
+    "execution control": "Rules about where a script may run: on the server, on the player's device (client), or both.",
+    "RunContext": "A Script property that says whether it runs on the server or the client.",
+    "AccessOutsideWrite": "The capability that lets a boxed script reach objects outside its box. The page says to avoid giving it.",
+    "nested": "Placed inside another one. A nested container is a box inside a box.",
+    "subset": "A smaller group taken from a bigger group. {Basic, Audio} is a subset of {Basic, Audio, CSG}.",
+    "BindableEvent / BindableFunction": "Objects that let scripts on the same side (server or client) send messages or call each other's functions.",
+    "require": "Loading a ModuleScript so you can use the code it returns."
+  },
+  "watchOut": [
+    "Forgetting to switch `SandboxedInstanceMode` to `Experimental`. The `Sandboxed` setting does nothing without it.",
+    "Giving a box `AccessOutsideWrite` just to make an error go away. It makes the sandbox much less safe.",
+    "Thinking a nested box can have more powers than its outer box. It only gets what both share.",
+    "Expecting `getfenv` or `setfenv` to work in a sandboxed script. They are blocked there.",
+    "Thinking sandboxing turns objects off. Lights still shine and GUIs still show; only what scripts can do is limited."
+  ]
+}

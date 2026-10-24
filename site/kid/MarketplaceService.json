@@ -1,0 +1,225 @@
+{
+  "name": "MarketplaceService",
+  "simple": "MarketplaceService handles everything about spending Robux in your game: showing buy windows, checking if a player owns a game pass, and giving players what they paid for. It is how creators sell passes, developer products and subscriptions.",
+  "analogy": "MarketplaceService is like the cash register at a shop. The customer (client) can say 'I want to buy this', and the register pops up the payment screen, but only the shop owner in the back (the server) hands over the item after the payment really goes through.",
+  "whenToUse": [
+    "Show a purchase window for a game pass (one-time buy, like VIP) or a developer product (can be bought again, like 100 coins).",
+    "Check if a player owns a game pass when they join, and give them the perks.",
+    "Give players what they bought using `ProcessReceipt` or `BindReceiptHandler` on the server.",
+    "Open the built-in in-game Shop."
+  ],
+  "where": "Get it with `game:GetService(\"MarketplaceService\")`. Purchase prompts can be shown from a LocalScript or a server Script. Giving rewards (`ProcessReceipt`, `BindReceiptHandler`) and ownership checks for rewards must be done on the server.",
+  "terms": {
+    "Robux": "Roblox's money that players buy with real money.",
+    "game pass (pass)": "Something a player buys once and owns forever in your game, like VIP or double speed.",
+    "developer product": "Something a player can buy again and again, like 100 coins or a revive.",
+    "prompt": "The pop-up window that asks the player to confirm a purchase.",
+    "receipt": "A record Roblox sends to your server saying 'this player paid for this product'. Your server must answer that it gave the item.",
+    "subscription": "Something a player pays for every month to keep getting benefits.",
+    "bundle": "A set of avatar items sold together, like a full character body.",
+    "asset": "Any item on Roblox with an ID, like a hat, shirt or gear.",
+    "server": "The Roblox computer in charge of one copy of your game. A popular game runs many servers at the same time, each with its own group of players.",
+    "client": "A player's own device (phone, PC, console). LocalScripts run there.",
+    "callback": "A function you hand to Roblox so Roblox can run it later, when something happens.",
+    "pcall": "Short for 'protected call'. It runs a function and catches errors instead of crashing your script. It returns `true` and the results if it worked, or `false` and the error message if it failed.",
+    "async / yield": "Functions ending in `Async` talk to other computers over the internet. Your script pauses (yields) until the answer comes back.",
+    "exploiter": "A cheater who changes their own client. They can fake events on their device, so only trust purchase results the server gets from Roblox."
+  },
+  "examples": [
+    {
+      "title": "Sell 100 coins (developer product) safely",
+      "place": "Script in ServerScriptService",
+      "code": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nlocal COINS_100_PRODUCT_ID = 123456789 -- replace with your developer product id\n\n-- Set ONE ProcessReceipt for your whole game, in one server Script\nMarketplaceService.ProcessReceipt = function(receiptInfo)\n\tlocal player = Players:GetPlayerByUserId(receiptInfo.PlayerId)\n\tif not player then\n\t\t-- They left. Roblox will try again next time they join.\n\t\treturn Enum.ProductPurchaseDecision.NotProcessedYet\n\tend\n\n\tif receiptInfo.ProductId == COINS_100_PRODUCT_ID then\n\t\tlocal leaderstats = player:FindFirstChild(\"leaderstats\")\n\t\tlocal coins = leaderstats and leaderstats:FindFirstChild(\"Coins\")\n\t\tif coins then\n\t\t\tcoins.Value += 100\n\t\t\t-- Only say Granted AFTER the player really got the item\n\t\t\treturn Enum.ProductPurchaseDecision.PurchaseGranted\n\t\tend\n\tend\n\n\treturn Enum.ProductPurchaseDecision.NotProcessedYet\nend",
+      "explain": [
+        "When someone buys a developer product, Roblox calls `ProcessReceipt` on the server with a receipt.",
+        "We find the player. If they already left, we say NotProcessedYet so Roblox tries again later.",
+        "We give the coins, then return PurchaseGranted. If we return that without giving the item, the player loses their Robux for nothing.",
+        "To show the buy window, a LocalScript can call `MarketplaceService:PromptProductPurchase(player, COINS_100_PRODUCT_ID)`.",
+        "For real games, also save the coins (and the receipt's PurchaseId) to a data store so a purchase is never given twice or lost."
+      ]
+    },
+    {
+      "title": "VIP game pass: buy button and perk",
+      "place": "LocalScript inside a TextButton in StarterGui + Script in ServerScriptService",
+      "code": "-- CLIENT: LocalScript inside a TextButton\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\nlocal VIP_PASS_ID = 987654 -- replace with your pass id\n\nscript.Parent.Activated:Connect(function()\n\tMarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, VIP_PASS_ID)\nend)\n\n-- SERVER: Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\nlocal VIP_PASS_ID = 987654\n\nlocal function giveVip(player)\n\tplayer:SetAttribute(\"VIP\", true)\nend\n\n-- Already owns it when joining?\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal ok, owns = pcall(function()\n\t\treturn MarketplaceService:UserOwnsGamePassAsync(player.UserId, VIP_PASS_ID)\n\tend)\n\tif ok and owns then\n\t\tgiveVip(player)\n\tend\nend)\n\n-- Bought it during this visit?\nMarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, wasPurchased)\n\tif wasPurchased and passId == VIP_PASS_ID then\n\t\tgiveVip(player)\n\tend\nend)",
+      "explain": [
+        "The button only shows the buy window. It does not give anything.",
+        "The server checks ownership with `UserOwnsGamePassAsync` when the player joins.",
+        "The server also listens for `PromptGamePassPurchaseFinished` to give VIP right after buying.",
+        "The perk is given by the server, so a cheater cannot just give themselves VIP."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Never give paid items from a LocalScript or because a client said so. Give them on the server.",
+    "Set `ProcessReceipt` only once in one server Script. Setting it in two scripts means one replaces the other.",
+    "Do not use `PromptProductPurchaseFinished` to give developer products; use `ProcessReceipt` or `BindReceiptHandler`.",
+    "Game pass IDs and developer product IDs are different from asset IDs. Use the right one for each function.",
+    "Calls ending in Async can fail; wrap them in pcall.",
+    "You cannot test real Robux spending in Studio; Studio purchases are fake test purchases."
+  ],
+  "members": {
+    "MarketplaceService:BindReceiptHandler": {
+      "simple": "The newer way to handle purchases on the server. You pick a receipt type (developer products, or Robux transfers) and give a function. It can also take a list of product IDs so different products go to different functions. Your function must return `Enum.ReceiptDecision.Processed` once the item is given, or `NotProcessedYet` to try again later.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\nlocal REVIVE_ID = 111111 -- your developer product id\n\nMarketplaceService:BindReceiptHandler(Enum.ReceiptType.DeveloperProduct, function(receipt)\n\tlocal player = Players:GetPlayerByUserId(receipt.PlayerId)\n\tif not player then\n\t\treturn Enum.ReceiptDecision.NotProcessedYet\n\tend\n\tplayer:LoadCharacter() -- revive them\n\treturn Enum.ReceiptDecision.Processed\nend, { REVIVE_ID }) -- only handle this product here",
+      "gotcha": "Only one handler can exist for the same type and product. If no handler matches, the old `ProcessReceipt` is used."
+    },
+    "MarketplaceService:GetDeveloperProductsAsync": {
+      "simple": "Gets a list (in pages) of all developer products in your game, so you can build a shop menu without typing every product in by hand.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nlocal ok, pages = pcall(function()\n\treturn MarketplaceService:GetDeveloperProductsAsync()\nend)\nif ok then\n\tfor _, product in pages:GetCurrentPage() do\n\t\tprint(product) -- a table of info about each product\n\tend\nend"
+    },
+    "MarketplaceService:GetProductInfo": {
+      "simple": "Old — use GetProductInfoAsync instead."
+    },
+    "MarketplaceService:GetProductInfoAsync": {
+      "simple": "Gets details about an item, game pass or developer product: its name, description, price and more. Tell it what kind of thing it is with an `Enum.InfoType`.",
+      "example": "-- Script or LocalScript\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal VIP_PASS_ID = 987654\n\nlocal ok, info = pcall(function()\n\treturn MarketplaceService:GetProductInfoAsync(VIP_PASS_ID, Enum.InfoType.GamePass)\nend)\nif ok then\n\tprint(info.Name, info.PriceInRobux)\nend",
+      "gotcha": "It errors if the ID does not exist, so use pcall."
+    },
+    "MarketplaceService:GetRobloxSubscriptionDetailsAsync": {
+      "simple": "Checks if a player has Roblox's own platform-wide subscription. You get a table with `IsSubscribed` and `IsOriginExperience` (true if they first subscribed inside your game).",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal ok, details = pcall(function()\n\t\treturn MarketplaceService:GetRobloxSubscriptionDetailsAsync(player)\n\tend)\n\tif ok and details.IsSubscribed then\n\t\tprint(player.Name .. \" is a subscriber!\")\n\tend\nend)"
+    },
+    "MarketplaceService:GetSubscriptionProductInfoAsync": {
+      "simple": "Gets details about one of your game's subscriptions, like its name, description and display price, using its subscription ID (a string).",
+      "example": "-- Script or LocalScript\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nlocal ok, info = pcall(function()\n\treturn MarketplaceService:GetSubscriptionProductInfoAsync(\"EXP-1234567890\")\nend)\nif ok then\n\tprint(info.Name, info.DisplayPrice)\nend"
+    },
+    "MarketplaceService:GetUsersPriceLevelsAsync": {
+      "simple": "Gets a suggested price level for each player, based on their country and how much things cost there. A price level of 100 means about 100 Robux is a fair price for that player. Helps you keep trades and gifts fair.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal ok, levels = pcall(function()\n\t\treturn MarketplaceService:GetUsersPriceLevelsAsync({ player.UserId })\n\tend)\n\tif ok then\n\t\tprint(levels) -- shows each user id with its price level\n\tend\nend)"
+    },
+    "MarketplaceService:GetUserSubscriptionDetailsAsync": {
+      "simple": "Gets more detail about a player's subscription: its state, when it renews next and when it expires.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal ok, details = pcall(function()\n\t\treturn MarketplaceService:GetUserSubscriptionDetailsAsync(player, \"EXP-1234567890\")\n\tend)\n\tif ok then\n\t\tprint(details.SubscriptionState, details.NextRenewTime)\n\tend\nend)"
+    },
+    "MarketplaceService:GetUserSubscriptionPaymentHistoryAsync": {
+      "simple": "Gets up to one year of a player's payments for a subscription. Each entry says the time period and whether it was paid or refunded.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nlocal function showHistory(player)\n\tlocal ok, history = pcall(function()\n\t\treturn MarketplaceService:GetUserSubscriptionPaymentHistoryAsync(player, \"EXP-1234567890\")\n\tend)\n\tif ok then\n\t\tfor _, payment in history do\n\t\t\tprint(payment.CycleStartTime, payment.PaymentStatus)\n\t\tend\n\tend\nend"
+    },
+    "MarketplaceService:GetUserSubscriptionStatusAsync": {
+      "simple": "Checks if a player is subscribed right now. Returns a table with `IsSubscribed` (active?) and `IsRenewing` (will it continue next period?).",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\nlocal SUB_ID = \"EXP-1234567890\" -- your subscription id\n\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal ok, status = pcall(function()\n\t\treturn MarketplaceService:GetUserSubscriptionStatusAsync(player, SUB_ID)\n\tend)\n\tif ok and status.IsSubscribed then\n\t\tplayer:SetAttribute(\"Subscriber\", true)\n\tend\nend)"
+    },
+    "MarketplaceService:OpenShop": {
+      "simple": "Opens Roblox's built-in in-game Shop window for a player, showing your game passes and developer products sorted for them. No setup needed.",
+      "example": "-- LocalScript inside a TextButton in StarterGui\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nscript.Parent.Activated:Connect(function()\n\tMarketplaceService:OpenShop(Players.LocalPlayer)\nend)",
+      "gotcha": "From a LocalScript, the player must be the local player."
+    },
+    "MarketplaceService:PlayerOwnsAsset": {
+      "simple": "Old — use PlayerOwnsAssetAsync instead."
+    },
+    "MarketplaceService:PlayerOwnsAssetAsync": {
+      "simple": "Checks if a player has an item (like a hat or gear) in their inventory, using its asset ID.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\nlocal HAT_ID = 1029025 -- an example asset id\n\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal ok, owns = pcall(function()\n\t\treturn MarketplaceService:PlayerOwnsAssetAsync(player, HAT_ID)\n\tend)\n\tprint(player.Name, \"owns hat:\", ok and owns)\nend)",
+      "gotcha": "Do not use it for game passes (use `UserOwnsGamePassAsync`) or developer products (players do not 'own' those)."
+    },
+    "MarketplaceService:PlayerOwnsBundle": {
+      "simple": "Old — use PlayerOwnsBundleAsync instead."
+    },
+    "MarketplaceService:PlayerOwnsBundleAsync": {
+      "simple": "Checks if a player owns a bundle (a set of avatar items), using its bundle ID.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nlocal function ownsBundle(player, bundleId)\n\tlocal ok, owns = pcall(function()\n\t\treturn MarketplaceService:PlayerOwnsBundleAsync(player, bundleId)\n\tend)\n\treturn ok and owns\nend"
+    },
+    "MarketplaceService:PromptBulkPurchase": {
+      "simple": "Server only. Shows one buy window for several avatar items or bundles at once (up to 20), like a 'buy the whole outfit' button.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nlocal function buyOutfit(player)\n\tlocal items = {\n\t\t{ Type = Enum.MarketplaceProductType.AvatarAsset, Id = \"16630147\" },\n\t\t{ Type = Enum.MarketplaceProductType.AvatarBundle, Id = \"182\" },\n\t}\n\tMarketplaceService:PromptBulkPurchase(player, items, {})\nend",
+      "gotcha": "Only works with avatar items, and only from the server."
+    },
+    "MarketplaceService:PromptBundlePurchase": {
+      "simple": "Shows a buy window for a bundle (a set of avatar items).",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nMarketplaceService:PromptBundlePurchase(Players.LocalPlayer, 182)"
+    },
+    "MarketplaceService:PromptCancelSubscription": {
+      "simple": "Shows a window that lets a player cancel one of your game's subscriptions.",
+      "example": "-- LocalScript inside a TextButton in StarterGui\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nscript.Parent.Activated:Connect(function()\n\tMarketplaceService:PromptCancelSubscription(Players.LocalPlayer, \"EXP-1234567890\")\nend)"
+    },
+    "MarketplaceService:PromptGamePassPurchase": {
+      "simple": "Shows a buy window for a game pass. Use the pass ID (from the Creator Hub), not an asset ID.",
+      "example": "-- LocalScript inside a TextButton in StarterGui\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nscript.Parent.Activated:Connect(function()\n\tMarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, 987654)\nend)",
+      "gotcha": "Showing the window gives nothing. The server gives the perk after checking ownership."
+    },
+    "MarketplaceService:PromptPremiumPurchase": {
+      "simple": "Old — use PromptRobloxSubscriptionPurchase instead."
+    },
+    "MarketplaceService:PromptProductPurchase": {
+      "simple": "Shows a buy window for a developer product (something you can buy many times, like coins). The item is given by your `ProcessReceipt` or `BindReceiptHandler` on the server.",
+      "example": "-- LocalScript inside a TextButton in StarterGui\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\nlocal COINS_100_PRODUCT_ID = 123456789\n\nscript.Parent.Activated:Connect(function()\n\tMarketplaceService:PromptProductPurchase(Players.LocalPlayer, COINS_100_PRODUCT_ID)\nend)"
+    },
+    "MarketplaceService:PromptPurchase": {
+      "simple": "Shows a buy window for an item from the Marketplace, like a hat or gear, using its asset ID.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nMarketplaceService:PromptPurchase(Players.LocalPlayer, 1029025)",
+      "gotcha": "For limited items, prompting from the server is recommended; from the client it shows the cheapest resale copy."
+    },
+    "MarketplaceService:PromptRobloxSubscriptionPurchase": {
+      "simple": "Shows a window asking the player to buy Roblox's own subscription (Roblox Plus).",
+      "example": "-- LocalScript inside a TextButton in StarterGui\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nscript.Parent.Activated:Connect(function()\n\tMarketplaceService:PromptRobloxSubscriptionPurchase(Players.LocalPlayer)\nend)"
+    },
+    "MarketplaceService:PromptRobuxTransferAsync": {
+      "simple": "Server only. Starts sending Robux from one player to another user (for example, a gift or a trade). Returns a transfer request ID. Both players later get a receipt through `BindReceiptHandler`.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nlocal function giftRobux(sender, receiverUserId, amount)\n\tlocal ok, requestId = pcall(function()\n\t\treturn MarketplaceService:PromptRobuxTransferAsync(sender, receiverUserId, amount)\n\tend)\n\tif ok then\n\t\tprint(\"Transfer started, id:\", requestId)\n\tend\nend",
+      "gotcha": "Amount and receiver ID must be positive whole numbers. Some transfers wait for approval (like parental consent) before they finish."
+    },
+    "MarketplaceService:PromptSubscriptionPurchase": {
+      "simple": "Shows a buy window for one of your game's subscriptions, using its subscription ID (a string).",
+      "example": "-- LocalScript inside a TextButton in StarterGui\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nscript.Parent.Activated:Connect(function()\n\tMarketplaceService:PromptSubscriptionPurchase(Players.LocalPlayer, \"EXP-1234567890\")\nend)"
+    },
+    "MarketplaceService:RankProductsAsync": {
+      "simple": "Give it a list of your game passes and developer products (up to 50), and it sorts them in the order this player is most likely to want them. Handy for a personal shop.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nlocal products = {\n\t{ InfoType = Enum.InfoType.GamePass, Id = 987654 },\n\t{ InfoType = Enum.InfoType.Product, Id = 123456789 },\n}\n\nlocal ok, ranked = pcall(function()\n\treturn MarketplaceService:RankProductsAsync(products)\nend)\nif ok then\n\tfor i, item in ranked do\n\t\tprint(i, item.ProductInfo.Name)\n\tend\nend",
+      "gotcha": "Limited to 10 calls per minute. If you go over, wait 60 seconds."
+    },
+    "MarketplaceService:RecommendTopProductsAsync": {
+      "simple": "Gives up to 50 of your game passes and/or developer products that this player is most likely to buy. You choose which kinds with a list of `Enum.InfoType`.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nlocal ok, items = pcall(function()\n\treturn MarketplaceService:RecommendTopProductsAsync({ Enum.InfoType.GamePass, Enum.InfoType.Product })\nend)\nif ok then\n\tfor _, item in items do\n\t\tprint(item.ProductInfo.Name)\n\tend\nend",
+      "gotcha": "Limited to 5 calls per minute. May return an empty list."
+    },
+    "MarketplaceService:UserOwnsGamePassAsync": {
+      "simple": "Checks if a player (by UserId) owns a game pass. The usual way to give pass perks when a player joins.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\nlocal SPEED_PASS_ID = 987654\n\nPlayers.PlayerAdded:Connect(function(player)\n\tlocal ok, owns = pcall(function()\n\t\treturn MarketplaceService:UserOwnsGamePassAsync(player.UserId, SPEED_PASS_ID)\n\tend)\n\tif ok and owns then\n\t\tplayer.CharacterAdded:Connect(function(character)\n\t\t\tcharacter:WaitForChild(\"Humanoid\").WalkSpeed = 24\n\t\tend)\n\tend\nend)",
+      "gotcha": "Pass the pass ID, not an asset ID. Results may be cached for a short while."
+    },
+    "MarketplaceService.PromptBulkPurchaseFinished": {
+      "simple": "Fires when a bulk avatar-item buy window closes. Gives the player, a status and a results table.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nMarketplaceService.PromptBulkPurchaseFinished:Connect(function(player, status, results)\n\tprint(player.Name, \"closed the bulk window:\", status)\nend)",
+      "gotcha": "Not a trusted signal. To be sure they own the items, check with `PlayerOwnsAssetAsync` or `PlayerOwnsBundleAsync`."
+    },
+    "MarketplaceService.PromptBundlePurchaseFinished": {
+      "simple": "Fires when a bundle buy window closes. Tells you the player, the bundle ID and whether they bought it.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nMarketplaceService.PromptBundlePurchaseFinished:Connect(function(player, bundleId, wasPurchased)\n\tprint(player.Name, bundleId, wasPurchased)\nend)"
+    },
+    "MarketplaceService.PromptGamePassPurchaseFinished": {
+      "simple": "Fires when a game pass buy window closes. Tells you the player, the pass ID and whether they bought it. Use it on the server to give the perk right away.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal VIP_PASS_ID = 987654\n\nMarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, passId, wasPurchased)\n\tif wasPurchased and passId == VIP_PASS_ID then\n\t\tplayer:SetAttribute(\"VIP\", true)\n\tend\nend)"
+    },
+    "MarketplaceService.PromptPremiumPurchaseFinished": {
+      "simple": "Fires when the Roblox Premium buy window closes. It does not tell you whether they bought it.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nMarketplaceService.PromptPremiumPurchaseFinished:Connect(function()\n\tprint(\"Premium window closed\")\nend)",
+      "gotcha": "To know if someone's membership changed, use `Players.PlayerMembershipChanged`."
+    },
+    "MarketplaceService.PromptProductPurchaseFinished": {
+      "simple": "Fires when a developer product buy window closes. Gives the UserId, the product ID and whether it was bought. Good for things like closing your shop menu.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nMarketplaceService.PromptProductPurchaseFinished:Connect(function(userId, productId, isPurchased)\n\tprint(userId, productId, isPurchased)\nend)",
+      "gotcha": "Do NOT give the product here. Use `ProcessReceipt` or `BindReceiptHandler`, which are reliable."
+    },
+    "MarketplaceService.PromptPurchaseFinished": {
+      "simple": "Fires when a buy window for a Marketplace item (like a hat or gear) closes. Tells you the player, the asset ID and whether it was bought.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nMarketplaceService.PromptPurchaseFinished:Connect(function(player, assetId, isPurchased)\n\tif isPurchased then\n\t\tprint(player.Name .. \" bought asset \" .. assetId)\n\tend\nend)",
+      "gotcha": "Does not fire for developer products or game passes; they have their own events."
+    },
+    "MarketplaceService.PromptRobloxSubscriptionPurchaseFinished": {
+      "simple": "Fires when the Roblox Plus buy window closes. Tells you the player and whether they tried to buy.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nMarketplaceService.PromptRobloxSubscriptionPurchaseFinished:Connect(function(user, didTryPurchasing)\n\tprint(user.Name, \"tried to subscribe:\", didTryPurchasing)\nend)",
+      "gotcha": "Trying is not the same as succeeding. Watch `Player.HasRobloxSubscription` on the server before giving rewards."
+    },
+    "MarketplaceService.PromptSubscriptionPurchaseFinished": {
+      "simple": "Fires when one of your game's subscription buy windows closes. Tells you the player, the subscription ID and whether they tried to buy.",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\n\nMarketplaceService.PromptSubscriptionPurchaseFinished:Connect(function(user, subscriptionId, didTryPurchasing)\n\tprint(user.Name, subscriptionId, didTryPurchasing)\nend)",
+      "gotcha": "Confirm with `GetUserSubscriptionStatusAsync` before giving benefits."
+    },
+    "MarketplaceService.ProcessReceipt": {
+      "simple": "The function the server sets to hand out developer products. Roblox calls it with a receipt each time a purchase needs handling. Give the item, then return `Enum.ProductPurchaseDecision.PurchaseGranted`. If you cannot give it yet, return `NotProcessedYet` and Roblox will try again later (for example, next time they join).",
+      "example": "-- Script in ServerScriptService\nlocal MarketplaceService = game:GetService(\"MarketplaceService\")\nlocal Players = game:GetService(\"Players\")\n\nlocal COINS_100_PRODUCT_ID = 123456789 -- replace with your developer product id\n\n-- Set ONE ProcessReceipt for your whole game, in one server Script\nMarketplaceService.ProcessReceipt = function(receiptInfo)\n\tlocal player = Players:GetPlayerByUserId(receiptInfo.PlayerId)\n\tif not player then\n\t\t-- They left. Roblox will try again next time they join.\n\t\treturn Enum.ProductPurchaseDecision.NotProcessedYet\n\tend\n\n\tif receiptInfo.ProductId == COINS_100_PRODUCT_ID then\n\t\tlocal leaderstats = player:FindFirstChild(\"leaderstats\")\n\t\tlocal coins = leaderstats and leaderstats:FindFirstChild(\"Coins\")\n\t\tif coins then\n\t\t\tcoins.Value += 100\n\t\t\t-- Only say Granted AFTER the player really got the item\n\t\t\treturn Enum.ProductPurchaseDecision.PurchaseGranted\n\t\tend\n\tend\n\n\treturn Enum.ProductPurchaseDecision.NotProcessedYet\nend",
+      "gotcha": "Set it only once, in one server Script. It might run twice for the same purchase, so save each receipt's PurchaseId in a data store and skip ones you already handled."
+    }
+  }
+}

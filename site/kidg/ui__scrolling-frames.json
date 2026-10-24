@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/ui/scrolling-frames.md",
+  "simple": "A `ScrollingFrame` is a box you can scroll through, like an inventory list or a shop with lots of items. It has a big inside area called the canvas, and only part of it shows at a time. When the canvas is bigger than the box, scroll bars appear so players can move around. This page explains how to size the canvas, style the scroll bars, and stop the bouncy scrolling on phones.",
+  "analogy": "A scrolling frame is like a window looking at a long scroll of paper. The window stays the same size, but you can pull the paper up and down to read all of it.",
+  "keyPoints": [
+    "The canvas is the area inside the scrolling frame that holds your items.",
+    "If `CanvasSize` is taller than the frame's `Size`, vertical scrolling turns on; if it is wider, horizontal scrolling turns on.",
+    "Set `AutomaticCanvasSize` to Y, X, or XY to make the canvas grow to fit its items automatically.",
+    "`CanvasPosition` tells you how far the canvas has been scrolled, in pixels.",
+    "`VerticalScrollBarInset` set to Always or ScrollBar keeps content from hiding under the scroll bar.",
+    "Scroll bars are built from `TopImage`, `MidImage`, and `BottomImage`; `ScrollBarThickness` sets how thick they are.",
+    "Like frames, scrolling frames clip anything past their edges.",
+    "Set `ElasticBehavior` to Never to stop the canvas from bouncing past its ends on touch screens."
+  ],
+  "terms": {
+    "canvas": "The full inside area that can scroll. It can be much bigger than the visible box.",
+    "CanvasSize": "How big the canvas is. If the frame is 300 pixels tall and the canvas is 900, you can scroll through three screens' worth.",
+    "AutomaticCanvasSize": "Lets the canvas grow by itself to fit the items inside, so you do not have to guess `CanvasSize`.",
+    "CanvasPosition": "How far you have scrolled, in pixels from the top-left. (0, 200) means scrolled 200 pixels down.",
+    "inset": "Pushing the content in from the edge so the scroll bar does not cover it.",
+    "ScrollBarThickness": "How wide a vertical scroll bar is (or how tall a horizontal one is), in pixels.",
+    "elastic scrolling": "The rubber-band bounce when you drag past the end of a list on a phone.",
+    "clip": "Cutting off anything outside the box so it cannot be seen."
+  },
+  "example": {
+    "title": "Fill a scrolling list with 20 items",
+    "place": "LocalScript inside a ScrollingFrame (inside a ScreenGui in StarterGui)",
+    "code": "local scrollingFrame = script.Parent\n\n-- Grow the canvas taller as items are added\nscrollingFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y\nscrollingFrame.CanvasSize = UDim2.fromScale(0, 0)\nscrollingFrame.ScrollBarThickness = 8\n\n-- Stack items top to bottom\nlocal layout = Instance.new(\"UIListLayout\")\nlayout.Padding = UDim.new(0, 4) -- 4 pixels between items\nlayout.Parent = scrollingFrame\n\nfor i = 1, 20 do\n\tlocal item = Instance.new(\"TextLabel\")\n\titem.Size = UDim2.new(1, 0, 0, 40) -- full width, 40 pixels tall\n\titem.Text = \"Item \" .. i\n\titem.LayoutOrder = i\n\titem.Parent = scrollingFrame\nend",
+    "explain": [
+      "`script.Parent` is the `ScrollingFrame`.",
+      "`AutomaticCanvasSize` set to Y makes the canvas grow taller to fit the items.",
+      "A `UIListLayout` stacks the items in a column with 4 pixels of space.",
+      "The loop makes 20 labels. They are too tall to fit, so a scroll bar appears."
+    ]
+  },
+  "watchOut": [
+    "No scroll bar? The canvas is probably not bigger than the frame. Make `CanvasSize` bigger or use `AutomaticCanvasSize`.",
+    "Using scale for `CanvasSize` (like 0, 2) is measured from the frame's size; mixing this with `AutomaticCanvasSize` can be confusing. Start with `AutomaticCanvasSize` and a zero `CanvasSize`.",
+    "If the scroll bar covers the right edge of your items, set `VerticalScrollBarInset` to ScrollBar."
+  ]
+}

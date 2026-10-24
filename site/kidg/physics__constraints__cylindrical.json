@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/physics/constraints/cylindrical.md",
+  "simple": "A CylindricalConstraint lets a part slide along one line and also spin around a line, both at the same time. That makes it perfect for car suspension, where a wheel spins and also bounces up and down over bumps. It can be powered for spinning, for sliding, or both, and both kinds of movement can have limits.",
+  "analogy": "Imagine a bead on a pencil. You can slide the bead up and down the pencil, and you can also spin it around the pencil.",
+  "keyPoints": [
+    "A cylindrical constraint allows sliding along one axis and rotating around an axis.",
+    "Paired with a SpringConstraint, it makes vehicle suspension: the spring handles bounce, and the cylindrical lets the wheel spin and move up and down.",
+    "Point both attachments' yellow Axis and orange SecondaryAxis arrows the same way.",
+    "Spin power: `AngularActuatorType` Motor (goes for `AngularVelocity`, limited by `MotorMaxTorque`) or Servo (goes to `TargetAngle`).",
+    "Slide power: `ActuatorType` Motor (goes for `Velocity`, limited by `MotorMaxForce`) or Servo (goes to `TargetPosition`).",
+    "`LimitsEnabled` limits sliding with `LowerLimit` and `UpperLimit`. `AngularLimitsEnabled` limits spinning with `LowerAngle` and `UpperAngle`.",
+    "`InclinationAngle` (from -180 to 180) tilts the spin axis without changing the slide direction."
+  ],
+  "terms": {
+    "attachment": "A Roblox object you put inside a part to mark one exact point on it. Its Position is measured from the part's center, so an attachment at (-2, 0, 0) sits 2 studs toward the part's own left side.",
+    "Axis / SecondaryAxis": "Every attachment has its own arrows. `Axis` (yellow arrow) is its main X direction and `SecondaryAxis` (orange arrow) is its Y direction. With Orientation (0, 0, 0) the yellow arrow points along the part's X; with Orientation (0, 0, 90) it is turned a quarter turn to point straight up.",
+    "suspension": "The springy parts of a car that let wheels move up and down over bumps so the car body rides smoothly.",
+    "angular vs linear": "Angular is about spinning. Linear is about moving in a straight line.",
+    "AngularVelocity": "Spin speed in radians per second. 6.28 is about one full turn per second.",
+    "TargetPosition": "For a servo, how far apart along the slide line the attachments should be, in studs.",
+    "LowerLimit / UpperLimit": "The slide range in studs. -1 to 1 lets the part move 1 stud each way, 2 studs total.",
+    "LowerAngle / UpperAngle": "The spin range in degrees when angular limits are on.",
+    "InclinationAngle": "Tilts the spin axis away from the slide axis. At 0 they are the same line; at 90 the spin axis is sideways.",
+    "restitution": "How bouncy the stop is when a moving piece hits its limit. 0 means it stops dead, 1 means it bounces back as hard as it hit."
+  },
+  "example": {
+    "title": "A spinning platform that can bob up and down",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal pole = Instance.new(\"Part\")\npole.Size = Vector3.new(1, 10, 1)\npole.Position = Vector3.new(0, 5, -30)\npole.Anchored = true\npole.CanCollide = false\npole.Parent = Workspace\n\nlocal platform = Instance.new(\"Part\")\nplatform.Shape = Enum.PartType.Cylinder\nplatform.Size = Vector3.new(1, 12, 12)       -- a cylinder's length is along X\nplatform.Orientation = Vector3.new(0, 0, 90)  -- stand it up like a disc lying flat\nplatform.Position = Vector3.new(0, 5, -30)\nplatform.Parent = Workspace\n\n-- Attachments with their Axis pointing straight up: slide up/down AND spin around up\nlocal poleAtt = Instance.new(\"Attachment\")\npoleAtt.Orientation = Vector3.new(0, 0, 90)\npoleAtt.Parent = pole\n\n-- The platform is already turned (0, 0, 90), so its own X axis already points up.\n-- A plain attachment at its center lines up with the pole's attachment.\nlocal platformAtt = Instance.new(\"Attachment\")\nplatformAtt.Parent = platform\n\nlocal joint = Instance.new(\"CylindricalConstraint\")\njoint.Attachment0 = poleAtt\njoint.Attachment1 = platformAtt\n\n-- Spinning: motor at 1 radian per second (one turn about every 6.3 seconds)\njoint.AngularActuatorType = Enum.ActuatorType.Motor\njoint.AngularVelocity = 1\njoint.MotorMaxTorque = 100000\n\n-- Sliding: no motor, but it may only move between 1 stud below and 1 stud above\njoint.LimitsEnabled = true\njoint.LowerLimit = -1\njoint.UpperLimit = 1\njoint.Parent = pole",
+    "explain": [
+      "The pole is anchored. The platform is a flat disc centered on the pole.",
+      "Both attachments' yellow Axis arrows point straight up: the pole's because we turned it (0, 0, 90), and the platform's because the whole platform is already turned (0, 0, 90). So the platform can slide up and down the pole and also spin around it.",
+      "The angular motor spins it at 1 radian per second. A full turn is about 6.28 radians, so one spin takes about 6.3 seconds.",
+      "Slide limits of -1 to 1 let the platform move 1 stud down or 1 stud up from the pole's center. Gravity pulls it to the -1 limit, and a player jumping on it can make it bob.",
+      "`MotorMaxTorque` starts at 0, so we give it a big number or the platform would not spin."
+    ]
+  },
+  "watchOut": [
+    "If the part spins around the wrong line, check both Axis (yellow) and SecondaryAxis (orange) arrows on both attachments.",
+    "There are two separate actuators: `AngularActuatorType` for spinning and `ActuatorType` for sliding. Setting one does not power the other.",
+    "Without a spring, a suspension just drops to its lower limit. Add a SpringConstraint between the same two parts for real bounce."
+  ]
+}

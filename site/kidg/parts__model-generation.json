@@ -1,0 +1,47 @@
+{
+  "path": "content/en-us/parts/model-generation.md",
+  "simple": "This page shows how to make 3D models from a text description, like 'green dragon car with 4 wheels', using `GenerationService:GenerateModelAsync()`. Even players can do this while playing, and everyone in the server sees what was made. With a schema, the model comes out in separate pieces, like a body and four wheels, so it can actually work. Then 'retargetable scripts' add behavior so the car drives or the plane flies.",
+  "analogy": "It is like ordering from a toy factory: you describe the toy (the prompt), pick a kit shape like 'car with 4 wheels' (the schema), and then snap in a ready-made motor (the retargetable script) that fits whatever car came out.",
+  "keyPoints": [
+    "`GenerationService:GenerateModelAsync(inputs, schema)` creates a model from a text prompt.",
+    "The schema tells it how to split the model into parts. Right now there are two built-in ones: `Car5` (a body plus four wheels) and `Body1` (one single mesh).",
+    "Models made during the game are replicated, so every player sees them and can build together.",
+    "You can suggest a size and set a maximum triangle count to keep models fast to draw.",
+    "Generation can fail (for example, if the prompt is rejected or it takes too long), so wrap the call in `pcall`.",
+    "After generating, scale the model with `ScaleTo`, place it with `PivotTo`, and anchor its parts if it should stay still.",
+    "Retargetable scripts (from the `Behaviors.rbxm` file) adapt driving or flying behavior to whatever size and shape got generated.",
+    "With `Car5`, the parts have fixed names like `body` and `front left wheel`, so your script can find them."
+  ],
+  "terms": {
+    "text prompt": "The words you type to describe what to make, like 'purple bat car with 4 wheels'.",
+    "schema": "A plan that lists which separate parts to generate. `Car5` means five pieces: one body and four wheels.",
+    "mesh / MeshPart": "A 3D shape made of many tiny triangles. A `MeshPart` is a part that uses one.",
+    "functional model": "A model that does something, like a car you can drive, instead of just a statue.",
+    "replicated": "Copied from the server to every player's device so everyone sees it.",
+    "fidelity": "How detailed and accurate something looks.",
+    "latency": "The wait time before you get a result. Lower latency means faster.",
+    "bounding box": "An invisible box that fits around the whole model, used to suggest its size.",
+    "triangle count": "How many tiny triangles a mesh uses. Fewer triangles are faster to draw.",
+    "pcall": "A protected call. It runs a function and catches errors so your whole script does not crash.",
+    "retargetable script": "A script that adjusts itself to fit any generated model, like a car script that works whether the car is tiny or huge.",
+    "behavior": "The scripts, attachments, and constraints that make a model actually do things."
+  },
+  "example": {
+    "title": "Generate a car from a prompt",
+    "place": "Script in ServerScriptService",
+    "code": "local GenerationService = game:GetService(\"GenerationService\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal inputs = {\n\tTextPrompt = \"yellow sports car with a spoiler\",\n}\nlocal schema = {\n\tPredefinedSchema = \"Car5\", -- body plus four wheels\n}\n\n-- Generation can fail, so use pcall to catch errors\nlocal success, result = pcall(function()\n\treturn GenerationService:GenerateModelAsync(inputs, schema)\nend)\n\nif success then\n\t-- Shrink or grow the model so its biggest side is 16 studs\n\tlocal size = result:GetExtentsSize()\n\tlocal scaleFactor = 16 / math.max(size.X, size.Y, size.Z)\n\tresult:ScaleTo(scaleFactor)\n\n\t-- Anchor every part so the pieces do not fall apart\n\tfor _, descendant in result:GetDescendants() do\n\t\tif descendant:IsA(\"BasePart\") then\n\t\t\tdescendant.Anchored = true\n\t\tend\n\tend\n\n\t-- Place it on the ground 40 studs in front of the world center\n\tresult:PivotTo(CFrame.new(0, result:GetExtentsSize().Y / 2, -40))\n\tresult.Parent = Workspace\nelse\n\twarn(\"Generation failed:\", result)\nend",
+    "explain": [
+      "We describe the car in `TextPrompt` and choose the `Car5` schema.",
+      "`pcall` runs the generation safely. If it fails, `success` is false and `result` holds the error message.",
+      "We measure the model and scale it so its longest side is 16 studs.",
+      "We anchor all parts because this is just a display model with no driving script yet.",
+      "`PivotTo` sets its position so it sits on the ground, then we put it in Workspace."
+    ]
+  },
+  "watchOut": [
+    "Always wrap `GenerateModelAsync` in `pcall`. Without it, a rejected prompt or timeout crashes your script.",
+    "Generated pieces are separate parts. Without anchoring or a behavior script, they can fall apart.",
+    "Only `Car5` and `Body1` are built-in schemas. Do not expect other names to work.",
+    "Generated models can be any size, so scale them before placing them."
+  ]
+}

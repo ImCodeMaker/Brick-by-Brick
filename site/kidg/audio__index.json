@@ -1,0 +1,32 @@
+{
+  "path": "content/en-us/audio/index.md",
+  "simple": "This page is a quick tour of how sound works in Roblox games. Good sound makes your world feel real, tells players when they did something, and points them toward what to do next. You get sound files (called audio assets) from the Creator Store or by uploading your own. Then you use special audio objects to play those sounds, place them in the world, and change how they sound with effects.",
+  "analogy": "Think of setting up a band on a stage: you need the music (the audio file), a player to start it, speakers to send it out, cables to connect everything, and maybe some effect pedals to change the sound. Roblox audio objects are those same pieces, but virtual.",
+  "keyPoints": [
+    "Sound helps players feel inside your world, gives feedback for their actions, and guides their attention.",
+    "Positional sound comes from a spot in the world; non-positional sound plays the same everywhere, like background music.",
+    "You can only upload audio you have permission to use, such as sounds you made yourself.",
+    "The Creator Store has more than 100,000 free sound effects and music tracks you can use.",
+    "`AudioPlayer` plays a sound file, `AudioEmitter` is a virtual speaker in the world, and `AudioListener` is a virtual microphone.",
+    "`AudioDeviceOutput` is the player's real speakers or headphones, and `AudioDeviceInput` is their real microphone.",
+    "`AudioTextToSpeech` turns text into a spoken voice, and `AudioSpeechToText` turns speech into text.",
+    "`Wire` objects carry sound from one audio object to the next, and audio effects like `AudioEqualizer`, `AudioCompressor`, and `AudioReverb` change how the sound comes out."
+  ],
+  "terms": {
+    "audio asset": "A sound file that lives on Roblox, like a song or a jump sound. Each one has an ID number you use to play it.",
+    "asset ID": "The unique number Roblox gives each uploaded file, so your game can point to it. For example, `rbxassetid://1234567`.",
+    "positional audio": "Sound that comes from a place in the 3D world. It gets louder as you walk toward it and quieter as you walk away.",
+    "non-positional audio": "Sound that plays at the same volume no matter where you stand, like menu music.",
+    "Creator Store": "Roblox's library of free things you can put in your game, including sounds and music.",
+    "virtual speaker / virtual microphone": "Pretend speakers and microphones that exist inside the game world instead of on your desk.",
+    "audio stream": "The flow of sound moving from one audio object to another, like water moving through a pipe.",
+    "audio effect": "An object that changes a sound on its way through, like making it echo or sound muffled.",
+    "non-destructively": "The effect changes what you hear, but the original sound file stays exactly the same. Remove the effect and the sound is back to normal.",
+    "runtime": "The time when the game is actually running and people are playing it, not when you are editing in Studio."
+  },
+  "watchOut": [
+    "Do not upload songs or sounds you found online unless you made them or have permission. Use the Creator Store for free, safe sounds.",
+    "An `AudioPlayer` alone makes no sound. It needs a `Wire` connecting it to something that outputs sound, like an `AudioDeviceOutput` or an `AudioEmitter`.",
+    "Older guides use the `Sound` object. The newer audio objects on this page can do more, so start with them for new projects."
+  ]
+}

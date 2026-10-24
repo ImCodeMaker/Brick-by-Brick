@@ -1,0 +1,27 @@
+{
+  "path": "content/en-us/physics/constraints/universal.md",
+  "simple": "A UniversalConstraint joins two parts so one can pass its spinning on to the other even when they are bent at an angle. Real cars use this kind of joint (a universal joint) to send power from the engine down a drive shaft to the back wheels. It keeps two axes at a right angle to each other while letting the joint tilt. It is mostly used for vehicles and robots.",
+  "analogy": "Think of a bendy straw or a toy that spins a rod around a corner: you twist one end and the other end twists too, even though the joint is bent.",
+  "keyPoints": [
+    "A UniversalConstraint keeps two axes, one on each assembly, perpendicular (at 90 degrees) to each other.",
+    "It is used for things like car drive shafts that carry spinning power to the rear wheels, and for robots.",
+    "The orange SecondaryAxis arrows of the two attachments must be perpendicular to each other.",
+    "When the axes are set up correctly, a green L-shaped indicator appears in Studio.",
+    "Turn on `LimitsEnabled` to set `MaxAngle`, which limits how far it can tilt (within a cone), plus `Restitution` for bounce at that limit."
+  ],
+  "terms": {
+    "attachment": "A Roblox object you put inside a part to mark one exact point on it. Its Position is measured from the part's center, so an attachment at (0, 3, 0) sits 3 studs above the center of its part.",
+    "assembly": "Parts joined so physics moves them as one object.",
+    "perpendicular": "At a right angle, like the two lines of the letter L.",
+    "SecondaryAxis": "The orange arrow on an attachment (its Y direction). For a universal joint, one attachment's orange arrow should point at 90 degrees to the other's.",
+    "power transmission / drive shaft": "Sending spinning from one place to another. A drive shaft is a spinning rod that carries the engine's turning to the wheels.",
+    "MaxAngle": "The most the joint can tilt, in degrees. With MaxAngle 30, it can bend up to 30 degrees in any direction.",
+    "cone": "The shape made by all allowed tilt directions around a center line.",
+    "restitution": "How bouncy it is when it hits its limit. 0 stops dead, 1 bounces back hard."
+  },
+  "watchOut": [
+    "If the joint wobbles or locks up, the orange SecondaryAxis arrows are probably not perpendicular. Look for the green L indicator.",
+    "A universal joint does not create spin by itself. Something else, like a hinge motor, must turn the first shaft.",
+    "This is an advanced constraint. For a simple spinning wheel, a HingeConstraint is easier."
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "path": "content/en-us/chat/cross-server-chat.md",
+  "simple": "Cross-server chat lets players talk with people in other servers of the same game, not just the server they are in. It is great when your game has only a few players per server, or during a big live event. Roblox picks which servers get grouped together and keeps the same safety tools as normal chat. It is turned on by default, and you can switch it off on the Creator Dashboard.",
+  "analogy": "It is like a school with many classrooms. The Here tab is talking to kids in your own classroom, and the Global tab is the shared hallway where kids from lots of classrooms can chat.",
+  "keyPoints": [
+    "Cross-server chat is part of `TextChatService` and connects players across different servers of the same game.",
+    "When it is on, the chat window shows two tabs: Here (your server) and Global (other servers too).",
+    "Roblox groups servers by age, language, and how full they are, so chats are safe and make sense.",
+    "Each global channel connects about 200 users so it stays readable. If people send messages too fast, some messages get dropped.",
+    "Reporting, text filtering, chat rules, muting, and blocking all still work in global chat.",
+    "It is on by default. To change it: Creator Dashboard, pick your game, Audience > Communication Settings, then toggle Allow cross-server chat.",
+    "The Global tab never shows in private servers, even if the setting is on.",
+    "The Global tab supports a few commands: `/mute <username>`, `/unmute <username>`, `/help`, and `/clear`."
+  ],
+  "terms": {
+    "server": "One running copy of your game. A popular game might have 100 servers, each with its own group of players.",
+    "universe": "Your whole game, including all its places. Cross-server chat only connects servers from the same universe.",
+    "occupancy": "How many players are in a server right now. A server for 20 players with 3 people in it has low occupancy.",
+    "throttle": "A speed limit. If people send messages too fast, Roblox slows things down and drops some messages to protect chat.",
+    "channel": "A chat room inside the chat system. A global channel holds about 200 users from many servers.",
+    "private server": "A server that only invited people can join. The Global tab is turned off there to respect their privacy."
+  },
+  "watchOut": [
+    "Expecting Global to work in a private server. It is always hidden there, so test it in a normal public server.",
+    "Looking for the setting in Studio. The cross-server chat toggle lives on the Creator Dashboard under Audience > Communication Settings.",
+    "Thinking `/clear` deletes messages for everyone. It only clears the chat history in your own chat window."
+  ]
+}

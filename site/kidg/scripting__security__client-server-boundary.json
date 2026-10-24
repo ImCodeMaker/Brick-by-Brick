@@ -1,0 +1,54 @@
+{
+  "path": "content/en-us/scripting/security/client-server-boundary.md",
+  "simple": "Whenever a player's device can ask the server to do something, a cheater can try to abuse it. RemoteEvents, RemoteFunctions, ProximityPrompts, and ClickDetectors are all ways players talk to the server. This page teaches you to check every message on the server: is it the right type, is the value sensible, is the player allowed, and are they sending too many? Doing this keeps cheaters from getting free stuff or ruining the game for others.",
+  "analogy": "The server is like a bouncer at a club door. Messages from players are people trying to get in. The bouncer checks their ID (type), their age (value), the guest list (permission), and stops anyone trying to come in 100 times a minute (rate limit).",
+  "keyPoints": [
+    "Check every piece of data a client sends before using it.",
+    "Permission checks: is the player close enough, alive, holding the right key, or owning the right spell?",
+    "Type checks: make sure an \"item\" is really an `Instance` in the right folder with `typeof(item) == \"Instance\"` and `item:IsDescendantOf(folder)`. Cheaters can send fake tables that look like objects.",
+    "Value checks: numbers must be in a sensible range, like a quantity above 0. Use `math.isfinite()` to reject `inf` and NaN. Watch out for NaN: every comparison with it is false, so it slips past checks like `x < 0`.",
+    "Rate limit anything a player can trigger. A token bucket lets short bursts through but stops constant spam.",
+    "ProximityPrompts, ClickDetectors, and DragDetectors can be triggered from any distance, even when disabled. Check distance and state on the server.",
+    "When one player's action shows effects to others, the server must be a gatekeeper that checks first, not a relay that passes everything along.",
+    "For purchases, only give items on the server inside `ProcessReceipt`, never because the client said it bought something."
+  ],
+  "terms": {
+    "client-server boundary": "The line between the player's device (client) and Roblox's server. Anything crossing it from the client could be faked.",
+    "remote": "A RemoteEvent or RemoteFunction, used to send messages between the client and server.",
+    "attack vector": "A way a cheater can get in or cause harm.",
+    "payload": "The data packed into a message, like the arguments sent with `FireServer`.",
+    "spoof": "To fake something so it looks real, like a table pretending to be an item.",
+    "validate": "To check that data is the right type, in the right range, and allowed, before using it.",
+    "NaN": "Short for \"Not a Number\". It is a broken number, like the result of 0/0. `NaN < 0` and `NaN > 0` are both false, and NaN is not even equal to itself.",
+    "inf": "Infinity, a number bigger than any real number. You get it from things like 1/0 or `math.huge`.",
+    "rate limiting": "Capping how often a player can do something, like 5 chat messages every 10 seconds.",
+    "token bucket": "A rate limit idea: each player has a bucket of tokens (say 5). Each action spends 1. Tokens refill slowly (say 1 every 2 seconds). Empty bucket means the action is blocked.",
+    "relay": "Passing a message along without checking it.",
+    "gatekeeper": "Something that checks each message and only lets good ones through.",
+    "race condition": "A bug where the result depends on the exact timing of two things, like leaving the game mid-trade to copy items.",
+    "UTF-8": "The standard way text characters are stored. Data stores only accept valid UTF-8 text; `utf8.len()` returns nil for bad text.",
+    "ProcessReceipt": "A server callback on MarketplaceService that Roblox calls to confirm a real developer product purchase.",
+    "memory leak": "Memory that keeps getting used up because old data is never cleaned out, like keeping info for players who already left."
+  },
+  "example": {
+    "title": "Safe lightning spell with checks and cooldown",
+    "place": "Script in ServerScriptService (add a RemoteEvent named CastLightning to ReplicatedStorage)",
+    "code": "local Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n\nlocal castLightning = ReplicatedStorage:WaitForChild(\"CastLightning\")\nlocal COOLDOWN = 3 -- seconds between casts\nlocal MAX_RANGE = 100 -- studs\nlocal lastCast = {}\n\ncastLightning.OnServerEvent:Connect(function(player, strikePosition)\n\t-- 1. Type check: must be a Vector3\n\tif typeof(strikePosition) ~= \"Vector3\" then\n\t\treturn\n\tend\n\t-- 2. Reject NaN and infinity in any part of the position\n\tif not (math.isfinite(strikePosition.X) and math.isfinite(strikePosition.Y) and math.isfinite(strikePosition.Z)) then\n\t\treturn\n\tend\n\t-- 3. Cooldown check\n\tlocal now = os.clock()\n\tif now - (lastCast[player] or -math.huge) < COOLDOWN then\n\t\treturn\n\tend\n\t-- 4. Range check from the player's real position on the server\n\tlocal character = player.Character\n\tlocal root = character and character:FindFirstChild(\"HumanoidRootPart\")\n\tif not root or (root.Position - strikePosition).Magnitude > MAX_RANGE then\n\t\treturn\n\tend\n\t-- All checks passed: remember the time and tell everyone\n\tlastCast[player] = now\n\tcastLightning:FireAllClients(player, strikePosition)\nend)\n\n-- Clean up when players leave to avoid a memory leak\nPlayers.PlayerRemoving:Connect(function(player)\n\tlastCast[player] = nil\nend)",
+    "explain": [
+      "When a player fires `CastLightning`, the server checks the position really is a `Vector3`.",
+      "`math.isfinite` rejects NaN and infinity, which could break effects on every player's screen.",
+      "The cooldown blocks casting more than once every 3 seconds.",
+      "The range check uses the character's position on the server, so the strike must be within 100 studs.",
+      "Only then does the server send the effect to all clients with `FireAllClients`.",
+      "When a player leaves, their cooldown entry is removed."
+    ]
+  },
+  "watchOut": [
+    "Only checking `typeof(x) == \"number\"`. NaN is a number too. Also use `math.isfinite(x)`.",
+    "Trusting an \"item\" the client sends. Check it is an `Instance` and lives in your item folder.",
+    "Trusting `Enabled` or `MaxActivationDistance` on ProximityPrompts and ClickDetectors. Check distance on the server yourself.",
+    "Firing `FireAllClients` with whatever the client sent. Check it first, or a cheater can spam effects on everyone.",
+    "Granting purchases from a client signal like `PromptProductPurchaseFinished`. Use `ProcessReceipt` on the server.",
+    "Forgetting to clear per-player tables when players leave."
+  ]
+}

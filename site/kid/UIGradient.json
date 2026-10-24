@@ -1,0 +1,84 @@
+{
+  "name": "UIGradient",
+  "simple": "A UIGradient blends colors (and see-through-ness) smoothly across its parent UI object, like a sunset going from orange to purple. Put it inside a Frame, label, button or image. You can rotate it, slide it, and even fade part of the object out.",
+  "analogy": "A UIGradient is like a colored filter you slide over a card. The filter goes from one color to another, and you can turn it at any angle.",
+  "whenToUse": [
+    "Fancy backgrounds that fade between colors",
+    "Rainbow or shiny text",
+    "Fading the edge of a panel to invisible",
+    "A 'shine' that sweeps across a button (animate Offset)"
+  ],
+  "where": "Put it inside a Frame, TextLabel, TextButton, ImageLabel, ImageButton, ViewportFrame or Path2D (or inside a UIStroke for gradient outlines). Not supported on ScrollingFrame or TextBox.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "gradient": "A smooth blend from one color to another.",
+    "ColorSequence": "A list of colors at points from 0 (start) to 1 (end). ColorSequence.new(red, blue) goes from red to blue.",
+    "NumberSequence": "A list of numbers at points from 0 to 1. For transparency, NumberSequence.new(0, 1) goes from solid to invisible.",
+    "keypoint": "One stop in a sequence: a position from 0 to 1 and a value (a color or a number).",
+    "Color3": "A color made of red, green and blue amounts.",
+    "multiply": "Mixing colors so white keeps the gradient color and black stays black. That's why gradients look best on white objects.",
+    "tween": "Smoothly animate a value from one number to another over time."
+  },
+  "examples": [
+    {
+      "title": "A sunset background and a shine that sweeps across",
+      "place": "LocalScript inside a Frame (in a ScreenGui in StarterGui)",
+      "code": "local TweenService = game:GetService(\"TweenService\")\nlocal frame = script.Parent\nframe.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- white shows the gradient's true colors\n\nlocal gradient = Instance.new(\"UIGradient\")\ngradient.Color = ColorSequence.new({\n\tColorSequenceKeypoint.new(0, Color3.fromRGB(255, 140, 0)),  -- orange at the start\n\tColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 60, 120)), -- pink in the middle\n\tColorSequenceKeypoint.new(1, Color3.fromRGB(110, 40, 200)),   -- purple at the end\n})\ngradient.Rotation = 90 -- go top to bottom instead of left to right\ngradient.Parent = frame\n\n-- Slide the gradient from far up to far down, forever\ngradient.Offset = Vector2.new(0, -1)\nlocal tween = TweenService:Create(gradient, TweenInfo.new(3, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true), {Offset = Vector2.new(0, 1)})\ntween:Play()",
+      "explain": [
+        "The gradient is mixed with the frame's color, so we make the frame white to see the real colors.",
+        "ColorSequence has three stops: 0 = start, 0.5 = middle, 1 = end.",
+        "Rotation 90 turns the gradient so it runs from top to bottom.",
+        "Offset (0, -1) shifts the gradient up by one whole frame height; tweening to (0, 1) slides it down. -1 repeats forever and true makes it go back and forth."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Gradient colors are mixed with the object's own color. On a black frame you'll see nothing; use white.",
+    "It doesn't affect children. Each child needs its own UIGradient.",
+    "Doesn't work on ScrollingFrame or TextBox.",
+    "Changing Color or Transparency often is slow. Animate Offset or Rotation instead.",
+    "Use 6 color stops or fewer for good performance."
+  ],
+  "members": {
+    "UIGradient.Color": {
+      "simple": "The colors of the gradient, as a ColorSequence from start (0) to end (1). They're mixed with the parent's own color.",
+      "example": "local gradient = script.Parent -- a UIGradient\ngradient.Color = ColorSequence.new(Color3.fromRGB(0, 200, 255), Color3.fromRGB(0, 60, 160))"
+    },
+    "UIGradient.Enabled": {
+      "simple": "Turns the gradient on (true) or off (false) without deleting it.",
+      "example": "local gradient = script.Parent\ngradient.Enabled = false"
+    },
+    "UIGradient.Offset": {
+      "simple": "Slides the gradient, as a fraction of the parent's size. (1, 0) moves it right by one whole width; (0, 0.5) moves it down by half the height. On a 200-pixel-wide frame, Offset (0.25, 0) shifts it 50 pixels right. Animate it for a moving shine.",
+      "example": "local gradient = script.Parent\ngradient.Offset = Vector2.new(0.25, 0)"
+    },
+    "UIGradient.Rotation": {
+      "simple": "Turns the gradient clockwise by this many degrees. 0 (default) goes left to right, 90 goes top to bottom, 180 goes right to left.",
+      "example": "local gradient = script.Parent\ngradient.Rotation = 45 -- diagonal"
+    },
+    "UIGradient.Scale": {
+      "simple": "Stretches or squeezes the gradient. 1 (default) = the whole gradient fits once across the object. Under 1 squeezes it smaller (TileMode decides what fills the rest). Over 1 stretches it so only part shows.",
+      "example": "local gradient = script.Parent\ngradient.Scale = 0.5\ngradient.TileMode = Enum.GradientTileMode.Repeat -- repeat it twice across"
+    },
+    "UIGradient.TileMode": {
+      "simple": "What fills the leftover space when Scale is under 1 or Offset leaves a gap. For example, repeat the gradient, or mirror it.",
+      "example": "local gradient = script.Parent\ngradient.TileMode = Enum.GradientTileMode.Mirror"
+    },
+    "UIGradient.Transparency": {
+      "simple": "How see-through the object is along the gradient, as a NumberSequence. 0 = solid, 1 = invisible. NumberSequence.new(0, 1) fades from solid to invisible.",
+      "example": "local gradient = script.Parent\ngradient.Transparency = NumberSequence.new(0, 1) -- fade out toward the end"
+    },
+    "UIGradient.Type": {
+      "simple": "The gradient's shape: Linear (straight bands, default), Radial (circles from the center), Elliptical (ovals), or Conical (sweeps around like a clock hand).",
+      "example": "local gradient = script.Parent\ngradient.Type = Enum.GradientType.Radial -- glow from the center"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/luau/type-coercion.md",
+  "simple": "Type coercion means Luau automatically changes a value from one type to another when it needs to. For example, `100 + \"7\"` gives 107, because Luau turns the text \"7\" into the number 7. It also turns numbers into text when you join them with `..`. This is handy, but it can surprise you, so it helps to know when it happens.",
+  "analogy": "It is like a friend who automatically converts your money when you travel. You hand over dollars and they quietly swap them for the local coins so the shop accepts them. But if you hand them a toy instead of money, they cannot convert it and the purchase fails.",
+  "keyPoints": [
+    "Coercion is Luau automatically changing a value's type for one operation. It does not change the variable itself.",
+    "In math, strings that look like numbers become numbers: `\"1000\" + 234` is 1234.",
+    "If the string is not a number, like `\"hello\" + 234`, Luau throws an error and the script stops.",
+    "When joining with `..`, numbers become strings: `\"Pi is \" .. math.pi` works.",
+    "Use `string.format(\"%.3f\", x)` to control how a number looks as text, like 3.142.",
+    "Enum properties accept a number, a string name, or the full enum. `part.Material = \"Concrete\"` becomes `Enum.Material.Concrete`.",
+    "Best practice is to use the full enum name, like `Enum.Material.Concrete`.",
+    "`Lighting.TimeOfDay = 5` is turned into the text \"05:00:00\"."
+  ],
+  "terms": {
+    "type coercion": "Luau automatically changing a value from one type to another so an operation can work.",
+    "coerce": "To force a value into a different type. The string \"7\" is coerced into the number 7.",
+    "run time": "While the script is actually running.",
+    "arithmetic": "Math operations like `+`, `-`, `*`, `/`.",
+    "concatenation": "Joining strings with `..`.",
+    "explicit": "Clearly written out, so there is no guessing. `Enum.Material.Concrete` is more explicit than `\"Concrete\"`.",
+    "string.format": "A function that builds text from a pattern. `%.3f` means show a number with 3 digits after the decimal point.",
+    "TimeOfDay": "A Lighting property that sets the time in the game world, written like \"14:30:00\"."
+  },
+  "example": {
+    "title": "Mixing numbers and text safely",
+    "place": "Script in ServerScriptService",
+    "code": "local Lighting = game:GetService(\"Lighting\")\n\n-- String to number in math\nlocal typedAmount = \"25\" -- maybe from a text box\nprint(typedAmount + 5) --> 30\n\n-- Safer: convert on purpose and check it worked\nlocal amount = tonumber(typedAmount)\nif amount then\n\tprint(\"You typed\", amount)\nend\n\n-- Number to string when joining\nlocal coins = 120\nprint(\"Coins: \" .. coins) --> Coins: 120\nprint(\"Speed: \" .. string.format(\"%.1f\", 16.456)) --> Speed: 16.5\n\n-- Number to time string\nLighting.TimeOfDay = 18 -- 6 PM\nprint(Lighting.TimeOfDay) --> 18:00:00",
+    "explain": [
+      "`\"25\" + 5` works because Luau turns \"25\" into 25.",
+      "`tonumber` converts on purpose and returns `nil` if the text is not a number, so you can check first.",
+      "`..` turns 120 into \"120\" so it can be joined to the text.",
+      "`string.format(\"%.1f\", 16.456)` rounds to one decimal place: 16.5.",
+      "Setting `TimeOfDay` to 18 turns into \"18:00:00\" and makes it evening in the game."
+    ]
+  },
+  "watchOut": [
+    "Doing math on text that might not be a number. Use `tonumber` and check for `nil` first.",
+    "Relying on string names or numbers for enums. Write the full `Enum.Material.Concrete` so typos get caught.",
+    "Thinking coercion changes the variable. `\"7\" + 1` gives 8, but the variable still holds the string \"7\"."
+  ]
+}

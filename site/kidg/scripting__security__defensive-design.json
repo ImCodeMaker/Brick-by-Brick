@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/scripting/security/defensive-design.md",
+  "simple": "Instead of chasing cheaters after they cheat, you can design your game so cheating does not work or is not worth it. This is called defensive design. It is often easier and stronger than writing tricky code to catch cheaters. Before adding a feature, ask how a cheater could abuse it, and change the design so that abuse fails.",
+  "analogy": "Rather than hiring a guard to catch people sneaking cookies, you put the cookie jar in a locked cupboard. You stop the problem by how you set things up, not by catching people afterward.",
+  "keyPoints": [
+    "Reactive means trying to catch cheating after it happens. Defensive means designing so cheating cannot happen or gives no reward.",
+    "Cheaters usually find a way around detection code, so defensive design works better.",
+    "Shooter example: give fewer or no points for killing players who just spawned. Bot farms stop paying off, and spawn camping is discouraged too.",
+    "Obby example: make players touch checkpoints in order, and have the server check the order before giving rewards.",
+    "Combat example: the server works out damage from its own weapon stats and checks hits with its own raycasts.",
+    "Economy example: add server-side cooldowns and check every trade against the player's real inventory, so spamming requests cannot copy items.",
+    "Key question for every feature: how would a cheater abuse this, and can I change the design so that abuse is impossible or worthless?"
+  ],
+  "terms": {
+    "exploit": "A way of cheating by abusing a weakness in the game.",
+    "reactive approach": "Waiting for cheating to happen, then trying to spot and stop it.",
+    "defensive approach": "Building the game so cheating cannot work or gives nothing useful.",
+    "bot": "A fake or computer-controlled player account a cheater uses, for example to get killed over and over for free points.",
+    "spawn camping": "Waiting near where players appear and attacking them right away.",
+    "checkpoint": "A spot in an obby that saves your progress. Required checkpoints in order prove the player really went through the level.",
+    "server-side": "Done on Roblox's server, where cheaters cannot change the code.",
+    "cooldown": "A wait time before you can do the same action again, like 1 second between purchases.",
+    "raycasting": "Shooting an invisible line from one point to see what it hits. The server can use it to check if a shot really hit.",
+    "friction": "Here it means extra effort or hassle that makes cheating less worth it."
+  },
+  "example": {
+    "title": "Checkpoints that must be touched in order",
+    "place": "Script in ServerScriptService (add Parts named Checkpoint1, Checkpoint2, Checkpoint3 to a Folder named Checkpoints in Workspace)",
+    "code": "local Players = game:GetService(\"Players\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal checkpoints = Workspace:WaitForChild(\"Checkpoints\")\nlocal TOTAL = 3\n\n-- The server remembers the last checkpoint each player reached\nlocal progress = {}\n\nPlayers.PlayerAdded:Connect(function(player)\n\tprogress[player] = 0\nend)\nPlayers.PlayerRemoving:Connect(function(player)\n\tprogress[player] = nil\nend)\n\nfor i = 1, TOTAL do\n\tlocal part = checkpoints:WaitForChild(\"Checkpoint\" .. i)\n\tpart.Touched:Connect(function(hit)\n\t\tlocal player = Players:GetPlayerFromCharacter(hit.Parent)\n\t\tif not player or progress[player] == nil then\n\t\t\treturn\n\t\tend\n\t\t-- Only count this checkpoint if it is the very next one\n\t\tif progress[player] == i - 1 then\n\t\t\tprogress[player] = i\n\t\t\tprint(player.Name, \"reached checkpoint\", i)\n\t\t\tif i == TOTAL then\n\t\t\t\tprint(player.Name, \"finished the obby! Give reward here.\")\n\t\t\tend\n\t\tend\n\tend)\nend",
+    "explain": [
+      "The server stores each player's progress as a number, starting at 0.",
+      "Each checkpoint part listens for touches.",
+      "A touch only counts if it is the next checkpoint in order. Touching checkpoint 3 while at 0 does nothing.",
+      "The reward only happens after the last checkpoint, so teleporting straight to the end earns nothing."
+    ]
+  },
+  "watchOut": [
+    "Only checking a player's final position for rewards. A teleporting cheater passes that check easily.",
+    "Trusting damage numbers sent by the client. Keep weapon stats on the server and calculate damage there.",
+    "Letting players spam buy or trade requests. Add a server cooldown and check the real inventory each time.",
+    "Spending a lot of time on detection code first. Try changing the design before writing detectors."
+  ]
+}

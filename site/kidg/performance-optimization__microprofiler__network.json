@@ -1,0 +1,31 @@
+{
+  "path": "content/en-us/performance-optimization/microprofiler/network.md",
+  "simple": "The MicroProfiler can record the data your game sends and receives over the internet. This helps you find out why a game feels laggy or takes a long time to load. You turn on network capture, save a frame dump, and open it in a web browser. The charts show downloads and uploads per frame, colored by type, and you can click to see each network event.",
+  "analogy": "It is like tracking every package that comes to and leaves your house. You can see which day had the most deliveries and open each box to see what was inside.",
+  "keyPoints": [
+    "Network data only appears in saved frame dumps from the desktop client or Studio, not in the live overlay.",
+    "Open the MicroProfiler (Ctrl+Alt+F6) and pick High, Low, or Off in the Network menu.",
+    "High records more detail, like each item in a batch and asset IDs. Low is the default and is lighter, so dumps can hold more frames.",
+    "Save the frame data, open the HTML file, then pick X-Ray / Network to see the charts.",
+    "The top row is received traffic (downloads) and the bottom row is sent traffic (uploads).",
+    "Bars are colored by type: blue for physics, green for data, red for assets.",
+    "If a few big spikes hide everything else, turn on Options / Log Scale Graph.",
+    "Right-click a bar to open the Network events window with details for each event."
+  ],
+  "terms": {
+    "network traffic": "All the data going between a player's device and the server.",
+    "frame dump": "A saved recording of many frames of profiler data that you open in a web browser.",
+    "packet": "A small chunk of data sent over the network.",
+    "batch": "Many small items bundled into one packet to send them together.",
+    "deserialize": "Turn received data back into game things, like turning a packet into a property change.",
+    "verbosity": "How much detail is recorded. High verbosity records more but is more work for your computer.",
+    "log scale": "A graph scale where each step is 10 times bigger. A bar for 10 KB and one for 1,000 KB both stay visible, instead of the small one shrinking to almost nothing.",
+    "Rx and Tx": "Short for receive and transmit. Rx is data coming in, Tx is data going out.",
+    "latency": "Delay between something happening and others seeing it."
+  },
+  "watchOut": [
+    "Looking for network data in the live overlay. It only shows in saved dumps.",
+    "Leaving Network set to Off before saving. Then the dump has no network data at all.",
+    "Thinking red means danger. The colors show the type of traffic, not how bad it is."
+  ]
+}

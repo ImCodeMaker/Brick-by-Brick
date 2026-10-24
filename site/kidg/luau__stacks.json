@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/luau/stacks.md",
+  "simple": "A stack is a pile of items where the last one you put on is the first one you take off. That is called Last In, First Out, or LIFO. Stacks are handy for things like an undo button or going back through menus. Luau does not have stacks built in, but a table makes a great one.",
+  "analogy": "A stack is like a pile of dinner plates. You put new plates on top, and when you grab one, you take the top plate, which is the last one you added.",
+  "keyPoints": [
+    "A stack follows LIFO: last in, first out.",
+    "The top is the newest item; the bottom is the oldest.",
+    "Push means add an item to the top. Pop means remove the item from the top.",
+    "Stacks help with backtracking, like undo or going back to the previous screen.",
+    "You can build a stack with a table using `table.insert` to push and `table.remove` to pop.",
+    "Always make sure the stack is not empty before you pop.",
+    "The page suggests saving the stack code as a ModuleScript in ReplicatedStorage so both server and client can use it."
+  ],
+  "terms": {
+    "stack": "A list where you only add and remove at the top.",
+    "LIFO": "Last In, First Out. The last item added is the first one removed.",
+    "push": "To add an item to the top of the stack.",
+    "pop": "To remove and return the item on top of the stack.",
+    "top / bottom": "The top is the most recently added item; the bottom is the one added longest ago.",
+    "backtracking": "Going back step by step through what you did before, like pressing undo several times.",
+    "dynamically resized": "Able to grow or shrink as you add or remove items."
+  },
+  "example": {
+    "title": "Undo for a building game",
+    "place": "Script in ServerScriptService",
+    "code": "local history = {} -- our stack\n\nlocal function push(action)\n\ttable.insert(history, action) -- add to the top\nend\n\nlocal function pop()\n\tif #history == 0 then\n\t\treturn nil -- nothing to undo\n\tend\n\treturn table.remove(history, #history) -- take from the top\nend\n\npush(\"Placed red block\")\npush(\"Placed blue block\")\npush(\"Painted wall\")\n\nprint(\"Undo:\", pop()) --> Undo: Painted wall\nprint(\"Undo:\", pop()) --> Undo: Placed blue block\npush(\"Placed door\")\nprint(\"Undo:\", pop()) --> Undo: Placed door\nprint(\"Undo:\", pop()) --> Undo: Placed red block\nprint(\"Undo:\", pop()) --> Undo: nil",
+    "explain": [
+      "`history` is a table used as a stack.",
+      "`push` adds each action to the end of the table, which is the top of the stack.",
+      "`pop` removes and returns the last item, so the newest action is undone first.",
+      "If the stack is empty, `pop` returns `nil` instead of causing a problem."
+    ]
+  },
+  "watchOut": [
+    "Popping an empty stack. Check `#history == 0` first.",
+    "Using `table.remove(history, 1)`. That takes from the bottom, which makes it act like a queue, not a stack."
+  ]
+}

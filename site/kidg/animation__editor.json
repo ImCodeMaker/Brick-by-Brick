@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/animation/editor.md",
+  "simple": "The Animation Editor is the Studio tool where you make your own animations, like a dance, a punch, or a special idle. You select a rig, move the scrubber to a moment in time, pose a body part, and the editor saves a keyframe. Do that at a few moments and the editor fills in the motion between them. Then you can loop it, set its priority, save it, and publish it to Roblox to use in your games.",
+  "analogy": "It is like a flipbook where you only draw the most important pages, like the start and end of a jump, and the computer draws all the pages in between for you.",
+  "keyPoints": [
+    "Open it from the Avatar tab (or Window, then Avatar). You can only animate rigs, so insert one with the Rig Generator if you need one.",
+    "To pose: select a bone or mesh, drag the scrubber to a time, then move or rotate the part. A keyframe appears on the timeline. Press R to switch between Move and Rotate.",
+    "Time shows as seconds:frames at 30 frames per second, so 0:15 means half a second. The timeline starts at 1 second long.",
+    "Press Play or Spacebar to preview. Right-click keyframes to add, and select them to move, copy, paste, or delete.",
+    "Easing style (Linear, Constant, CubicV2, Elastic, Bounce) and easing direction (In, Out, InOut) change how motion speeds up or slows down between keyframes.",
+    "Click the Looping button to loop. For a smooth loop, copy the first keyframes to the end.",
+    "Priority decides which animation wins when two play at once. From highest to lowest: Action4, Action3, Action2, Action, Movement, Idle, Core.",
+    "Save keeps your work in ServerStorage. To actually use the animation in a game, Publish to Roblox and copy its asset ID. If it replaces a default animation like running, rename the last keyframe `End` first."
+  ],
+  "terms": {
+    "rig": "A model with parts connected by joints, like a character, that can be posed.",
+    "pose": "The exact position and rotation of a rig's parts at one moment, like arm raised at 0:15.",
+    "keyframe": "A saved pose for a part at a specific time. The editor animates smoothly from one keyframe to the next.",
+    "scrubber": "The marker on the timeline you drag to choose the current moment.",
+    "frame": "One tiny step of time. At 30 frames per second, 1 frame is 1/30 of a second, so 0:15 is 15 frames or half a second.",
+    "track": "A row in the track list for one body part, holding all of that part's keyframes.",
+    "interpolation": "Filling in the in-between motion between two keyframes.",
+    "easing style": "The shape of the speed change between keyframes. Linear is steady; Bounce looks bouncy at the end.",
+    "easing direction": "Which end the easing affects. In starts slow and ends fast; Out starts fast and ends slow.",
+    "priority": "A rank that decides which animation overrides another. A jump at Action beats an idle at Idle.",
+    "KeyframeSequence": "The object Studio saves your animation as, inside ServerStorage.",
+    "publish": "Upload the animation to Roblox so it gets an asset ID and can be used in games.",
+    "assembly root part": "The part of a rig that stays put while the other joints move, like the hips or torso. Setting `PrimaryPart` does not change it.",
+    "replicate": "Copy from the server to players' devices. ServerStorage does not replicate, so clients cannot see what is stored there."
+  },
+  "watchOut": [
+    "Using a saved (not published) animation in your game. Saving only keeps your work in ServerStorage; publish it and use the asset ID instead.",
+    "Forgetting to rename the final keyframe `End` (exact capitals) when replacing default animations like run or jump.",
+    "Publishing for a group game without picking the group in the Creator field. Choose the group so the game can use it.",
+    "Loops that jump at the end. The editor does not blend the last keyframe into the first, so copy the first keyframes to the end.",
+    "Expecting Add Keyframe Here to use the scrubber's spot. It adds the keyframe where you right-click.",
+    "A custom rig where the wrong part stays still. Check the `AssemblyRootPart` is the part that should stay in place."
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/ui/styling/index.md",
+  "simple": "This page introduces UI styling, a way to set how your buttons, frames, and labels look from one central place instead of changing each one by hand. You write style rules inside a `StyleSheet`, and every matching UI object picks up those looks automatically. You can also save shared values like colors and sizes as tokens, and group tokens into themes such as light and dark. If your game has lots of menus, this saves tons of time and keeps everything matching.",
+  "analogy": "It is like a school uniform rule: instead of telling every student what to wear one by one, the school writes one rule, \"all students wear a blue shirt\", and everyone it applies to follows it. Change the rule to green, and everyone switches at once.",
+  "keyPoints": [
+    "A `StyleSheet` holds style rules, and each `StyleRule` has a `Selector` that decides which UI objects it changes.",
+    "Selectors can match by class (like every `Frame`), by tag (like `.ButtonPrimary`), by name (like `#ModalFrame`), by state (like `:Hover`), or add modifiers (like `::UICorner`).",
+    "Tokens are named values stored as attributes on a `StyleSheet`, like a color called `Magenta`. Rules use them with a `$` in front, like `$Magenta`.",
+    "Themes are sets of the same token names with different values, so you can swap a whole look (for example light and dark) at once.",
+    "Style queries let styles apply only in certain situations, like small screens, a certain input type, or reduced motion turned on.",
+    "A `StyleLink` placed inside a `ScreenGui` connects one `StyleSheet` to that `ScreenGui` and everything inside it. Only one style sheet can apply to a given tree.",
+    "In the Properties window, a styled property shows a warning mark, and hovering it tells you which style is changing it.",
+    "If you set a property by hand on one object, it shows in bold as an override. Right-click it and choose Reset to Default to go back to the styled value."
+  ],
+  "terms": {
+    "stylesheet": "A container of style rules, like a recipe book of looks. In Roblox it is the `StyleSheet` instance.",
+    "style rule": "One instruction inside a style sheet, such as \"all Frames are magenta and 200 by 200 pixels\".",
+    "selector": "The text on a rule that says which objects it targets. `\"Frame\"` means every Frame, `\".ButtonPrimary\"` means objects tagged ButtonPrimary.",
+    "token": "A named, reusable value, like a variable for design. If token `Gold` is `#FFCC00`, any rule using `$Gold` gets that yellow color.",
+    "theme": "A group of tokens that can be swapped as a set. ThemeA might say `FrameColor` is aqua, ThemeB might say it is magenta.",
+    "attribute": "A custom labeled value you attach to any instance. Tokens are stored as attributes on a style sheet.",
+    "derive": "To inherit tokens and rules from another style sheet. A `StyleDerive` instance points one sheet at another to borrow from it.",
+    "tag": "A label you stick on an instance through `CollectionService`, so rules or scripts can find all objects with that label.",
+    "modifier": "An extra UI piece like `UICorner` (rounded corners) or `UIStroke` (outline). Styling can add a phantom one without you inserting it.",
+    "phantom": "Not really in the Explorer. A phantom `UICorner` acts like it is there because a rule says so, but you will not see it as a child.",
+    "state": "What is happening to a UI object right now. There are four `GuiState` values: `Idle`, `Hover`, `Press`, and `NonInteractable`.",
+    "query": "A condition, like \"only on small screens\". Query selectors start with `@`.",
+    "override": "A value you set directly on one object that wins over the styled value. It shows in bold.",
+    "propagation": "How a style spreads. A `StyleLink` on a `ScreenGui` spreads the sheet's rules to every UI object inside that ScreenGui."
+  },
+  "example": {
+    "title": "Make every Frame magenta with one rule",
+    "place": "LocalScript inside a ScreenGui in StarterGui",
+    "code": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n\nlocal screenGui = script.Parent\n\n-- Create a style sheet to hold our rules and tokens\nlocal sheet = Instance.new(\"StyleSheet\")\nsheet.Name = \"DesignSheet\"\nsheet.Parent = ReplicatedStorage\n\n-- Tokens are attributes on the sheet\nsheet:SetAttribute(\"Magenta\", Color3.fromHex(\"FF0099\"))\nsheet:SetAttribute(\"SquareL\", UDim2.fromOffset(200, 200))\n\n-- Link the sheet to this ScreenGui so its rules apply here\nlocal styleLink = Instance.new(\"StyleLink\")\nstyleLink.StyleSheet = sheet\nstyleLink.Parent = screenGui\n\n-- A rule that targets every Frame (class selector)\nlocal rule = Instance.new(\"StyleRule\")\nrule.Selector = \"Frame\"\nrule.Parent = sheet\nrule:SetProperties({\n\tBackgroundColor3 = \"$Magenta\", -- use the token\n\tSize = \"$SquareL\",\n\tBorderSizePixel = 0,\n})\n\n-- Any Frame we add now gets the style automatically\nlocal frame = Instance.new(\"Frame\")\nframe.Parent = screenGui",
+    "explain": [
+      "We make a `StyleSheet` and store it in ReplicatedStorage.",
+      "We add two tokens as attributes: a magenta color and a 200 by 200 pixel size.",
+      "A `StyleLink` inside the ScreenGui connects the sheet to this ScreenGui and everything in it.",
+      "The `StyleRule` with selector `\"Frame\"` matches every Frame. Its properties use the tokens with `$`.",
+      "When we add a new Frame, it turns magenta and 200 by 200 without us setting those properties on it."
+    ]
+  },
+  "watchOut": [
+    "Forgetting the `StyleLink`. Without it, your rules never reach the UI. Put it inside the ScreenGui and set its `StyleSheet`.",
+    "Expecting the Properties window to show the styled value. It still shows the default; look for the warning mark and hover it.",
+    "Tag selectors need the dot: write `\".ButtonPrimary\"`, not `\"ButtonPrimary\"`, and remember to actually tag the object.",
+    "Themes that are meant to swap must define the same token names, or some looks will break when you switch.",
+    "Setting a property by hand on an object overrides the style. If an object will not follow your rule, check for a bold value and reset it."
+  ]
+}

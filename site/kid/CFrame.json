@@ -1,0 +1,309 @@
+{
+  "name": "CFrame",
+  "simple": "A CFrame (short for \"coordinate frame\") stores two things at once: WHERE something is (its position) and WHICH WAY it is facing (its rotation). Every part in your game has a CFrame. If you only change Position, you move a part; if you change its CFrame, you can move it AND turn it in one step. CFrames also let you say things like \"5 studs in front of this part\", no matter which way the part is turned.",
+  "analogy": "A CFrame is like a person standing on a map holding a compass. The spot they stand on is the position. The way their nose points is the rotation. \"Take 3 steps forward\" means something different depending on which way that person is facing, and CFrames do exactly that kind of math for you.",
+  "whenToUse": [
+    "Moving AND turning a part at the same time (set `part.CFrame`).",
+    "Making something face something else, like a turret aiming at a player (`CFrame.lookAt`).",
+    "Placing things relative to another thing, like a sword in front of a character or a door around its hinge.",
+    "Spinning or tilting a part by a set number of degrees (`CFrame.Angles` with `math.rad`).",
+    "Teleporting a character (`character:PivotTo(someCFrame)`).",
+    "Finding out where something is from another object's point of view, like \"is the player in front of or behind this NPC?\"."
+  ],
+  "where": "CFrame is a built-in data type, so it works everywhere: in a Script (server) or a LocalScript (client). You do not need game:GetService. Make one with `CFrame.new(...)`, or read one from a part with `part.CFrame`.",
+  "terms": {
+    "CFrame": "Short for coordinate frame. A value that holds a position plus a rotation.",
+    "position": "Where something is, written as three numbers X, Y, Z (a Vector3). Example: (0, 5, 0) means 5 studs up from the center of the world.",
+    "rotation / orientation": "Which way something is turned or facing.",
+    "stud": "Roblox's unit of distance. A default baseplate tile is 4 studs wide.",
+    "vector": "A group of numbers, like (X, Y, Z), that can mean a spot in the world OR a direction plus a length. See Vector3.",
+    "unit vector": "A vector whose length is exactly 1. It only tells you a direction, like an arrow that is 1 stud long.",
+    "world space": "Measuring from the center of the whole game world (0, 0, 0), where +Y is always straight up and the axes never turn. Like using north, south, east, west.",
+    "object space / local space": "Measuring from a specific object's own point of view: its center is (0, 0, 0), its forward is its own front, its right is its own right. Like saying \"to my left\" instead of \"to the west\".",
+    "relative": "Measured compared to something else. \"5 studs in front of the part\" is relative to the part.",
+    "offset": "An extra amount you add to move something away from a starting point. A part at (0, 5, 0) moved by an offset of (2, 0, 0) ends up at (2, 5, 0).",
+    "radians": "The unit Roblox uses for angles in CFrames. A full circle is about 6.283 radians (2 times pi) instead of 360 degrees. Use `math.rad(degrees)` to convert, for example `math.rad(90)` is about 1.5708.",
+    "axis": "One of the three directions: X (left/right), Y (up/down), Z (forward/back). Rotating \"around the Y axis\" means spinning like a top or a merry-go-round.",
+    "LookVector": "The direction a CFrame is facing (its front), as a unit vector.",
+    "identity": "The \"do nothing\" CFrame: position (0, 0, 0) and no rotation at all.",
+    "inverse": "The CFrame that undoes another one. If one CFrame means \"move 5 right\", its inverse means \"move 5 left\".",
+    "interpolate / lerp": "To find a spot part-way between a start and a goal. Lerp with 0.5 means exactly halfway.",
+    "Euler angles": "Describing a rotation as three separate turns: one around X, one around Y, one around Z. The order you do them in changes the result.",
+    "rotation order": "Which of the three turns (X, Y, Z) happens first. `CFrame.Angles` uses X then Y then Z; `CFrame.fromOrientation` uses Y then X then Z.",
+    "matrix / rotation matrix": "A 3 by 3 grid of 9 numbers that the CFrame uses inside to store rotation. You almost never need to touch it; use RightVector, UpVector and LookVector instead.",
+    "quaternion": "Another math way to store a rotation using 4 numbers. Advanced, and rarely needed in Roblox scripts.",
+    "gimbal lock": "A math hiccup where two of the three Euler angles line up (around 90 degrees of tilt up or down), so the numbers you get back can look odd even though the rotation is fine.",
+    "anchored": "A part with Anchored = true does not fall or get pushed by physics, so setting its CFrame moves it cleanly.",
+    "tuple": "When a function gives back several values at once, like `local a, b, c = something()`."
+  },
+  "examples": [
+    {
+      "title": "Move and turn a part in one line",
+      "place": "Script inside an Anchored Part in Workspace",
+      "code": "local part = script.Parent\n\n-- Put the part 10 studs up, then turn it 45 degrees around the Y axis (like a spinning top).\n-- math.rad changes degrees into radians, which is what CFrame.Angles wants.\npart.CFrame = CFrame.new(0, 10, 0) * CFrame.Angles(0, math.rad(45), 0)\n\nprint(part.Position) --> 0, 10, 0",
+      "explain": [
+        "`CFrame.new(0, 10, 0)` makes a CFrame at position (0, 10, 0) with no turning.",
+        "`CFrame.Angles(0, math.rad(45), 0)` is a CFrame that only turns: 45 degrees around the up-and-down (Y) axis.",
+        "Multiplying them with `*` means: go to that spot, then turn there.",
+        "Setting `part.CFrame` moves and rotates the part at the same time."
+      ]
+    },
+    {
+      "title": "Spin a part forever",
+      "place": "Script inside an Anchored Part in Workspace",
+      "code": "local part = script.Parent\n\nwhile true do\n\t-- Take the part's current CFrame and turn it 2 more degrees around its own Y axis.\n\tpart.CFrame = part.CFrame * CFrame.Angles(0, math.rad(2), 0)\n\ttask.wait() -- wait one frame so the game does not freeze\nend",
+      "explain": [
+        "Each loop takes the part's current CFrame and adds a small 2 degree turn.",
+        "Because the turn is on the RIGHT side of `*`, it happens around the part's own center, so it spins in place.",
+        "`task.wait()` pauses for about one frame, so the spin looks smooth."
+      ]
+    },
+    {
+      "title": "Why the order of * matters (local vs world)",
+      "place": "Script in ServerScriptService",
+      "code": "local move = CFrame.new(10, 0, 0)               -- \"go 10 studs along X\"\nlocal turn = CFrame.Angles(0, math.rad(90), 0)  -- \"turn 90 degrees around Y\"\n\n-- Move first, then turn: you walk 10 studs, then spin on the spot.\nlocal a = move * turn\nprint(a.Position) --> 10, 0, 0\n\n-- Turn first, then move: you spin, THEN walk 10 studs along your NEW X direction.\nlocal b = turn * move\nprint(b.Position) --> about 0, 0, -10",
+      "explain": [
+        "Read `A * B` as: start at A, then do B using A's own directions (A's local space).",
+        "`move * turn`: you are already at (10, 0, 0) when you turn, so you only spin in place.",
+        "`turn * move`: after turning 90 degrees, your own \"right\" (X) direction points toward world (0, 0, -1). Walking 10 studs that way lands you at (0, 0, -10).",
+        "Rule of thumb: `part.CFrame * something` means \"do something from the part's point of view\". The thing on the right uses the left one's directions.",
+        "Tiny numbers like -4.37e-07 may show up instead of 0. That is normal rounding, not a bug."
+      ]
+    },
+    {
+      "title": "Put something 5 studs in front of a part, whichever way it faces",
+      "place": "Script in ServerScriptService (needs a Part named Base in Workspace)",
+      "code": "local base = workspace:WaitForChild(\"Base\")\n\nlocal marker = Instance.new(\"Part\")\nmarker.Size = Vector3.new(1, 1, 1)\nmarker.Anchored = true\nmarker.BrickColor = BrickColor.new(\"Bright red\")\n\n-- In a CFrame's own space, \"forward\" is -Z. So (0, 0, -5) means 5 studs in front.\nmarker.CFrame = base.CFrame * CFrame.new(0, 0, -5)\nmarker.Parent = workspace\n\n-- Same spot, a different way: start at the base and add 5 times its forward direction.\nprint(base.Position + base.CFrame.LookVector * 5)",
+      "explain": [
+        "`base.CFrame * CFrame.new(0, 0, -5)` means \"from the base's point of view, go 5 studs forward\".",
+        "If the base is at (0, 5, 0) and turned 90 degrees around Y, its front points toward world (-1, 0, 0), so the marker ends up at (-5, 5, 0).",
+        "`LookVector` is the direction the base faces. Multiplying it by 5 makes an arrow 5 studs long, and adding it to the position gives the same spot."
+      ]
+    },
+    {
+      "title": "Make a part face a target",
+      "place": "Script in ServerScriptService (needs Parts named Turret and Target in Workspace)",
+      "code": "local turret = workspace:WaitForChild(\"Turret\")\nlocal target = workspace:WaitForChild(\"Target\")\n\nwhile true do\n\t-- Stay where you are, but point your front at the target.\n\tturret.CFrame = CFrame.lookAt(turret.Position, target.Position)\n\ttask.wait(0.1)\nend",
+      "explain": [
+        "`CFrame.lookAt(from, to)` builds a CFrame placed at `from` whose front (LookVector) points at `to`.",
+        "Running it in a loop keeps the turret aimed even if the target moves."
+      ]
+    },
+    {
+      "title": "Is the player in front of or behind this NPC?",
+      "place": "Script in ServerScriptService (needs a Part named Guard in Workspace)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal guard = workspace:WaitForChild(\"Guard\")\n\nwhile true do\n\tfor _, player in Players:GetPlayers() do\n\t\tlocal character = player.Character\n\t\tlocal root = character and character:FindFirstChild(\"HumanoidRootPart\")\n\t\tif root then\n\t\t\t-- Turn the player's world position into the guard's own point of view.\n\t\t\tlocal seen = guard.CFrame:PointToObjectSpace(root.Position)\n\t\t\tif seen.Z < 0 then\n\t\t\t\tprint(player.Name .. \" is in front of the guard\")\n\t\t\telse\n\t\t\t\tprint(player.Name .. \" is behind the guard\")\n\t\t\tend\n\t\tend\n\tend\n\ttask.wait(1)\nend",
+      "explain": [
+        "`PointToObjectSpace` answers: where is this point if the guard is the center of the world and the guard's front is forward?",
+        "In object space, negative Z is in front, positive Z is behind, positive X is to the guard's right, positive Y is above.",
+        "So `seen.Z < 0` means the player is somewhere in front of the guard."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Angles are in radians, not degrees. `CFrame.Angles(0, 90, 0)` spins about 14 full turns plus a bit, not 90 degrees. Write `CFrame.Angles(0, math.rad(90), 0)`.",
+    "Order matters: `a * b` is usually NOT the same as `b * a`. Put the thing you want to happen \"from the part's point of view\" on the right: `part.CFrame * CFrame.new(0, 0, -5)`.",
+    "`part.CFrame * CFrame.new(0, 0, -5)` moves forward the way the part faces, but `part.CFrame + Vector3.new(0, 0, -5)` moves toward world -Z no matter how the part is turned.",
+    "A CFrame's front is -Z, not +Z. `CFrame.new(0, 0, -5)` is 5 studs in FRONT.",
+    "CFrames cannot be changed piece by piece. `part.CFrame.Position = ...` or `cf.X = 5` gives an error. Build a new CFrame and assign the whole thing.",
+    "If a part is not Anchored, setting its CFrame works but physics may move it again right away.",
+    "To move a whole character or model, use `model:PivotTo(cframe)` instead of setting each part's CFrame.",
+    "Printing a CFrame shows 12 numbers (3 for position, 9 for rotation). Print `cf.Position` or `cf.LookVector` instead if you just want to read it."
+  ],
+  "members": {
+    "CFrame.new": {
+      "simple": "Makes a new CFrame. With no arguments you get the identity (spot (0, 0, 0), no turning). With a Vector3 or three numbers you get that position with no turning. There are also older or advanced versions: `CFrame.new(pos, lookAt)` (use `CFrame.lookAt` instead), 7 numbers (position plus a quaternion rotation), and 12 numbers (position plus all 9 rotation-grid numbers).",
+      "example": "local a = CFrame.new()                      -- at (0, 0, 0), no rotation\nlocal b = CFrame.new(0, 10, 0)              -- 10 studs up, no rotation\nlocal c = CFrame.new(Vector3.new(4, 2, 0))  -- same idea using a Vector3\nprint(b.Position) --> 0, 10, 0",
+      "gotcha": "`CFrame.new` never turns anything (unless you use the advanced versions). Multiply by `CFrame.Angles(...)` to add rotation."
+    },
+    "CFrame.lookAt": {
+      "simple": "Makes a CFrame placed at `at` whose front (LookVector) points toward the spot `lookAt`. Perfect for aiming turrets, cameras, or making an NPC face a player. The optional third value says which way is \"up\" (normally (0, 1, 0)).",
+      "example": "-- Stand at (0, 5, 0) and look at (10, 5, 0)\nlocal cf = CFrame.lookAt(Vector3.new(0, 5, 0), Vector3.new(10, 5, 0))\nprint(cf.Position)    --> 0, 5, 0\nprint(cf.LookVector)  --> about 1, 0, 0  (facing +X, toward the target)",
+      "gotcha": "Both arguments are positions (spots), not directions. If you have a direction instead, use `CFrame.lookAlong`. Looking straight up or straight down can give a strange sideways turn."
+    },
+    "CFrame.lookAlong": {
+      "simple": "Like `CFrame.lookAt`, but the second value is a DIRECTION to face along instead of a spot to look at. `CFrame.lookAlong(at, dir)` is the same as `CFrame.lookAt(at, at + dir)`.",
+      "example": "-- Stand at (0, 5, 0) and face along +X\nlocal cf = CFrame.lookAlong(Vector3.new(0, 5, 0), Vector3.new(1, 0, 0))\nprint(cf.LookVector) --> about 1, 0, 0"
+    },
+    "CFrame.fromRotationBetweenVectors": {
+      "simple": "Gives a rotation-only CFrame (position (0, 0, 0)) that turns the first direction so it points the same way as the second direction, using the shortest turn. Handy for tilting something so its top lines up with a slope.",
+      "example": "local from = Vector3.new(0, 1, 0)  -- pointing up\nlocal to = Vector3.new(1, 0, 0)    -- pointing right\nlocal turn = CFrame.fromRotationBetweenVectors(from, to)\nprint(turn * from) --> about 1, 0, 0  (\"up\" got turned into \"right\")"
+    },
+    "CFrame.fromEulerAngles": {
+      "simple": "Makes a rotation-only CFrame from three angles in radians: turn around X, around Y, and around Z. The optional fourth value (an `Enum.RotationOrder`) picks which turn happens first; the default is X, then Y, then Z, which is the same as `CFrame.Angles`.",
+      "example": "-- Tilt 30 degrees around X, using the default X-Y-Z order\nlocal tilt = CFrame.fromEulerAngles(math.rad(30), 0, 0)\n\n-- Same three angles, but do Y first, then X, then Z\nlocal other = CFrame.fromEulerAngles(math.rad(30), math.rad(45), 0, Enum.RotationOrder.YXZ)",
+      "gotcha": "Remember radians: use `math.rad(degrees)`."
+    },
+    "CFrame.fromEulerAnglesXYZ": {
+      "simple": "Rotation-only CFrame from three angles in radians, turning around X first, then Y, then Z. Exactly the same as `CFrame.Angles`.",
+      "example": "local cf = CFrame.fromEulerAnglesXYZ(0, math.rad(90), 0) -- quarter turn around Y\nprint(cf.LookVector) --> about -1, 0, 0"
+    },
+    "CFrame.fromEulerAnglesYXZ": {
+      "simple": "Rotation-only CFrame from three angles in radians, turning around Y first, then X, then Z. Exactly the same as `CFrame.fromOrientation`. This order is nice for cameras and characters: first turn left/right (Y), then look up/down (X).",
+      "example": "-- Face 90 degrees to the left, then tip the nose 20 degrees up\nlocal cf = CFrame.fromEulerAnglesYXZ(math.rad(20), math.rad(90), 0)"
+    },
+    "CFrame.Angles": {
+      "simple": "The most common way to make a rotation. Gives a CFrame with no position change that turns by `rx` around X, `ry` around Y, and `rz` around Z (in radians, X first, then Y, then Z). Multiply it onto another CFrame to turn that thing.",
+      "example": "local part = workspace.Part -- an Anchored part\n-- Spin the part 90 degrees around its own up axis, like a top\npart.CFrame = part.CFrame * CFrame.Angles(0, math.rad(90), 0)",
+      "gotcha": "`CFrame.Angles(0, 90, 0)` uses 90 RADIANS (about 5157 degrees). Always wrap degrees in `math.rad`. If you only use one of the three angles, Angles, fromEulerAngles and fromOrientation all give the same result; they only differ when you mix two or more angles."
+    },
+    "CFrame.fromOrientation": {
+      "simple": "Rotation-only CFrame from three angles in radians, turning Y first, then X, then Z. This matches how a part's Orientation property (the numbers you see in Studio's Properties window) works, so it is the easiest way to copy those numbers into a CFrame.",
+      "example": "local part = workspace.Part\nlocal o = part.Orientation -- in degrees, for example (0, 45, 0)\n-- Rebuild the same rotation as a CFrame (degrees -> radians!)\nlocal rotation = CFrame.fromOrientation(math.rad(o.X), math.rad(o.Y), math.rad(o.Z))"
+    },
+    "CFrame.fromAxisAngle": {
+      "simple": "Rotation-only CFrame that turns `r` radians around any direction you choose (the axis), like spinning a wheel on an axle pointing that way. Positive angles turn counter-clockwise when you look down the axis toward its start.",
+      "example": "-- Quarter turn around the up axis (same as CFrame.Angles(0, math.rad(90), 0))\nlocal cf = CFrame.fromAxisAngle(Vector3.yAxis, math.rad(90))\n\n-- Tilt around a slanted axis\nlocal slanted = CFrame.fromAxisAngle(Vector3.new(1, 1, 0), math.rad(45))"
+    },
+    "CFrame.fromMatrix": {
+      "simple": "Builds a CFrame from a position plus the three direction arrows you want it to have: its right direction (`vX`) and up direction (`vY`), and optionally its back direction (`vZ`). Useful when you already know which way \"right\" and \"up\" should point, for example lining a part up with the ground's surface.",
+      "example": "local pos = Vector3.new(0, 5, 0)\nlocal right = Vector3.new(0, 0, -1)\nlocal up = Vector3.new(0, 1, 0)\nlocal cf = CFrame.fromMatrix(pos, right, up)\nprint(cf.LookVector) --> about -1, 0, 0  (same as a 90 degree turn around Y)",
+      "gotcha": "The right and up arrows should be length 1 and at a right angle (90 degrees) to each other, or the result can be squished."
+    },
+    "CFrame.identity": {
+      "simple": "The \"do nothing\" CFrame: position (0, 0, 0) and no rotation. Same as `CFrame.new()`. Multiplying any CFrame by it leaves it unchanged.",
+      "example": "local cf = CFrame.new(1, 2, 3)\nprint(cf * CFrame.identity == cf) --> true",
+      "gotcha": "Use it as `CFrame.identity`, not on a CFrame you made (`myCFrame.identity` is not how it is meant to be used)."
+    },
+    "CFrame.Position": {
+      "simple": "The position part of the CFrame as a Vector3: where it is in the world.",
+      "example": "local cf = CFrame.new(3, 7, -2) * CFrame.Angles(0, math.rad(45), 0)\nprint(cf.Position) --> 3, 7, -2  (turning does not change the position)",
+      "gotcha": "You cannot set it: `cf.Position = ...` errors. Make a new CFrame instead, for example `CFrame.new(newPos) * cf.Rotation`."
+    },
+    "CFrame.Rotation": {
+      "simple": "A copy of the CFrame with the same turning but the position moved to (0, 0, 0). Use it when you only care which way something faces, or to keep a part's rotation while moving it somewhere new.",
+      "example": "local part = workspace.Part\nlocal newSpot = Vector3.new(0, 20, 0)\n-- Move the part to newSpot but keep the way it is facing\npart.CFrame = CFrame.new(newSpot) * part.CFrame.Rotation"
+    },
+    "CFrame.X": {
+      "simple": "The X number of the position (left/right in the world). Same as `cf.Position.X`.",
+      "example": "local cf = CFrame.new(3, 7, -2)\nprint(cf.X) --> 3"
+    },
+    "CFrame.Y": {
+      "simple": "The Y number of the position (how high up). Same as `cf.Position.Y`.",
+      "example": "local cf = CFrame.new(3, 7, -2)\nprint(cf.Y) --> 7"
+    },
+    "CFrame.Z": {
+      "simple": "The Z number of the position (forward/back in the world). Same as `cf.Position.Z`.",
+      "example": "local cf = CFrame.new(3, 7, -2)\nprint(cf.Z) --> -2"
+    },
+    "CFrame.LookVector": {
+      "simple": "The direction the CFrame is FACING, as an arrow 1 stud long (a unit vector). This is the part's front. For a CFrame with no rotation it is (0, 0, -1). Multiply it by a number to get \"that many studs forward\".",
+      "example": "local part = workspace.Part\n-- A spot 10 studs in front of the part, whichever way it is turned\nlocal ahead = part.Position + part.CFrame.LookVector * 10\n\n-- Unturned CFrame faces -Z\nprint(CFrame.new().LookVector) --> 0, 0, -1\n-- After a 90 degree turn around Y it faces -X\nprint((CFrame.Angles(0, math.rad(90), 0)).LookVector) --> about -1, 0, 0",
+      "gotcha": "Front is -Z, so LookVector is the opposite of ZVector."
+    },
+    "CFrame.RightVector": {
+      "simple": "The direction to the CFrame's own RIGHT side, as a 1-stud arrow. For a CFrame with no rotation it is (1, 0, 0). Great for side-stepping or strafing.",
+      "example": "local part = workspace.Part\n-- Move the part 4 studs to its own right\npart.CFrame = part.CFrame + part.CFrame.RightVector * 4\n\nprint(CFrame.Angles(0, math.rad(90), 0).RightVector) --> about 0, 0, -1"
+    },
+    "CFrame.UpVector": {
+      "simple": "The direction out of the CFrame's own TOP, as a 1-stud arrow. For an unturned CFrame it is (0, 1, 0). If the part is tipped over, UpVector tips with it.",
+      "example": "local part = workspace.Part\n-- Is the part lying on its side? (its top no longer points mostly up)\nif part.CFrame.UpVector.Y < 0.5 then\n\tprint(\"The part has fallen over!\")\nend"
+    },
+    "CFrame.XVector": {
+      "simple": "Another name for RightVector: the CFrame's own X direction (its right side).",
+      "example": "local cf = CFrame.new()\nprint(cf.XVector) --> 1, 0, 0"
+    },
+    "CFrame.YVector": {
+      "simple": "Another name for UpVector: the CFrame's own Y direction (its top).",
+      "example": "local cf = CFrame.new()\nprint(cf.YVector) --> 0, 1, 0"
+    },
+    "CFrame.ZVector": {
+      "simple": "The CFrame's own Z direction, which points out of its BACK. It is the exact opposite of LookVector.",
+      "example": "local cf = CFrame.new()\nprint(cf.ZVector)      --> 0, 0, 1\nprint(-cf.LookVector)  --> 0, 0, 1  (same thing)"
+    },
+    "CFrame:Inverse": {
+      "simple": "Gives the CFrame that UNDOES this one. If `cf` means \"move 5 studs right and turn left\", `cf:Inverse()` means \"turn back right and move 5 studs back\". `cf * cf:Inverse()` gives the identity (no movement, no turn).",
+      "example": "local cf = CFrame.new(5, 0, 0)\nprint(cf:Inverse().Position) --> -5, 0, 0\nprint((cf * cf:Inverse()).Position) --> 0, 0, 0",
+      "gotcha": "`cf:ToObjectSpace(x)` is the same as `cf:Inverse() * x`, so you usually do not need Inverse directly."
+    },
+    "CFrame:Lerp": {
+      "simple": "Finds a CFrame part-way between this one and `goal`. `alpha` is how far along: 0 is the start, 1 is the goal, 0.5 is halfway. Both position AND rotation blend smoothly, so it is great for simple smooth movement.",
+      "example": "local startCF = CFrame.new(0, 0, 0)\nlocal goalCF = CFrame.new(10, 0, 0) * CFrame.Angles(0, math.rad(90), 0)\n\nlocal quarter = startCF:Lerp(goalCF, 0.25)\nprint(quarter.Position) --> 2.5, 0, 0  (and turned about 22.5 degrees)\n\n-- Slide a part to the goal over 1 second\nlocal part = workspace.Part\nfor i = 1, 30 do\n\tpart.CFrame = startCF:Lerp(goalCF, i / 30)\n\ttask.wait(1 / 30)\nend",
+      "gotcha": "For fancy animations with easing (speeding up and slowing down), TweenService is often easier."
+    },
+    "CFrame:Orthonormalize": {
+      "simple": "Cleans up a CFrame's rotation so its three direction arrows are exactly 1 stud long and exactly at right angles. After many, many small multiplications, tiny rounding errors can make a rotation slightly \"bent\". `BasePart.CFrame` cleans itself automatically, but other places that take a CFrame do not.",
+      "example": "local cf = CFrame.new()\nfor i = 1, 10000 do\n\tcf = cf * CFrame.Angles(0, 0.001, 0)\nend\ncf = cf:Orthonormalize() -- fix any tiny errors that built up"
+    },
+    "CFrame:ToWorldSpace": {
+      "simple": "Takes a CFrame described from THIS CFrame's point of view and tells you where it is in the world. Same as `cf * other`. Example: \"2 studs above me\" turns into a real world spot.",
+      "example": "local cf = CFrame.new(5, 10, 0)\nlocal offset = CFrame.new(0, 2, 0) -- \"2 studs above me\"\nprint(cf:ToWorldSpace(offset).Position) --> 5, 12, 0\n\n-- With turning: stand at (0, 5, 0) facing -X, then \"10 studs forward\"\nlocal turned = CFrame.new(0, 5, 0) * CFrame.Angles(0, math.rad(90), 0)\nprint(turned:ToWorldSpace(CFrame.new(0, 0, -10)).Position) --> about -10, 5, 0",
+      "gotcha": "You can pass several CFrames at once and get several back."
+    },
+    "CFrame:ToObjectSpace": {
+      "simple": "The opposite of ToWorldSpace. Takes a CFrame in the world and tells you where it is FROM THIS CFrame's point of view (as if this CFrame were the center of the world). Same as `cf:Inverse() * other`. Great for saving how two things are placed relative to each other, like a hat on a head, so you can put it back later.",
+      "example": "local hinge = CFrame.new(10, 0, 0)\nlocal door = CFrame.new(12, 3, 0)\nlocal relative = hinge:ToObjectSpace(door)\nprint(relative.Position) --> 2, 3, 0  (door is 2 right and 3 up from the hinge)\n\n-- Later, after the hinge moves or turns, put the door back in the same spot relative to it:\nlocal newDoor = hinge:ToWorldSpace(relative)"
+    },
+    "CFrame:PointToWorldSpace": {
+      "simple": "Takes a point (a Vector3) described from this CFrame's point of view and gives its spot in the world. Same as `cf * point`. Uses both the position and the turning.",
+      "example": "local cf = CFrame.new(5, 10, 0)\nprint(cf:PointToWorldSpace(Vector3.new(0, 4, 0))) --> 5, 14, 0\n\n-- Turned 90 degrees around Y, standing at (0, 5, 0):\nlocal turned = CFrame.new(0, 5, 0) * CFrame.Angles(0, math.rad(90), 0)\n-- \"10 studs in front of me\" (front is -Z)\nprint(turned:PointToWorldSpace(Vector3.new(0, 0, -10))) --> about -10, 5, 0"
+    },
+    "CFrame:PointToObjectSpace": {
+      "simple": "Takes a point in the world and tells you where it is from this CFrame's point of view. In the answer, negative Z means in front, positive Z means behind, positive X means to the right, positive Y means above. Perfect for \"is the player in front of me?\" or \"which side of the door am I on?\".",
+      "example": "local turned = CFrame.new(0, 5, 0) * CFrame.Angles(0, math.rad(90), 0)\n-- The world point (-10, 5, 0) seen from this CFrame:\nprint(turned:PointToObjectSpace(Vector3.new(-10, 5, 0))) --> about 0, 0, -10\n-- That means: 10 studs straight in front of it."
+    },
+    "CFrame:VectorToWorldSpace": {
+      "simple": "Like PointToWorldSpace, but for DIRECTIONS instead of spots: it only turns the arrow and ignores the position. Example: \"my forward direction\" (0, 0, -1) becomes a direction in the world.",
+      "example": "local turned = CFrame.new(0, 5, 0) * CFrame.Angles(0, math.rad(90), 0)\nprint(turned:VectorToWorldSpace(Vector3.new(0, 0, -1))) --> about -1, 0, 0  (same as turned.LookVector)\n-- The position (0, 5, 0) was ignored, because directions do not have a place."
+    },
+    "CFrame:VectorToObjectSpace": {
+      "simple": "Takes a direction in the world and tells you what that direction is from this CFrame's point of view. Only turning is used; position is ignored. Handy for checking if a car is driving forward or backward.",
+      "example": "local car = workspace.Car -- a Part\nlocal v = car.CFrame:VectorToObjectSpace(car.AssemblyLinearVelocity)\nif v.Z < 0 then\n\tprint(\"Driving forward\")   -- moving toward the car's own front (-Z)\nelseif v.Z > 0 then\n\tprint(\"Driving backward\")\nend"
+    },
+    "CFrame:GetComponents": {
+      "simple": "Gives back all 12 numbers inside the CFrame: x, y, z (the position) and then the 9 numbers of the rotation grid (R00 to R22). Mostly useful for saving a CFrame or advanced math.",
+      "example": "local cf = CFrame.new(1, 2, 3)\nprint(cf:GetComponents()) --> 1 2 3 1 0 0 0 1 0 0 0 1\nlocal x, y, z = cf:GetComponents() -- you can keep just the first few"
+    },
+    "CFrame:ToEulerAngles": {
+      "simple": "Breaks the rotation back into three angles (in radians) around X, Y and Z. You can choose the order with an `Enum.RotationOrder`; the default is X-Y-Z. Use `math.deg` to read them as degrees.",
+      "example": "local cf = CFrame.Angles(0, math.rad(45), 0)\nlocal rx, ry, rz = cf:ToEulerAngles()\nprint(math.deg(ry)) --> about 45",
+      "gotcha": "The angles you get back can be a different-looking set that still makes the same final rotation, especially near 90 degree tilts (gimbal lock)."
+    },
+    "CFrame:ToEulerAnglesXYZ": {
+      "simple": "Breaks the rotation into three angles in radians using the X-Y-Z order, the same order `CFrame.Angles` uses. So it is the reverse of `CFrame.Angles`.",
+      "example": "local cf = CFrame.Angles(math.rad(10), math.rad(20), math.rad(30))\nlocal rx, ry, rz = cf:ToEulerAnglesXYZ()\nprint(math.deg(rx), math.deg(ry), math.deg(rz)) --> about 10 20 30"
+    },
+    "CFrame:ToEulerAnglesYXZ": {
+      "simple": "Breaks the rotation into three angles in radians using the Y-X-Z order. It is the reverse of `CFrame.fromEulerAnglesYXZ` and `CFrame.fromOrientation`.",
+      "example": "local cf = CFrame.fromEulerAnglesYXZ(math.rad(20), math.rad(90), 0)\nlocal rx, ry, rz = cf:ToEulerAnglesYXZ()\nprint(math.deg(rx), math.deg(ry)) --> about 20 90"
+    },
+    "CFrame:ToOrientation": {
+      "simple": "Same as ToEulerAnglesYXZ. Gives the three angles (in radians) that match how a part's Orientation property works. Use `math.deg` to compare them with the numbers in the Properties window.",
+      "example": "local part = workspace.Part\nlocal rx, ry, rz = part.CFrame:ToOrientation()\nprint(math.deg(rx), math.deg(ry), math.deg(rz)) -- about the same as part.Orientation"
+    },
+    "CFrame:ToAxisAngle": {
+      "simple": "Describes the rotation as ONE turn: an axis (a 1-stud arrow to spin around) and an angle in radians. It is the reverse of `CFrame.fromAxisAngle`.",
+      "example": "local cf = CFrame.Angles(0, math.rad(90), 0)\nlocal axis, angle = cf:ToAxisAngle()\nprint(axis)             --> about 0, 1, 0\nprint(math.deg(angle))  --> about 90"
+    },
+    "CFrame:components": {
+      "simple": "An older lowercase name for GetComponents. Use `cf:GetComponents()` instead.",
+      "example": "local x, y, z = CFrame.new(1, 2, 3):GetComponents() -- use this name"
+    },
+    "CFrame:FuzzyEq": {
+      "simple": "Checks if two CFrames are ALMOST the same, in both position and rotation. Computers make tiny rounding errors, so `==` can say false for CFrames that are basically equal. The optional `epsilon` is how much difference you allow (a small positive number).",
+      "example": "local a = CFrame.new(0, 5, 0)\nlocal b = CFrame.new(0, 5.000001, 0)\nprint(a == b)         --> false (not exactly equal)\nprint(a:FuzzyEq(b))   --> true  (close enough)"
+    },
+    "CFrame:AngleBetween": {
+      "simple": "Tells you how far apart two CFrames are turned, as one angle in radians (from 0 to pi, which is 0 to 180 degrees). Position is ignored.",
+      "example": "local a = CFrame.new(0, 0, 0)\nlocal b = CFrame.new(50, 0, 0) * CFrame.Angles(0, math.rad(90), 0)\nprint(math.deg(a:AngleBetween(b))) --> about 90  (the 50 stud move does not count)"
+    },
+    "op:CFrame*CFrame": {
+      "simple": "Combines two CFrames: start at the left one, then do the right one FROM THE LEFT ONE'S POINT OF VIEW (its local space). Same as `left:ToWorldSpace(right)`. Order matters: `a * b` and `b * a` usually give different answers.",
+      "example": "local move = CFrame.new(10, 0, 0)\nlocal turn = CFrame.Angles(0, math.rad(90), 0)\nprint((move * turn).Position) --> 10, 0, 0       (walk, then spin in place)\nprint((turn * move).Position) --> about 0, 0, -10 (spin, then walk along your new right side)",
+      "gotcha": "Want to turn a part in place? Put the rotation on the right: `part.CFrame * CFrame.Angles(...)`."
+    },
+    "op:CFrame*Vector3": {
+      "simple": "Takes a point described from the CFrame's point of view and returns where it is in the world. Same as `cf:PointToWorldSpace(v)`.",
+      "example": "local turned = CFrame.new(0, 5, 0) * CFrame.Angles(0, math.rad(90), 0)\nprint(turned * Vector3.new(0, 0, -10)) --> about -10, 5, 0\n-- (0, 0, -10) means \"10 studs in front\"; this CFrame faces -X, so that is (-10, 5, 0)"
+    },
+    "op:CFrame+Vector3": {
+      "simple": "Slides the CFrame by a Vector3 using WORLD directions. The rotation stays the same. This ignores which way the CFrame faces.",
+      "example": "local cf = CFrame.new(1, 2, 3) * CFrame.Angles(0, math.rad(90), 0)\nlocal moved = cf + Vector3.new(0, 10, 0)\nprint(moved.Position) --> 1, 12, 3  (still turned the same way)",
+      "gotcha": "To move in the CFrame's OWN directions (like forward), use `cf * CFrame.new(0, 0, -5)` or `cf + cf.LookVector * 5` instead."
+    },
+    "op:CFrame-Vector3": {
+      "simple": "Slides the CFrame backward by a Vector3 using world directions; rotation stays the same. `cf - v` is the same as `cf + (-v)`.",
+      "example": "local cf = CFrame.new(1, 12, 3)\nprint((cf - Vector3.new(0, 10, 0)).Position) --> 1, 2, 3"
+    }
+  }
+}

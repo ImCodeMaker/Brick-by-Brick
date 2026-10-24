@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/projects/teleport.md",
+  "simple": "Big games are often split into several places, like a lobby, a town, and a dungeon. `TeleportService` moves players from one place to another, to a certain server, or even to another game. This page shows how to teleport safely from a server script, how to show your own loading screen, how to send a little data along, and how to retry when a teleport fails.",
+  "analogy": "Teleporting is like taking a train between towns. You buy the ticket at the station (the server), not by jumping on the tracks yourself. Your suitcase (teleport data) comes along, but anyone can peek inside it, so you keep real money in the bank (data stores).",
+  "keyPoints": [
+    "Teleports do not work in Studio playtests. Publish the game and test in the real Roblox app.",
+    "Use `TeleportService:TeleportAsync(placeId, {players}, options)` from a server script. The old client `Teleport()` is deprecated.",
+    "Access Control for Places decides how players can enter your non-start places: Fully open, Limited to same universe, or Secure within universe only.",
+    "Pick Secure if some areas should only be reached by earning them, so cheaters cannot jump straight there.",
+    "Call `SetTeleportGui()` on the client to show your own loading screen during a teleport. Scripts inside that screen do not run.",
+    "Use `TeleportOptions` to pick a specific server, a reserved server, or a brand new reserved server.",
+    "`SetTeleportData()` sends simple data that the new place reads with `player:GetJoinData()`. Players can see this data, so never send coins or items this way.",
+    "Wrap teleports in `pcall` and retry, and listen to `TeleportInitFailed` for teleports that fail at the last moment."
+  ],
+  "terms": {
+    "place": "One separate map inside your game. A game can have many places, like a lobby and a battle arena.",
+    "start place": "The place players land in first when they click Play on your game.",
+    "PlaceId": "The ID number of a place. You find it in Creator Hub and put it in your script.",
+    "universe": "Another word for your whole game, which holds all its places.",
+    "server-initiated": "Started by a server script, not by a player's device. Players cannot fake these easily.",
+    "exploit": "Cheating by changing what a player's own device does, like forcing a teleport to a secret area.",
+    "reserved server": "A private server your script creates. Only players you teleport with its access code can get in.",
+    "access code": "A secret string that lets a teleport enter one reserved server.",
+    "ServerInstanceId": "The unique ID of one running public server, used to send players to that exact server.",
+    "pcall": "Short for protected call. It runs a function and catches errors so your script does not crash. It returns `true` or `false` plus a result.",
+    "retry": "Trying again after a failure, often after waiting a moment, such as 1 second, up to a limit like 5 tries.",
+    "deprecated": "Old and no longer recommended. It may still work, but you should not use it in new work.",
+    "deep link": "A web link that opens a game and can drop you into a specific spot."
+  },
+  "example": {
+    "title": "Touch a pad to teleport to another place",
+    "place": "Script inside a Part named TeleportPad in Workspace",
+    "code": "local Players = game:GetService(\"Players\")\nlocal TeleportService = game:GetService(\"TeleportService\")\n\nlocal TARGET_PLACE_ID = 12345678 -- replace with your own place's ID\nlocal pad = script.Parent\nlocal busy = {} -- players already being teleported\n\npad.Touched:Connect(function(hit)\n\tlocal player = Players:GetPlayerFromCharacter(hit.Parent)\n\tif not player or busy[player] then\n\t\treturn\n\tend\n\tbusy[player] = true\n\n\t-- Try the teleport safely so an error does not break the script\n\tlocal success, result = pcall(function()\n\t\treturn TeleportService:TeleportAsync(TARGET_PLACE_ID, {player})\n\tend)\n\n\tif not success then\n\t\twarn(\"Teleport failed:\", result)\n\t\tbusy[player] = nil -- let them try again\n\tend\nend)",
+    "explain": [
+      "When something touches the pad, we check if it belongs to a player's character.",
+      "The `busy` table stops the same player from starting many teleports while their feet keep touching the pad.",
+      "`TeleportAsync` takes the place ID and a list of players, here just one.",
+      "`pcall` catches errors. If the teleport fails, we print why and let the player try again.",
+      "Publish the game and test in the Roblox app, because Studio cannot teleport."
+    ]
+  },
+  "watchOut": [
+    "Testing teleports in Studio and thinking your code is broken. Teleports only work in a published game.",
+    "Teleporting from a LocalScript. Use a RemoteEvent, Touched, or a ProximityPrompt to start it on the server instead.",
+    "Sending coins, items, or levels as teleport data. Players can see and change it, so save that in a data store.",
+    "Forgetting that a teleport can fail. Always use `pcall` and handle `TeleportInitFailed`."
+  ]
+}

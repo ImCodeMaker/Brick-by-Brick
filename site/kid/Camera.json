@@ -1,0 +1,178 @@
+{
+  "name": "Camera",
+  "simple": "The Camera is the player's eye in the 3D world: it decides what shows up on their screen. Every player has their own camera, and Roblox's built-in camera scripts normally move it to follow your character. With code you can take control of it to make cutscenes, top-down views, or zoom effects.",
+  "analogy": "The Camera is like a movie camera operator. Normally the operator follows the main actor (your character) around. You can also tell the operator \"stand here and point there\" for a dramatic shot.",
+  "whenToUse": [
+    "Make a cutscene or a fixed camera angle.",
+    "Change field of view to zoom in (like a sniper scope) or widen the view (speed effect).",
+    "Find where a 3D point appears on the screen, or what 3D spot the player tapped.",
+    "Make the camera follow something other than the character, like a ball or a car."
+  ],
+  "where": "Client side. Each player has their own Camera in their own copy of Workspace. Get it in a LocalScript with `game:GetService(\"Workspace\").CurrentCamera`. Changes are not shared with the server or other players.",
+  "terms": {
+    "client": "One player's own device (computer, phone, tablet, or console).",
+    "server": "Roblox's computer that runs the shared game for everyone.",
+    "CFrame": "Position plus rotation in one value. The camera's CFrame says where the camera is and which way it looks.",
+    "field of view (FOV)": "How wide the camera sees, in degrees. Bigger numbers see more of the world (wide angle); smaller numbers zoom in.",
+    "viewport": "The rectangle on your screen where the 3D world is drawn.",
+    "pixel": "One tiny dot on the screen. Screen positions are measured in pixels from the top-left corner.",
+    "GUI inset": "The space at the top of the screen used by Roblox's top bar. Some methods include it, some do not.",
+    "ray": "An invisible straight line with a starting point and a direction, like a laser pointer.",
+    "unit ray": "A ray that is exactly 1 stud long. Multiply its Direction to make it longer.",
+    "Scriptable": "A CameraType that tells Roblox's camera scripts to stop moving the camera, so your code is in full control.",
+    "VR": "Virtual reality, using a headset.",
+    "clipping plane": "An invisible wall right in front of the camera. Anything closer than it is not drawn.",
+    "bounding box": "An imaginary box just big enough to hold an object.",
+    "deprecated": "Old and replaced by something newer."
+  },
+  "examples": [
+    {
+      "title": "Fixed cutscene shot, then back to normal",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\n\n-- Take control from the default camera scripts\ncamera.CameraType = Enum.CameraType.Scriptable\n\n-- Stand at (0, 30, 40) and look at the point (0, 0, 0)\ncamera.CFrame = CFrame.lookAt(Vector3.new(0, 30, 40), Vector3.new(0, 0, 0))\n\ntask.wait(5)\n\n-- Give control back so it follows the character again\ncamera.CameraType = Enum.CameraType.Custom",
+      "explain": [
+        "Setting CameraType to Scriptable stops Roblox from moving the camera.",
+        "`CFrame.lookAt(from, target)` builds a CFrame standing at `from` and facing `target`. Here the camera is 30 studs up and 40 studs back, looking at the center of the map.",
+        "After 5 seconds, CameraType Custom hands control back to the normal follow camera."
+      ]
+    },
+    {
+      "title": "Zoom in while holding right mouse button",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local UserInputService = game:GetService(\"UserInputService\")\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\n\nUserInputService.InputBegan:Connect(function(input)\n\tif input.UserInputType == Enum.UserInputType.MouseButton2 then\n\t\tcamera.FieldOfView = 30 -- zoomed in\n\tend\nend)\n\nUserInputService.InputEnded:Connect(function(input)\n\tif input.UserInputType == Enum.UserInputType.MouseButton2 then\n\t\tcamera.FieldOfView = 70 -- back to normal (the default)\n\tend\nend)",
+      "explain": [
+        "The default FieldOfView is 70 degrees.",
+        "Making it 30 shows a narrower slice of the world, which looks zoomed in.",
+        "Letting go sets it back to 70."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Cameras only matter in LocalScripts. Changing the camera from a server Script does nothing for players.",
+    "If you set the camera's CFrame but it snaps back, the default scripts are moving it. Set CameraType to Scriptable first.",
+    "The camera may not be fully ready the instant a LocalScript starts. If needed, wait a moment or listen for `Workspace:GetPropertyChangedSignal(\"CurrentCamera\")`.",
+    "FieldOfView is clamped between 1 and 120."
+  ],
+  "members": {
+    "Camera.CameraSubject": {
+      "simple": "The thing the camera follows, usually your character's Humanoid. Set it to a part to follow that part instead, like a ball or a car.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nlocal ball = Workspace:WaitForChild(\"Ball\")\ncamera.CameraSubject = ball -- follow the ball",
+      "gotcha": "It cannot be set to nil. To go back to normal, set it to your character's Humanoid."
+    },
+    "Camera.CameraType": {
+      "simple": "Which built-in camera behavior to use. Custom is the normal follow camera. Scriptable means Roblox stops moving it so your code can. Others include Fixed, Follow, Track, Watch, Attach, and Orbital.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\ncamera.CameraType = Enum.CameraType.Scriptable"
+    },
+    "Camera.CFrame": {
+      "simple": "Where the camera is and which way it is looking, as one CFrame. Its LookVector is the direction the player is looking.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\ncamera.CameraType = Enum.CameraType.Scriptable\n-- 20 studs up, looking down at (0, 0, 0)\ncamera.CFrame = CFrame.lookAt(Vector3.new(0, 20, 10), Vector3.new(0, 0, 0))",
+      "gotcha": "In VR, head movement is not included here; use `GetRenderCFrame` for that."
+    },
+    "Camera.CoordinateFrame": {
+      "simple": "Old — use `CFrame` instead."
+    },
+    "Camera.DiagonalFieldOfView": {
+      "simple": "How many degrees the camera sees from one corner of the screen to the opposite corner. Changing it also changes FieldOfView.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nprint(camera.DiagonalFieldOfView)"
+    },
+    "Camera.FieldOfView": {
+      "simple": "How many degrees the camera sees from the top of the screen to the bottom. The default is 70. Smaller numbers zoom in; bigger numbers show more. It must be between 1 and 120.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\ncamera.FieldOfView = 90 -- wider view, feels faster"
+    },
+    "Camera.FieldOfViewMode": {
+      "simple": "Which field of view stays the same when the screen size changes (for example, when rotating a phone): the vertical one, the diagonal one, or the widest side.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\ncamera.FieldOfViewMode = Enum.FieldOfViewMode.Vertical"
+    },
+    "Camera.Focus": {
+      "simple": "The spot the camera is paying attention to. Roblox draws lighting and details best near this spot. The default camera sets it for you; it does not change where the camera points.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\ncamera.CameraType = Enum.CameraType.Scriptable\ncamera.CFrame = CFrame.lookAt(Vector3.new(0, 20, 20), Vector3.new(0, 0, 0))\ncamera.Focus = CFrame.new(0, 0, 0) -- prioritize details at the target",
+      "gotcha": "With CameraType Scriptable, Focus does not update by itself; set it yourself."
+    },
+    "Camera.focus": {
+      "simple": "Old — use `Focus` instead."
+    },
+    "Camera.HeadLocked": {
+      "simple": "For VR. If true (the default), the camera automatically follows the player's real head movement in their headset.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\ncamera.HeadLocked = true"
+    },
+    "Camera.HeadScale": {
+      "simple": "For VR. How big the world feels to the player. Bigger HeadScale makes the world look smaller, like being a giant.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\ncamera.HeadScale = 2 -- world looks half as big in VR"
+    },
+    "Camera.MaxAxisFieldOfView": {
+      "simple": "How many degrees the camera sees along the longest side of the screen (side to side on a wide screen, top to bottom on a phone held upright).",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nprint(camera.MaxAxisFieldOfView)"
+    },
+    "Camera.NearPlaneZ": {
+      "simple": "Read-only. How close to the camera things can be and still be drawn, as a negative number of studs. Anything closer gets cut away.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nprint(camera.NearPlaneZ) -- a small negative number"
+    },
+    "Camera.ViewportSize": {
+      "simple": "Read-only. The size of the player's game screen area in pixels (width, height), not counting notches or cutouts.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nlocal size = camera.ViewportSize\nprint(\"Screen is\", size.X, \"by\", size.Y)"
+    },
+    "Camera.VRTiltAndRollEnabled": {
+      "simple": "For VR. If true, tilting or rolling the camera CFrame also tilts the player's view. Off by default because a tilted horizon can make VR players feel sick.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\ncamera.VRTiltAndRollEnabled = false"
+    },
+    "Camera:GetLargestCutoffDistance": {
+      "simple": "Old — use `WorldRoot:Raycast` instead."
+    },
+    "Camera:GetPanSpeed": {
+      "simple": "Old — no longer used."
+    },
+    "Camera:GetPartsObscuringTarget": {
+      "simple": "Gives a list of parts blocking the straight line between the camera and each point you give. Useful for making walls see-through when they hide the player.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nlocal player = game:GetService(\"Players\").LocalPlayer\nlocal character = player.Character or player.CharacterAdded:Wait()\nlocal head = character:WaitForChild(\"Head\")\nlocal blockers = camera:GetPartsObscuringTarget({ head.Position }, { character })\nfor _, part in blockers do\n\tpart.LocalTransparencyModifier = 0.7 -- only you see it faded\nend"
+    },
+    "Camera:GetRenderCFrame": {
+      "simple": "Gives the camera's CFrame exactly as it is being drawn, including VR head movement. Use it instead of CFrame when you need the true view in VR.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nprint(camera:GetRenderCFrame().Position)"
+    },
+    "Camera:GetRoll": {
+      "simple": "Old — build the roll into `CFrame` instead (for example with `CFrame.Angles`)."
+    },
+    "Camera:GetTiltSpeed": {
+      "simple": "Old — no longer used."
+    },
+    "Camera:Interpolate": {
+      "simple": "Old — use TweenService to smoothly move the camera's CFrame instead."
+    },
+    "Camera:PanUnits": {
+      "simple": "Old — set the camera's `CFrame` instead."
+    },
+    "Camera:ScreenPointToRay": {
+      "simple": "Turns a spot on the screen (in pixels) into a 1-stud-long invisible line (a ray) pointing out into the 3D world. Use it to find what the player tapped or clicked. It counts the top bar in its math, matching GUI positions.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nlocal unitRay = camera:ScreenPointToRay(200, 150)\n-- make it 500 studs long and see what it hits\nlocal result = Workspace:Raycast(unitRay.Origin, unitRay.Direction * 500)\nif result then\n\tprint(\"You pointed at\", result.Instance.Name)\nend"
+    },
+    "Camera:SetCameraPanMode": {
+      "simple": "Old — no longer used."
+    },
+    "Camera:SetRoll": {
+      "simple": "Old — build the roll into `CFrame` instead (for example with `CFrame.Angles`)."
+    },
+    "Camera:TiltUnits": {
+      "simple": "Old — set the camera's `CFrame` instead."
+    },
+    "Camera:ViewportPointToRay": {
+      "simple": "Same as ScreenPointToRay, but it does NOT count the top bar, so (0, 0) is the very top-left of the whole viewport. Good for positions that come from input, like mouse position from UserInputService.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nlocal UserInputService = game:GetService(\"UserInputService\")\nlocal mouse = UserInputService:GetMouseLocation()\nlocal ray = camera:ViewportPointToRay(mouse.X, mouse.Y)\nprint(ray.Direction)"
+    },
+    "Camera:WorldToScreenPoint": {
+      "simple": "Turns a 3D world position into a spot on the screen. Gives back a Vector3 (X and Y are the screen spot in pixels, Z is how far away it is) and true or false for whether it is on screen. Counts the top bar, so it matches GUI positions.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nlocal spot, onScreen = camera:WorldToScreenPoint(Vector3.new(0, 10, 0))\nif onScreen then\n\tprint(\"It is at\", spot.X, spot.Y, \"on the screen\")\nend",
+      "gotcha": "onScreen is true even if a wall is hiding the point; it only checks the screen edges."
+    },
+    "Camera:WorldToViewportPoint": {
+      "simple": "Same as WorldToScreenPoint, but it does NOT count the top bar in its math.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nlocal spot, onScreen = camera:WorldToViewportPoint(Vector3.new(0, 10, 0))\nprint(spot.X, spot.Y, onScreen)"
+    },
+    "Camera:ZoomToExtents": {
+      "simple": "Moves the camera so a whole box-shaped area fits perfectly on screen. Give it the box's CFrame (center and rotation) and size. Great for showing off a whole model.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal Workspace = game:GetService(\"Workspace\")\nlocal camera = Workspace.CurrentCamera\nlocal castle = Workspace:WaitForChild(\"Castle\") -- a Model\ncamera.CameraType = Enum.CameraType.Scriptable\nlocal boxCFrame, boxSize = castle:GetBoundingBox()\ncamera:ZoomToExtents(boxCFrame, boxSize)"
+    },
+    "Camera.InterpolationFinished": {
+      "simple": "Old — goes with the old `Interpolate`. Use TweenService and its Completed event instead."
+    }
+  }
+}

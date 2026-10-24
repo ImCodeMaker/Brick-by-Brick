@@ -1,0 +1,98 @@
+{
+  "name": "GuiBase2d",
+  "simple": "GuiBase2d is the family name for every flat (2D) piece of on-screen stuff in Roblox: frames, buttons, labels, and the containers that hold them like ScreenGui. You never make a GuiBase2d yourself. Instead, every UI thing you make gets its features, like AbsolutePosition and AbsoluteSize, which tell you exactly where it ended up on the screen in pixels.",
+  "analogy": "GuiBase2d is like the word 'vehicle'. You never buy a 'vehicle', you buy a car or a bike, but every vehicle has wheels and a speed. Every UI object has a real pixel position and size on your screen.",
+  "whenToUse": [
+    "Reading where a UI object really is on the screen in pixels (AbsolutePosition)",
+    "Reading how big a UI object really is in pixels (AbsoluteSize)",
+    "Turning automatic translation on or off for text (AutoLocalize)",
+    "Controlling how gamepad selection moves around a group of buttons (SelectionGroup)"
+  ],
+  "where": "Client side. It is a base class, so you cannot do Instance.new(\"GuiBase2d\"). Its properties show up on every UI object (Frame, TextLabel, ScreenGui, and so on). UI code goes in a LocalScript, for example inside StarterGui or StarterPlayerScripts.",
+  "terms": {
+    "base class": "A 'parent type' that other types are built from. You can't make one directly, but every type built from it gets its properties.",
+    "abstract": "Means 'only used as a base class'. You never create it yourself.",
+    "pixel": "One tiny dot on your screen. A typical laptop screen is about 1920 pixels wide and 1080 pixels tall.",
+    "absolute": "The final, real answer after everything is worked out. AbsoluteSize is the true size in pixels, no matter how the Size was written.",
+    "read-only": "You can look at the value, but you can't change it from a script. Roblox updates it for you.",
+    "Vector2": "Two numbers stuck together: X (left-right) and Y (up-down). Example: Vector2.new(400, 250).",
+    "descendant": "Anything inside an object: its children, their children, and so on, all the way down.",
+    "client": "The player's own device (their computer, phone, or console). UI lives and runs here.",
+    "LocalScript": "A script that runs on the player's device instead of on the Roblox server. All UI code goes in LocalScripts.",
+    "localization": "Translating your game's text into other languages, like turning 'Play' into 'Jugar' for Spanish players.",
+    "gamepad": "A game controller, like an Xbox or PlayStation controller.",
+    "deprecated": "Old and replaced by something better. It may still work, but you shouldn't use it in new code."
+  },
+  "examples": [
+    {
+      "title": "Find out where a frame really is on screen",
+      "place": "LocalScript inside a Frame (inside a ScreenGui in StarterGui)",
+      "code": "local frame = script.Parent -- the Frame this LocalScript is inside\n\n-- Size and Position are the 'recipe'. Absolute values are the real result in pixels.\nprint(\"Recipe size:\", frame.Size)\nprint(\"Real size in pixels:\", frame.AbsoluteSize)\nprint(\"Real top-left corner in pixels:\", frame.AbsolutePosition)\n\n-- Absolute values change when the window is resized, so listen for it\nframe:GetPropertyChangedSignal(\"AbsoluteSize\"):Connect(function()\n\tprint(\"New real size:\", frame.AbsoluteSize)\nend)",
+      "explain": [
+        "script.Parent is the Frame because the LocalScript is placed inside it.",
+        "frame.Size is what you typed in (for example 50% of the screen). frame.AbsoluteSize is what that turned into, like (500, 300) pixels on a 1000x600 window.",
+        "AbsolutePosition is always the frame's top-left corner in pixels, even if you used AnchorPoint to place it by its center.",
+        "GetPropertyChangedSignal runs our function whenever AbsoluteSize changes, for example when the player resizes their window or rotates their phone."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Size and Position are what you ask for. AbsoluteSize and AbsolutePosition are what you actually get, in pixels. If your Size uses Scale (percent), the AbsoluteSize changes on every screen size.",
+    "AbsolutePosition is always the top-left corner, not the AnchorPoint. A centered frame still reports its top-left corner.",
+    "You can't set AbsolutePosition or AbsoluteSize. To move or resize something, change Position or Size instead.",
+    "Inside a ScreenGui, AbsolutePosition is measured from just below the Roblox top bar (unless the ScreenGui ignores that inset), so (0, 0) may not be the very top pixel of the window."
+  ],
+  "members": {
+    "GuiBase2d.AbsolutePosition": {
+      "simple": "The real spot on the screen, in pixels, where this UI object's top-left corner ended up. Roblox works it out from the object's Position and all of its parents' sizes and positions. Use it when you need exact pixel numbers, like checking if the mouse is over something.",
+      "example": "-- LocalScript inside a Frame\nlocal frame = script.Parent\n-- Prints something like 400, 250 (pixels from the top-left of the screen area)\nprint(frame.AbsolutePosition.X, frame.AbsolutePosition.Y)",
+      "gotcha": "It is always the TOP-LEFT corner, even if AnchorPoint is (0.5, 0.5). It is read-only, so change Position instead."
+    },
+    "GuiBase2d.AbsoluteRotation": {
+      "simple": "The real angle, in degrees, that this UI object is turned on the screen. It adds up its own Rotation plus any rotation from its parents. A frame turned 10 degrees inside a parent turned 20 degrees has an AbsoluteRotation of 30.",
+      "example": "local frame = script.Parent\nprint(\"Turned by\", frame.AbsoluteRotation, \"degrees on screen\")",
+      "gotcha": "It is not kept between 0 and 360, so you might see numbers like 370 or -20."
+    },
+    "GuiBase2d.AbsoluteSize": {
+      "simple": "The real width and height of this UI object, in pixels, after Roblox has done the math. If a frame's Size is 50% of a 1000-pixel-wide screen, its AbsoluteSize.X is 500.",
+      "example": "local frame = script.Parent\nprint(\"Width:\", frame.AbsoluteSize.X, \"Height:\", frame.AbsoluteSize.Y)",
+      "gotcha": "It is read-only. It changes when the screen changes size, so don't save it once and assume it stays the same."
+    },
+    "GuiBase2d.AutoLocalize": {
+      "simple": "When true (the default), Roblox tries to automatically translate the text in this object and everything inside it into the player's language, using your game's translation tables. Turn it off for text that should never be translated, like a player's name or a score number.",
+      "example": "local nameLabel = script.Parent -- a TextLabel that shows a player's name\nnameLabel.AutoLocalize = false -- never try to translate names"
+    },
+    "GuiBase2d.Localize": {
+      "simple": "Old — use AutoLocalize instead."
+    },
+    "GuiBase2d.RootLocalizationTable": {
+      "simple": "Lets you point this UI (and everything inside it) at one specific LocalizationTable (a list of translations) to use first. Only works if AutoLocalize is true on this object and the objects above it. Most games leave it empty and let Roblox use the default tables.",
+      "example": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal screenGui = script.Parent -- a ScreenGui\n-- Use this special translation table first for this whole menu\nscreenGui.RootLocalizationTable = ReplicatedStorage:WaitForChild(\"ShopTranslations\")"
+    },
+    "GuiBase2d.SelectionBehaviorDown": {
+      "simple": "Only matters when SelectionGroup is true. Decides what happens when a gamepad player presses down and there is no button below inside this group. Escape (the default) lets the selection leave the group. Stop keeps the selection trapped inside the group.",
+      "example": "local menu = script.Parent -- a Frame full of buttons\nmenu.SelectionGroup = true\nmenu.SelectionBehaviorDown = Enum.SelectionBehavior.Stop -- can't move down out of the menu"
+    },
+    "GuiBase2d.SelectionBehaviorLeft": {
+      "simple": "Only matters when SelectionGroup is true. Decides whether gamepad selection can move LEFT out of this group (Escape, the default) or must stay inside (Stop).",
+      "example": "local menu = script.Parent\nmenu.SelectionGroup = true\nmenu.SelectionBehaviorLeft = Enum.SelectionBehavior.Stop"
+    },
+    "GuiBase2d.SelectionBehaviorRight": {
+      "simple": "Only matters when SelectionGroup is true. Decides whether gamepad selection can move RIGHT out of this group (Escape, the default) or must stay inside (Stop).",
+      "example": "local menu = script.Parent\nmenu.SelectionGroup = true\nmenu.SelectionBehaviorRight = Enum.SelectionBehavior.Stop"
+    },
+    "GuiBase2d.SelectionBehaviorUp": {
+      "simple": "Only matters when SelectionGroup is true. Decides whether gamepad selection can move UP out of this group (Escape, the default) or must stay inside (Stop).",
+      "example": "local menu = script.Parent\nmenu.SelectionGroup = true\nmenu.SelectionBehaviorUp = Enum.SelectionBehavior.Stop"
+    },
+    "GuiBase2d.SelectionGroup": {
+      "simple": "Turns this object into a 'group' for gamepad players. When true, the gamepad selection looks for buttons inside this group first, and the four SelectionBehavior properties decide whether the selection can leave the group. Handy for menus where you don't want the highlight wandering off.",
+      "example": "local shopMenu = script.Parent -- a Frame with buttons inside\nshopMenu.SelectionGroup = true -- gamepad selection prefers buttons in here",
+      "gotcha": "The four SelectionBehavior properties do nothing until SelectionGroup is true."
+    },
+    "GuiBase2d.SelectionChanged": {
+      "simple": "Fires when gamepad selection moves onto, off of, or around inside this object or anything inside it. It gives you three things: amISelected (is THIS object the one selected now?), previousSelection, and newSelection.",
+      "example": "local menu = script.Parent\nmenu.SelectionChanged:Connect(function(amISelected, previousSelection, newSelection)\n\tif newSelection then\n\t\tprint(\"Gamepad is now on:\", newSelection.Name)\n\tend\nend)"
+    }
+  }
+}

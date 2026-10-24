@@ -1,0 +1,33 @@
+{
+  "path": "content/en-us/workspace/camera/free-camera.md",
+  "simple": "Free camera mode (freecam) lets you unhook the camera from your character and fly it anywhere in your game. It is a tool for owners and editors to take cool screenshots and videos, watch players, or look for problems. You turn it on with Left Shift + P. It also has a menu for smooth movement, hiding the UI, following a player, and adding movie-style effects.",
+  "analogy": "It is like flying a camera drone around your own game world: you leave your character standing still and steer the drone wherever you want for the perfect shot.",
+  "keyPoints": [
+    "Freecam works during playtesting in Studio, or in the live game if you own it or have edit permission.",
+    "Press Left Shift + P to turn it on or off. Your on-screen UI hides automatically.",
+    "Controls: WASD to fly, E and Q to go up and down, hold right mouse and drag to look around, scroll to zoom, Z and C to tilt (double-tap to reset), hold Shift to move slowly.",
+    "Gamepads work too once freecam is on, but you need a keyboard to turn it on.",
+    "Press the up arrow (or D-pad Up) to open the config menu for speed and stiffness, UI visibility, Player Lock, and post-processing.",
+    "Player Lock keeps the camera aimed at a chosen player as they move.",
+    "Custom post-processing adds effects like depth of field, bloom, blur, color correction, sun rays, and color grading. The menu features need the game to use the upgraded Input Action System player scripts.",
+    "Shortcuts hide UI types: Ctrl+Left Shift+G (Roblox UI), C (your ScreenGuis), B (BillboardGuis), N (nameplates). Press again to bring them back."
+  ],
+  "terms": {
+    "freecam": "Short for free camera, a camera you can fly around without your character.",
+    "playtesting": "Running your game inside Studio to try it out.",
+    "edit permissions": "Permission from the game's owner to change the game. Only these people can use freecam in live games.",
+    "field of view": "How wide the camera sees. Zooming in narrows it to make far-away things look bigger.",
+    "roll / Dutch angle": "Tilting the camera sideways so the picture looks slanted, a trick filmmakers use to make a scene feel tense.",
+    "stiffness": "How tightly the camera follows your controls. High stiffness stops sharply; low stiffness glides smoothly.",
+    "post-processing": "Effects added to the picture after it is drawn, like blur or glow, similar to photo filters.",
+    "depth of field": "Blurring things that are not in focus so the subject stands out.",
+    "bloom": "Making bright areas glow, like looking at a strong light.",
+    "nameplate": "The name and health bar shown above a player's head.",
+    "Input Action System": "A newer Roblox system for handling controls. The freecam config menu and effects only work when the game uses its upgraded player scripts."
+  },
+  "watchOut": [
+    "Freecam will not turn on for regular players in a live game. You must be the owner or have edit permission.",
+    "You cannot start freecam from a gamepad or touchscreen; use Left Shift + P on a keyboard.",
+    "Turning on custom post-processing disables your game's own post-processing effects while freecam is on."
+  ]
+}

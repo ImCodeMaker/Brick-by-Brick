@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/luau/queues.md",
+  "simple": "A queue is a line of items where the first one in is the first one out, just like a line at a snack stand. Games use queues for things like players waiting for a match or tasks waiting their turn. There is also a priority queue, where more important items jump ahead. Luau does not have a queue type built in, but you can make one with a table.",
+  "analogy": "A regular queue is the line for a ride: whoever got there first gets on first. A priority queue is like a line where VIP pass holders get to go ahead of everyone else.",
+  "keyPoints": [
+    "A regular queue follows FIFO: first in, first out.",
+    "New items are added to the back, and items are read or removed from the front.",
+    "In a priority queue, each item has a priority number. Higher priority items come out first.",
+    "In a priority queue, a new item goes behind all items with the same or higher priority. To jump to the very front, give it a higher priority than the current highest.",
+    "Priority queues help with matchmaking, for example giving players who waited longest a higher priority.",
+    "`MemoryStoreService` has built-in queues for sharing data across servers. For anything else, build a queue with a table.",
+    "The page's queue module has `enqueue` (add to back), `dequeue` (take from front), and `isEmpty`."
+  ],
+  "terms": {
+    "queue": "A list where items join at the back and leave from the front.",
+    "FIFO": "First In, First Out. The item added first is the first one removed.",
+    "enqueue": "To add an item to the back of the queue.",
+    "dequeue": "To remove the item at the front of the queue.",
+    "priority queue": "A queue where items with bigger priority numbers come out first, no matter when they were added.",
+    "priority": "A number that says how important an item is. With priorities 0, 3, and 5, the 5 comes out first.",
+    "linear data structure": "Items arranged in a single line, one after another.",
+    "MemoryStoreService": "A Roblox service for short-term data shared between all your game's servers. It includes built-in queues.",
+    "ModuleScript": "A script that holds code other scripts can load with `require`."
+  },
+  "example": {
+    "title": "A simple waiting line for a mini-game",
+    "place": "Script in ServerScriptService",
+    "code": "-- A simple queue using a table and two counters\nlocal queue = {}\nlocal first = 1 -- position of the front item\nlocal last = 0  -- position of the back item\n\nlocal function enqueue(value)\n\tlast += 1\n\tqueue[last] = value\nend\n\nlocal function isEmpty()\n\treturn first > last\nend\n\nlocal function dequeue()\n\tif isEmpty() then\n\t\treturn nil\n\tend\n\tlocal value = queue[first]\n\tqueue[first] = nil -- clear the old spot\n\tfirst += 1\n\treturn value\nend\n\nenqueue(\"Ava\")\nenqueue(\"Ben\")\nenqueue(\"Cho\")\n\nprint(dequeue()) --> Ava (first in, first out)\nprint(dequeue()) --> Ben\nenqueue(\"Dev\")\nprint(dequeue()) --> Cho\nprint(dequeue()) --> Dev\nprint(dequeue()) --> nil (the line is empty)",
+    "explain": [
+      "`first` and `last` remember where the front and back of the line are.",
+      "`enqueue` moves `last` up by 1 and puts the new name there.",
+      "`dequeue` takes the name at `first`, clears that spot, and moves `first` up by 1.",
+      "Names come out in the same order they went in: Ava, Ben, Cho, then Dev.",
+      "When the line is empty, `dequeue` returns `nil` instead of crashing."
+    ]
+  },
+  "watchOut": [
+    "Removing from an empty queue. Check `isEmpty()` first, or the page's module will throw an error.",
+    "Using `table.remove(list, 1)` on very long lists. It shifts every item, which gets slow; the two-counter method avoids that.",
+    "Mixing up queues and stacks. A queue gives you the oldest item; a stack gives you the newest."
+  ]
+}

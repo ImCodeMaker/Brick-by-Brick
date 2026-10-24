@@ -1,0 +1,25 @@
+{
+  "path": "content/en-us/effects/index.md",
+  "simple": "This page is a quick tour of the special effects you can add to a Roblox game. You make most effects by putting an effect object inside a part or an attachment. There are lights, particle emitters (fire, smoke, sparks), beams (lasers, waterfalls), trails (sword swooshes), and highlights (glowing outlines). Each one has its own page with more detail.",
+  "analogy": "Think of effects like stickers and glow sticks for your build: the part is the toy, and you stick an effect onto it to make it shine, sparkle, or leave a streak.",
+  "keyPoints": [
+    "You create effects by parenting an effect object to a part or an attachment.",
+    "There are three light types: `PointLight` (glows in every direction, like a bulb or torch), `SpotLight` (a cone, like a flashlight), and `SurfaceLight` (glows from one face, like a TV screen).",
+    "A `ParticleEmitter` shoots out lots of small 2D images to make fire, smoke, sparks, and more.",
+    "A `Beam` draws a texture between two attachments. You can change its color, fade, width, and curve for things like waterfalls and force fields.",
+    "A `Trail` draws a streak behind two moving attachments, great for sword slashes, flying projectiles, or footprints.",
+    "A `Highlight` puts an outline and colored overlay on an object to show it is important or can be used."
+  ],
+  "terms": {
+    "parent / parenting": "Putting one object inside another in the Explorer. If a light is inside a part, the part is its parent and the light glows from that part.",
+    "attachment": "An invisible point inside a part. Effects like beams and trails need attachments to know where to start and end.",
+    "particle": "One tiny flat picture, like a single spark or puff of smoke. Emitters make lots of them.",
+    "texture": "An image used to paint the look of an effect, like a laser pattern on a beam.",
+    "gradient": "A smooth change from one color or value to another, like red fading into yellow."
+  },
+  "watchOut": [
+    "Beams and trails need two attachments. Without both, nothing shows up.",
+    "Too many particles or very big ones can make the game slow, especially on phones. Start small.",
+    "Effects are visual only. A glowing beam will not hurt players unless you also write a script for it."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/ui/text-filtering.md",
+  "simple": "Text filtering hides bad words and private info, like phone numbers, before other players see them. Roblox already filters normal chat for you, but any other text players type or your game makes, like a pet name or a message on a sign, is your job to filter. This is a big deal: if Roblox finds that your game shows unfiltered text, it can take your game down until you fix it. The page shows how to send text to the server and filter it with `TextService`.",
+  "analogy": "It is like a teacher checking notes before they get pinned on the class bulletin board. Anything that goes up for everyone to see has to pass the check first.",
+  "keyPoints": [
+    "You must filter any displayed text you do not fully control, like player typing, random word generators, text from outside websites, or names saved in data stores.",
+    "Roblox chat is filtered for you. Your own text boxes and signs are not.",
+    "On the server, call `TextService:FilterStringAsync(text, userId)` with the text and the `UserId` of the player who wrote it. It gives back a `TextFilterResult`.",
+    "Use `GetNonChatStringForBroadcastAsync()` for text everyone will see, like a sign on the server.",
+    "Use `GetNonChatStringForUserAsync()` when the text is shown to just one specific player.",
+    "Filter after the player submits (for example, presses Enter), not on every letter they type.",
+    "Wrap the filter calls in `pcall` because they can fail, and handle the error."
+  ],
+  "terms": {
+    "text filtering": "Roblox's system that replaces bad words or private info with hashtags before others see it.",
+    "personally identifiable information": "Info that could find a real person, like a phone number, address, or full name.",
+    "UserId": "The unique number Roblox gives each account. The filter needs the writer's UserId to filter correctly.",
+    "TextFilterResult": "The object you get back from `FilterStringAsync`. You call one of its methods to get the cleaned-up text.",
+    "broadcast": "Show to everyone in the server, like a public sign.",
+    "RemoteEvent": "A messenger that sends info between a player's device (client) and the server. Here it carries the typed text to the server.",
+    "client": "The player's own device. LocalScripts run here.",
+    "server": "Roblox's computer running the game for everyone. Filtering must happen here.",
+    "yield": "Pause and wait for something to finish. Filter functions yield while Roblox checks the text.",
+    "pcall": "A safe way to call a function. If the function errors, the script keeps running and tells you it failed instead of crashing.",
+    "FocusLost": "An event on a `TextBox` that fires when the player stops typing in it, for example by pressing Enter or clicking away."
+  },
+  "example": {
+    "title": "Filter text a player types for a public sign",
+    "place": "Script in ServerScriptService (plus a RemoteEvent named InputRemoteEvent in ReplicatedStorage, and a LocalScript in the TextBox that fires it)",
+    "code": "local TextService = game:GetService(\"TextService\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n\nlocal inputRemoteEvent = ReplicatedStorage:WaitForChild(\"InputRemoteEvent\")\n\nlocal function onInputReceived(player, text)\n\t-- Ignore empty or non-text input\n\tif typeof(text) ~= \"string\" or text == \"\" then\n\t\treturn\n\tend\n\n\t-- Step 1: ask Roblox to check the text from this player\n\tlocal ok, filterResult = pcall(function()\n\t\treturn TextService:FilterStringAsync(text, player.UserId)\n\tend)\n\tif not ok then\n\t\twarn(\"Could not filter text:\", filterResult)\n\t\treturn\n\tend\n\n\t-- Step 2: get the version that is safe for everyone to see\n\tlocal ok2, filteredText = pcall(function()\n\t\treturn filterResult:GetNonChatStringForBroadcastAsync()\n\tend)\n\tif ok2 then\n\t\tprint(\"FILTERED:\", filteredText) -- show this on your sign\n\telse\n\t\twarn(\"Error filtering text!\")\n\tend\nend\n\ninputRemoteEvent.OnServerEvent:Connect(onInputReceived)",
+    "explain": [
+      "The LocalScript in the TextBox sends the typed text with `FireServer` when the player presses Enter.",
+      "On the server, `OnServerEvent` gives us the player who sent it and the text.",
+      "We skip empty text or anything that is not a string.",
+      "`FilterStringAsync` checks the text, using the sender's `UserId`. We wrap it in `pcall` in case it fails.",
+      "`GetNonChatStringForBroadcastAsync` returns text that is safe for everyone, which you can then put on a sign or SurfaceGui."
+    ]
+  },
+  "watchOut": [
+    "Showing player text without filtering it. Roblox can remove your game until you add filtering.",
+    "Filtering on the client. Filtering must be done on the server, so send the text with a RemoteEvent.",
+    "Filtering every keystroke. Wait until the player submits, then filter once.",
+    "Using the broadcast method for text only one player sees, or the other way around. Pick broadcast for everyone, `ForUser` for one person.",
+    "Not using `pcall`. The filter can fail, and without `pcall` your script errors out."
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/ui/position-and-size.md",
+  "simple": "This page teaches how to put UI exactly where you want it and make it the right size. Every UI object has a `Position` and `Size` made of two parts: scale (a fraction of the container) and offset (exact pixels). `AnchorPoint` picks which spot on the object those numbers refer to, and `ZIndex` decides what is drawn on top. It also gives tips for phones, like keeping buttons where thumbs can reach.",
+  "analogy": "Scale is like saying \"put the poster halfway across the wall\", which works on any wall. Offset is like saying \"put it 50 centimeters from the corner\", which looks different on a big wall than a small one.",
+  "keyPoints": [
+    "`Position` and `Size` use `UDim2`, which has a scale and an offset for both X (across) and Y (down).",
+    "Scale is a fraction of the parent container: 0.5 means 50%. Offset is in pixels. The two are added together.",
+    "In Studio you can type `0.5` and get 50% scale for both axes, or `20` and get 20 pixels for both.",
+    "`AnchorPoint` is the spot on the object that `Position` refers to: (0, 0) is the top-left corner, (0.5, 0.5) is the center, (1, 1) is the bottom-right.",
+    "`ZIndex` sets which objects draw on top; higher numbers cover lower ones, and children draw above their parents by default.",
+    "Layouts like `UIListLayout`, `UIGridLayout`, `UITableLayout`, and `UIPageLayout` can take over position and size for you.",
+    "On phones, the bottom corners are taken by the thumbstick and jump button, so keep important UI out of those spots.",
+    "Put often-used buttons where thumbs reach easily, and only show buttons when they are needed."
+  ],
+  "terms": {
+    "UDim2": "A UI position or size with four numbers: X scale, X offset, Y scale, Y offset. Written like {0.5, 10},{0, 20}.",
+    "scale": "A fraction of the parent's size. In a 1000-pixel-wide screen, X scale 0.25 is 250 pixels.",
+    "offset": "An exact number of pixels. X offset 40 moves it 40 pixels right.",
+    "additive": "Scale and offset are added. {0.5, 10} on a 1000-pixel-wide screen means 500 + 10 = 510 pixels.",
+    "AnchorPoint": "The point on the object that is placed at `Position`, given as fractions of the object's own size. (0.5, 0.5) with Position {0.5,0},{0.5,0} centers the object on screen.",
+    "ZIndex": "A whole number for layering. An object with ZIndex 5 draws over one with ZIndex 1.",
+    "container / parent": "The UI object something sits inside. Scale is measured from this, not always the whole screen.",
+    "cross-platform": "Working on phones, tablets, computers, and consoles.",
+    "reserved zones": "Screen areas already used by Roblox controls on phones, like the thumbstick in the bottom-left.",
+    "thumb zone": "The part of a phone screen your thumbs can reach comfortably while holding it."
+  },
+  "example": {
+    "title": "Center a box on any screen size",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal box = Instance.new(\"Frame\")\nbox.AnchorPoint = Vector2.new(0.5, 0.5) -- use the box's center as its handle\nbox.Position = UDim2.fromScale(0.5, 0.5) -- put that center at 50%, 50% of the screen\nbox.Size = UDim2.new(0.3, 0, 0, 100) -- 30% of screen width, exactly 100 pixels tall\nbox.ZIndex = 2\nbox.Parent = screenGui\n\nlocal shadow = Instance.new(\"Frame\")\nshadow.AnchorPoint = Vector2.new(0.5, 0.5)\nshadow.Position = UDim2.new(0.5, 6, 0.5, 6) -- center, then 6 pixels right and down\nshadow.Size = box.Size\nshadow.BackgroundColor3 = Color3.new(0, 0, 0)\nshadow.ZIndex = 1 -- drawn under the box\nshadow.Parent = screenGui",
+    "explain": [
+      "We set the box's `AnchorPoint` to (0.5, 0.5) so its center is what gets positioned.",
+      "`UDim2.fromScale(0.5, 0.5)` places that center in the middle of the screen, whatever its size.",
+      "The size mixes scale (30% wide) and offset (100 pixels tall).",
+      "We add a black shadow frame nudged 6 pixels right and down, with a lower `ZIndex` so it sits behind the box."
+    ]
+  },
+  "watchOut": [
+    "Using only offset (pixels) can make UI too big on phones and tiny on big monitors. Use scale for most things.",
+    "Forgetting `AnchorPoint` is the top-left by default makes \"centered\" UI look shifted right and down. Set it to (0.5, 0.5) to center.",
+    "If a layout like `UIListLayout` is in the container, it will override the `Position` you set.",
+    "Test on a phone or in Studio's device emulator so buttons are not hidden under the thumbstick or jump button."
+  ]
+}

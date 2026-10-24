@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/performance-optimization/monitor.md",
+  "simple": "After you publish an update, you need to keep an eye on how your game performs for real players. The Performance Dashboard shows live data for players' devices and your servers, and you can compare different dates to see if an update helped or hurt. This page tells a story of finding a memory leak using the dashboard and the Developer Console. It shows why playing for a long time while testing matters.",
+  "analogy": "It is like checking your plant every day after moving it to a new window. If it starts drooping, you know the move caused it.",
+  "keyPoints": [
+    "The Performance Dashboard is the best way to watch performance of your published game.",
+    "It has two tabs: one for clients (players' devices) and one for servers.",
+    "Use date ranges to compare before and after an update.",
+    "In the story, client crashes went up after adding a new place, matching rising memory use.",
+    "Quick tests in Studio did not show the problem. Playing longer showed memory growing over time.",
+    "The Developer Console Memory tab, under PlaceScriptMemory, pointed to one script.",
+    "The script kept adding player data to a big table but never removed it. Fixing that brought crashes back down.",
+    "Compare the Performance Dashboard with other analytics to see how performance affects things like play time and earnings."
+  ],
+  "terms": {
+    "Performance Dashboard": "A page on the Creator Dashboard with charts of how your live game is performing.",
+    "client": "A player's device running your game.",
+    "crash rate": "How often the game crashes for players. An uptick means it went up.",
+    "correlate": "When two things go up or down together. Crashes rising as memory rises suggests memory is the cause.",
+    "session time": "How long a player stays in one visit. Longer sessions give leaks more time to grow.",
+    "memory leak": "Memory that keeps growing because the game never lets go of stuff it no longer needs.",
+    "Developer Console": "A tool you open with F9 in a game. Its Memory tab shows what is using memory.",
+    "PlaceScriptMemory": "A part of the Memory tab that shows how much memory each script is using.",
+    "regression": "When something gets worse after a change, like frame rate dropping after an update."
+  },
+  "example": {
+    "title": "Avoid a growing table leak",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\n-- Stores extra data for each player while they are in the server\nlocal playerData = {}\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayerData[player.UserId] = { clicks = 0 }\nend)\n\n-- Clean up when a player leaves, so the table does not grow forever\nPlayers.PlayerRemoving:Connect(function(player)\n\tplayerData[player.UserId] = nil\nend)",
+    "explain": [
+      "We keep a table that holds data for each player, keyed by their `UserId`.",
+      "When a player joins, we add an entry.",
+      "When a player leaves, we set their entry to `nil`, which removes it.",
+      "Without the cleanup step, a server that runs for hours would keep every player who ever joined, and memory would keep climbing."
+    ]
+  },
+  "watchOut": [
+    "Testing for only a minute in Studio. Some problems, like leaks, only show after playing a long time.",
+    "Only checking the client tab. Check the server tab too, since a server leak can crash everyone at once.",
+    "Adding data to a table without ever removing it. Always clean up when a player leaves or an object is destroyed."
+  ]
+}

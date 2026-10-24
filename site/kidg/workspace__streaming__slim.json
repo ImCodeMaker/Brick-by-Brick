@@ -1,0 +1,47 @@
+{
+  "path": "content/en-us/workspace/streaming/slim.md",
+  "simple": "SLIM is a Roblox feature that makes cheap, good-looking stand-ins for models and player avatars that are far away. With streaming on, faraway things normally vanish because they are not loaded. With SLIM, Roblox's cloud builds a light version that still shows up, so your city skyline or crowd of players does not just disappear. It also makes games run faster, because the stand-in costs much less for the device to draw.",
+  "analogy": "It is like a cardboard cutout of a building on a movie set. From far away it looks just like the real building, but it is light and cheap. When the camera walks close, the real building is swapped in.",
+  "keyPoints": [
+    "SLIM needs three things: StreamingEnabled on, the place saved to Roblox (not just a local file), and Team Create turned on.",
+    "To use SLIM on a model, set its `LevelOfDetail` property to SLIM in the Properties window.",
+    "SLIM works best on models that never change while the game runs, like buildings, props, and scenery. Adding parts, changing materials, or animating breaks it.",
+    "Models with a Humanoid inside are skipped. For player characters, set `Workspace.EnableSLIMAvatars` to Enabled instead.",
+    "SLIM avatars only work for R15 player characters with normal proportions. R6 avatars and NPCs are not included.",
+    "In one example crowd far away, SLIM cut about 2,600,000 triangles down to about 170,000.",
+    "The first time, the cloud may need 1 to 2 minutes to build the SLIM version. Wait, then rejoin.",
+    "Debug tint modes in the Developer Console and Studio's Visualization Options color models so you can see their SLIM status."
+  ],
+  "terms": {
+    "SLIM": "Scalable Lightweight Interactive Models. Roblox's system for making light, faraway versions of models and avatars.",
+    "transcoding": "Converting something into a different, more efficient format. Roblox's cloud transcodes your model into a SLIM mesh.",
+    "draw call": "One instruction sent to the graphics chip to draw something. Fewer draw calls means a faster game. SLIM can draw a 50-part house in far fewer calls.",
+    "GPU": "The graphics chip in a device that draws everything on screen.",
+    "triangle": "The tiny flat shapes every 3D model is built from. Fewer triangles means less work for the device.",
+    "composite mesh": "Many parts merged into one single mesh.",
+    "level of detail": "Using simpler versions of objects the farther away they are.",
+    "fidelity": "How close something looks to the real original.",
+    "CDN": "A network of servers around the world that stores files, like SLIM assets, so players can download them quickly.",
+    "static": "Not changing while the game runs.",
+    "R15 / R6": "Two kinds of Roblox character bodies. R15 has 15 body parts and R6 has 6.",
+    "z-fighting": "Flickering when two surfaces sit in exactly the same spot and the game cannot decide which to show. Moving one by even 0.01 studs fixes it.",
+    "UV mapping": "Instructions for how a flat image wraps around a 3D shape."
+  },
+  "example": {
+    "title": "Turn on SLIM for every model in a Buildings folder",
+    "place": "Studio Command Bar (View > Command Bar), run once while editing a published place with streaming and Team Create on",
+    "code": "-- Find the folder that holds all the static buildings\nlocal buildings = workspace:FindFirstChild(\"Buildings\")\n\nif buildings then\n\tlocal count = 0\n\tfor _, item in buildings:GetDescendants() do\n\t\t-- Only models that are not characters (no Humanoid inside)\n\t\tif item:IsA(\"Model\") and not item:FindFirstChildWhichIsA(\"Humanoid\", true) then\n\t\t\titem.LevelOfDetail = Enum.ModelLevelOfDetail.SLIM\n\t\t\tcount += 1\n\t\tend\n\tend\n\tprint(\"Set SLIM on \" .. count .. \" models\")\nelse\n\twarn(\"No folder named Buildings in Workspace\")\nend",
+    "explain": [
+      "The Command Bar runs code in Studio right away, which is handy for changing many objects at once.",
+      "We look for a folder called Buildings in Workspace, since only static scenery should use SLIM.",
+      "We go through everything inside it and pick out Models that have no Humanoid, because SLIM skips characters anyway.",
+      "We set each one's `LevelOfDetail` to SLIM and count them, then print the total so you know it worked."
+    ]
+  },
+  "watchOut": [
+    "Testing SLIM in an unpublished local file. SLIM needs Roblox's cloud, so publish first and turn on Team Create.",
+    "Putting SLIM on doors, moving platforms, or animated models. SLIM is for things that never change during play.",
+    "Expecting to see SLIM avatars when testing alone. You need at least 2 clients, like Server and Clients test mode or a Team Test.",
+    "Changing a player's avatar after CharacterAppearanceLoaded (like adding a Highlight) and wondering why SLIM does not show it."
+  ]
+}

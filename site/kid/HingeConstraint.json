@@ -1,0 +1,121 @@
+{
+  "name": "HingeConstraint",
+  "simple": "HingeConstraint lets two parts spin around one line, like a door on its hinges or a wheel on an axle. The two attachments stay on the same spot, and their X arrows (the hinge line) stay lined up. You can leave it free-spinning, power it like a motor, or make it turn to an exact angle like a servo.",
+  "analogy": "HingeConstraint is exactly like a door hinge or a wheel's axle: it can only swing or spin one way, around one line.",
+  "whenToUse": [
+    "Doors and gates that swing",
+    "Car and cart wheels (Motor)",
+    "Drawbridges, levers and flippers (Servo)",
+    "Spinning windmills and fans"
+  ],
+  "where": "Make it with Instance.new(\"HingeConstraint\"), set Attachment0 and Attachment1 (one in each part), and put it in workspace. The hinge line is each attachment's X arrow, so turn the attachments so their X points along the axle.",
+  "terms": {
+    "constraint": "An invisible rule or connector that the physics engine follows, like 'these two parts must stay stuck together' or 'push this part upward'.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "axis": "An imaginary line something turns around or slides along. An attachment's X axis is its main arrow.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "angular velocity": "How fast something spins, and around which axis, measured in radians per second. 2 x pi (about 6.28) radians per second is one full turn every second.",
+    "radians": "Another way to measure angles. A full circle is 2 x pi (about 6.28) radians, which is 360 degrees. `math.rad(90)` turns 90 degrees into radians.",
+    "restitution": "Bounciness, from 0 (no bounce, just stops) to 1 (bounces back as hard as it hit).",
+    "actuator": "The part of a constraint that powers movement by itself, like a motor. ActuatorType picks None (no power), Motor (keep spinning/moving at a speed) or Servo (move to a target spot and stop).",
+    "motor (ActuatorType)": "Keeps turning or sliding at a set speed, like a fan or a car wheel.",
+    "servo (ActuatorType)": "Moves to a set target angle or position and holds there, like a robot arm or an automatic door.",
+    "limits": "Stops that keep a joint from moving too far, like a door that can only swing 90 degrees.",
+    "acceleration": "How fast speed changes. The rule is F = m x a (force = mass x acceleration). Push a mass-5.6 part with force 56 and it speeds up by 10 studs/s every second.",
+    "degrees": "The usual way to measure angles: 90 degrees is a quarter turn, 360 is a full turn. TargetAngle, LowerAngle and UpperAngle use degrees.",
+    "local simulation": "When a player's own device is allowed to calculate a part's physics so it feels smooth. Parts hinged to anchored parts do not get this when players touch them, so they may feel a little delayed."
+  },
+  "examples": [
+    {
+      "title": "A door that swings open to 90 degrees",
+      "place": "Script in ServerScriptService",
+      "code": "local frame = workspace:WaitForChild(\"DoorFrame\") -- anchored\nlocal door = workspace:WaitForChild(\"Door\")       -- unanchored\n\n-- Both attachments at the door's edge. Rotate them so X points straight up (the hinge line).\nlocal edge = door.CFrame * CFrame.new(-door.Size.X / 2, 0, 0)\nlocal a0 = Instance.new(\"Attachment\")\na0.Parent = frame\na0.WorldCFrame = edge * CFrame.Angles(0, 0, math.rad(90))\nlocal a1 = Instance.new(\"Attachment\")\na1.Parent = door\na1.WorldCFrame = a0.WorldCFrame\n\nlocal hinge = Instance.new(\"HingeConstraint\")\nhinge.Attachment0 = a0\nhinge.Attachment1 = a1\nhinge.ActuatorType = Enum.ActuatorType.Servo\nhinge.ServoMaxTorque = 100000 -- strong enough to swing the door\nhinge.AngularSpeed = 2        -- radians per second while moving\nhinge.TargetAngle = 0         -- closed\nhinge.Parent = frame\n\ntask.wait(2)\nhinge.TargetAngle = 90 -- swing open a quarter turn",
+      "explain": [
+        "Both attachments sit at the door's left edge. Rotating them 90 degrees around Z makes their X arrow point straight up, so the hinge line is vertical, like a real door.",
+        "Servo mode means 'turn to TargetAngle and hold there'. TargetAngle is in degrees.",
+        "AngularSpeed (about 2 radians per second, roughly 115 degrees per second) is how fast it swings.",
+        "ServoMaxTorque must be big enough to move the door's weight."
+      ]
+    },
+    {
+      "title": "A motor wheel that keeps spinning",
+      "place": "Script in ServerScriptService",
+      "code": "local hinge = workspace:WaitForChild(\"Cart\"):WaitForChild(\"WheelHinge\")\n\nhinge.ActuatorType = Enum.ActuatorType.Motor\nhinge.AngularVelocity = 10      -- target spin: 10 radians/s (about 1.6 turns per second)\nhinge.MotorMaxTorque = 50000    -- how hard the motor can twist\nhinge.MotorMaxAcceleration = math.huge -- reach that speed as fast as possible",
+      "explain": [
+        "Motor mode spins the hinge at AngularVelocity, measured in radians per second. 2 x pi (6.28) is one turn per second.",
+        "MotorMaxTorque limits how hard it can twist. A heavy cart needs more.",
+        "A negative AngularVelocity spins the other way (drive backwards)."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The hinge spins around the attachments' X arrows. If your door spins the wrong way (like flipping over), rotate the attachments.",
+    "AngularVelocity and AngularSpeed are in radians per second, but TargetAngle, LowerAngle and UpperAngle are in degrees. Mixing these up is very common.",
+    "If the motor or servo does nothing, the max torque is probably too small.",
+    "If a part is hinged to an anchored part, physics for it is not calculated on the player's device, so it may feel slightly laggy to touch."
+  ],
+  "members": {
+    "HingeConstraint.ActuatorType": {
+      "simple": "Picks how the hinge is powered: None (free, just swings), Motor (keeps spinning at AngularVelocity) or Servo (turns to TargetAngle and holds).",
+      "example": "workspace.Gate.HingeConstraint.ActuatorType = Enum.ActuatorType.Servo"
+    },
+    "HingeConstraint.AngularResponsiveness": {
+      "simple": "In Servo mode, how sharply it snaps to TargetAngle. Bigger numbers react faster; smaller numbers are softer and slower.",
+      "example": "workspace.Gate.HingeConstraint.AngularResponsiveness = 45"
+    },
+    "HingeConstraint.AngularSpeed": {
+      "simple": "In Servo mode, how fast it turns toward TargetAngle, in radians per second.",
+      "example": "workspace.Gate.HingeConstraint.AngularSpeed = math.rad(45) -- 45 degrees per second"
+    },
+    "HingeConstraint.AngularVelocity": {
+      "simple": "In Motor mode, the spin speed it tries to keep, in radians per second. Negative spins the other way.",
+      "example": "workspace.Car.WheelHinge.AngularVelocity = -8 -- reverse"
+    },
+    "HingeConstraint.CurrentAngle": {
+      "simple": "Read-only: how far the hinge is turned right now, found by comparing the two attachments' Y arrows.",
+      "example": "local hinge = workspace.Gate.HingeConstraint\nprint(\"Gate is open\", hinge.CurrentAngle, \"degrees\")"
+    },
+    "HingeConstraint.LimitsEnabled": {
+      "simple": "If true, the hinge can only turn between LowerAngle and UpperAngle. It stops at the ends (and bounces if Restitution is above 0).",
+      "example": "local hinge = workspace.Door.HingeConstraint\nhinge.LimitsEnabled = true\nhinge.LowerAngle = 0\nhinge.UpperAngle = 100 -- door can open up to 100 degrees"
+    },
+    "HingeConstraint.LowerAngle": {
+      "simple": "The smallest angle (in degrees) the hinge may reach when LimitsEnabled is true.",
+      "example": "workspace.Flipper.HingeConstraint.LowerAngle = -30"
+    },
+    "HingeConstraint.MotorMaxAcceleration": {
+      "simple": "In Motor mode, the fastest it may speed up its spin, in radians per second, per second. Lower numbers give a gentle start.",
+      "example": "workspace.Car.WheelHinge.MotorMaxAcceleration = 5 -- smooth start"
+    },
+    "HingeConstraint.MotorMaxTorque": {
+      "simple": "In Motor mode, the most twisting strength the motor can use to reach AngularVelocity.",
+      "example": "workspace.Car.WheelHinge.MotorMaxTorque = 100000"
+    },
+    "HingeConstraint.Radius": {
+      "simple": "Only changes how big the hinge looks when drawn. It does not change how it works.",
+      "example": "workspace.Gate.HingeConstraint.Radius = 0.5"
+    },
+    "HingeConstraint.Restitution": {
+      "simple": "How bouncy the hinge is when it hits LowerAngle or UpperAngle (with limits on), from 0 (no bounce) to 1 (full bounce).",
+      "example": "workspace.Door.HingeConstraint.Restitution = 0.3 -- small bounce when it slams"
+    },
+    "HingeConstraint.ServoMaxTorque": {
+      "simple": "In Servo mode, the most twisting strength it can use to reach TargetAngle.",
+      "example": "workspace.Gate.HingeConstraint.ServoMaxTorque = 100000"
+    },
+    "HingeConstraint.SoftlockServoUponReachingTarget": {
+      "simple": "Old — use the normal Servo settings (TargetAngle, AngularSpeed, ServoMaxTorque) instead."
+    },
+    "HingeConstraint.TargetAngle": {
+      "simple": "In Servo mode, the angle in degrees the hinge turns to and holds.",
+      "example": "local hinge = workspace.Drawbridge.HingeConstraint\nhinge.TargetAngle = 0   -- down\ntask.wait(5)\nhinge.TargetAngle = 80  -- raise the bridge"
+    },
+    "HingeConstraint.UpperAngle": {
+      "simple": "The largest angle (in degrees) the hinge may reach when LimitsEnabled is true.",
+      "example": "workspace.Flipper.HingeConstraint.UpperAngle = 30"
+    }
+  }
+}

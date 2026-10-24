@@ -1,0 +1,47 @@
+{
+  "name": "BindableEvent",
+  "simple": "A BindableEvent lets scripts on the SAME side talk to each other: server Script to server Script, or LocalScript to LocalScript. One script fires it, and every script listening runs its function. It does not cross between server and players; that is what RemoteEvents are for.",
+  "analogy": "A BindableEvent is like a school bell inside one building. When someone rings it, every classroom in that building hears it. A building across the street (the other side of the client-server boundary) hears nothing.",
+  "whenToUse": [
+    "One server Script needs to tell other server Scripts something happened, like 'round over'.",
+    "Making your own custom event, like a `Died` or `LevelUp` event for your own system.",
+    "Not for server-to-client messages. Use a RemoteEvent for that."
+  ],
+  "where": "Create it in Studio or with `Instance.new(\"BindableEvent\")`. Put it where your scripts can find it, like ServerStorage (server-only) or ReplicatedStorage.",
+  "terms": {
+    "server": "The one computer, run by Roblox in a data center, that is in charge of a game. Every player in the same game is connected to it. It keeps the official copy of the game, like who has how many coins.",
+    "client": "Your own device (phone, PC, Xbox) running the game. Every player has their own client. The client draws the screen and reads your keyboard, mouse or touch.",
+    "client-server boundary": "The invisible wall between the server and each client. They are different computers, so a script on one side cannot just reach over and change a variable on the other side. Messages have to be sent across.",
+    "fire": "To send off an event so that the functions listening to it run.",
+    "event / signal": "Something that can happen, like `PlayerAdded` or `OnServerEvent`. You connect a function to it and that function runs each time it happens.",
+    "connect": "Telling Roblox: when this event happens, run my function. You do it with `:Connect(function() ... end)`.",
+    "same side": "Both scripts run on the server, or both run on the same player's client."
+  },
+  "examples": [
+    {
+      "title": "Tell other server scripts the round ended",
+      "place": "Two Scripts in ServerScriptService, BindableEvent named RoundEnded in ServerStorage",
+      "code": "-- Script A: the round timer\nlocal ServerStorage = game:GetService(\"ServerStorage\")\nlocal roundEnded = ServerStorage:WaitForChild(\"RoundEnded\")\n\ntask.wait(60)\nroundEnded:Fire(\"Red team\") -- tell everyone listening\n\n-- Script B: gives out rewards\nlocal ServerStorage = game:GetService(\"ServerStorage\")\nlocal roundEnded = ServerStorage:WaitForChild(\"RoundEnded\")\n\nroundEnded.Event:Connect(function(winner)\n\tprint(winner .. \" won! Giving rewards...\")\nend)",
+      "explain": [
+        "Script A calls `Fire` with the winner's name.",
+        "Script B was listening with `.Event:Connect`, so its function runs and receives the same value.",
+        "Both scripts are on the server, so a BindableEvent is the right tool."
+      ]
+    }
+  ],
+  "gotchas": [
+    "It does not cross the client-server boundary. A LocalScript firing it will not reach a server Script.",
+    "Values are copied, not shared: if you fire a table, listeners get a copy, and functions or metatables inside it are lost.",
+    "Make sure the listener connects before you fire, or it will miss the message."
+  ],
+  "members": {
+    "BindableEvent:Fire": {
+      "simple": "Rings the bell. Every function connected to `.Event` runs, with the values you pass.",
+      "example": "-- Script in ServerScriptService\nlocal levelUp = Instance.new(\"BindableEvent\")\n\nlevelUp.Event:Connect(function(newLevel)\n\tprint(\"Reached level\", newLevel)\nend)\n\nlevelUp:Fire(5) --> Reached level 5"
+    },
+    "BindableEvent.Event": {
+      "simple": "The event that runs each time someone calls `Fire` on this BindableEvent. Connect a function to it to listen.",
+      "example": "-- Script in ServerScriptService\nlocal ServerStorage = game:GetService(\"ServerStorage\")\nlocal roundEnded = ServerStorage:WaitForChild(\"RoundEnded\")\n\nroundEnded.Event:Connect(function(winner)\n\tprint(\"Winner:\", winner)\nend)"
+    }
+  }
+}

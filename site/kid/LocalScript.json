@@ -1,0 +1,51 @@
+{
+  "name": "LocalScript",
+  "simple": "A LocalScript holds Luau code that runs on one player's own device (the client), not on the server. It controls things only that player has: their camera, their screen buttons, their keyboard and mouse. Changes a LocalScript makes to the world are usually seen only by that one player.",
+  "analogy": "If the server is the referee, each client is one player on the field with their own eyes and hands. A LocalScript is like that player's personal notebook: it can change what THEY see and do, but it cannot change the score for everyone.",
+  "whenToUse": [
+    "Reacting to keyboard, mouse, touch, or controller input.",
+    "Making buttons and menus on the screen work.",
+    "Moving or changing the player's camera.",
+    "Visual effects only one player should see, like a sparkle when they pick something up."
+  ],
+  "where": "Runs on the client. A LocalScript only runs when it is inside one of these: StarterPlayerScripts (copied into each player's PlayerScripts), StarterCharacterScripts (copied into the character each time it spawns), StarterGui (copied into the PlayerGui), StarterPack (copied into the Backpack), ReplicatedFirst, or the player's character. It does NOT run in Workspace (outside a character), ReplicatedStorage, ServerScriptService, or ServerStorage. Use `Players.LocalPlayer` to get the player it is running for.",
+  "terms": {
+    "server": "Roblox's computer that runs the one shared copy of the game for everyone in the server. What happens here is the truth everyone sees.",
+    "client": "One player's own device (computer, phone, tablet, or console). Each player has their own client.",
+    "LocalPlayer": "`game:GetService(\"Players\").LocalPlayer` is the player whose device is running this LocalScript. It only works in LocalScripts.",
+    "StarterPlayerScripts": "A folder inside StarterPlayer. LocalScripts here start once when the player joins.",
+    "StarterCharacterScripts": "A folder inside StarterPlayer. LocalScripts here are copied into the character every time it spawns.",
+    "StarterGui": "The folder for screen menus (ScreenGuis). Its contents are copied to each player's screen.",
+    "RemoteEvent": "A messenger object that lets a LocalScript send a message to a server Script, or the other way around.",
+    "replicate": "To copy changes between the server and players' devices. Most changes made by a LocalScript are NOT copied to the server."
+  },
+  "examples": [
+    {
+      "title": "Press E to print a message",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal UserInputService = game:GetService(\"UserInputService\")\n\nlocal player = Players.LocalPlayer -- the player using this device\n\nUserInputService.InputBegan:Connect(function(input, gameProcessed)\n\t-- gameProcessed is true if they were typing in chat, so ignore that\n\tif gameProcessed then return end\n\tif input.KeyCode == Enum.KeyCode.E then\n\t\tprint(player.Name, \"pressed E\")\n\tend\nend)",
+      "explain": [
+        "Keyboard input only exists on the player's device, so this must be a LocalScript.",
+        "`Players.LocalPlayer` is you, the player whose computer is running this.",
+        "When E is pressed (and they are not typing in chat), it prints a message in that player's Output."
+      ]
+    },
+    {
+      "title": "Ask the server to do something",
+      "place": "LocalScript in StarterPlayerScripts (plus a RemoteEvent named BuyItem in ReplicatedStorage)",
+      "code": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal buyItem = ReplicatedStorage:WaitForChild(\"BuyItem\") -- a RemoteEvent\n\n-- Tell the server we want to buy a sword.\n-- A Script on the server listens with buyItem.OnServerEvent and decides if it is allowed.\nbuyItem:FireServer(\"Sword\")",
+      "explain": [
+        "LocalScripts cannot give items for real, because the server is in charge.",
+        "So the LocalScript sends a request through a RemoteEvent.",
+        "A server Script receives it, checks if the player has enough coins, and then gives the item."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A LocalScript in Workspace (not inside a character) or in ReplicatedStorage simply never runs. Put it in StarterPlayerScripts, StarterCharacterScripts, or StarterGui.",
+    "Use `WaitForChild` to find things, because objects from the server may arrive a moment after your LocalScript starts.",
+    "Changes made only in a LocalScript (like deleting a wall) are NOT seen by other players. Use a RemoteEvent to ask the server.",
+    "LocalScripts cannot see ServerStorage or ServerScriptService; those stay on the server."
+  ],
+  "members": {}
+}

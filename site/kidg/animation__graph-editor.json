@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/animation/graph-editor.md",
+  "simple": "The Animation Graph Editor lets you mix and control animations by connecting boxes (nodes) with lines, instead of writing a lot of code. For example, you can plug a walk animation and a wave animation into an Add node so your character waves while walking. You make the single animations in the Animation Editor, then use the graph to decide how they combine and switch. Your scripts then just send in values, like how fast the character is moving, and the graph does the rest.",
+  "analogy": "It is like a DJ mixing board: each animation is a song on its own channel, and the graph's knobs and connections decide how loud each one plays in the final mix.",
+  "keyPoints": [
+    "Open it from the Avatar tab with Graph Editor. Select a rig, then choose Graph, New to start a graph.",
+    "Right-click, Insert Node, Clip to add an animation, then set its Animation ID (the page uses default Walk `507777826` and Wave `507770239`).",
+    "An Add node combines a Base animation (like walking) with an Additive one (like waving). Connect its output to the Pose port of Graph Output.",
+    "Parameters are graph variables like `Speed`. Scripts change them with `AnimationTrack:SetParameter(\"name\", value)`.",
+    "Publish the graph to get an asset ID, then load it on an `Animator` with `LoadAnimation` just like a normal animation and call `Play()`.",
+    "Marker events that reach the top of the graph can still be caught with `GetMarkerReachedSignal`.",
+    "Nodes like Select and Sequence blend when switching inputs, using settings like DefaultTransitionDuration (seconds) and a Linear or CubicV2 curve.",
+    "Graph, Create Animate script makes ready-made scripts. Who runs the graph depends on `Workspace.AuthorityMode`: the player's client in Automatic mode, the server in Server mode, and always the server for NPCs."
+  ],
+  "terms": {
+    "node": "A box in the graph that does one job, like playing a clip or adding two animations together.",
+    "node-based": "Built by connecting boxes with wires instead of typing code.",
+    "Clip node": "A node that plays one animation from its Animation ID.",
+    "Add node": "A node that layers an Additive animation on top of a Base animation, like waving on top of walking.",
+    "blend": "Mixing two animations so the change is smooth. A 0.2-second blend fades from one to the other over 0.2 seconds.",
+    "blend tree": "A set of nodes that mix animations together based on values like speed.",
+    "parameter": "A named value the graph reads, like `Speed` = 12. Scripts update it while the game runs.",
+    "port": "A connection spot on a node where you plug in a wire.",
+    "weight": "How much an animation counts in the final mix, from 0 (none) to 1 (fully).",
+    "replicate": "Copy from one computer to others so every player sees the same thing.",
+    "AuthorityMode": "A Workspace setting that decides who is in charge of running things: the owning player's device (Automatic) or the server (Server).",
+    "prediction": "The player's device guesses ahead so animation looks smooth right away, then fixes itself if the server disagrees.",
+    "NPC": "Non-player character, controlled by the game."
+  },
+  "example": {
+    "title": "Send the character's speed into a graph",
+    "place": "LocalScript in StarterCharacterScripts (player character, AuthorityMode Automatic)",
+    "code": "local RunService = game:GetService(\"RunService\")\n\nlocal character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal animator = humanoid:WaitForChild(\"Animator\")\nlocal rootPart = character:WaitForChild(\"HumanoidRootPart\")\n\n-- Load your published graph like any animation (replace the ID)\nlocal animation = Instance.new(\"Animation\")\nanimation.AnimationId = \"rbxassetid://123456789\"\nlocal graphTrack = animator:LoadAnimation(animation)\ngraphTrack:Play()\n\n-- Every frame, tell the graph how fast we are moving\nRunService.Stepped:Connect(function()\n\tlocal speed = rootPart.AssemblyLinearVelocity.Magnitude\n\tgraphTrack:SetParameter(\"humanoidSpeed\", speed)\nend)",
+    "explain": [
+      "We find the character's `Animator` and its `HumanoidRootPart`.",
+      "We load the published graph's asset ID with `LoadAnimation` and play it.",
+      "`RunService.Stepped` runs our function every frame.",
+      "We measure speed as the length of the root part's velocity, for example 16 when walking.",
+      "`SetParameter(\"humanoidSpeed\", speed)` passes that number into the graph, which can blend from idle to run based on it."
+    ]
+  },
+  "watchOut": [
+    "The parameter name in `SetParameter` must match the graph's parameter name exactly.",
+    "Plugging the waving clip into Base and walking into Additive. Put the main motion in Base and the layered motion in Additive.",
+    "Forgetting to connect anything to Graph Output's Pose port. Nothing plays without it.",
+    "In Server authority mode, player characters need `SetParameter` called from both RunServer and RunClient.",
+    "Using a transition curve other than Linear or CubicV2. Only those two are supported for now."
+  ]
+}

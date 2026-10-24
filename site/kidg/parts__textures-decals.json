@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/parts/textures-decals.md",
+  "simple": "Textures and decals let you stick images onto the faces of parts, like a brick pattern on a wall or a poster on a sign. A Decal stretches one image to cover a whole face, while a Texture repeats the image over and over like tiles. Textures can also be moved and scaled, and even animated with code to make things like flowing water or drifting fog. This is one of the easiest ways to make plain blocks look detailed.",
+  "analogy": "A Decal is like a single sticker stretched to fit a box lid. A Texture is like wallpaper: the same pattern repeats across the whole wall, and a bigger wall just gets more repeats.",
+  "keyPoints": [
+    "A Decal stretches its image to fill one face. A Texture repeats its image across the face.",
+    "Add a Decal or Texture as a child of a part or union, then choose which face it goes on with the `Face` property: Top, Bottom, Front, Back, Left or Right.",
+    "Set the image with `ColorMapContent`, using an image you uploaded or its asset ID.",
+    "`Color3` tints the image and `Transparency` goes from 0 (fully visible) to 1 (invisible).",
+    "For Textures, `StudsPerTileU` and `StudsPerTileV` set how many studs wide and tall each repeat of the image is.",
+    "`OffsetStudsU` and `OffsetStudsV` slide the image sideways or up and down. Changing them over time with TweenService animates the surface.",
+    "Texture streaming loads simple versions of images first and sharper ones later, automatically, so games load faster and crash less.",
+    "Right-click a part and choose Show Orientation Indicator to see which face is Front (blue line) and which is Top (green arrow)."
+  ],
+  "terms": {
+    "Decal": "An image stuck to one face of a part that stretches to fit. A square image on a 10 x 2 stud face gets squashed to fit that long thin shape.",
+    "Texture": "An image stuck to one face that repeats like tiles. On a 10 stud wide face with 2 studs per tile, it repeats 5 times across.",
+    "face": "One flat side of a part. A block has 6 faces: Top, Bottom, Front, Back, Left and Right.",
+    "union": "A shape made by combining parts with solid modeling.",
+    "tint": "A color mixed over the image. A Color3 of (255, 255, 255) keeps the original colors, while (255, 0, 100) gives it a pink-red look.",
+    "U and V": "Names for the two directions across a flat image. U is horizontal (left-right) and V is vertical (up-down).",
+    "StudsPerTile": "How big one copy of the image is, in studs. On an 8 stud wide wall, `StudsPerTileU = 2` shows 4 copies across and `StudsPerTileU = 4` shows 2.",
+    "offset": "How far the image is slid from its starting spot, in studs. `OffsetStudsU = 0.5` shifts the pattern half a stud sideways.",
+    "tween": "A smooth change of a value from one number to another over time, like sliding an offset from 0 to 50 over 8 seconds.",
+    "streaming (texture)": "Loading images little by little: blurry first, then sharper as memory allows.",
+    "asset ID": "The number Roblox gives an uploaded image so you can use it anywhere.",
+    "texture atlas": "One big image that holds many small images packed together.",
+    "texel density": "How many image pixels cover each stud of a surface. Keeping it even makes everything look equally sharp."
+  },
+  "example": {
+    "title": "Make a scrolling conveyor belt texture",
+    "place": "Script inside a long anchored Part named Conveyor (server Script)",
+    "code": "local TweenService = game:GetService(\"TweenService\")\n\nlocal belt = script.Parent  -- a part, for example 4 studs wide and 20 studs long\n\nlocal stripes = Instance.new(\"Texture\")\nstripes.Face = Enum.NormalId.Top\nstripes.ColorMapContent = Content.fromAssetId(0) -- replace 0 with your image's asset ID\nstripes.StudsPerTileU = 4   -- each copy is 4 studs wide (1 copy across a 4 stud belt)\nstripes.StudsPerTileV = 2   -- each copy is 2 studs long (10 copies along 20 studs)\nstripes.Parent = belt\n\n-- Slide the image 2 studs (one full tile) every 0.5 seconds, forever\nlocal info = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1)\nlocal tween = TweenService:Create(stripes, info, { OffsetStudsV = 2 })\ntween:Play()",
+    "explain": [
+      "We create a Texture and put it on the Top face of the belt part.",
+      "`Content.fromAssetId` sets the image. Put in the asset ID of a stripe image you uploaded.",
+      "On a 20 stud long belt, `StudsPerTileV = 2` repeats the image 20 / 2 = 10 times along its length.",
+      "The tween slides `OffsetStudsV` from 0 to 2 in 0.5 seconds. Since 2 studs is exactly one tile, the jump back to 0 looks seamless.",
+      "A repeat count of -1 means the tween loops forever, so the stripes keep scrolling. That looks like 2 / 0.5 = 4 studs per second of movement.",
+      "This only changes the look. It does not push players. A real conveyor would also need physics, such as setting the part's `AssemblyLinearVelocity`."
+    ]
+  },
+  "watchOut": [
+    "Using a Decal when you want a repeating pattern makes the image look stretched and blurry on big walls. Use a Texture instead.",
+    "Your image may appear on the wrong side. Check the `Face` property and use Show Orientation Indicator to find Front and Top.",
+    "Resizing a part does not resize a Texture's image. It only changes how many times it repeats. Change `StudsPerTileU` and `StudsPerTileV` to resize the image.",
+    "Images you upload must follow the Community Rules and Terms of Use, or they can be removed."
+  ]
+}

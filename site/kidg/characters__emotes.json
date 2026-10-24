@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/characters/emotes.md",
+  "simple": "Emotes are short animations like waving, dancing, or cheering. Players use them by typing chat commands like `/e cheer` or by opening the emotes menu. This page shows how to open or close that menu with a script, choose which emotes appear in it, turn the menu off, and make a character play an emote.",
+  "analogy": "The emotes menu is like a wheel of stickers you can slap on your character. You, the game maker, can choose which stickers go on the wheel or take the wheel away.",
+  "keyPoints": [
+    "Every player gets default emotes like dance, point, and cheer. More can be bought on the Marketplace.",
+    "Open or close the menu with `GuiService:SetEmotesMenuOpen(true)` or `false`, and check it with `GetEmotesMenuOpen()`.",
+    "Use `HumanoidDescription:SetEmotes()` to set which emotes a character has, as a table of name to asset ID.",
+    "Use `SetEquippedEmotes()` to put up to 8 emotes on the wheel. They appear in order, starting at the top and going clockwise.",
+    "The names you choose, like \"Shrug\", are exactly what players see.",
+    "Turn the menu off with `StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.EmotesMenu, false)`. Chat commands still work.",
+    "To stop players' own bought emotes from loading, uncheck `UserEmotesEnabled` in StarterPlayer in Studio. Scripts cannot change it.",
+    "Play an emote by name with `Humanoid:PlayEmote()`. The API reference says to use `PlayEmoteAsync()` for new work."
+  ],
+  "terms": {
+    "emote": "A short character animation used to express yourself, like a wave or a dance.",
+    "emotes menu": "The wheel of emotes players open from the top right of the screen.",
+    "chat command": "Text typed in chat that does something, like `/e dance`.",
+    "HumanoidDescription": "An object listing a character's look and animations, including its emotes.",
+    "equip": "Put an emote onto the wheel so players can pick it. The wheel holds up to 8.",
+    "asset ID": "The number that identifies an item on Roblox, like `3576686446` for the Hello emote.",
+    "clockwise": "The direction a clock's hands move: top, then right, then bottom, then left."
+  },
+  "example": {
+    "title": "Set up a custom emote wheel and play one",
+    "place": "LocalScript in StarterPlayer > StarterCharacterScripts",
+    "code": "local character = script.Parent\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal description = humanoid:WaitForChild(\"HumanoidDescription\")\n\n-- Name shown in the menu = list of emote asset IDs\nlocal emoteTable = {\n\t[\"Hello\"] = {3576686446},\n\t[\"Shrug\"] = {3576968026},\n\t[\"Salute\"] = {3360689775},\n}\ndescription:SetEmotes(emoteTable)\n\n-- Put them on the wheel in this order (top, then clockwise)\ndescription:SetEquippedEmotes({\"Hello\", \"Shrug\", \"Salute\"})\n\n-- Play the Shrug emote after 2 seconds\ntask.wait(2)\nlocal ok, result = pcall(function()\n\treturn humanoid:PlayEmoteAsync(\"Shrug\")\nend)\nprint(\"Shrug played:\", ok and result)",
+    "explain": [
+      "This LocalScript is copied into each new character, so `script.Parent` is the character.",
+      "We find the character's `HumanoidDescription`, which holds its emotes.",
+      "`SetEmotes` gives the character three emotes with friendly names and their asset IDs.",
+      "`SetEquippedEmotes` puts them on the emote wheel in that order.",
+      "After 2 seconds, `PlayEmoteAsync(\"Shrug\")` plays it. It is wrapped in `pcall` because it errors if the emote name is not found."
+    ]
+  },
+  "watchOut": [
+    "Trying to equip more than 8 emotes. The wheel only holds 8.",
+    "Playing an emote name the character does not have. It errors, so set it with `SetEmotes` first and use `pcall`.",
+    "Thinking that hiding the menu blocks emotes. Players can still use chat commands like `/e dance`.",
+    "Trying to change `UserEmotesEnabled` in a script. It only works when set in Studio."
+  ]
+}

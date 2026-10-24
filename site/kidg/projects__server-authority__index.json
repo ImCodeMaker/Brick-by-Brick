@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/projects/server-authority/index.md",
+  "simple": "In the server authority model, the server decides everything that happens in the game, and players' devices only send what buttons they pressed. That stops cheats like flying or super speed, because a player's device is never trusted to say where it is. To keep it from feeling laggy, each device guesses (predicts) what will happen right away, then fixes itself if the server disagrees. This page explains those ideas and how to set up your scripts so the same game logic runs on both the server and the devices.",
+  "analogy": "It is like playing chess by mail with a referee. You move your piece on your own board right away so the game feels quick, but you also mail the move to the referee. If the referee says the move was not allowed, you put your board back the way the referee has it and replay from there.",
+  "keyPoints": [
+    "The server is the single source of truth. Clients only report their inputs, never their own position or health, which blocks flyhacks and speedhacks.",
+    "To hide lag, the client predicts a few frames ahead of the last state it got from the server, so your actions show up instantly.",
+    "When the server's real result differs from the guess, that is a misprediction. The client rolls back to the server's state and quickly replays the frames. Small mispredictions are normal.",
+    "Set `Workspace.AuthorityMode` to Server. That also turns on NextGenerationReplication, the Input Action System for player scripts, Deferred signals, fixed simulation, and streaming.",
+    "Put core game logic in a ModuleScript that both the server and client load, inside functions bound with `RunService:BindToSimulation()`. These get re-run during resimulation.",
+    "Use `time()` for timing inside simulation code, because it matches on server and client and rewinds during replays. Do not use `tick()`, `os.time()`, or `os.clock()` there.",
+    "Store custom game data (health, ammo, inventory) in attributes. Only the first 64 attributes replicate, names can be up to 50 characters, and string values up to 50 characters.",
+    "Use InputActions for any input that affects the game, not `UserInputService.InputBegan`. Play sounds, animations, and effects separately in `RenderStepped`."
+  ],
+  "terms": {
+    "server authority": "A setup where only the server decides what really happens in the game.",
+    "source of truth": "The one official version everyone must agree with. Here, the server's copy of the game.",
+    "netcode": "The code and rules for how a multiplayer game sends information over the internet.",
+    "input latency": "The delay between pressing a button and seeing the result. Going to the server and back can take 100 to 300 milliseconds.",
+    "frame": "One small step of the game simulation. At 60 frames per second, each frame is about 0.017 seconds.",
+    "client prediction": "The player's device guessing the result of their input right away, before the server answers.",
+    "misprediction": "When the device's guess turns out different from what the server decided, like you thought you moved but another player stunned you.",
+    "rollback": "Resetting to the last state the server confirmed. If the client is on frame 7 and finds frame 3 was wrong, it goes back to the server's frame 3.",
+    "resimulation": "Replaying the frames after a rollback using the corrected state. In the example, frames 4, 5, and 6 are replayed before frame 7.",
+    "authoritative state": "The official state of the game according to the server.",
+    "simulation access": "A label in the API docs. Only properties and methods with it can be used inside `BindToSimulation` functions, and those properties get predicted. `BasePart.CFrame` is one.",
+    "attribute": "A custom value you store on an object, like `Health = 100`. Mismatched attributes between server and client cause a rollback.",
+    "InputAction": "An object from the Input Action System that represents an action like jump. Its inputs are sent to the server and replayed during resimulation.",
+    "deterministic": "Always giving the same result from the same starting point, which server and client need so their guesses match."
+  },
+  "example": {
+    "title": "A spinning platform that runs the same on server and client",
+    "place": "ModuleScript named Simulation in ReplicatedStorage, plus a Script in ServerScriptService and a LocalScript in StarterPlayerScripts that load it (Workspace.AuthorityMode = Server, anchored part named SpinPlatform in Workspace)",
+    "code": "-- ===== ModuleScript \"Simulation\" in ReplicatedStorage =====\nlocal RunService = game:GetService(\"RunService\")\n\nlocal Simulation = {}\n\nSimulation.Initialize = function()\n\t-- Get references BEFORE the simulation loop starts\n\tlocal platform = workspace:WaitForChild(\"SpinPlatform\")\n\tlocal center = platform.Position\n\n\tRunService:BindToSimulation(function(deltaTime)\n\t\t-- time() matches on server and client, and rewinds on rollback\n\t\tlocal angle = time() * 1.5 -- 1.5 radians per second\n\t\tplatform.CFrame = CFrame.new(center) * CFrame.Angles(0, angle, 0)\n\tend)\nend\n\nreturn Simulation\n\n-- ===== Script in ServerScriptService =====\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal Simulation = require(ReplicatedStorage:WaitForChild(\"Simulation\"))\nSimulation.Initialize()\n\n-- ===== LocalScript in StarterPlayerScripts =====\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal Simulation = require(ReplicatedStorage:WaitForChild(\"Simulation\"))\nSimulation.Initialize()",
+    "explain": [
+      "The ModuleScript holds the game logic once, so the server and every client run exactly the same code.",
+      "We find the platform and remember its center before binding, so the bound function only touches simulation-safe things like `CFrame`.",
+      "`BindToSimulation` runs our function at a fixed rate, and again during any rollback and replay.",
+      "We use `time()` to get the angle. Since it is the same on server and client, both agree on where the platform is, so there are few mispredictions.",
+      "The two small loader scripts just `require` the module and call `Initialize`, one on the server and one on the client."
+    ]
+  },
+  "watchOut": [
+    "Using `tick()` or `os.clock()` inside simulation code. They differ between devices and do not rewind, which causes constant mispredictions. Use `time()`.",
+    "Reading keys with `UserInputService.InputBegan` for core gameplay. The server never sees those inputs. Use InputActions instead.",
+    "Playing explosion sounds or animations inside `BindToSimulation`. A replay could play them twice, or for something that never really happened. Trigger effects from `RenderStepped` by reading the synced state.",
+    "Storing more than 64 attributes or long strings on one object. Extra ones will not replicate.",
+    "Forgetting that RemoteEvents may arrive in a different order than property or attribute changes."
+  ]
+}

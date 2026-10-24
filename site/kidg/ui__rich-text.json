@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/ui/rich-text.md",
+  "simple": "Rich text lets you style just part of a sentence on a label, button, or text box. You wrap words in little tags, like `<b>bold</b>` or `<font color=\"#FF7800\">orange</font>`, and Roblox draws them styled. You can make words bold, italic, underlined, colored, bigger, outlined, highlighted, and more. It is perfect for things like \"You won 25 gems\" where the gem count pops out.",
+  "analogy": "It is like using a highlighter and colored pens on a school worksheet: same page, but certain words stand out because you marked them.",
+  "keyPoints": [
+    "Rich text works on `TextLabel`, `TextButton`, and `TextBox`, but you must turn on the `RichText` property for each object.",
+    "Every tag needs an opening and a closing tag, like `<i>` and `</i>`.",
+    "You can nest tags, but close them in reverse order: `<b><i>hi</i></b>`.",
+    "`<font>` can set `color`, `size`, `face`, `family`, `weight`, and `transparency`.",
+    "Other tags include `<stroke>` (outline), `<b>`, `<i>`, `<u>`, `<s>`, `<br/>` (new line), `<uc>` (uppercase), `<sc>` (small caps), `<mark>` (highlight), and `<!-- -->` (hidden comment).",
+    "To show the characters `<`, `>`, `\"`, `'`, or `&` as plain text, use escape forms like `&lt;` and `&amp;`.",
+    "Localizing (translating) your game removes rich text tags, so you need to add the tags back to translated text yourself."
+  ],
+  "terms": {
+    "markup tag": "A label in angle brackets that tells Roblox how to style text, like `<b>` to start bold and `</b>` to end it.",
+    "nest": "Put one tag inside another. `<b><u>Win</u></b>` is bold and underlined.",
+    "stroke": "An outline around text. `thickness=\"2\"` makes a 2-pixel outline.",
+    "font face": "The style of letters, like Michroma or Oswald.",
+    "font weight": "How thick the letters are, from `100` (thin) to `900` (heavy), or names like `Bold` and `Heavy`.",
+    "transparency": "How see-through something is. `0` is solid, `0.5` is half see-through, `1` is invisible.",
+    "hex color": "A color written as `#` plus six characters, like `#FF7800` for orange. You can also use `rgb(255,125,0)`.",
+    "escape form": "A special code that shows a symbol instead of treating it as part of a tag. `&lt;` shows `<`.",
+    "localization": "Translating your game into other languages."
+  },
+  "example": {
+    "title": "A reward message with a highlighted gem count",
+    "place": "LocalScript inside a ScreenGui in StarterGui",
+    "code": "local screenGui = script.Parent\n\nlocal label = Instance.new(\"TextLabel\")\nlabel.Size = UDim2.fromOffset(400, 60)\nlabel.Position = UDim2.fromOffset(20, 20)\nlabel.TextSize = 28\nlabel.RichText = true -- must be on for tags to work\n\n-- Bold the word, color the number gold, and outline it\nlabel.Text = \"<b>Nice!</b> You won <font color=\\\"#FFCC00\\\"><stroke color=\\\"#000000\\\" thickness=\\\"2\\\">25 gems</stroke></font>\"\n\nlabel.Parent = screenGui",
+    "explain": [
+      "We create a `TextLabel` and give it a size, position, and text size.",
+      "`RichText = true` tells Roblox to read the tags instead of showing them as letters.",
+      "`<b>Nice!</b>` makes that word bold.",
+      "`<font color=\"#FFCC00\">` makes \"25 gems\" gold, and `<stroke>` adds a 2-pixel black outline around it.",
+      "Tags close in reverse order: `</stroke>` comes before `</font>`."
+    ]
+  },
+  "watchOut": [
+    "Forgetting to turn on `RichText`. Without it, players see the raw tags like `<b>` on screen.",
+    "Closing tags in the wrong order, like `<b><i>text</b></i>`. Always close the newest tag first.",
+    "Missing a closing tag. Every `<b>` needs a `</b>`.",
+    "Typing `<` or `&` as normal text in rich text. Use `&lt;` or `&amp;` instead.",
+    "Translated text loses its tags. Re-add the tags to your translated strings."
+  ]
+}

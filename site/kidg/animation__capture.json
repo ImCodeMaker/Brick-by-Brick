@@ -1,0 +1,30 @@
+{
+  "path": "content/en-us/animation/capture.md",
+  "simple": "Animation capture lets you make animations by acting them out instead of posing every frame by hand. With Face capture, your webcam copies your facial expressions onto a character with an animation-ready head. With Body capture, you upload a short video of a person moving and Roblox turns it into a full-body animation for an R15 rig. Both create real keyframes you can tweak afterward, save, and publish.",
+  "analogy": "It is like a motion-capture studio for movies, where an actor's real movements are copied onto a digital character, except you only need a webcam or a phone video.",
+  "keyPoints": [
+    "Both tools are beta features, so you must turn them on in Studio's beta features first.",
+    "Face capture: open the Clip Editor from the Avatar tab, select a rig with an animation-compatible head, name the animation, click Face Capture, accept the consent popup, then press the red circle to record.",
+    "Face recordings can be up to 60 seconds. Stop with the red square or timer, and click Re-Record to try again.",
+    "For good face capture, use a well-lit room and keep your face in the center of the camera view.",
+    "Body capture: select an R15 rig, click the three-dot button, then Import, then Live Animation Creator, and choose an `.mp4` or `.mov` video.",
+    "Body videos need one well-lit person visible the whole time, one continuous shot under 15 seconds, a steady camera, and must follow Roblox's Community Rules and Terms of Use.",
+    "After capture, you can fine-tune keyframes, save, and export the animation like any other."
+  ],
+  "terms": {
+    "animation capture": "Making an animation by recording real movement instead of posing by hand.",
+    "puppeteer": "To control a character's movements with your own, like a puppet copying you.",
+    "animation compatible head": "A character head built to move its face, so it can smile, blink, or drop its jaw.",
+    "keyframe": "A saved pose at a moment in time. Capture makes these for you automatically.",
+    "R15 rig": "Roblox's standard 15-part character body, with joints for arms, legs, and torso.",
+    "beta feature": "A new feature still being tested. You turn it on yourself in Studio's beta features settings.",
+    "consent": "Saying yes on purpose. The Face Capture popup asks if you agree to your face movements being collected and your camera being used.",
+    "NPC": "Non-player character, a character controlled by the game instead of a person."
+  },
+  "watchOut": [
+    "Not enabling the beta feature first. The capture buttons will not be available.",
+    "Recording in a dark room or off-center. The camera has trouble tracking you; get good light and center your face.",
+    "Uploading a video with more than one person, camera cuts, shaky camera, or longer than 15 seconds. Keep it to one person, one steady shot, under 15 seconds.",
+    "Using face capture on a rig without an animation-compatible head. Pick a rig with a dynamic head."
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "name": "GuiButton",
+  "simple": "GuiButton is the base for the two clickable UI objects: TextButton and ImageButton. It gives them click events, most importantly Activated, which fires when the button is clicked with a mouse, tapped on a phone, or pressed with the A button on a controller. You never create a GuiButton itself; you create a TextButton or ImageButton.",
+  "analogy": "GuiButton is like the 'push' part of every doorbell. Some doorbells have a label (TextButton), some have a picture (ImageButton), but they all ring when pressed.",
+  "whenToUse": [
+    "Running code when a player clicks or taps a button (Activated)",
+    "Doing something on right-click or long-press (SecondaryActivated)",
+    "Turning the automatic hover/press color change on or off (AutoButtonColor)",
+    "Letting the mouse move freely while a menu is open in first person (Modal)"
+  ],
+  "where": "Client side, inside a ScreenGui, or a SurfaceGui/BillboardGui that is in the player's PlayerGui. Make a TextButton or ImageButton (not a GuiButton). Button code goes in a LocalScript, for example inside the button itself in StarterGui.",
+  "terms": {
+    "abstract": "Only used as a base for other types. You never create it yourself.",
+    "event": "Something that happens, like a click. Use :Connect(function) to run code when it happens.",
+    "Activated": "The best 'button was pressed' event. It works the same with mouse, touch and gamepad.",
+    "multi-platform": "Works on computers, phones, tablets and consoles.",
+    "LocalScript": "A script that runs on the player's own device. Button clicks only happen there, so button code must be in a LocalScript.",
+    "server": "Roblox's computer that runs the game for everyone. It can't see clicks on UI directly; use a RemoteEvent to tell it.",
+    "RemoteEvent": "A messenger object that lets a LocalScript send a message to the server (or the other way around).",
+    "InputObject": "An object that describes one input, such as which mouse button or which finger.",
+    "haptic": "Vibration you can feel, like a controller or phone buzzing.",
+    "mouse lock": "When the mouse is stuck in the middle of the screen, like in first-person view or shift-lock."
+  },
+  "examples": [
+    {
+      "title": "Make a button that does something",
+      "place": "LocalScript inside a TextButton (inside a ScreenGui in StarterGui)",
+      "code": "local button = script.Parent -- the TextButton\nlocal clicks = 0\n\nbutton.Activated:Connect(function()\n\tclicks += 1\n\tbutton.Text = \"Clicked \" .. clicks .. \" times\"\nend)",
+      "explain": [
+        "script.Parent is the button, since the LocalScript is inside it.",
+        "Activated fires on mouse click, phone tap, and controller A-button press, so one line covers every device.",
+        "Each press adds 1 to clicks and updates the button's text."
+      ]
+    },
+    {
+      "title": "Ask the server to do something when a button is pressed",
+      "place": "LocalScript inside a TextButton, plus a Script in ServerScriptService, plus a RemoteEvent named \"BuySword\" in ReplicatedStorage",
+      "code": "-- LocalScript inside the TextButton\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal buySword = ReplicatedStorage:WaitForChild(\"BuySword\")\nlocal button = script.Parent\n\nbutton.Activated:Connect(function()\n\tbuySword:FireServer() -- tell the server 'I want to buy the sword'\nend)\n\n-- Script in ServerScriptService (a separate script!)\n-- local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n-- local buySword = ReplicatedStorage:WaitForChild(\"BuySword\")\n-- buySword.OnServerEvent:Connect(function(player)\n-- \tprint(player.Name, \"wants to buy the sword\")\n-- \t-- check they have enough coins HERE, on the server\n-- end)",
+      "explain": [
+        "Buttons only work on the player's device, so the click is detected in a LocalScript.",
+        "Things that matter for everyone (coins, items) must be done by the server, so we send a message with a RemoteEvent.",
+        "The commented part shows what the server Script looks like. Put it in its own Script in ServerScriptService.",
+        "Always check things like 'has enough coins' on the server, because players could cheat on their own device."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Clicks never reach a server Script directly. Use a LocalScript, and a RemoteEvent if the server needs to know.",
+    "Use Activated instead of MouseButton1Click so your button works on phones and controllers too.",
+    "Buttons inside a SurfaceGui or BillboardGui only get clicks if that Gui is in the player's PlayerGui (put it in StarterGui and set Adornee).",
+    "If Interactable is false, the button can't be clicked at all."
+  ],
+  "members": {
+    "GuiButton.AutoButtonColor": {
+      "simple": "When true (default), the button automatically gets a bit darker when you hover over or press it, so players can tell it's clickable. Set false if you want to make your own hover effect.",
+      "example": "local button = script.Parent\nbutton.AutoButtonColor = false -- I'll do my own hover colors",
+      "gotcha": "On an ImageButton with an Image set, this has no effect; use HoverImage and PressedImage instead."
+    },
+    "GuiButton.HoverHapticEffect": {
+      "simple": "A HapticEffect (vibration) that plays when the pointer first moves onto the button. Leave empty for no vibration. Whether the player feels it depends on their device and settings.",
+      "example": "local button = script.Parent\nlocal buzz = Instance.new(\"HapticEffect\")\nbuzz.Type = Enum.HapticEffectType.UIHover\nbuzz.Parent = button\nbutton.HoverHapticEffect = buzz"
+    },
+    "GuiButton.Modal": {
+      "simple": "When true and this button is visible, the mouse is NOT locked to the center of the screen (unless right mouse is held). Useful so players in first person can still move the mouse to click a menu.",
+      "example": "local closeButton = script.Parent\ncloseButton.Modal = true -- free the mouse while this menu is open"
+    },
+    "GuiButton.PressHapticEffect": {
+      "simple": "A HapticEffect (vibration) that plays when the button is pressed. Leave empty for no vibration.",
+      "example": "local button = script.Parent\nlocal buzz = Instance.new(\"HapticEffect\")\nbuzz.Type = Enum.HapticEffectType.UIClick\nbuzz.Parent = button\nbutton.PressHapticEffect = buzz"
+    },
+    "GuiButton.Selected": {
+      "simple": "When true, the button shows a highlighted 'selected' look, but only for the old built-in Roblox button styles. With the normal Custom style it does nothing visible. Roblox never changes it for you.",
+      "example": "local tabButton = script.Parent\ntabButton.Selected = true",
+      "gotcha": "It has nothing to do with gamepad selection. That is GuiService.SelectedObject."
+    },
+    "GuiButton.Style": {
+      "simple": "Picks one of Roblox's old built-in button looks. The default, Custom, lets you style the button yourself with BackgroundColor3 and friends, which is what new games should do.",
+      "example": "local button = script.Parent\nbutton.Style = Enum.ButtonStyle.Custom -- style it yourself"
+    },
+    "GuiButton.Activated": {
+      "simple": "THE button-pressed event. Fires on a full mouse click, a finger tap on mobile, or the A button on a controller. Gives you the InputObject and a clickCount (starts at 0) you can use to spot quick repeated clicks.",
+      "example": "local button = script.Parent\nbutton.Activated:Connect(function(inputObject, clickCount)\n\tprint(\"Pressed! clickCount =\", clickCount)\nend)",
+      "gotcha": "Doesn't fire on the server. Use it in a LocalScript."
+    },
+    "GuiButton.MouseButton1Click": {
+      "simple": "Fires on a full LEFT mouse click: press down and let go while still on the button. If the mouse slides off before letting go, it doesn't fire.",
+      "example": "local button = script.Parent\nbutton.MouseButton1Click:Connect(function()\n\tprint(\"Left clicked\")\nend)",
+      "gotcha": "Prefer Activated, which also works on touch and gamepad."
+    },
+    "GuiButton.MouseButton1Down": {
+      "simple": "Fires the moment the LEFT mouse button is pressed down on the button (before letting go). Gives mouse x and y.",
+      "example": "local button = script.Parent\nbutton.MouseButton1Down:Connect(function(x, y)\n\tprint(\"Pressing down at\", x, y)\nend)"
+    },
+    "GuiButton.MouseButton1Up": {
+      "simple": "Fires when the LEFT mouse button is let go over the button. Gives mouse x and y.",
+      "example": "local button = script.Parent\nbutton.MouseButton1Up:Connect(function(x, y)\n\tprint(\"Let go at\", x, y)\nend)"
+    },
+    "GuiButton.MouseButton2Click": {
+      "simple": "Fires on a full RIGHT mouse click (press and let go while on the button).",
+      "example": "local itemButton = script.Parent\nitemButton.MouseButton2Click:Connect(function()\n\tprint(\"Right clicked - show options menu\")\nend)",
+      "gotcha": "Mouse only. SecondaryActivated also covers long-press on touch and gamepad."
+    },
+    "GuiButton.MouseButton2Down": {
+      "simple": "Fires the moment the RIGHT mouse button is pressed down on the button. Gives mouse x and y.",
+      "example": "local button = script.Parent\nbutton.MouseButton2Down:Connect(function(x, y)\n\tprint(\"Right button down\")\nend)"
+    },
+    "GuiButton.MouseButton2Up": {
+      "simple": "Fires when the RIGHT mouse button is let go over the button. Gives mouse x and y.",
+      "example": "local button = script.Parent\nbutton.MouseButton2Up:Connect(function(x, y)\n\tprint(\"Right button up\")\nend)"
+    },
+    "GuiButton.SecondaryActivated": {
+      "simple": "The 'other action' version of Activated. Fires on right-click with a mouse, a long press on touch, R3 on a gamepad, or Alt+Enter in keyboard UI navigation. Good for 'more options' or 'drop item'.",
+      "example": "local itemButton = script.Parent\nitemButton.SecondaryActivated:Connect(function(inputObject)\n\tprint(\"Show more options for this item\")\nend)"
+    }
+  }
+}

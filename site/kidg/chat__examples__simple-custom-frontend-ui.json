@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/chat/examples/simple-custom-frontend-ui.md",
+  "simple": "This example shows how to build your own simple chat box instead of using Roblox's default one. You turn off the default chat window and input bar, then make a TextBox for typing and a ScrollingFrame that lists messages. It helps you understand how chat messages are sent and received. Heads up: if platform-integrated chat is turned on, custom UIs can no longer show message text, so you would use a `TextChannelWindow` instead.",
+  "analogy": "It is like swapping the speaker and microphone on a walkie-talkie for your own. The radio signal (TextChatService) still carries the messages, you just built new parts to talk into and listen from.",
+  "keyPoints": [
+    "First turn off the default UI by setting `ChatWindowConfiguration.Enabled` and `ChatInputBarConfiguration.Enabled` to false in the Properties window.",
+    "The input bar is a `TextBox` in a `ScreenGui` in StarterGui, with a LocalScript inside it.",
+    "When the player presses Enter, the script sends the text with `RBXGeneral:SendAsync()`, wrapped in `pcall` in case it fails.",
+    "After sending, clear the TextBox so it is ready for the next message.",
+    "The chat window is a `ScrollingFrame` with a `UIListLayout` that stacks a `TextLabel` for each message.",
+    "`TextChatService.MessageReceived` fires twice for your own message: once when sending and once when the server confirms it. Reuse the same label instead of making two.",
+    "With platform-integrated chat enabled, this approach stops working. Use `TextChannelWindow` instead."
+  ],
+  "terms": {
+    "frontend": "The part of a system that players see and touch, like buttons and text boxes.",
+    "RBXGeneral": "The default public chat channel that everyone in the server can see.",
+    "SendAsync": "A function that sends a message into a channel. Async means it may take a moment to finish.",
+    "pcall": "Short for protected call. It runs a function and catches errors, so one failure does not crash your whole script.",
+    "FocusLost": "An event that fires when the player stops typing in a TextBox, for example by pressing Enter or clicking away.",
+    "MessageId": "A unique name for each message. The example names each label with it so it can find and update the same label later.",
+    "UIListLayout": "An object that automatically lines up its siblings in a list, so you do not have to place each label by hand."
+  },
+  "example": {
+    "title": "Send chat from your own TextBox",
+    "place": "LocalScript inside a TextBox, inside a ScreenGui in StarterGui",
+    "code": "local TextChatService = game:GetService(\"TextChatService\")\n\n-- RBXGeneral is the default public channel\nlocal channels = TextChatService:WaitForChild(\"TextChannels\")\nlocal general = channels:WaitForChild(\"RBXGeneral\")\n\nlocal textBox = script.Parent\n\ntextBox.FocusLost:Connect(function(enterPressed)\n\tlocal text = textBox.Text\n\t-- Only send if Enter was pressed and the box is not empty\n\tif enterPressed and #text > 0 then\n\t\tlocal success = pcall(function()\n\t\t\treturn general:SendAsync(text)\n\t\tend)\n\n\t\tif not success then\n\t\t\tgeneral:DisplaySystemMessage(\"Failed to send message\")\n\t\tend\n\n\t\t-- Clear the box for the next message\n\t\ttextBox.Text = \"\"\n\tend\nend)",
+    "explain": [
+      "We find the `RBXGeneral` channel inside `TextChatService.TextChannels`.",
+      "`FocusLost` runs when the player stops typing. `enterPressed` is true if they pressed Enter.",
+      "`#text > 0` checks the message is not empty. `#` gives the length, so `#\"hi\"` is 2.",
+      "`SendAsync` sends the message. We wrap it in `pcall` so an error does not break the script.",
+      "If sending fails, we show a system message so the player knows.",
+      "Finally we clear the box."
+    ]
+  },
+  "watchOut": [
+    "Forgetting to turn off the default chat window and input bar, so two chat boxes show at once.",
+    "Making a new label every time `MessageReceived` fires. Your own messages fire twice, so look up the label by `MessageId` first.",
+    "Using this with platform-integrated chat enabled. Message text comes back as an empty string, so the window shows nothing. Use `TextChannelWindow` instead."
+  ]
+}

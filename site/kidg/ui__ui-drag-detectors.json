@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/ui/ui-drag-detectors.md",
+  "simple": "A `UIDragDetector` makes a piece of UI draggable, like a slider knob, a volume control, or a spinning dial. Just put one inside a UI object and players can drag it with a mouse, finger, or gamepad, with no code at all. You can limit it to slide along a line, spin in a circle, or stay inside a box. Scripts can then react to the dragging, for example changing a setting as a slider moves.",
+  "analogy": "It is like putting a magnet handle on a fridge picture: suddenly you can grab it and slide it around, and you can add rails so it only slides left and right.",
+  "keyPoints": [
+    "Put a `UIDragDetector` directly inside any `GuiObject` to make it draggable on every device.",
+    "In Studio, dragging only works when the Select, Move, Scale, and Rotate tools and UI editor tools are not active.",
+    "`DragStyle` picks the motion: `TranslateLine` (along one line), `TranslatePlane` (anywhere flat), `Rotate` (spin), or `Scriptable` (your own rules).",
+    "`DragAxis` sets the line direction for `TranslateLine`; the default (1, 0) means left and right.",
+    "`ResponseStyle` decides whether the object moves by offset (pixels) or scale, or does not move at all so your script can decide (`CustomOffset`, `CustomScale`).",
+    "`BoundingUI` keeps the dragged object inside another UI object, and min/max translation and angle properties set limits.",
+    "`DragStart`, `DragContinue`, and `DragEnd` events fire as dragging begins, continues, and stops.",
+    "`SetDragStyleFunction()` and `AddConstraintFunction()` let scripts invent custom motion, like snapping to a grid."
+  ],
+  "terms": {
+    "translate / translation": "Moving something from one spot to another without spinning it.",
+    "rotation": "Spinning something around its center, measured in degrees.",
+    "LayerCollector": "The UI container at the top, like a `ScreenGui` or `SurfaceGui`. Dragging happens in its flat space.",
+    "DragAxis": "The direction of the slide line. (1, 0) is left-right; (0, 1) is up-down.",
+    "ReferenceUIInstance": "Another UI object to measure from. If set, rotation spins around that object's center instead of the dragged object's own center.",
+    "offset vs. scale": "Offset is pixels (like 50 pixels). Scale is a fraction of the parent (like 0.5 = half).",
+    "BoundingUI": "A UI box the dragged object cannot leave, like the track of a slider.",
+    "clamped": "Held between a minimum and maximum. If the max is 100 and you drag to 150, it stays at 100.",
+    "constraint function": "Your own function that adjusts the proposed position before it is used, for example rounding it to the nearest grid square.",
+    "client": "The player's own device. Drag scripts usually run there in a `LocalScript`."
+  },
+  "example": {
+    "title": "Make a slider that changes a box's transparency",
+    "place": "LocalScript inside a UIDragDetector, which is inside a Frame named Handle, which is inside a Frame named SliderContainer (in a ScreenGui in StarterGui)",
+    "code": "-- Hierarchy: SliderContainer > Handle > UIDragDetector > this LocalScript\nlocal uiDragDetector = script.Parent\nlocal handle = uiDragDetector.Parent\nlocal sliderContainer = handle.Parent\n\nuiDragDetector.DragStyle = Enum.UIDragDetectorDragStyle.TranslateLine -- slide on a line\nuiDragDetector.DragAxis = Vector2.new(1, 0) -- left and right only\nuiDragDetector.ResponseStyle = Enum.UIDragDetectorResponseStyle.Scale -- move by scale\nuiDragDetector.BoundingUI = sliderContainer -- stay inside the track\n\nlocal function updateTransparency()\n\t-- Handle at the left (scale 0) = see-through, at the right (scale 1) = solid\n\tsliderContainer.BackgroundTransparency = 1 - handle.Position.X.Scale\nend\n\nupdateTransparency()\nuiDragDetector.DragContinue:Connect(updateTransparency)",
+    "explain": [
+      "We find the detector, the handle it sits in, and the slider track around the handle.",
+      "We make the handle slide only left and right, by scale, and only inside the track.",
+      "Our function reads how far across the track the handle is (0 to 1) and sets the track's transparency from it.",
+      "We run it once at the start, then again every time the player keeps dragging."
+    ]
+  },
+  "watchOut": [
+    "Dragging does not work in Studio while the Select, Move, Scale, or Rotate tool is active. Switch them off to test.",
+    "The detector must be a direct child of the object you want to drag.",
+    "If you use `CustomOffset` or `CustomScale`, the object will not move by itself; your script must use `DragUDim2` or `DragRotation`.",
+    "Drag event scripts should be `LocalScript`s (or client scripts), because UI input happens on the player's device."
+  ]
+}

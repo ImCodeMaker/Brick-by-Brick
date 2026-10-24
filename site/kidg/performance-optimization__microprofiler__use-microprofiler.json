@@ -1,0 +1,44 @@
+{
+  "path": "content/en-us/performance-optimization/microprofiler/use-microprofiler.md",
+  "simple": "This walkthrough shows how to use the MicroProfiler to hunt down a real slowdown. A sample game runs at about 45 FPS instead of 60. By pausing the profiler and hovering over the stacked bars, you find a LocalScript doing tons of raycasts every frame. You add a custom label to prove it, remove the bad code, and the game goes back to 60 FPS.",
+  "analogy": "It is like finding which app is draining your phone's battery. You check the battery screen, see one app at the top, close it, and the battery lasts longer again.",
+  "keyPoints": [
+    "Download the sample game, open it in Studio with Open from File, and press F5 to playtest.",
+    "Press Ctrl+Shift+F5 to see the Performance Summary. The frame rate is below 60.",
+    "Open the MicroProfiler with Ctrl+Alt+F6. Bars of the same height mean the slowdown happens every frame, not just once in a while.",
+    "Press Ctrl+P to pause and open detailed mode. Drag to pan and hover over labels.",
+    "Stacked bars show what code is inside what. Hover deeper layers until you find labels like `LocalScript` and `Raycast`.",
+    "The culprit loops 1,500 raycasts every time `Stepped` fires.",
+    "Wrap suspicious code in `debug.profilebegin(\"Name\")` and `debug.profileend()` to make your own label show up in the profiler.",
+    "Remove the bad code, test again, and confirm the frame rate is back to 60."
+  ],
+  "terms": {
+    "MicroProfiler": "A tool that shows how much time each task takes in every frame.",
+    "frame time": "How long one frame takes. At 60 FPS it should be about 16.67 ms or less.",
+    "spike": "A frame that takes much longer than the ones around it, shown as a tall bar.",
+    "detailed mode": "The MicroProfiler view that shows every task as a labeled bar on a timeline.",
+    "worker thread": "An extra helper line of work that runs alongside the main thread.",
+    "raycast": "Shooting an invisible line through the world to see what it hits. Each one costs some time, so 1,500 per frame adds up fast.",
+    "Stepped": "A `RunService` event that fires every frame before physics. Newer code uses `PreSimulation` instead.",
+    "profilebegin / profileend": "Functions in the `debug` library that mark the start and end of a chunk of code, so it shows up as its own named bar in the MicroProfiler.",
+    "root cause": "The real reason a problem happens, not just the symptom."
+  },
+  "example": {
+    "title": "Label your own code in the MicroProfiler",
+    "place": "LocalScript in StarterPlayerScripts",
+    "code": "local RunService = game:GetService(\"RunService\")\nlocal Workspace = game:GetService(\"Workspace\")\n\nlocal RAYS_PER_FRAME = 50\n\nlocal function onPreSimulation()\n\t-- Everything between begin and end shows up as \"My Raycasts\"\n\tdebug.profilebegin(\"My Raycasts\")\n\n\tfor _ = 1, RAYS_PER_FRAME do\n\t\tlocal origin = Vector3.new(math.random(-50, 50), 20, math.random(-50, 50))\n\t\tlocal direction = Vector3.new(0, -40, 0) -- straight down, 40 studs\n\t\tWorkspace:Raycast(origin, direction)\n\tend\n\n\tdebug.profileend()\nend\n\nRunService.PreSimulation:Connect(onPreSimulation)",
+    "explain": [
+      "Every frame, `PreSimulation` runs our function.",
+      "`debug.profilebegin(\"My Raycasts\")` starts a named bar in the MicroProfiler.",
+      "The loop shoots 50 rays straight down from random spots 20 studs high.",
+      "`debug.profileend()` ends the named bar. Every `profilebegin` needs a matching `profileend`.",
+      "Open the MicroProfiler (Ctrl+Alt+F6) while playing and look for the My Raycasts label to see how long it takes. Raise `RAYS_PER_FRAME` and watch the bar grow."
+    ]
+  },
+  "watchOut": [
+    "Forgetting `debug.profileend()`. Each begin must have an end, or the labels get mixed up.",
+    "Doing a lot of work inside a per-frame event. Even a small cost multiplied by 60 frames a second adds up.",
+    "Guessing instead of measuring. Use the profiler to find the slow part before changing code.",
+    "Leaving the fix untested. Always check the Performance Summary again after your change."
+  ]
+}

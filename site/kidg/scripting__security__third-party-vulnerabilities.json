@@ -1,0 +1,33 @@
+{
+  "path": "content/en-us/scripting/security/third-party-vulnerabilities.md",
+  "simple": "Free models from the Creator Store (the Toolbox) can hide bad scripts called backdoors. A backdoor lets the person who made it secretly control your game, steal data, or ruin it for players. Even a normal-looking car or house can have one. This page shows how to box in a model's scripts so they can only do what they really need.",
+  "analogy": "Grabbing a free model is like taking a free toy from a stranger. Most are fine, but one might have a hidden microphone inside, so you check it and keep it in a room where it cannot hear much.",
+  "keyPoints": [
+    "A backdoor is a hidden script that gives its creator secret server control of your game.",
+    "Backdoors often hide inside normal-looking models and may only switch on when a certain player joins or a command is typed.",
+    "The Toolbox shows when a model contains scripts, before and while you insert it.",
+    "Roblox moderation removes many bad models, but not all of them.",
+    "Best defense: sandbox it. Set Workspace's `SandboxedInstanceMode` to `Experimental`, set the model's `Sandboxed` property to true, then pick only the `Capabilities` it needs.",
+    "Be extra careful about giving a free model Network, DataStore, AssetRequire, CapabilityControl, or LoadString powers.",
+    "Read a model's scripts before using it. Watch for scrambled code or code pushed far off to the side with lots of spaces.",
+    "Popular, well-rated models are usually safer, but popularity does not guarantee safety."
+  ],
+  "terms": {
+    "third-party asset": "Something made by someone other than you, like a model from the Creator Store.",
+    "Creator Store / Toolbox": "The place in Studio where you can grab free models, images, sounds, and more made by others.",
+    "backdoor": "A sneaky script that lets its creator control your game without your permission.",
+    "malicious": "Made on purpose to cause harm.",
+    "sandboxing": "Putting something in a closed box with limited powers so it cannot affect the rest of your game.",
+    "capability": "One permission you can give a sandboxed model, like Audio or Physics.",
+    "obfuscated": "Made deliberately hard to read, often to hide what code really does.",
+    "whitespace": "Blank spaces and empty lines. Bad scripts can use lots of spaces to push code off the edge of the screen.",
+    "vetted": "Checked and reviewed by others."
+  },
+  "watchOut": [
+    "Inserting a model without checking for scripts. Look for script icons and read every script inside.",
+    "Trusting a model just because it is popular. Still check it.",
+    "Giving a free model the Network or DataStore capability without knowing exactly why it needs it.",
+    "Missing hidden code. Scroll all the way right in long lines and be suspicious of unreadable code.",
+    "Panicking at \"lacking Capability Unassigned\" errors. During the beta some features do not work while sandboxed yet."
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "name": "UIAspectRatioConstraint",
+  "simple": "A UIAspectRatioConstraint keeps its parent's shape the same, no matter the screen size. You give it a width-to-height ratio: 1 for a perfect square, 2 for twice as wide as tall, and so on. Great for keeping pictures and buttons from getting squished on different devices.",
+  "analogy": "It's like a photo frame that can grow or shrink, but always stays the same shape, so the picture never looks stretched.",
+  "whenToUse": [
+    "Keeping square icons square on phones and wide monitors",
+    "Stopping images from stretching when you size them with Scale",
+    "Keeping a panel at a nice 16:9 or 4:3 shape"
+  ],
+  "where": "Put it inside the UI object whose shape you want to lock. Create in Studio or with Instance.new in a LocalScript.",
+  "terms": {
+    "modifier": "A small invisible object you put INSIDE a UI object to change how it looks or behaves. It does nothing on its own.",
+    "parent": "The object something is placed inside. A modifier affects its parent.",
+    "sibling": "Objects that share the same parent, like brothers and sisters.",
+    "UDim": "Half of a UDim2: just one Scale and one Offset. UDim.new(0, 8) means 0% + 8 pixels. UDim.new(0.1, 0) means 10% of the parent's size.",
+    "Scale": "A fraction (0 to 1) of the parent's size. 0.5 = half.",
+    "Offset": "An exact number of pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "LocalScript": "A script that runs on the player's own device. UI code goes in LocalScripts.",
+    "Vector2": "Two numbers together: X (width or left-right) and Y (height or up-down).",
+    "aspect ratio": "Width divided by height. A 200x100 box has an aspect ratio of 2. A square has 1.",
+    "constraint": "A rule that limits something. Here it limits the shape.",
+    "axis": "A direction: X is width, Y is height.",
+    "AbsoluteSize": "The real size in pixels after all the math."
+  },
+  "examples": [
+    {
+      "title": "Keep an icon perfectly square",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = playerGui\n\nlocal icon = Instance.new(\"ImageLabel\")\nicon.Size = UDim2.fromScale(0.15, 0.15) -- 15% of the screen width and height\nicon.Position = UDim2.fromScale(0.02, 0.02)\nicon.Image = \"rbxassetid://1234567890\" -- replace with your image ID\nicon.Parent = screenGui\n\nlocal ratio = Instance.new(\"UIAspectRatioConstraint\")\nratio.AspectRatio = 1 -- width = height\nratio.Parent = icon",
+      "explain": [
+        "Without the constraint, on a 1000x600 screen the icon would be 150 x 90 pixels, a squished rectangle.",
+        "With AspectRatio 1, it shrinks the long side to match: 90 x 90 pixels, a perfect square.",
+        "On a tall phone screen it still stays square."
+      ]
+    }
+  ],
+  "gotchas": [
+    "AspectRatio is width / height. 2 means twice as WIDE. For twice as TALL use 0.5.",
+    "It overrides list and grid layouts' sizing for that item.",
+    "The constraint makes things smaller to fit the shape, so your object may end up smaller than its Size."
+  ],
+  "members": {
+    "UIAspectRatioConstraint.AspectRatio": {
+      "simple": "The shape to keep, as width divided by height. 1 = square, 2 = twice as wide as tall (e.g. 200x100), 0.5 = twice as tall as wide. Must be more than 0. 16:9 widescreen is 16/9, about 1.78.",
+      "example": "local ratio = script.Parent -- a UIAspectRatioConstraint\nratio.AspectRatio = 16 / 9 -- widescreen shape"
+    },
+    "UIAspectRatioConstraint.AspectType": {
+      "simple": "How big the object can get while keeping its shape. FitWithinMaxSize (default) = as big as possible inside its own Size. ScaleWithParentSize = as big as possible inside its parent.",
+      "example": "local ratio = script.Parent\nratio.AspectType = Enum.AspectType.ScaleWithParentSize"
+    },
+    "UIAspectRatioConstraint.DominantAxis": {
+      "simple": "Which side wins when fixing the shape: Width (default) keeps the width and changes the height to match, Height keeps the height and changes the width.",
+      "example": "local ratio = script.Parent\nratio.DominantAxis = Enum.DominantAxis.Height"
+    }
+  }
+}

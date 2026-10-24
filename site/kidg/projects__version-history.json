@@ -1,0 +1,31 @@
+{
+  "path": "content/en-us/projects/version-history.md",
+  "simple": "Roblox keeps old saved and published versions of each place, and Version History is where you see them. You can write notes on a save, like \"added the boss room\", so you can find it later, and you can go back to an older version if something breaks. This is your safety net: if a change ruins your game, you can return to a version that worked.",
+  "analogy": "It is like save slots in a video game. Before a hard boss you make a save named \"before boss\", and if things go badly you load it and try again.",
+  "keyPoints": [
+    "Open the Version History widget from Window > Version History. You can dock it anywhere in Studio.",
+    "You can search your version notes and filter by date, auto or manual save, published saves, collaborator, and whether a save has notes.",
+    "To save with notes, use File > Save to Roblox with Notes, or press Ctrl+Alt+S (Windows) or Cmd+Option+S (Mac).",
+    "Notes are required when you publish, so you always know what changed for players.",
+    "Studio can draft publish notes by summarizing your team's version notes since the last publish. You can edit, keep, or dismiss the draft.",
+    "To restore in Studio: open Version History, click the three-dot menu on a version, Open Local Copy, then File > Save to Roblox As and overwrite the place.",
+    "To restore on the Creator Dashboard: your game > Configurations > Places > pick the place > Version History > Restore.",
+    "Restoring creates a new version but does not publish it. For a public game, publish it and restart servers so players get it."
+  ],
+  "terms": {
+    "version": "One saved snapshot of your place at a certain moment.",
+    "checkpoint": "A version you mark as important, like a finished level, so you can easily return to it.",
+    "version notes": "A name and description you attach to a save, like \"v1.2: new shop\".",
+    "auto save vs manual save": "An auto save happens on its own every few minutes. A manual save is one you made yourself.",
+    "widget": "A small window inside Studio that you can move and dock.",
+    "dock": "Snap a window into a spot in your Studio layout so it stays there.",
+    "restore": "Bring back an older version. It is added as a brand-new version, so the newer ones are not erased.",
+    "roll back": "Go back to an earlier version that worked.",
+    "local copy": "A copy opened on your computer that is not yet saved to Roblox."
+  },
+  "watchOut": [
+    "Restoring a version and thinking players now have it. You still have to publish it and restart servers.",
+    "Saving without notes all the time. Later you will not know which save is which. Add a short note for big changes.",
+    "Searching for notes on very old saves. Versions from before this feature existed cannot be searched until you add notes to them."
+  ]
+}

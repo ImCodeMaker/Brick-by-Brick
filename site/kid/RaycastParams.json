@@ -1,0 +1,121 @@
+{
+  "name": "RaycastParams",
+  "simple": "RaycastParams is a settings box you hand to workspace:Raycast (and the other cast functions). It tells the invisible laser beam what to skip and what it is allowed to hit. The most common use is telling the ray to ignore your own character so it does not hit yourself.",
+  "analogy": "RaycastParams is like the rules you give a friend playing \"I spy\": \"don't count anything in my backpack, and don't count water\". The friend still looks, but follows your rules.",
+  "whenToUse": [
+    "Ignoring the player's own character when shooting a laser or checking what is in front of them",
+    "Only letting a ray hit things inside one folder (like Enemies)",
+    "Ignoring Terrain water",
+    "Making a ray pretend to be in a collision group"
+  ],
+  "where": "Works in any script on server or client. Make one with RaycastParams.new() (no arguments), set its properties, then pass it as the third argument: workspace:Raycast(origin, direction, params). You can reuse the same one many times.",
+  "terms": {
+    "raycast": "Shooting an invisible laser beam through the 3D world and asking \"what does it hit first?\". Roblox tells you what part it hit, where, and how far away.",
+    "origin": "The starting point of the ray: where the laser beam comes out. A Vector3 position like (0, 10, 0).",
+    "direction": "Which way the ray goes AND how far. It is a Vector3 arrow. Vector3.new(0, -50, 0) means \"straight down, 50 studs long\".",
+    "magnitude": "The length of a Vector3 arrow. The magnitude of (0, -50, 0) is 50. For a raycast, this length is how far the ray checks: anything farther away is ignored.",
+    "filter": "A list of things the ray should skip (exclude) or the only things it may hit (include). Usually you exclude your own character so you do not hit yourself.",
+    "descendant": "Anything inside something else, at any depth: its children, their children, and so on. Excluding a character also excludes its arms, legs, hats, and so on.",
+    "nil": "Lua's word for \"nothing\". workspace:Raycast gives nil when the ray hits nothing.",
+    "collision group": "A named team of parts that you set up so some groups pass through each other. Queries can pretend to be in one of these groups.",
+    "CanQuery": "A part property. When false, raycasts and other spatial queries skip that part.",
+    "CanCollide": "A part property. When false, players and other parts can walk or fall through it.",
+    "LookVector": "A unit arrow pointing the way a part or character is facing. Multiply it by a number to make it that long: LookVector * 50 is a 50-stud arrow forward.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "exclude": "Skip these things. The ray goes right through them.",
+    "include": "ONLY these things can be hit. Everything else is skipped.",
+    "array": "A list in Lua, written with curly braces like {partA, partB}.",
+    "sphere cast": "Like a raycast, but instead of a thin laser you push a ball through the world and see what it bumps into first.",
+    "shape cast": "Pushing a shape (a part, a block, or a ball) through the world to see what it bumps into first. Blockcast, Spherecast, and Shapecast do this."
+  },
+  "examples": [
+    {
+      "title": "Raycasting step by step: what is in front of me?",
+      "place": "LocalScript in StarterCharacterScripts",
+      "code": "local character = script.Parent\nlocal rootPart = character:WaitForChild(\"HumanoidRootPart\")\n\n-- Step 4: the filter. Skip my own character.\nlocal params = RaycastParams.new()\nparams.ExcludeInstances = { character }\n\nwhile true do\n\t-- Step 1: origin = where the laser starts (my body)\n\tlocal origin = rootPart.Position\n\n\t-- Steps 2 and 3: direction = which way AND how far.\n\t-- LookVector is length 1, so * 20 makes it 20 studs long.\n\tlocal direction = rootPart.CFrame.LookVector * 20\n\n\t-- Step 5: shoot the ray\n\tlocal result = workspace:Raycast(origin, direction, params)\n\n\tif result then\n\t\tprint(\"In front of me:\", result.Instance.Name, math.floor(result.Distance), \"studs away\")\n\tend\n\ttask.wait(1)\nend",
+      "explain": [
+        "Step 1, origin: the ray starts at my HumanoidRootPart, the middle of my character.",
+        "Step 2, direction: LookVector is an arrow pointing where I face, with length 1.",
+        "Step 3, length: the length (magnitude) of the direction is how far the ray checks. LookVector * 20 is 20 studs long, so anything farther than 20 studs is ignored.",
+        "Step 4, filter: without ExcludeInstances the ray would start inside my own body and hit me first. Excluding my character also skips all its descendants (arms, legs, hats).",
+        "Step 5, result: workspace:Raycast gives back a RaycastResult if it hit something, or nil if nothing was within 20 studs.",
+        "We check once a second with task.wait(1)."
+      ]
+    },
+    {
+      "title": "Only hit enemies",
+      "place": "Script in ServerScriptService (with a Folder named Enemies in Workspace)",
+      "code": "local enemies = workspace:WaitForChild(\"Enemies\")\n\nlocal params = RaycastParams.new()\nparams.IncludeInstances = { enemies } -- only things inside Enemies count\nparams.IgnoreWater = true\n\nlocal origin = Vector3.new(0, 5, 0)\nlocal direction = Vector3.new(100, 0, 0) -- 100 studs along +X\n\nlocal result = workspace:Raycast(origin, direction, params)\nif result then\n\tprint(\"Hit enemy part:\", result.Instance:GetFullName())\nend",
+      "explain": [
+        "IncludeInstances = { enemies } means walls, trees, and everything else are ignored. Only parts inside the Enemies folder can be hit.",
+        "IgnoreWater = true lets the ray pass through Terrain water.",
+        "The ray starts at (0, 5, 0) and checks 100 studs along the X direction."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Forgetting to exclude your own character means the ray often hits you first.",
+    "IncludeInstances = {} (an empty list) means the ray can hit NOTHING. Leave it as nil if you want to hit everything.",
+    "If a part is in both the exclude and include lists, exclude wins.",
+    "The direction's length is the ray's range. Vector3.new(0, -1, 0) only checks 1 stud down. Multiply by a bigger number for more range (up to 15,000 studs).",
+    "Older code uses FilterDescendantsInstances and FilterType. New code should use ExcludeInstances and IncludeInstances."
+  ],
+  "members": {
+    "RaycastParams.new": {
+      "simple": "Makes a blank RaycastParams with no rules set. It takes no arguments, so you set its properties afterwards.",
+      "example": "local params = RaycastParams.new()\nparams.IgnoreWater = true"
+    },
+    "RaycastParams.ExcludeInstances": {
+      "simple": "A list of things the ray should skip, along with everything inside them. Usually you put the player's own character here.",
+      "example": "local Players = game:GetService(\"Players\")\nlocal character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()\n\nlocal params = RaycastParams.new()\nparams.ExcludeInstances = { character } -- never hit myself",
+      "gotcha": "If something is in both ExcludeInstances and IncludeInstances, it is excluded."
+    },
+    "RaycastParams.IncludeInstances": {
+      "simple": "A list of the ONLY things the ray may hit (plus everything inside them). Leave it nil to allow everything. Setting it to an empty list {} allows nothing at all.",
+      "example": "local params = RaycastParams.new()\nparams.IncludeInstances = { workspace:WaitForChild(\"Targets\") } -- only targets count",
+      "gotcha": "nil means \"include everything\", but {} means \"include nothing\". They are opposites."
+    },
+    "RaycastParams.IgnoreWater": {
+      "simple": "If true, the ray passes through Terrain water as if it were not there. If false, water can be hit.",
+      "example": "local params = RaycastParams.new()\nparams.IgnoreWater = true -- see the lake floor, not the water surface"
+    },
+    "RaycastParams.CollisionGroup": {
+      "simple": "The name of a collision group the ray pretends to belong to. Parts in groups set to NOT collide with that group are skipped. If you do not set it, the ray uses the \"Default\" group.",
+      "example": "local params = RaycastParams.new()\n-- \"Ghosts\" must already exist as a collision group in your game\nparams.CollisionGroup = \"Ghosts\""
+    },
+    "RaycastParams.RespectCanCollide": {
+      "simple": "If true, the ray decides whether to hit a part by its CanCollide setting instead of its CanQuery setting. So parts players can walk through (CanCollide off) are skipped.",
+      "example": "local params = RaycastParams.new()\nparams.RespectCanCollide = true -- ignore walk-through decorations"
+    },
+    "RaycastParams.BruteForceAllSlow": {
+      "simple": "If true, the ray ignores all the usual part settings and checks every single part the slow way. It is only for testing; do not use it in a real game because it hurts performance.",
+      "example": "local params = RaycastParams.new()\nparams.BruteForceAllSlow = true -- testing only!",
+      "gotcha": "Leave this false in published games."
+    },
+    "RaycastParams.Margin": {
+      "simple": "Makes the cast shape a bit fatter in every direction, in studs. Default is 0. On a normal raycast, a Margin turns the thin laser into a ball of that radius (a sphere cast), so it is easier to hit things.",
+      "example": "local params = RaycastParams.new()\nparams.Margin = 1 -- the laser is now a ball 1 stud in radius\nlocal result = workspace:Raycast(Vector3.new(0, 5, 0), Vector3.new(0, 0, -50), params)",
+      "gotcha": "Must be 0 or more. A huge Margin can make the cast too big and throw an error."
+    },
+    "RaycastParams.SizeGradient": {
+      "simple": "Makes the cast shape grow or shrink as it travels, for shape casts like Spherecast and Blockcast. Default 0 keeps the size the same. 0.5 ends 50% bigger, -0.5 ends at half size, -1 shrinks to nothing.",
+      "example": "local params = RaycastParams.new()\nparams.SizeGradient = 1 -- the ball ends twice as big as it started\n-- A 2-stud ball pushed 40 studs forward\nlocal result = workspace:Spherecast(Vector3.new(0, 5, 0), 2, Vector3.new(0, 0, -40), params)",
+      "gotcha": "Must be -1 or more."
+    },
+    "RaycastParams.FilterDescendantsInstances": {
+      "simple": "The older way to filter: a list of things used as either a skip list or an only-these list, depending on FilterType. New code should use ExcludeInstances or IncludeInstances instead.",
+      "example": "local params = RaycastParams.new()\nparams.FilterType = Enum.RaycastFilterType.Exclude\nparams.FilterDescendantsInstances = { workspace:WaitForChild(\"Decorations\") }",
+      "gotcha": "Replaced by ExcludeInstances and IncludeInstances for new work."
+    },
+    "RaycastParams.FilterType": {
+      "simple": "Says whether the FilterDescendantsInstances list is a skip list (Enum.RaycastFilterType.Exclude) or an only-these list (Enum.RaycastFilterType.Include). It is part of the older filter system.",
+      "example": "local params = RaycastParams.new()\nparams.FilterType = Enum.RaycastFilterType.Include\nparams.FilterDescendantsInstances = { workspace:WaitForChild(\"Targets\") }",
+      "gotcha": "New code should use ExcludeInstances or IncludeInstances instead."
+    },
+    "RaycastParams:AddToFilter": {
+      "simple": "Adds one thing, or a list of things, to the FilterDescendantsInstances list without replacing what is already there. Part of the older filter system.",
+      "example": "local params = RaycastParams.new()\nparams.FilterType = Enum.RaycastFilterType.Exclude\nparams:AddToFilter(workspace:WaitForChild(\"Decorations\"))\nparams:AddToFilter({ workspace:WaitForChild(\"Effects\") })",
+      "gotcha": "New code should put things in ExcludeInstances or IncludeInstances instead."
+    }
+  }
+}

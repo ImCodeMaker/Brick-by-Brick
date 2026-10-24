@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/luau/tables.md",
+  "simple": "A table is a container that holds many values in one place. You can use it as a numbered list (an array), like a list of players, or as a labeled list (a dictionary), like a player's stats. Tables are the main way to organize data in Luau, so you will use them in almost every game. This page also shows how to copy tables and lock them so they cannot change.",
+  "analogy": "An array is like a numbered row of lockers: locker 1, locker 2, locker 3. A dictionary is like a set of labeled drawers: \"Coins\", \"Level\", \"Name\". Either way, the table is the whole cabinet.",
+  "keyPoints": [
+    "Make a table with curly braces: `local t = {}`. It can hold any values except `nil`.",
+    "Arrays are ordered lists. The first item is at index 1, not 0.",
+    "Read and write array items with brackets: `list[2]`, `list[4] = \"New\"`. `#list` gives the length.",
+    "`table.insert(list, value)` adds to the end; `table.insert(list, 2, value)` adds at position 2. `table.remove(list, 2)` removes position 2 and shifts the rest down.",
+    "Dictionaries store key-value pairs, like `{ coins = 10, level = 3 }`. Read with `stats.coins` or `stats[\"coins\"]`.",
+    "Loop through any table with `for key, value in t do`. Set a key to `nil` to remove it.",
+    "Putting a table into another variable does not copy it. Both variables point to the same table.",
+    "`table.clone` makes a shallow copy. `table.freeze` makes a table read-only forever."
+  ],
+  "terms": {
+    "table": "Luau's container type for holding many values.",
+    "array": "A table used as a numbered list. `{\"Red\", \"Blue\"}` has \"Red\" at index 1 and \"Blue\" at index 2.",
+    "index": "The position number of an item in an array. Luau starts counting at 1.",
+    "1-based indexing": "Counting positions starting at 1. Some other languages start at 0, but Luau does not.",
+    "dictionary": "A table where each value has a name (key) instead of a position number.",
+    "key-value pair": "A label and its value together. In `coins = 10`, `coins` is the key and `10` is the value.",
+    "iterate": "To go through every item one at a time, usually with a `for` loop.",
+    "reference": "A pointer to a table, not a copy. If `b = a`, changing `a[1]` also changes what `b[1]` shows.",
+    "shallow clone": "A copy of the top level only. Tables inside it are still shared with the original.",
+    "deep clone": "A full copy, including copies of every table inside it.",
+    "recursive function": "A function that calls itself, used here to handle tables inside tables.",
+    "freeze": "To lock a table so nobody can change it. It cannot be unfrozen.",
+    "nested table": "A table stored inside another table."
+  },
+  "example": {
+    "title": "Track a player's backpack and stats",
+    "place": "Script in ServerScriptService",
+    "code": "-- An array: a numbered list\nlocal backpack = { \"Sword\", \"Shield\" }\ntable.insert(backpack, \"Potion\") -- add to the end\nprint(#backpack) --> 3\nprint(backpack[1]) --> Sword\n\ntable.remove(backpack, 2) -- remove \"Shield\"\nfor index, item in backpack do\n\tprint(index, item)\nend\n--> 1 Sword\n--> 2 Potion\n\n-- A dictionary: labeled values\nlocal stats = { coins = 50, level = 1 }\nstats.coins += 25\nstats.title = \"Rookie\" -- add a new key\nstats.level = nil -- remove a key\nfor key, value in stats do\n\tprint(key, value)\nend\n\n-- Copy instead of sharing\nlocal copy = table.clone(stats)\ncopy.coins = 0\nprint(stats.coins, copy.coins) --> 75 0",
+    "explain": [
+      "`backpack` is an array. `table.insert` adds \"Potion\" at the end, making 3 items.",
+      "`table.remove(backpack, 2)` removes \"Shield\" and moves \"Potion\" from spot 3 to spot 2.",
+      "`stats` is a dictionary. Its coins go from 50 to 75, a new `title` key is added, and `level` is removed by setting it to `nil`.",
+      "`table.clone` makes a separate copy, so changing `copy.coins` does not change `stats.coins`."
+    ]
+  },
+  "watchOut": [
+    "Starting at index 0. In Luau, the first item is `list[1]`.",
+    "Thinking `local b = a` makes a copy. It does not; use `table.clone(a)`.",
+    "Using `#` on a dictionary. `#` only counts array items, so it gives 0 for `{ coins = 5 }`.",
+    "Expecting dictionary loops in a set order. The order can be different from how you wrote it.",
+    "Using `table.clone` on tables with tables inside. The inner ones are still shared; use a deep clone."
+  ]
+}

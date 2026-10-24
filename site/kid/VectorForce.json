@@ -1,0 +1,78 @@
+{
+  "name": "VectorForce",
+  "simple": "VectorForce is an invisible pusher that pushes a part with the same strength every moment, in a direction you choose. Because it never stops pushing, the part keeps speeding up, like a rocket. If you push up with exactly the part's weight, the part floats.",
+  "analogy": "VectorForce is like a rocket engine strapped to a box. The engine always pushes the same amount. With RelativeTo = Attachment0 it pushes wherever the box points (like a real rocket); with RelativeTo = World it always pushes one fixed direction (like wind).",
+  "whenToUse": [
+    "Make a part hover by cancelling gravity",
+    "Rocket thrusters and jetpacks",
+    "Wind that always blows one way",
+    "Anti-gravity zones or low-gravity objects"
+  ],
+  "where": "Put it inside the part you want to push (or anywhere in workspace), with Attachment0 set to an attachment in that part. Works from a Script on the server. Make it with Instance.new(\"VectorForce\").",
+  "terms": {
+    "force": "A push or pull. In Roblox it is measured in Roblox force units (mass x studs per second per second). A bigger number is a harder push.",
+    "mass": "How much 'stuff' an object has, which decides how hard it is to push. A part's mass = its volume x its material density. A 4x1x2 Plastic part (volume 8, density 0.7) has mass 5.6.",
+    "gravity": "The pull that makes things fall. In Roblox it is `workspace.Gravity`, which is 196.2 studs per second per second by default.",
+    "acceleration": "How fast speed changes. The rule is F = m x a (force = mass x acceleration). Push a mass-5.6 part with force 56 and it speeds up by 10 studs/s every second.",
+    "velocity": "Speed plus direction, written as a Vector3 in studs per second. Vector3.new(0, 0, 20) means 20 studs every second along the Z direction.",
+    "Vector3": "Three numbers (X, Y, Z) bundled together. Used for positions, directions, forces and speeds. Y is up.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "assembly": "A group of parts that are rigidly joined (for example by welds) so they move as one solid object. A force on any part moves the whole group.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "world space": "Directions measured using the whole game world's fixed arrows: Y is always straight up toward the sky, no matter how a part is turned.",
+    "attachment space": "Directions measured using an attachment's own arrows. If the part tips over, 'up' for the attachment tips over too.",
+    "RelativeTo": "Chooses whose arrows the numbers use: World (the game world's fixed directions) or Attachment0/Attachment1 (that attachment's own directions, which turn when the part turns).",
+    "center of mass": "The balance point of an object. Pushing exactly through it moves the object without spinning it; pushing off to the side also makes it spin.",
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "AssemblyMass": "A part property that gives the total mass of the part plus every part welded to it. Use it to work out how much force you need.",
+    "constant force": "A push that never changes strength. Because F = m x a, a constant force gives a constant speed-up, so the part keeps getting faster and faster."
+  },
+  "examples": [
+    {
+      "title": "Make a part hover in the air",
+      "place": "Script in ServerScriptService",
+      "code": "local part = Instance.new(\"Part\")\npart.Size = Vector3.new(4, 1, 2)\npart.Position = Vector3.new(0, 10, 0)\npart.Anchored = false\npart.Parent = workspace\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal force = Instance.new(\"VectorForce\")\nforce.Attachment0 = attachment\nforce.RelativeTo = Enum.ActuatorRelativeTo.World -- \"up\" means the sky\nforce.ApplyAtCenterOfMass = true                 -- push the balance point, no spinning\n\n-- Exactly cancel gravity: force = mass x gravity\nforce.Force = Vector3.new(0, part.AssemblyMass * workspace.Gravity, 0)\nforce.Parent = part\n\nprint(\"Mass:\", part.AssemblyMass)          -- 5.6 for a 4x1x2 Plastic part\nprint(\"Force needed:\", force.Force.Y)      -- 5.6 x 196.2 = about 1098.7",
+      "explain": [
+        "Gravity pulls down on the part with a force of mass x gravity. For a mass of 5.6 that is 5.6 x 196.2 = about 1098.7.",
+        "We push UP with exactly the same amount, so the two cancel out. The part stops falling and floats.",
+        "`RelativeTo = World` makes the Y in our Vector3 mean 'toward the sky', even if the part tips over.",
+        "`ApplyAtCenterOfMass = true` pushes through the balance point, so the part does not start spinning.",
+        "If you push a bit more (say 1.1 x the weight), the part slowly rises. A bit less, and it slowly sinks."
+      ]
+    },
+    {
+      "title": "A simple rocket that pushes where it points",
+      "place": "Script inside an unanchored Part named Rocket",
+      "code": "local rocket = script.Parent\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = rocket\n\nlocal thrust = Instance.new(\"VectorForce\")\nthrust.Attachment0 = attachment\n-- Default RelativeTo is Attachment0: the force turns WITH the rocket\nthrust.RelativeTo = Enum.ActuatorRelativeTo.Attachment0\nthrust.ApplyAtCenterOfMass = true\n-- Push up along the rocket's own Y arrow, twice as hard as gravity\nthrust.Force = Vector3.new(0, rocket.AssemblyMass * workspace.Gravity * 2, 0)\nthrust.Parent = rocket\n\ntask.wait(3)\nthrust.Enabled = false -- engine off after 3 seconds; the rocket falls back",
+      "explain": [
+        "With RelativeTo set to Attachment0, (0, number, 0) means 'along the rocket's own up arrow'. If the rocket tilts, the push tilts too.",
+        "We push with 2 x its weight. One weight cancels gravity, the extra weight speeds it upward.",
+        "After 3 seconds we switch the engine off with Enabled = false and gravity takes over."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The part must be unanchored. Anchored parts ignore forces.",
+    "A VectorForce never lets go, so the part keeps getting faster. If you want a steady speed, use LinearVelocity instead.",
+    "Too-small numbers do nothing visible: a force of 10 on a part with mass 5.6 is weaker than gravity (about 1098.7), so the part still falls. Always compare with mass x gravity.",
+    "If the part spins wildly, turn on ApplyAtCenterOfMass, or put the attachment at the part's center.",
+    "Adding more welded parts increases AssemblyMass, so recalculate the force if your model changes."
+  ],
+  "members": {
+    "VectorForce.ApplyAtCenterOfMass": {
+      "simple": "If true, the push goes through the object's balance point, so it moves without spinning. If false (default), it pushes at Attachment0's spot, which can also make it twist if that spot is off-center.",
+      "example": "local force = workspace.Box.VectorForce\nforce.ApplyAtCenterOfMass = true -- push the middle, no tumbling"
+    },
+    "VectorForce.Force": {
+      "simple": "How hard and in which direction to push, as a Vector3. The length of the vector is the strength. Which way X, Y and Z point depends on RelativeTo.",
+      "example": "local part = workspace.Box\nlocal force = part.VectorForce\n-- Push up with exactly the part's weight so it floats\nforce.Force = Vector3.new(0, part.AssemblyMass * workspace.Gravity, 0)",
+      "gotcha": "Gravity is strong in Roblox (196.2). A Force of Vector3.new(0, 100, 0) on a normal-sized part will not lift it."
+    },
+    "VectorForce.RelativeTo": {
+      "simple": "Picks whose directions the Force uses. World: Y is always the sky. Attachment0 (default): directions turn with the part, like a rocket engine. Attachment1: directions follow the other attachment.",
+      "example": "local force = workspace.Box.VectorForce\n-- Wind that always blows toward +X, no matter how the box spins\nforce.RelativeTo = Enum.ActuatorRelativeTo.World\nforce.Force = Vector3.new(500, 0, 0)",
+      "gotcha": "To fight gravity, use World. With Attachment0, if the part flips upside down your 'up' push becomes a 'down' push."
+    }
+  }
+}

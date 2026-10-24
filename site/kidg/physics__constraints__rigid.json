@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/physics/constraints/rigid.md",
+  "simple": "A RigidConstraint locks two attachments (or bones) together so they stay in the same position and rotation relative to each other. It is like a weld, but it connects attachment points instead of whole parts. That makes it perfect for snapping a hat, backpack or tool onto a specific spot on a character, because characters already have attachments in useful places.",
+  "analogy": "It is like a snap button on a jacket: the two halves are fixed points, and when you snap them together they line up exactly.",
+  "keyPoints": [
+    "RigidConstraint connects two Attachments or Bones, not two parts.",
+    "The two attachments are held at the same position and rotation relative to each other, with zero offset between them.",
+    "It can attach accessories to attachments on a character rig, which a WeldConstraint cannot do directly.",
+    "In Studio, clicking a part with the Rigid tool creates a new attachment on it; clicking an existing attachment or bone uses that one.",
+    "After two valid clicks, the constraint is created. If either click is not on a part, attachment or bone, nothing is created.",
+    "To glue two parts directly, use a WeldConstraint instead."
+  ],
+  "terms": {
+    "attachment": "A Roblox object you put inside a part to mark one exact point on it. Its Position is measured from the part's center, so an attachment at (0, 3, 0) sits 3 studs above the center of its part.",
+    "bone": "A joint inside an animated mesh. A constraint on a bone follows the bone as it animates.",
+    "rig": "The skeleton and joints of a character that let it move and animate.",
+    "zero offset": "No gap between the two attachment points. They are lined up exactly on top of each other, facing the same way.",
+    "accessory": "Something worn on a character, like a hat, hair or backpack.",
+    "Massless": "A part property. When true, the part adds no weight to the assembly, so a hat will not make the character lean or slow down."
+  },
+  "example": {
+    "title": "Snap a glowing crown onto every player's head",
+    "place": "Script in ServerScriptService",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal function giveCrown(character)\n\tlocal head = character:WaitForChild(\"Head\")\n\t-- R15 heads come with an attachment named HatAttachment on top\n\tlocal hatAttachment = head:WaitForChild(\"HatAttachment\")\n\n\tlocal crown = Instance.new(\"Part\")\n\tcrown.Name = \"Crown\"\n\tcrown.Size = Vector3.new(1.5, 0.5, 1.5)\n\tcrown.Material = Enum.Material.Neon\n\tcrown.BrickColor = BrickColor.new(\"Bright yellow\")\n\tcrown.CanCollide = false\n\tcrown.Massless = true   -- adds no weight to the character\n\n\t-- The crown's own attachment, 0.25 studs below its center (its bottom face)\n\tlocal crownAttachment = Instance.new(\"Attachment\")\n\tcrownAttachment.Position = Vector3.new(0, -0.25, 0)\n\tcrownAttachment.Parent = crown\n\n\tlocal rigid = Instance.new(\"RigidConstraint\")\n\trigid.Attachment0 = hatAttachment\n\trigid.Attachment1 = crownAttachment\n\trigid.Parent = crown\n\n\tcrown.Parent = character\nend\n\nPlayers.PlayerAdded:Connect(function(player)\n\tplayer.CharacterAdded:Connect(giveCrown)\nend)",
+    "explain": [
+      "Every time a player's character spawns, `giveCrown` runs.",
+      "R15 character heads already have an attachment called HatAttachment at the top of the head. We wait for it to exist.",
+      "The crown is 0.5 studs tall, so its bottom face is 0.25 studs below its center. We put the crown's attachment there.",
+      "The RigidConstraint lines the two attachments up exactly, so the bottom of the crown sits on the HatAttachment spot and moves with the head.",
+      "`CanCollide = false` and `Massless = true` stop the crown from bumping into things or weighing the player down."
+    ]
+  },
+  "watchOut": [
+    "Forgetting `Massless = true` on accessories can make characters tip or move strangely.",
+    "If the item appears in the wrong spot, check its attachment's Position. It is measured from the item's center.",
+    "Older R6 characters have different attachments than R15. Check the attachment name exists before using it.",
+    "RigidConstraint needs attachments or bones. If you just want to glue two parts, a WeldConstraint is simpler."
+  ]
+}

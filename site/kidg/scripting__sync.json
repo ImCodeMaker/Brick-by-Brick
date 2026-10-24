@@ -1,0 +1,38 @@
+{
+  "path": "content/en-us/scripting/sync.md",
+  "simple": "Script Sync lets you write your Roblox scripts in a different code editor, like Visual Studio Code, instead of Studio's built-in one. Studio copies your scripts into regular files on your computer and keeps them matched: change the file and Studio updates, change the script in Studio and the file updates. This is useful if you like another editor's features or want to track your code with tools like Git. You still use Studio for building, testing, and everything else.",
+  "analogy": "It is like a notebook that is magically linked to a whiteboard. Whatever you write in the notebook appears on the whiteboard, and whatever someone writes on the whiteboard appears in your notebook.",
+  "keyPoints": [
+    "To start, select one or more folders in the Explorer, right-click, choose Sync to..., and pick a folder on your computer.",
+    "Right-click again and choose Script Sync > Reveal in Explorer (Windows) or Reveal in Finder (Mac), then open that folder in your editor.",
+    "Sync folders rather than single scripts, so new, renamed, and deleted scripts inside sync automatically.",
+    "You only set it up once. Next time you open the place, syncing resumes by itself.",
+    "Only Scripts, LocalScripts, ModuleScripts, and Folders sync. Parts and models are ignored, so keep code in folders of its own.",
+    "File names decide the script type: `name.luau` is a ModuleScript, `name.server.luau` is a server Script, `name.client.luau` is a client Script, and `name.local.luau` is a LocalScript.",
+    "If Studio and your files differ, a dialog lets you choose Keep Studio or Keep Disk.",
+    "For VS Code, install the Luau Language Server extension and its Studio companion plugin so autocomplete and type checking work."
+  ],
+  "terms": {
+    "Script Sync": "A Studio feature that keeps scripts in Studio and files on your computer matched.",
+    "IDE": "Integrated Development Environment. A code editor with extra tools, like VS Code or Cursor.",
+    "text editor": "A program for writing plain text and code, like Notepad++ or Sublime Text.",
+    "local disk": "Your computer's own storage, where files and folders live.",
+    "directory": "Another word for a folder on your computer.",
+    "sync": "Keep two copies matching, so a change in one shows up in the other.",
+    "version control": "A tool like Git that saves the history of your code so you can see changes and undo them.",
+    "source of truth": "The main copy everything else follows. With Script Sync, Studio stays the main home of your project.",
+    "conflict": "When the Studio copy and the file copy are different and you must pick which one wins.",
+    "RunContext": "A Script setting that says where it runs: Server, Client, Legacy, or Plugin.",
+    "language server (LSP)": "A helper that gives your editor smart features like autocomplete, error checking, and go to definition.",
+    "linting": "Automatically checking code for likely mistakes or messy style.",
+    "Rojo": "A popular community tool that syncs your whole project, not just scripts, with files on disk."
+  },
+  "watchOut": [
+    "Syncing a folder that also has parts or models in it. Only scripts and folders sync, so keep code in separate folders.",
+    "Syncing scripts that have attributes or tags. Script Sync ignores those, and you can lose that data.",
+    "Giving two scripts in the same folder the same name, or using characters your computer does not allow in file names. Studio will stop and ask you to fix it.",
+    "Deleting the top-level synced folder on your computer. Stop sync in Studio first (Script Sync > Stop Sync), then delete.",
+    "Two teammates syncing and editing the same script at once. They can overwrite each other's changes.",
+    "Installing editor extensions from unknown sources. Check that they come from a trustworthy creator."
+  ]
+}

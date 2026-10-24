@@ -1,0 +1,78 @@
+{
+  "name": "Vector3int16",
+  "simple": "Vector3int16 is like a Vector3 (X, Y, Z), but each number must be a WHOLE number between -32,768 and 32,767. It saves memory, but it has no handy tools like Magnitude or Unit. Most games never need it; you will usually use Vector3 instead.",
+  "analogy": "If Vector3 is a ruler that can measure tiny fractions, Vector3int16 is a ruler that only has whole-number marks and stops at 32,767.",
+  "whenToUse": [
+    "When a Roblox feature specifically asks for one, for example building a Region3int16 (a box of whole-number spots used by some Terrain tools).",
+    "Almost never otherwise; use Vector3 for positions, sizes and directions."
+  ],
+  "where": "Built-in data type, works in Scripts and LocalScripts. Make one with `Vector3int16.new(x, y, z)`.",
+  "terms": {
+    "integer": "A whole number with no decimal part, like 3 or -40 (not 2.5).",
+    "16-bit signed integer": "A whole number stored in a small box of memory. It can only hold numbers from -32,768 to 32,767, and can be negative (that is what \"signed\" means).",
+    "overflow": "When a number is too big for its box and wraps around to the other end. Putting 32,768 into a 16-bit integer turns it into -32,768, like a car odometer rolling over.",
+    "rounded down": "Decimal parts are thrown away so you get a whole number, for example 3.9 becomes 3.",
+    "component": "One of the numbers inside the vector, like X or Y."
+  },
+  "examples": [
+    {
+      "title": "Make one and turn it into a normal Vector3",
+      "place": "Script in ServerScriptService",
+      "code": "local small = Vector3int16.new(1, 2, 3)\nprint(small.X, small.Y, small.Z) --> 1 2 3\n\n-- Convert by passing each number separately\nlocal normal = Vector3.new(small.X, small.Y, small.Z)\nprint(normal) --> 1, 2, 3",
+      "explain": [
+        "`Vector3int16.new` stores three whole numbers.",
+        "To use it with Vector3 tools, copy each number into `Vector3.new` one by one."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Do NOT write `Vector3.new(myVector3int16)`. It silently gives (0, 0, 0) with no error. Pass `.X, .Y, .Z` separately.",
+    "Decimals are thrown away: `Vector3int16.new(2.9, 0, 0).X` is 2.",
+    "Numbers past 32,767 wrap around to big negative numbers (overflow). Keep values in range, including after math."
+  ],
+  "members": {
+    "Vector3int16.new": {
+      "simple": "Makes a new Vector3int16 from three whole numbers. Decimal parts are rounded down. Each number must be from -32,768 to 32,767.",
+      "example": "local v = Vector3int16.new(10, 20.7, 30)\nprint(v.Y) --> 20  (the .7 was dropped)",
+      "gotcha": "32,768 is one too big and wraps around to -32,768."
+    },
+    "Vector3int16.X": {
+      "simple": "The X whole number. Lowercase `.x` also works.",
+      "example": "print(Vector3int16.new(1, 2, 3).X) --> 1"
+    },
+    "Vector3int16.Y": {
+      "simple": "The Y whole number. Lowercase `.y` also works.",
+      "example": "print(Vector3int16.new(1, 2, 3).Y) --> 2"
+    },
+    "Vector3int16.Z": {
+      "simple": "The Z whole number. Lowercase `.z` also works.",
+      "example": "print(Vector3int16.new(1, 2, 3).Z) --> 3"
+    },
+    "op:Vector3int16+Vector3int16": {
+      "simple": "Adds matching numbers.",
+      "example": "print(Vector3int16.new(1, 2, 3) + Vector3int16.new(10, 20, 30)) --> 11, 22, 33",
+      "gotcha": "If a total goes past 32,767 it wraps around (overflow)."
+    },
+    "op:Vector3int16-Vector3int16": {
+      "simple": "Subtracts matching numbers.",
+      "example": "print(Vector3int16.new(11, 22, 33) - Vector3int16.new(1, 2, 3)) --> 10, 20, 30"
+    },
+    "op:Vector3int16*Vector3int16": {
+      "simple": "Multiplies matching numbers.",
+      "example": "print(Vector3int16.new(2, 3, 4) * Vector3int16.new(5, 5, 5)) --> 10, 15, 20",
+      "gotcha": "Products get big fast; stay under 32,767."
+    },
+    "op:Vector3int16/Vector3int16": {
+      "simple": "Divides matching numbers. The answers are rounded down to whole numbers.",
+      "example": "print(Vector3int16.new(10, 9, 8) / Vector3int16.new(3, 2, 2)) --> 3, 4, 4"
+    },
+    "op:Vector3int16*number": {
+      "simple": "Multiplies every number by the same amount. `number * Vector3int16` works too.",
+      "example": "print(Vector3int16.new(1, 2, 3) * 4) --> 4, 8, 12"
+    },
+    "op:Vector3int16/number": {
+      "simple": "Divides every number by the same amount. The answers are rounded toward zero (decimals dropped).",
+      "example": "print(Vector3int16.new(10, 9, 7) / 2) --> 5, 4, 3"
+    }
+  }
+}

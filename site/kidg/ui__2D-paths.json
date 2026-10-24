@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/ui/2D-paths.md",
+  "simple": "A `Path2D` lets you draw smooth lines and curves in your UI, like a winding road on a map or a track for an icon to slide along. You click to place dots called control points, and drag little handles called tangents to bend the line into curves. You can change the line's color and thickness. Scripts can then place UI objects along the path or animate something moving along it.",
+  "analogy": "Drawing a `Path2D` is like laying out a toy train track: you place the stops (control points) and bend the track between them (tangents), and later the train (a UI object) can ride along it.",
+  "keyPoints": [
+    "Insert a `Path2D` anywhere under a visible `ScreenGui` or `SurfaceGui`.",
+    "With the Add Point tool (P), click to add control points; drag while clicking to create curve handles; press Enter or Done when finished.",
+    "Use the Select tool (V) to drag points or handles, or type exact positions in `SelectedControlPointData`.",
+    "Point positions are relative to the path's parent container, not the whole screen.",
+    "Right-click a point to delete it, clear its tangents, or break and mirror its tangents.",
+    "`Color3`, `Thickness`, `Visible`, and `ZIndex` change how the line looks and what it draws over.",
+    "`GetControlPoints()` returns the list of points, and `GetPositionOnCurveArcLength(t)` gives the position at a fraction `t` of the way along the path.",
+    "Paths are built from cubic Bezier curves between each pair of points."
+  ],
+  "terms": {
+    "spline": "A smooth curved line that passes through a series of points.",
+    "control point": "A dot on the path that the line passes through. You add, move, and delete these.",
+    "tangent": "A handle sticking out of a control point. Pulling it bends the curve near that point.",
+    "mirrored tangents": "The two handles on a point move together, like a seesaw, so the curve stays smooth. Breaking them lets each move on its own.",
+    "relative": "Measured from the parent container, not the screen. A point at 30% from the left inside a small frame sits 30% across that frame, not 30% across the whole screen.",
+    "UDim2": "A UI position or size made of scale and offset for X and Y. `UDim2.fromScale(0.3, 0.2)` means 30% across and 20% down.",
+    "t value": "A number from 0 to 1 meaning how far along the path. 0 is the start, 0.5 is halfway, 1 is the end.",
+    "arc length": "The distance measured along the curve itself, so `t = 0.5` is truly halfway along the line.",
+    "Bezier curve": "A math recipe for drawing smooth curves using start and end points plus handles."
+  },
+  "example": {
+    "title": "Slide an icon back and forth along a path",
+    "place": "LocalScript inside a ScreenGui (in StarterGui) that also contains a Path2D and an ImageLabel",
+    "code": "local TweenService = game:GetService(\"TweenService\")\n\nlocal screenGui = script.Parent\nlocal path = screenGui:WaitForChild(\"Path2D\")\nlocal icon = screenGui:FindFirstChildWhichIsA(\"ImageLabel\")\n\n-- A number from 0 to 1 that we will tween\nlocal progress = Instance.new(\"NumberValue\")\nprogress.Value = 0\n\n-- 4 seconds, smooth start and stop, repeat forever (-1), go back and forth (true)\nlocal tweenInfo = TweenInfo.new(4, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut, -1, true)\nlocal tween = TweenService:Create(progress, tweenInfo, { Value = 1 })\n\n-- Each time the number changes, move the icon to that spot on the path\nprogress.Changed:Connect(function(value)\n\ticon.Position = path:GetPositionOnCurveArcLength(value)\nend)\n\ntween:Play()",
+    "explain": [
+      "We find the `Path2D` and an `ImageLabel` in the same `ScreenGui`.",
+      "We make a `NumberValue` to hold a progress number from 0 (start) to 1 (end).",
+      "We tween that number from 0 to 1 over 4 seconds, reversing and repeating forever.",
+      "Whenever the number changes, we ask the path for the position at that fraction and move the icon there."
+    ]
+  },
+  "watchOut": [
+    "If your icon shows up in the wrong place, remember points are relative to the path's parent. Keep the path and the moving object in the same container.",
+    "Dragging while adding a point creates tangents. Click without dragging if you want a sharp corner.",
+    "After choosing Mirror Tangents, nothing changes until you drag one of the handles."
+  ]
+}

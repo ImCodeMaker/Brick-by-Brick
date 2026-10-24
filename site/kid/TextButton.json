@@ -1,0 +1,158 @@
+{
+  "name": "TextButton",
+  "simple": "A TextButton is a box with text that players can click or tap. It looks like a TextLabel but also has button events like Activated. Use it for Play, Buy, Close, and any other clickable word.",
+  "analogy": "A TextButton is like an elevator button with a label on it: it shows words like 'Lobby' and does something when you press it.",
+  "whenToUse": [
+    "Play, Settings, Close, Buy buttons",
+    "Menu tabs",
+    "Any clickable text"
+  ],
+  "where": "Inside a ScreenGui (or a SurfaceGui/BillboardGui that's in PlayerGui). The click code must be in a LocalScript, often placed right inside the button in StarterGui.",
+  "terms": {
+    "UI / GUI": "User Interface: the buttons, menus, text and pictures drawn on the screen or on things in the game.",
+    "LocalScript": "A script that runs on the player's own device. All UI code goes in LocalScripts.",
+    "ScreenGui": "The invisible container that holds UI shown on the player's screen. It must be inside the player's PlayerGui (put it in StarterGui in Studio).",
+    "parent": "The object something is placed inside.",
+    "UDim2": "The value used for Size and Position: (X Scale, X Offset, Y Scale, Y Offset). Scale is a fraction (0 to 1) of the parent's size; Offset is exact pixels.",
+    "pixel": "One tiny dot on the screen.",
+    "transparency": "How see-through something is. 0 = solid, 1 = invisible.",
+    "Color3": "A color made of red, green and blue amounts, like Color3.fromRGB(255, 0, 0) for red.",
+    "font": "The style of the letters, like Arial, Comic, or a blocky game font.",
+    "rich text": "Text with simple tags inside it, like <b>word</b>, that make parts bold, italic or colored.",
+    "grapheme": "One visible character, like a letter, a number, or a symbol.",
+    "wrap": "When text reaches the edge, it continues on the next line.",
+    "truncate": "Cut off text that's too long, often adding '...' at the end.",
+    "stroke": "An outline around each letter.",
+    "read-only": "You can read the value but not change it.",
+    "localization": "Translating text into the player's language.",
+    "deprecated": "Old and replaced by something better. Don't use it in new code.",
+    "Activated": "The button's main 'pressed' event. Works with mouse, touch and gamepad.",
+    "RemoteEvent": "A messenger that lets a LocalScript tell the server something happened, like 'I clicked Buy'.",
+    "server": "Roblox's computer that runs the game for everyone. Important things like giving coins must happen there."
+  },
+  "examples": [
+    {
+      "title": "A button that opens and closes a menu",
+      "place": "LocalScript inside a TextButton, in a ScreenGui in StarterGui that also has a Frame named \"Menu\"",
+      "code": "local button = script.Parent\nlocal menu = button.Parent:WaitForChild(\"Menu\")\n\nmenu.Visible = false\nbutton.Text = \"Open Menu\"\n\nbutton.Activated:Connect(function()\n\tmenu.Visible = not menu.Visible -- flip between shown and hidden\n\tif menu.Visible then\n\t\tbutton.Text = \"Close Menu\"\n\telse\n\t\tbutton.Text = \"Open Menu\"\n\tend\nend)",
+      "explain": [
+        "button.Parent is the ScreenGui, where we find the Menu frame.",
+        "Activated fires on click, tap, or gamepad A press.",
+        "'not menu.Visible' flips true to false and false to true, so each press toggles the menu.",
+        "We also change the button's text so players know what it will do next."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Click code must run in a LocalScript. To change coins or give items, send a RemoteEvent to the server.",
+    "Use Activated, not MouseButton1Click, so phone and console players can press it too.",
+    "Want a plain rectangle button without words? Set TextTransparency to 1 or leave Text empty."
+  ],
+  "members": {
+    "TextButton.ContentText": {
+      "simple": "Read-only. The text exactly as players see it. If RichText is on, the formatting tags like <b> are removed. For Text = \"<b>Hi</b>\" with RichText on, ContentText is \"Hi\".",
+      "example": "local button = script.Parent\nprint(button.ContentText)"
+    },
+    "TextButton.Font": {
+      "simple": "Picks a built-in font from a list (Enum.Font), like Gotham or Cartoon. It stays in sync with FontFace; FontFace is the newer, more flexible choice.",
+      "example": "local button = script.Parent\nbutton.Font = Enum.Font.GothamBold"
+    },
+    "TextButton.FontFace": {
+      "simple": "The font used to draw the text, including its weight (how bold) and style (italic). It can use fonts that aren't in the old Font list.",
+      "example": "local button = script.Parent\nbutton.FontFace = Font.new(\"rbxasset://fonts/families/FredokaOne.json\")\n-- A bold font: pass the weight when you make it\nbutton.FontFace = Font.new(\"rbxasset://fonts/families/GothamSSm.json\", Enum.FontWeight.Bold)"
+    },
+    "TextButton.FontSize": {
+      "simple": "Old — use TextSize instead."
+    },
+    "TextButton.LineHeight": {
+      "simple": "The space between lines of text, as a multiplier from 1 to 3. 1 is normal, 1.5 adds extra breathing room, 2 is double spacing.",
+      "example": "local button = script.Parent\nbutton.LineHeight = 1.5"
+    },
+    "TextButton.LocalizedText": {
+      "simple": "Read-only. The translated text actually being shown, when automatic translation (AutoLocalize) found a translation for the player's language. If no translation applies, it's just the normal text.",
+      "example": "local button = script.Parent\nprint(\"Showing:\", button.LocalizedText)"
+    },
+    "TextButton.MaxVisibleGraphemes": {
+      "simple": "Limits how many characters are shown. -1 (default) shows everything. Count up from 0 to make a 'typewriter' effect where letters appear one by one.",
+      "example": "local button = script.Parent\nbutton.Text = \"Welcome, adventurer!\"\nfor i = 0, #button.Text do\n\tbutton.MaxVisibleGraphemes = i\n\ttask.wait(0.05)\nend\nbutton.MaxVisibleGraphemes = -1 -- show everything",
+      "gotcha": "The text layout doesn't move while letters appear; it's planned as if all the text is already there."
+    },
+    "TextButton.OpenTypeFeatures": {
+      "simple": "Turns on special font features using short codes separated by commas, like \"zero\" for a zero with a slash through it. Empty (default) means none. If a code doesn't work, OpenTypeFeaturesError says why.",
+      "example": "local button = script.Parent\nbutton.OpenTypeFeatures = \"zero\" -- slashed zeros, so 0 doesn't look like O"
+    },
+    "TextButton.OpenTypeFeaturesError": {
+      "simple": "Read-only. Empty when OpenTypeFeatures worked. Otherwise a message like \"Unsupported feature: xyz\" telling you what went wrong.",
+      "example": "local button = script.Parent\nif button.OpenTypeFeaturesError ~= \"\" then\n\twarn(button.OpenTypeFeaturesError)\nend"
+    },
+    "TextButton.RichText": {
+      "simple": "When true, you can style parts of the text with tags like <b>bold</b>, <i>italic</i> or <font color=\"#FF0000\">red</font>.",
+      "example": "local button = script.Parent\nbutton.RichText = true\nbutton.Text = \"You found a <b>golden</b> <font color=\\\"#FFD700\\\">sword</font>!\""
+    },
+    "TextButton.Text": {
+      "simple": "The words shown. You can use \\n in a script to start a new line.",
+      "example": "local button = script.Parent\nbutton.Text = \"Line one\\nLine two\""
+    },
+    "TextButton.TextBounds": {
+      "simple": "Read-only. The size in pixels of the box the text actually needs. Handy for making a background exactly fit the text.",
+      "example": "local button = script.Parent\nprint(\"Text needs\", button.TextBounds.X, \"by\", button.TextBounds.Y, \"pixels\")"
+    },
+    "TextButton.TextColor": {
+      "simple": "Old — use TextColor3 instead."
+    },
+    "TextButton.TextColor3": {
+      "simple": "The color of the text.",
+      "example": "local button = script.Parent\nbutton.TextColor3 = Color3.fromRGB(255, 255, 255) -- white text"
+    },
+    "TextButton.TextDirection": {
+      "simple": "Which way the text reads. Auto (default) figures it out from the language, so languages like Arabic read right-to-left. You can force LeftToRight or RightToLeft.",
+      "example": "local button = script.Parent\nbutton.TextDirection = Enum.TextDirection.Auto"
+    },
+    "TextButton.TextFits": {
+      "simple": "Read-only. true if all the text fits inside, false if some of it is cut off.",
+      "example": "local button = script.Parent\nif not button.TextFits then\n\tprint(\"Text is too long for this box!\")\nend"
+    },
+    "TextButton.TextScaled": {
+      "simple": "When true, the text automatically grows or shrinks to fill the whole box (TextSize is ignored and wrapping turns on). Great for BillboardGuis and SurfaceGuis.",
+      "example": "local button = script.Parent\nbutton.TextScaled = true",
+      "gotcha": "Text can become tiny and hard to read. Add a UITextSizeConstraint to set a min/max size, and don't combine it with AutomaticSize."
+    },
+    "TextButton.TextSize": {
+      "simple": "How tall one line of text is, in pixels. 14 is small, 24 is medium, 48 is big. Ignored when TextScaled is on.",
+      "example": "local button = script.Parent\nbutton.TextSize = 24",
+      "gotcha": "Try not to go below 9; tiny text is hard to read for many players."
+    },
+    "TextButton.TextStrokeColor3": {
+      "simple": "The color of the outline drawn around each letter. Only shows when TextStrokeTransparency is less than 1.",
+      "example": "local button = script.Parent\nbutton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0) -- black outline\nbutton.TextStrokeTransparency = 0             -- make it visible",
+      "gotcha": "For thicker or gradient outlines, use a UIStroke instead."
+    },
+    "TextButton.TextStrokeTransparency": {
+      "simple": "How see-through the letter outline is. 1 (default) = no outline, 0 = solid outline. The outline is drawn several times stacked, so even 0.5 looks quite solid; 0.75 to 1 gives a soft outline.",
+      "example": "local button = script.Parent\nbutton.TextStrokeTransparency = 0.5"
+    },
+    "TextButton.TextTransparency": {
+      "simple": "How see-through the text is. 0 = solid, 1 = invisible. Doesn't affect the background box (that's BackgroundTransparency).",
+      "example": "local TweenService = game:GetService(\"TweenService\")\nlocal button = script.Parent\n-- Fade the text out over 1 second\nTweenService:Create(button, TweenInfo.new(1), {TextTransparency = 1}):Play()"
+    },
+    "TextButton.TextTruncate": {
+      "simple": "What to do with text that's too long to fit. None (default) just cuts it off. AtEnd replaces the end with \"...\". SplitWord can cut in the middle of a word.",
+      "example": "local button = script.Parent\nbutton.TextTruncate = Enum.TextTruncate.AtEnd -- \"A really long na...\""
+    },
+    "TextButton.TextWrap": {
+      "simple": "Old — use TextWrapped instead."
+    },
+    "TextButton.TextWrapped": {
+      "simple": "When true, long text continues on the next line instead of running off the side. It prefers to break at spaces. Lines that don't fit vertically aren't shown.",
+      "example": "local button = script.Parent\nbutton.TextWrapped = true"
+    },
+    "TextButton.TextXAlignment": {
+      "simple": "Lines the text up sideways inside the box: Left, Center (default) or Right.",
+      "example": "local button = script.Parent\nbutton.TextXAlignment = Enum.TextXAlignment.Left"
+    },
+    "TextButton.TextYAlignment": {
+      "simple": "Lines the text up up-and-down inside the box: Top, Center (default) or Bottom.",
+      "example": "local button = script.Parent\nbutton.TextYAlignment = Enum.TextYAlignment.Top"
+    }
+  }
+}

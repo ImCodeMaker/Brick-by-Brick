@@ -1,0 +1,50 @@
+{
+  "path": "content/en-us/projects/server-authority/techniques.md",
+  "simple": "This page has advanced tricks for games that use server authority, where the server decides everything and players' devices predict ahead to feel fast. It covers creating objects instantly on the device, hiding the jumps that happen when a guess was wrong, writing animation and effect code that survives replays, designing gameplay that hides lag, and debugging tools. These tricks are what make a competitive game like racing or laser tag feel smooth instead of jittery.",
+  "analogy": "It is like a sports broadcast with a tiny delay. The commentator calls the play right away, and if the replay shows they called it wrong, the broadcast smoothly corrects instead of jumping around, so viewers barely notice.",
+  "keyPoints": [
+    "Instance stitching: create a part with `Instance.new`, `Clone`, or `Instance.fromExisting` inside a `BindToSimulation` function in a shared ModuleScript. It appears instantly on the client and is merged with the server's copy later.",
+    "A stitched instance must be parented into the game in the same frame it was made. Do not save it and parent it later.",
+    "Position smoothing: hide the real simulated object and show a see-through-to-physics copy that glides toward it, so corrections look smooth instead of snapping.",
+    "Do not keep old AnimationTrack objects around. After a rollback they may be stale. Ask the Animator each time with `GetTrackByAnimationId` or `GetPlayingAnimationTracks`.",
+    "Keep game state in a simple state machine stored in attributes (like Idle, Lit, Exploded) inside the simulation, and play particles and sounds in `RenderStepped` based on that state, so wrong guesses can be undone.",
+    "Design for lag: slower acceleration and delayed actions (like a fuse before an explosion) hide network corrections better than instant ones.",
+    "Other players' inputs are not shared with you by default. For racing, the server can copy inputs into attributes so every client can simulate other cars correctly.",
+    "Press Ctrl+Shift+F6 (Cmd+Shift+F6 on Mac) in Studio to open the server authority visualizer, which shows prediction success rate, late inputs, and server frame rate."
+  ],
+  "terms": {
+    "instance stitching": "When the client makes an object right away and Roblox later joins it with the server's matching object, so they become one.",
+    "GUID": "A unique ID. Server and client build the same GUID from the object type, the script, the frame number, and a counter, which is how they know two objects are the same.",
+    "round trip": "A message going from your device to the server and back. It takes at least the network delay twice.",
+    "misprediction": "When the client guessed wrong about what the server would do.",
+    "rollback and resimulation": "Going back to the last state the server confirmed and quickly replaying the frames after it.",
+    "renderer object": "A visual-only copy that players see, separate from the invisible object physics actually moves.",
+    "massless": "Having no weight in physics, so it does not affect anything it is attached to.",
+    "SmoothDamp": "A `TweenService` method that moves a value smoothly toward a target, like a spring with no bounce. A `smoothTime` of 0.07 means it catches up in roughly that many seconds.",
+    "AnimationTrack": "A loaded animation that is playing or ready to play on a character.",
+    "cache": "Saving something to reuse later instead of getting it again. Here, caching tracks causes bugs.",
+    "state machine": "Tracking something by a small set of named states and the rules for moving between them, like a grenade going Idle, then Lit, then Exploded or Defused.",
+    "network artifact": "A visible glitch caused by network delay, like a car suddenly jumping forward.",
+    "extrapolate": "Guess where something is going next based on where it has been.",
+    "FPS": "Frames per second. If the server's simulation drops below 59, it cannot keep up and the game gets worse."
+  },
+  "example": {
+    "title": "Smoothly follow a simulated ball",
+    "place": "LocalScript in StarterPlayerScripts (Workspace has an invisible part SimulatedBall and a visible part RenderBall)",
+    "code": "local RunService = game:GetService(\"RunService\")\nlocal TweenService = game:GetService(\"TweenService\")\n\nlocal simulated = workspace:WaitForChild(\"SimulatedBall\") -- invisible, moved by physics\nlocal renderer = workspace:WaitForChild(\"RenderBall\")     -- visible, only for looks\n\n-- Make the visible ball ignore physics completely\nrenderer.Anchored = true\nrenderer.CanCollide = false\nrenderer.Massless = true\n\nlocal smoothTime = 0.07 -- smaller = catches up faster\nlocal velocity = Vector3.zero -- remembered between frames\n\nRunService.RenderStepped:Connect(function(deltaTime)\n\tlocal newPosition, newVelocity = TweenService:SmoothDamp(\n\t\trenderer.Position,\n\t\tsimulated.Position,\n\t\tvelocity,\n\t\tsmoothTime,\n\t\tmath.huge,\n\t\tdeltaTime\n\t)\n\tvelocity = newVelocity -- save it for next frame\n\trenderer.Position = newPosition\nend)",
+    "explain": [
+      "Physics moves the invisible SimulatedBall. When a misprediction is corrected, it may suddenly jump.",
+      "The RenderBall is what players see. It is anchored and has no collisions, so it never affects the game.",
+      "Every frame, `SmoothDamp` moves the visible ball part of the way toward the real one, so a jump of, say, 3 studs becomes a quick glide.",
+      "We save the returned velocity in the outer `velocity` variable so the motion stays smooth from one frame to the next.",
+      "The visible ball is always a tiny bit behind the real one. That is usually fine, but you can turn smoothing on only after big jumps, like the Soccer template does."
+    ]
+  },
+  "watchOut": [
+    "Creating an instance in a simulation callback and parenting it a frame later. It must be parented in the same frame or stitching breaks.",
+    "Saving an AnimationTrack at the start and calling `AdjustSpeed` on it forever. After a rollback it may not be the real track anymore. Look it up each time.",
+    "Playing an explosion the moment the client predicts it. If the server says it was defused, you must undo it. Drive effects from synced state in `RenderStepped`.",
+    "Writing `local smoothPosition, smoothVelocity = ...` inside the loop. The `local` makes a new variable each frame, so the saved velocity is never updated. Assign to the outer variable instead.",
+    "Making movement super snappy with huge acceleration. Corrections become very noticeable. Gentler motion hides lag."
+  ]
+}

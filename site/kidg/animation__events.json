@@ -1,0 +1,40 @@
+{
+  "path": "content/en-us/animation/events.md",
+  "simple": "Animation events are named markers you place at specific moments in an animation, like the exact frame a foot hits the ground. While the animation plays, a script can listen for that marker and do something right then, like play a footstep sound or spawn a dust puff. This keeps sounds and effects perfectly in sync with movement. You can also attach a short text value to each marker to give your script extra info.",
+  "analogy": "It is like cue marks in a school play script: when the actor reaches the line marked \"thunder\", the sound crew plays the thunder sound.",
+  "keyPoints": [
+    "The event track is hidden at first. Click the settings icon to the right of the timeline and choose Show Animation Events.",
+    "To add one: move the scrubber to the frame, click Edit Animation Events, click + Add Event, type a name, optionally add a Parameter, and click Save.",
+    "Once made, an event name can be reused anywhere in the animation, like a `FootStep` marker for both the left and right foot.",
+    "Copy a marker with right-click, Copy Selected, then right-click elsewhere and choose Paste Events.",
+    "In a LocalScript, use `AnimationTrack:GetMarkerReachedSignal(\"Name\")` and `:Connect` a function to run code when that marker is reached.",
+    "The marker's Parameter text is passed to your function, so you can send extra info like `\"left\"` or `\"right\"`."
+  ],
+  "terms": {
+    "event marker": "A small symbol on the timeline that marks when an animation event happens.",
+    "parameter": "An optional text value saved with the marker, like `\"left\"`, that your script receives when the marker is hit.",
+    "AnimationTrack": "A playable copy of an animation loaded onto a character. You call `:Play()` on it and listen to its markers.",
+    "Animator": "The object inside a `Humanoid` that loads and plays animations.",
+    "signal": "Something that fires when an event happens. You `:Connect` a function to it to react.",
+    "asset ID": "The number Roblox gives your published animation, used as `rbxassetid://` plus the number."
+  },
+  "example": {
+    "title": "Print which foot stepped",
+    "place": "LocalScript in StarterCharacterScripts",
+    "code": "local Players = game:GetService(\"Players\")\n\nlocal player = Players.LocalPlayer\nlocal character = player.Character or player.CharacterAdded:Wait()\nlocal humanoid = character:WaitForChild(\"Humanoid\")\nlocal animator = humanoid:WaitForChild(\"Animator\")\n\n-- Point to your published walk animation (replace the ID)\nlocal walkAnim = Instance.new(\"Animation\")\nwalkAnim.AnimationId = \"rbxassetid://5432167890\"\n\n-- Load it so we get an AnimationTrack\nlocal walkTrack = animator:LoadAnimation(walkAnim)\n\n-- Run this every time the \"FootStep\" marker is reached\nwalkTrack:GetMarkerReachedSignal(\"FootStep\"):Connect(function(paramString)\n\tprint(\"Step with:\", paramString) -- e.g. \"left\" or \"right\"\nend)\n\nwalkTrack:Play()",
+    "explain": [
+      "We find the player's character, its `Humanoid`, and the `Animator` inside it.",
+      "We make an `Animation` object and set its `AnimationId` to the published animation's ID.",
+      "`LoadAnimation` turns it into an `AnimationTrack` we can play.",
+      "`GetMarkerReachedSignal(\"FootStep\")` gives a signal for that marker name; our function runs each time it is reached.",
+      "`paramString` is the Parameter text you typed for that marker in the editor.",
+      "`walkTrack:Play()` starts the animation so the markers can fire."
+    ]
+  },
+  "watchOut": [
+    "The marker name in the script must match the editor exactly, including capitals. `\"Footstep\"` will not catch `FootStep`.",
+    "Forgetting to republish the animation after adding events. The game uses the published version.",
+    "Not seeing the event track. Turn on Show Animation Events from the timeline settings.",
+    "Pasted events land where you right-click, not where the scrubber is."
+  ]
+}

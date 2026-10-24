@@ -1,0 +1,41 @@
+{
+  "path": "content/en-us/physics/constraints/spring.md",
+  "simple": "A SpringConstraint acts like a real spring between two attachments. If they are pulled farther apart than the spring's resting length it pulls them back together, and if they are squished closer it pushes them apart. You can make it stiff or soft, and choose how quickly the bouncing dies down. Springs are used for car suspension, bouncy platforms, trampolines and wobbly toys.",
+  "analogy": "A spring in a pogo stick or a mattress: squish it and it pushes back, stretch it and it pulls back, and it bounces a few times before settling.",
+  "keyPoints": [
+    "A spring pushes or pulls its two attachments toward its `FreeLength`, its natural resting length.",
+    "Farther apart than FreeLength: it pulls them together. Closer than FreeLength: it pushes them apart.",
+    "`Stiffness` is the strength. Higher stiffness gives a stronger push or pull for the same stretch.",
+    "`Damping` controls how quickly bouncing stops. 0 bounces forever; higher values settle faster.",
+    "Turn on `LimitsEnabled` to set `MinLength` and `MaxLength`. The attachments stop dead at these lengths, with no bounce.",
+    "Springs plus CylindricalConstraints make great vehicle suspension."
+  ],
+  "terms": {
+    "attachment": "A Roblox object you put inside a part to mark one exact point on it. Its Position is measured from the part's center, so an attachment at (-2, 0, 0) sits 2 studs toward the part's own left side.",
+    "FreeLength": "The length where the spring is relaxed and does nothing. With FreeLength 5, attachments 8 apart get pulled 3 studs closer, and attachments 2 apart get pushed 3 studs apart.",
+    "stiffness": "How strong the spring is. The farther it is stretched or squished from FreeLength, the harder it pushes or pulls, and a higher stiffness makes that push stronger.",
+    "damping": "Like friction for the bounce. A spring with damping 0 keeps bouncing forever; with high damping it settles almost right away, like a car shock absorber.",
+    "oscillate": "To move back and forth over and over, like a bouncing spring.",
+    "CurrentLength": "A read-only property telling you how far apart the attachments are right now.",
+    "MinLength / MaxLength": "Hard stops. If MaxLength is 10, the spring can never be stretched past 10 studs.",
+    "restitution": "Bounciness at a limit. A spring's Min and Max limits have no restitution, so it stops dead there."
+  },
+  "example": {
+    "title": "A bouncy block hanging from a spring",
+    "place": "Script in ServerScriptService",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal hook = Instance.new(\"Part\")\nhook.Size = Vector3.new(2, 1, 2)\nhook.Position = Vector3.new(0, 25, 10)\nhook.Anchored = true\nhook.Parent = Workspace\n\nlocal block = Instance.new(\"Part\")\nblock.Size = Vector3.new(2, 2, 2)     -- volume 8, Plastic density 0.7: mass 5.6\nblock.Position = Vector3.new(0, 15, 10)\nblock.Parent = Workspace\n\nlocal hookAtt = Instance.new(\"Attachment\")\nhookAtt.Position = Vector3.new(0, -0.5, 0)  -- bottom of the hook\nhookAtt.Parent = hook\n\nlocal blockAtt = Instance.new(\"Attachment\")\nblockAtt.Position = Vector3.new(0, 1, 0)    -- top of the block\nblockAtt.Parent = block\n\nlocal spring = Instance.new(\"SpringConstraint\")\nspring.Attachment0 = hookAtt\nspring.Attachment1 = blockAtt\nspring.FreeLength = 6     -- relaxed length in studs\nspring.Stiffness = 500\nspring.Damping = 5        -- low: bounces several times before settling\nspring.LimitsEnabled = true\nspring.MinLength = 2\nspring.MaxLength = 14\nspring.Visible = true\nspring.Parent = hook\n\ntask.wait(5)\nprint(\"Spring length after settling:\", spring.CurrentLength)",
+    "explain": [
+      "The hook's attachment is at its bottom (world height 24.5). The block's attachment is at its top (world height 16). They start 8.5 studs apart.",
+      "FreeLength is 6, so the spring is stretched by 2.5 studs and pulls the block up. Gravity pulls it down. The block bounces between those two pulls.",
+      "With `Damping = 5` the bouncing slowly dies down. Try 0 to bounce forever, or 50 to settle almost at once.",
+      "The block settles a bit longer than 6 studs, because the spring must stretch a little to hold up the block's weight (5.6 x 196.2, about 1099). A stiffer spring stretches less.",
+      "MinLength 2 and MaxLength 14 are hard stops, so a big hit can never squash it shorter than 2 or stretch it past 14."
+    ]
+  },
+  "watchOut": [
+    "A spring with very high stiffness and no damping can shake wildly. Add some damping.",
+    "If your spring sags too much, raise `Stiffness`. If it is too jumpy, lower it or raise `Damping`.",
+    "Making the spring visible (`Visible = true`) is only for looks. It does not change how it works.",
+    "A spring alone lets parts swing in every direction. For a car shock, pair it with a CylindricalConstraint or PrismaticConstraint so it only moves along one line."
+  ]
+}

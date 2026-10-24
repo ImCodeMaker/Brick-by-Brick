@@ -1,0 +1,42 @@
+{
+  "path": "content/en-us/ui/viewport-frames.md",
+  "simple": "A `ViewportFrame` is a little window in your UI that shows real 3D objects. It uses its own camera to take a live picture of whatever models you put inside it. You can use it for a minimap, a spinning sword in an inventory, or a preview of what a player has equipped. You can make the object follow your camera, stay still, or spin, and even add shiny sky reflections.",
+  "analogy": "A viewport frame is like a TV screen in your menu, showing what a little camera inside a tiny studio is filming.",
+  "keyPoints": [
+    "A `ViewportFrame` shows 3D objects inside flat 2D UI using a camera.",
+    "Objects you want to see must be placed inside the `ViewportFrame`, not just in Workspace.",
+    "Set the frame's `CurrentCamera` to choose which camera it looks through.",
+    "To make the view move with the player's camera, set `CurrentCamera` to the main `Camera`.",
+    "For a still view, duplicate the camera, point it where you want, and use the copy as `CurrentCamera`.",
+    "To make an object spin, move the viewport camera around it in a script every frame.",
+    "Lighting inside is set by `Ambient`, `LightDirection`, and `LightColor`; `ImageColor3` and `ImageTransparency` tint and fade the whole view.",
+    "A `Sky` placed inside the frame can give shiny parts reflections."
+  ],
+  "terms": {
+    "viewport": "A window that shows a view of 3D things.",
+    "render": "To draw something on the screen.",
+    "CurrentCamera": "The camera the `ViewportFrame` looks through. Without one, it shows nothing.",
+    "static": "Not moving. A static view always looks the same.",
+    "cubemap": "Six pictures (front, back, left, right, up, down) wrapped around like a box, used to make reflections.",
+    "Field of view": "How wide the camera sees, in degrees. A smaller number zooms in; a bigger number shows more.",
+    "CFrame": "A value holding both a position and a rotation. `CFrame.new(0, 0, 10)` means 10 studs back along the Z axis from the center.",
+    "LightDirection": "Which way the light shines. The default (-1, -1, -1) points down, left, and forward from the center."
+  },
+  "example": {
+    "title": "Spin an item in an inventory slot",
+    "place": "LocalScript inside a ViewportFrame (inside a ScreenGui in StarterGui), with a Part placed inside the ViewportFrame",
+    "code": "local RunService = game:GetService(\"RunService\")\n\nlocal viewportFrame = script.Parent\n\nlocal cameraDistance = 10 -- studs from the object\nlocal spinSpeed = 50 -- degrees per second\n\n-- Make a camera just for this frame\nlocal viewportCamera = Instance.new(\"Camera\")\nviewportCamera.FieldOfView = 50\nviewportFrame.CurrentCamera = viewportCamera\nviewportCamera.Parent = viewportFrame\n\nlocal object = viewportFrame:FindFirstChildWhichIsA(\"BasePart\")\nif object then\n\t-- Put the object at the center\n\tobject.CFrame = CFrame.new(0, 0, 0)\n\n\tlocal t = 0\n\tRunService.PostSimulation:Connect(function(deltaTime)\n\t\tt += deltaTime\n\t\t-- Turn around the center, then step back 10 studs to look at it\n\t\tviewportCamera.CFrame = CFrame.Angles(0, math.rad(t * spinSpeed), 0) * CFrame.new(0, 0, cameraDistance)\n\tend)\nelse\n\twarn(\"Put a part inside the ViewportFrame\")\nend",
+    "explain": [
+      "We make a new `Camera` and tell the `ViewportFrame` to look through it.",
+      "We find the first part inside the frame and put it at the center (0, 0, 0).",
+      "Every frame, `PostSimulation` gives us the time passed, which we add to `t`.",
+      "We spin the camera around the center by `t * spinSpeed` degrees and move it 10 studs back, so it circles the part and the part looks like it is spinning."
+    ]
+  },
+  "watchOut": [
+    "Moving a part out of Workspace into the `ViewportFrame` removes it from the world. Duplicate it first if you still need it in the game.",
+    "If the frame is blank, check that `CurrentCamera` is set and the camera is pointed at the object.",
+    "To change the view, move the camera, not the objects inside the frame.",
+    "Objects inside a `ViewportFrame` do not act like physical things in the world; it is just a picture."
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "name": "BallSocketConstraint",
+  "simple": "BallSocketConstraint pins two attachments to the same spot but lets them turn in any direction. With limits on, you can stop it tilting too far (a cone limit) and stop it twisting too much (twist limits).",
+  "analogy": "BallSocketConstraint is like your shoulder or hip joint: the arm stays attached at one point but can swing around in almost any direction. Limits are like how your neck can only turn and tilt so far.",
+  "whenToUse": [
+    "Ragdoll arms, legs and heads",
+    "Hanging lamps and chains",
+    "Tails, tentacles and wobbly decorations",
+    "Trailer hitches"
+  ],
+  "where": "Make it with Instance.new(\"BallSocketConstraint\"), set Attachment0 and Attachment1 (one in each part, placed where the joint should be) and put it in workspace.",
+  "terms": {
+    "constraint": "An invisible rule or connector that the physics engine follows, like 'these two parts must stay stuck together' or 'push this part upward'.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "torque": "A twisting push that makes things spin, like turning a doorknob or a steering wheel. Torque = force x distance from the spinning point, so pushing farther from the center twists harder.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "unanchored": "A part that physics is allowed to move. Constraints that push or pull only work on unanchored parts.",
+    "restitution": "Bounciness, from 0 (no bounce, just stops) to 1 (bounces back as hard as it hit).",
+    "limits": "Stops that keep a joint from moving too far, like a door that can only swing 90 degrees.",
+    "stiffness": "How strong a spring is. A stiff spring pushes back hard when you squash or stretch it even a little.",
+    "tilt": "Leaning to the side away from straight, like nodding or tipping your head.",
+    "twist": "Turning around the joint's own line, like shaking your head 'no'. It is measured between the two attachments' Y arrows.",
+    "friction torque": "A twisting resistance that makes the joint stiff, so it does not flop around freely.",
+    "degrees": "The usual way to measure angles: 90 degrees is a quarter turn."
+  },
+  "examples": [
+    {
+      "title": "A floppy hanging lamp",
+      "place": "Script in ServerScriptService",
+      "code": "local ceiling = workspace:WaitForChild(\"Ceiling\") -- anchored\nlocal lamp = workspace:WaitForChild(\"Lamp\")       -- unanchored, hanging below\n\n-- The joint point: the top of the lamp\nlocal jointSpot = lamp.CFrame * CFrame.new(0, lamp.Size.Y / 2, 0)\n\nlocal a0 = Instance.new(\"Attachment\")\na0.Parent = ceiling\na0.WorldCFrame = jointSpot\nlocal a1 = Instance.new(\"Attachment\")\na1.Parent = lamp\na1.WorldCFrame = jointSpot\n\nlocal socket = Instance.new(\"BallSocketConstraint\")\nsocket.Attachment0 = a0\nsocket.Attachment1 = a1\nsocket.LimitsEnabled = true\nsocket.UpperAngle = 30          -- can tilt at most 30 degrees\nsocket.MaxFrictionTorque = 50   -- a little stiffness so it does not swing forever\nsocket.Parent = ceiling",
+      "explain": [
+        "Both attachments go at the top of the lamp, so that is the pivot point.",
+        "LimitsEnabled with UpperAngle 30 means the lamp can tilt up to 30 degrees in any direction, but not more.",
+        "MaxFrictionTorque adds stiffness so bumps die down instead of swinging forever."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Put both attachments at the exact same spot (the joint), or the parts will jump together when the game starts.",
+    "UpperAngle only works when LimitsEnabled is true; twist limits also need TwistLimitsEnabled.",
+    "If a part is joined this way to an anchored part (or something connected to an anchored part), its physics is not calculated on the player's own device when they touch it, so it may feel slightly delayed."
+  ],
+  "members": {
+    "BallSocketConstraint.LimitsEnabled": {
+      "simple": "If true, Attachment1 cannot tilt more than UpperAngle away from Attachment0. Also unlocks the twist limit settings.",
+      "example": "workspace.Lamp.BallSocketConstraint.LimitsEnabled = true"
+    },
+    "BallSocketConstraint.MaxFrictionTorque": {
+      "simple": "How stiff the joint is: the most twisting friction it uses to resist turning. 0 = totally floppy; higher = stiffer.",
+      "example": "workspace.Ragdoll.Neck.MaxFrictionTorque = 20"
+    },
+    "BallSocketConstraint.Radius": {
+      "simple": "How big the joint looks when drawn. Only changes the look.",
+      "example": "workspace.Lamp.BallSocketConstraint.Radius = 0.3"
+    },
+    "BallSocketConstraint.Restitution": {
+      "simple": "How bouncy the joint is when it hits the UpperAngle limit, from 0 (no bounce) to 1 (full bounce). Needs LimitsEnabled.",
+      "example": "workspace.Lamp.BallSocketConstraint.Restitution = 0.2"
+    },
+    "BallSocketConstraint.TwistLimitsEnabled": {
+      "simple": "If true, limits twisting (spinning around the joint's own line) to between TwistLowerAngle and TwistUpperAngle. Twist is measured between the two attachments' Y arrows.",
+      "example": "local neck = workspace.Ragdoll.Neck\nneck.LimitsEnabled = true\nneck.TwistLimitsEnabled = true\nneck.TwistLowerAngle = -60\nneck.TwistUpperAngle = 60 -- head can turn 60 degrees each way"
+    },
+    "BallSocketConstraint.TwistLowerAngle": {
+      "simple": "The lowest twist angle allowed when TwistLimitsEnabled is true.",
+      "example": "workspace.Ragdoll.Neck.TwistLowerAngle = -45"
+    },
+    "BallSocketConstraint.TwistUpperAngle": {
+      "simple": "The highest twist angle allowed when TwistLimitsEnabled is true.",
+      "example": "workspace.Ragdoll.Neck.TwistUpperAngle = 45"
+    },
+    "BallSocketConstraint.UpperAngle": {
+      "simple": "How far the joint can tilt (the size of the cone) when LimitsEnabled is true.",
+      "example": "workspace.Ragdoll.Shoulder.UpperAngle = 90"
+    }
+  }
+}

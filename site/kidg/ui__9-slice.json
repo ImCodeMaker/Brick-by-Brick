@@ -1,0 +1,29 @@
+{
+  "path": "content/en-us/ui/9-slice.md",
+  "simple": "9-slice is a trick for stretching a fancy UI image, like a panel with decorated corners, to any size without making the corners look squished or blurry. Roblox cuts your one image into a 3 by 3 grid of nine pieces. The corners never stretch, the edges stretch in one direction, and only the middle stretches both ways. This is how you make one button or panel image that fits short words, long words, and translated text.",
+  "analogy": "Picture a picture frame. To make a bigger frame, you keep the same four corner pieces and just use longer side strips. The corners stay perfect while the sides and middle grow.",
+  "keyPoints": [
+    "One image is split into nine parts: 4 corners, 4 edges, and 1 center.",
+    "Corners (1, 3, 7, 9) never scale, top and bottom edges (2, 8) stretch sideways, left and right edges (4, 6) stretch up and down, and the center (5) stretches both ways.",
+    "It works on an `ImageLabel` or `ImageButton` that has a valid image asset ID in its Image field.",
+    "Set the `ScaleType` property to Slice, then click the `SliceCenter` property and the three-dot button to open the 9-Slice Editor.",
+    "In the editor, drag the four red lines to set where the slices are cut. The UI updates right away so you can see the result.",
+    "For exact numbers, type the offsets into the fields on the right side of the editor window."
+  ],
+  "terms": {
+    "9-slice": "Cutting an image into a 3 by 3 grid (nine pieces) so it can stretch without warping the corners.",
+    "distort": "To stretch something so it looks wrong. A round corner stretched wide turns into a flat oval.",
+    "aspect ratio": "Width compared to height. A 500 by 200 label is 2.5 times wider than it is tall.",
+    "ScaleType": "The property that controls how an image fills its box. Setting it to Slice turns on 9-slice.",
+    "SliceCenter": "The property that stores where the middle slice is in the source image.",
+    "offset": "Here, how many pixels from an edge of the source image the red line sits. An offset of 20 on the left means the line is 20 pixels in from the image's left edge.",
+    "source image": "The original uploaded picture, at its real pixel size. The editor shows this size so you can pick good offsets.",
+    "asset ID": "The number Roblox gives your uploaded image, used like `rbxassetid://123456`."
+  },
+  "watchOut": [
+    "The editor's offset numbers are not the same as the `SliceCenter` property values. Offsets count pixels from each edge to its red line.",
+    "Forgetting to set `ScaleType` to Slice. The `SliceCenter` property and editor only show up after that.",
+    "Putting the red lines inside the fancy corner art. Keep the whole corner decoration outside the lines so it does not stretch.",
+    "The editor needs a valid image in the Image field. Upload and set the image first."
+  ]
+}

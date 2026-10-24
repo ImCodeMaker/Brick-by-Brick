@@ -1,0 +1,28 @@
+{
+  "path": "content/en-us/matchmaking/analytics.md",
+  "simple": "Matchmaking analytics is a dashboard of charts that show how well your matchmaking is working. You can see things like how full servers are, how often players join friends, and how good their ping is. You can look at one place over a date range and switch between averages and percentiles. This helps you decide if your matchmaking weights need changing.",
+  "analogy": "It is like checking a fitness tracker after changing your workout. The charts tell you if the change actually helped.",
+  "keyPoints": [
+    "Open it from the Creator Dashboard: pick your game, go to Configurations > Custom matchmaking, then the Analytics tab.",
+    "Pick a Date Range from the previous day up to the last 90 days.",
+    "Pick a Place to see its charts. The Current Configuration shows which matchmaking setup that place uses.",
+    "If the place has no custom configuration, you see data for the default Roblox configuration.",
+    "Use Filter By to switch every chart between average, P10, P50, and P90.",
+    "Charts include Occupancy Ratio, Preferred Player Match Ratio, Age Difference, Common Language Ratio, Estimate Ping, Voice Chat Ratio, Common Device Ratio, Play History Difference, and custom signal charts.",
+    "Categorical charts show how similar players are (a ratio). Numerical charts show how different they are (a difference)."
+  ],
+  "terms": {
+    "metric": "A number you measure to see how something is going, like average ping.",
+    "ratio": "A part compared to the whole. If 6 of 8 players speak your language, the ratio is 6/8 = 0.75.",
+    "percentile": "Where a value falls when all values are sorted. P90 means 90 percent of values are at or below it.",
+    "P50": "The median, the middle value. Half the values are above it and half below.",
+    "P10 and P90": "The low end and high end. For ping, lower is better, so P10 is the best case and P90 is the worst case.",
+    "preferred player": "A friend of the joining player, or someone sharing their IP address.",
+    "occupancy ratio": "How full the chosen server was. 6 players in an 8-player server is 0.75."
+  },
+  "watchOut": [
+    "Thinking P90 is always the best. For things where lower is better, like ping or age difference, P90 is the worst case.",
+    "Looking at the wrong place. Check the Place dropdown and the Current Configuration name before reading the charts.",
+    "Expecting two separate charts for two custom signals of the same type. Both show as two lines on one chart."
+  ]
+}

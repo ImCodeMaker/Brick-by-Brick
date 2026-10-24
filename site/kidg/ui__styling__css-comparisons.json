@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/ui/styling/css-comparisons.md",
+  "simple": "CSS is the language websites use to decide how things look. This page shows how each CSS idea matches a Roblox UI styling idea, with side-by-side examples. Even if you have never written CSS, it is a handy tour of every kind of selector, plus hover effects, rounded corners, screen-size rules, variables, and smooth transitions. Each example is a short LocalScript you can paste and try.",
+  "analogy": "It is like a phrasebook between two languages: \"button\" in CSS is `\"TextButton\"` in Roblox, \".class\" in CSS is a tag in Roblox, and so on.",
+  "keyPoints": [
+    "To test, put a `StyleSheet` in ReplicatedStorage, and a `ScreenGui` in StarterGui with a `LocalScript` and a `StyleLink` inside it.",
+    "Class selectors like `\"TextButton\"` match every object of that class. Tag selectors like `\".ButtonPrimary\"` match tagged objects. Name selectors like `\"#ModalFrame\"` match by `Name`, and names do not have to be unique.",
+    "`>` means direct child, and `>>` means any descendant (child, grandchild, and so on). Commas list several selectors that share the same properties.",
+    "State selectors like `\"ImageLabel:Hover\"` apply only while that state is active, like the mouse being over it.",
+    "`::UICorner` style selectors add phantom modifiers, for example rounded corners on every Frame tagged `RoundedCorner20`.",
+    "Queries use `@`. Built-in ones like `@ViewportDisplaySizeSmall` or `@ReducedMotionEnabledTrue` need no setup; custom ones use a `::StyleQuery` rule with a condition like `MinSize`.",
+    "Variables are tokens: set an attribute on the sheet, then use it with `$`, like `\"$ButtonBgColor\"`.",
+    "`SetPropertyTransitions()` makes changes animate smoothly, and rules can be nested inside other rules so their selectors merge."
+  ],
+  "terms": {
+    "CSS": "The style language for websites. Roblox styling borrows many of its ideas.",
+    "selector": "Text that picks which objects a rule changes, like `\"TextButton\"` or `\".MenuContainer > TextButton\"`.",
+    "combinator": "A symbol that joins selectors to describe family relationships, like `>` for child or `>>` for descendant.",
+    "child": "An object directly inside another. If a button is inside MenuFrame, it is MenuFrame's child.",
+    "descendant": "Any object inside another at any depth. A button inside a sub-frame inside MenuFrame is a descendant of MenuFrame but not its child.",
+    "pseudo-class": "In CSS, a state like hover. In Roblox, a state selector such as `:Hover` or `:Press`.",
+    "pseudo-instance": "A phantom object a rule adds, like `::UICorner` giving every match rounded corners of 20 pixels.",
+    "container query": "A rule that depends on the size of a parent. Example: only when the parent Frame is at least 400 pixels wide, make the button red.",
+    "media query": "A rule that depends on the device or settings, like small screen, touch input, or reduced motion.",
+    "AbsoluteSize": "The real size of a UI object in pixels on screen right now. `MinSize` queries check this.",
+    "reduced motion": "A player setting asking for less animation. `@ReducedMotionEnabledTrue` lets you respect it.",
+    "transition": "Animating from one value to another over time, like rotating to -5 degrees over 1.25 seconds instead of instantly.",
+    "nesting": "Putting a rule inside another rule. A `\"> TextButton\"` rule inside a `\"#MenuFrame\"` rule means buttons that are children of MenuFrame."
+  },
+  "example": {
+    "title": "Buttons that tilt smoothly on hover",
+    "place": "LocalScript inside a ScreenGui in StarterGui (with a StyleLink in the ScreenGui and a StyleSheet in ReplicatedStorage)",
+    "code": "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n\nlocal coreSheet = ReplicatedStorage:FindFirstChildWhichIsA(\"StyleSheet\")\nlocal screenGui = script.Parent\nlocal styleLink = screenGui:FindFirstChildWhichIsA(\"StyleLink\")\nstyleLink.StyleSheet = coreSheet\n\n-- Normal look for every TextButton\nlocal buttonRule = Instance.new(\"StyleRule\")\nbuttonRule.Selector = \"TextButton\"\nbuttonRule:SetProperties({\n\tBackgroundColor3 = Color3.fromHex(\"335FFF\"),\n\tTextColor3 = Color3.fromHex(\"E1E1E1\"),\n\tSize = UDim2.new(0.15, 0, 0, 40),\n\tBorderSizePixel = 0,\n})\n-- Animate color and rotation changes instead of jumping\nbuttonRule:SetPropertyTransitions({\n\tBackgroundColor3 = TweenInfo.new(1, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out),\n\tRotation = TweenInfo.new(1.25, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out),\n})\nbuttonRule.Parent = coreSheet\n\n-- Look while the mouse is over a TextButton\nlocal hoverRule = Instance.new(\"StyleRule\")\nhoverRule.Selector = \"TextButton:Hover\"\nhoverRule:SetProperties({\n\tAutoButtonColor = false,\n\tBackgroundColor3 = Color3.fromHex(\"33AAFF\"),\n\tRotation = -5,\n})\nhoverRule.Parent = coreSheet\n\n-- Create a button to see it work\nlocal button = Instance.new(\"TextButton\")\nbutton.Text = \"Main Menu\"\nbutton.Parent = screenGui",
+    "explain": [
+      "The first lines find the StyleSheet and connect it to this ScreenGui through the StyleLink.",
+      "`buttonRule` gives every TextButton a blue background, light text, and a size of 15% of the screen wide by 40 pixels tall.",
+      "`SetPropertyTransitions` says color changes take 1 second and rotation changes take 1.25 seconds, slowing down at the end.",
+      "`hoverRule` uses `:Hover`, so it only applies while the mouse is over the button: lighter blue and tilted -5 degrees.",
+      "Because of the transitions, the button smoothly tilts and brightens when you hover, and smoothly goes back when you leave."
+    ]
+  },
+  "watchOut": [
+    "Mixing up `>` and `>>`. `>` only matches direct children; use `>>` if the object might be deeper inside.",
+    "Writing CSS-style descendant selectors with a space, like `\".MenuContainer TextButton\"`. Roblox uses `>>` for that.",
+    "Forgetting to tag objects for tag selectors. `CollectionService:AddTag(button, \"ButtonPrimary\")` must run, or the `.ButtonPrimary` rule matches nothing.",
+    "Thinking `#Name` must be unique like a web id. In Roblox, every object with that name matches.",
+    "Leaving `AutoButtonColor` on when styling hover colors. Set it to `false` so your hover color shows."
+  ]
+}

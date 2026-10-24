@@ -1,0 +1,39 @@
+{
+  "path": "content/en-us/characters/index.md",
+  "simple": "A character is any model that moves around and interacts with your world, like your avatar, a shopkeeper, or a dragon boss. This page is an overview of the kinds of characters on Roblox and the tools you use to make them. It explains player characters, non-player characters (NPCs), and features that help many characters run smoothly. Read it first to know which other character pages you need.",
+  "analogy": "Think of a school play. The main actors (player characters) need full costumes, lines, and moves. The background extras (NPCs) might only need to walk across the stage once, so they need much less.",
+  "keyPoints": [
+    "There are two main types: player characters that players control, and non-player characters (NPCs) that the game controls.",
+    "Many games let players use their own Roblox avatar. Avatars come ready to wear accessories, play animations, and show a name and health bar.",
+    "A standard avatar has 15 body parts, a rig of joints, a `Humanoid`, `FaceControls`, 15 `WrapTarget` objects, and 19 `Attachment` points.",
+    "NPCs can be very simple: a `Model` with a mesh or two and a `Humanoid` is often enough.",
+    "Artists often build character meshes in outside tools like Blender, Maya, or GIMP, then import them into Studio.",
+    "Avatar Setup turns a raw mesh into a full avatar by adding body parts, rigging, skinning, face animation, cages, and attachments.",
+    "Adaptive Animation and the Animation Graph Editor help animations work on many body shapes and combine clips without writing controller scripts.",
+    "The Character Controller Library replaces the stiff `Humanoid` movement with abilities and controllers, and SLIM makes many characters cheaper to draw far away."
+  ],
+  "terms": {
+    "character": "Any `Model` that moves and interacts with the world, whether it looks like a person or not.",
+    "NPC": "Non-player character. A character the game controls, like an enemy, a shopkeeper, or a crowd in a town.",
+    "avatar": "A player's own Roblox look, made of the body and items they picked or bought.",
+    "Humanoid": "An object inside a character that gives it a name, health, and movement like walking, jumping, and swimming.",
+    "mesh": "A 3D shape made of tiny triangles that forms how something looks.",
+    "rig": "The hidden skeleton of joints inside a character that lets it bend and move.",
+    "R15": "The standard Roblox body with 15 parts, like `UpperTorso`, `LeftHand`, and `Head`.",
+    "joint": "A spot where two body parts connect and can turn, like an elbow. Standard avatars need 15, and advanced rigs can add up to 37 more.",
+    "skinning": "Data that tells the mesh surface how to bend with the joints, so an arm bends smoothly instead of snapping.",
+    "layered accessory": "Clothing that stretches and fits over the body, like a jacket that fits any body size.",
+    "rigid accessory": "An item that does not bend and just sticks onto an attachment point, like a hat.",
+    "cage": "An invisible shell around a body part that tells layered clothing how to fit over it.",
+    "Attachment": "A marked point on the body where things like hats or tools connect.",
+    "state machine": "A system where a character is in one state at a time, like Running or Jumping, and follows rules to switch between them.",
+    "rendering": "Drawing the 3D world on your screen. Drawing many detailed characters can make the game slow.",
+    "SLIM": "Scalable Lightweight Interactive Models. Roblox automatically makes simpler versions of models to show far away, for example about 170,000 triangles instead of 2,600,000 in a crowd.",
+    "streaming": "Loading only the parts of the world near the player and unloading far parts to save memory."
+  },
+  "watchOut": [
+    "Building every NPC like a full player avatar. Simple NPCs only need what their job requires, which keeps your game fast.",
+    "Expecting a custom mesh to wear accessories or play avatar animations right away. It needs rigging, cages, and attachments, which Avatar Setup can add.",
+    "Turning on SLIM without instance streaming. SLIM needs streaming enabled to work."
+  ]
+}

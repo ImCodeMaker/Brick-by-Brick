@@ -1,0 +1,53 @@
+{
+  "name": "Accessory",
+  "simple": "An Accessory is an item a character wears, like a hat, hair, glasses, wings or a backpack. It holds a part named Handle with an Attachment inside. When added to a character, the Attachment snaps onto the matching Attachment on the body, like HatAttachment on the head.",
+  "analogy": "An Accessory is like a clip-on badge. The badge has a clip (the Attachment in its Handle), and the shirt has a matching spot (an Attachment on the body with the same name). Clip them together and it stays put.",
+  "whenToUse": [
+    "Give a character a hat, sword on the back, wings, or other wearable item.",
+    "Check what kind of item something is (AccessoryType).",
+    "Remove or change what players are wearing."
+  ],
+  "where": "Inside a character Model when worn. Keep spare ones in ServerStorage and add them with `humanoid:AddAccessory(accessory)` from a server Script. Accessory inherits from Accoutrement.",
+  "terms": {
+    "Handle": "The Part inside the Accessory that you see. It's what gets attached to the body.",
+    "Attachment": "An invisible point on a part. The accessory's Attachment and the body's Attachment with the same name are joined together.",
+    "weld": "A connection that glues two parts together so they move as one.",
+    "layered clothing": "3D clothes like jackets that wrap around the body. They use a WrapLayer inside the Handle.",
+    "Enum.AccessoryType": "The list of accessory kinds, like Hat, Hair, Face, Neck, Shoulder, Front, Back, Waist, and clothing types like Jacket.",
+    "R6 / R15": "The two kinds of Roblox character bodies (6 parts or 15 parts). Accessories work on both."
+  },
+  "examples": [
+    {
+      "title": "Give every player a hat when they spawn",
+      "place": "Script in ServerScriptService (put an Accessory named PartyHat in ServerStorage)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal ServerStorage = game:GetService(\"ServerStorage\")\nlocal hatTemplate = ServerStorage:WaitForChild(\"PartyHat\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAppearanceLoaded:Connect(function(character)\n        local humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n        if humanoid then\n            local hat = hatTemplate:Clone()\n            humanoid:AddAccessory(hat) -- snaps HatAttachment to the head\n        end\n    end)\nend)",
+      "explain": [
+        "The PartyHat Accessory must have a Part named Handle, and inside the Handle an Attachment named HatAttachment.",
+        "AddAccessory looks for an Attachment on the body with the same name (the head has HatAttachment) and welds them together.",
+        "We wait for CharacterAppearanceLoaded so the player's own items are already on.",
+        "This runs on the server so everyone sees the hat."
+      ]
+    },
+    {
+      "title": "List what a character is wearing",
+      "place": "Script in ServerScriptService",
+      "code": "local Players = game:GetService(\"Players\")\n\nPlayers.PlayerAdded:Connect(function(player)\n    player.CharacterAppearanceLoaded:Connect(function(character)\n        local humanoid = character:FindFirstChildOfClass(\"Humanoid\")\n        for _, accessory in humanoid:GetAccessories() do\n            print(accessory.Name .. \" is a \" .. accessory.AccessoryType.Name)\n        end\n    end)\nend)",
+      "explain": [
+        "GetAccessories returns every Accessory on the character.",
+        "AccessoryType tells you what kind it is, like Hat or Hair. .Name turns the Enum value into plain text."
+      ]
+    }
+  ],
+  "gotchas": [
+    "The Handle part must be named exactly `Handle`.",
+    "If the Attachment name in the Handle doesn't match any Attachment on the body, the accessory won't stay on.",
+    "Make the Handle not Anchored, or the character gets stuck.",
+    "AccessoryType is Unknown for accessories you add yourself, unless you set it."
+  ],
+  "members": {
+    "Accessory.AccessoryType": {
+      "simple": "What kind of accessory this is, like Hat, Hair, Face, Back or Waist. It's Unknown unless the accessory came from the player's avatar or a HumanoidDescription, or you set it yourself.",
+      "example": "if accessory.AccessoryType == Enum.AccessoryType.Hat then\n    print(\"It's a hat!\")\nend"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "path": "content/en-us/ui/list-flex-layouts.md",
+  "simple": "A `UIListLayout` automatically lines up UI items in a row or a column, so you do not have to place each one by hand. Add or remove an item and the rest move to fit. You can choose the direction, order, alignment, spacing, and whether items wrap onto a new line. Flex settings go further, stretching items to fill leftover space, like tabs that always fill the whole bar.",
+  "analogy": "A list layout is like kids lining up for lunch: you just say \"line up by number\" and everyone finds their spot, and if someone leaves, the line closes the gap.",
+  "keyPoints": [
+    "Put a `UIListLayout` inside a container and it arranges all the other UI items (its siblings) in that container.",
+    "Once added, the layout controls the items' `Position` (and can affect `Size` and `Rotation`), so setting those yourself will not work normally.",
+    "`FillDirection` picks Horizontal (a row) or Vertical (a column).",
+    "`SortOrder` sorts by each item's `LayoutOrder` number (low first) or by `Name` alphabetically.",
+    "`HorizontalAlignment` and `VerticalAlignment` line up items with each other and inside the container.",
+    "`Wraps` moves items to a new line when they run out of room, and `Padding` adds space between items.",
+    "`HorizontalFlex`/`VerticalFlex` share extra space among items, and `ItemLineAlignment` can stretch items to match their line.",
+    "Put a `UIFlexItem` inside one item to make only that item grow or shrink."
+  ],
+  "terms": {
+    "sibling": "Objects that share the same parent. A `UIListLayout` affects its siblings, not itself.",
+    "LayoutOrder": "A number on each UI item used for sorting. Items with 1, 2, 3 appear in that order.",
+    "ascending": "Going from small to big, like 1, 2, 3.",
+    "alphanumeric": "Sorted like a dictionary, by letters and numbers in the name.",
+    "padding": "Empty space. Here it means the gap between items, such as 8 pixels.",
+    "wrap": "When a row is full, the next items start a new row, like words wrapping in a text box.",
+    "flex": "Letting items stretch or shrink to fill the space. Three tabs in a 300-pixel bar each become 100 pixels wide; six tabs each become 50.",
+    "cross-direction": "The other direction from the list. For a horizontal row, the cross-direction is up and down.",
+    "UIFlexItem": "An object you put inside one list item to control how that one item flexes, such as `Fill`, `Grow`, or `Shrink`."
+  },
+  "example": {
+    "title": "Make a row of tabs that always fill the bar",
+    "place": "LocalScript inside a Frame named TabBar (inside a ScreenGui in StarterGui)",
+    "code": "local tabBar = script.Parent\n\nlocal layout = Instance.new(\"UIListLayout\")\nlayout.FillDirection = Enum.FillDirection.Horizontal -- left to right\nlayout.SortOrder = Enum.SortOrder.LayoutOrder\nlayout.Padding = UDim.new(0, 4) -- 4 pixels between tabs\nlayout.HorizontalFlex = Enum.UIFlexAlignment.Fill -- stretch tabs to fill the bar\nlayout.Parent = tabBar\n\nlocal tabNames = { \"Shop\", \"Inventory\", \"Settings\" }\nfor index, name in tabNames do\n\tlocal tab = Instance.new(\"TextButton\")\n\ttab.Text = name\n\ttab.Size = UDim2.new(0, 50, 1, 0) -- starting width; flex will stretch it\n\ttab.LayoutOrder = index\n\ttab.Parent = tabBar\nend",
+    "explain": [
+      "We add a `UIListLayout` to the tab bar and make it a horizontal row.",
+      "We sort by `LayoutOrder` and add 4 pixels between items.",
+      "`HorizontalFlex` set to `Fill` stretches the tabs so they share the bar's full width.",
+      "We create three buttons with `LayoutOrder` 1, 2, 3 so they appear in that order. Add a fourth and they all shrink to fit."
+    ]
+  },
+  "watchOut": [
+    "If you cannot move an item by changing `Position`, a list layout is in charge. Remove it or change the layout instead.",
+    "To reverse order (right to left), make the `LayoutOrder` values negative, like 0, -1, -2.",
+    "`Padding` only adds space between items, not around the edges. Use `UIPadding` for the edges.",
+    "Flex costs a bit more performance, so only use it when you really need stretching. Use a grid when items must line up in both directions."
+  ]
+}

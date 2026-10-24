@@ -1,0 +1,33 @@
+{
+  "path": "content/en-us/physics/constraints/no-collision.md",
+  "simple": "A NoCollisionConstraint stops two specific parts from bumping into each other, while both still collide with everything else in the world. It is the quick fix for parts in the same machine that overlap and scrape, like a car wheel rubbing against the car body. For whole groups of things, collision groups are the bigger tool.",
+  "analogy": "It is like telling two friends in a crowded hallway they are allowed to walk through each other, while everyone else still has to go around.",
+  "keyPoints": [
+    "NoCollisionConstraint turns off collisions between exactly two parts.",
+    "Both parts still collide normally with every other part in the world.",
+    "It links parts directly with `Part0` and `Part1`, not attachments.",
+    "A typical use is stopping a car's wheel from scraping against the car body.",
+    "For many objects at once, like whole teams, use collision groups instead."
+  ],
+  "terms": {
+    "collision": "When two solid parts touch and the physics engine stops them from passing through each other.",
+    "Part0 / Part1": "The two parts that should ignore each other.",
+    "collision group": "A named group of parts. You can set which groups collide with which, for example letting all players walk through a team door.",
+    "CanCollide": "A part setting. Turning it off makes the part pass through everything, which is different from a NoCollisionConstraint that only affects one pair."
+  },
+  "example": {
+    "title": "Stop a wheel from scraping the car body",
+    "place": "Script in ServerScriptService (with a car model in the Workspace)",
+    "code": "local Workspace = game:GetService(\"Workspace\")\n\nlocal car = Workspace:WaitForChild(\"Car\")\nlocal body = car:WaitForChild(\"Body\")\nlocal frontLeftWheel = car:WaitForChild(\"FrontLeftWheel\")\n\nlocal noCollide = Instance.new(\"NoCollisionConstraint\")\nnoCollide.Part0 = body\nnoCollide.Part1 = frontLeftWheel\nnoCollide.Parent = body",
+    "explain": [
+      "We find the car's body and one of its wheels.",
+      "The NoCollisionConstraint uses `Part0` and `Part1`, so the body and wheel can now overlap without pushing on each other.",
+      "The wheel still touches the road, so the car still drives. Only wheel-versus-body bumping is turned off.",
+      "Repeat for each wheel, or loop over them, so all 4 wheels spin freely."
+    ]
+  },
+  "watchOut": [
+    "Setting `CanCollide = false` on a wheel makes it fall through the road. Use a NoCollisionConstraint to ignore only the body.",
+    "A NoCollisionConstraint only covers one pair. For lots of parts, collision groups are much easier to manage."
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "name": "RemoteFunction",
+  "simple": "A RemoteFunction lets a player's device ask the server a question and wait for the answer. Unlike a RemoteEvent, the script that asks stops and waits until the other side replies.",
+  "analogy": "A RemoteFunction is like calling the shop on the phone and asking 'how much is the sword?'. You stay on the line until they answer. A RemoteEvent is more like sending a text and moving on.",
+  "whenToUse": [
+    "The client needs information only the server knows, like 'what is in my inventory?' or 'did my purchase work?'.",
+    "You want a yes/no reply from the server before updating the screen.",
+    "Avoid using it to ask a client for something (server asking client). It is risky; see the gotchas."
+  ],
+  "where": "Create it in Studio and put it in ReplicatedStorage. The server sets `OnServerInvoke`; LocalScripts call `InvokeServer`.",
+  "terms": {
+    "server": "The one computer, run by Roblox in a data center, that is in charge of a game. Every player in the same game is connected to it. It keeps the official copy of the game, like who has how many coins.",
+    "client": "Your own device (phone, PC, Xbox) running the game. Every player has their own client. The client draws the screen and reads your keyboard, mouse or touch.",
+    "client-server boundary": "The invisible wall between the server and each client. They are different computers, so a script on one side cannot just reach over and change a variable on the other side. Messages have to be sent across.",
+    "Script": "A script that runs on the server. Put it in ServerScriptService.",
+    "LocalScript": "A script that runs on one player's client. Put it in StarterPlayerScripts, StarterGui or StarterCharacterScripts.",
+    "ReplicatedStorage": "A storage folder that both the server and every client can see. The usual home for RemoteEvents and RemoteFunctions.",
+    "exploiter": "A cheater who uses hacking tools to change their own client. They can run any code they want on their own device, including firing your RemoteEvents with fake values.",
+    "validate": "To double-check something before trusting it. The server validates a request by asking: is this a real item? Can this player afford it? Are they close enough?",
+    "invoke": "To call a function and wait for its answer.",
+    "callback": "A function you hand to Roblox so Roblox can run it later. For a RemoteFunction you set the callback with `=`, not with `:Connect`.",
+    "yield": "To pause a script and wait. `InvokeServer` yields until the server sends back an answer.",
+    "return": "Handing a value back from a function. Whatever your callback returns is the answer the other side receives."
+  },
+  "examples": [
+    {
+      "title": "Ask the server how many coins I have",
+      "place": "Script in ServerScriptService + LocalScript in StarterPlayerScripts, RemoteFunction named GetCoins in ReplicatedStorage",
+      "code": "-- SERVER\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal getCoins = ReplicatedStorage:WaitForChild(\"GetCoins\")\n\nlocal coinsByUserId = {} -- the server's true record\n\n-- Set the callback with = (only one callback can exist)\ngetCoins.OnServerInvoke = function(player)\n\treturn coinsByUserId[player.UserId] or 0\nend\n\n-- CLIENT\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal getCoins = ReplicatedStorage:WaitForChild(\"GetCoins\")\n\nlocal coins = getCoins:InvokeServer() -- waits for the answer\nprint(\"I have \" .. coins .. \" coins\")",
+      "explain": [
+        "The server sets `OnServerInvoke` to a function. Roblox passes the asking player first.",
+        "The LocalScript calls `InvokeServer()` and pauses until the server's function returns.",
+        "The returned number arrives on the client and gets printed."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Set `OnServerInvoke` with `=`, not `:Connect`. Only the last one you set is used.",
+    "Avoid `InvokeClient`. If the player leaves, the server gets an error; if a cheater never answers, the server script waits forever.",
+    "Never trust the values the client sends to `InvokeServer`. Check them on the server.",
+    "Because the caller waits, a slow server callback freezes the calling LocalScript until it finishes."
+  ],
+  "members": {
+    "RemoteFunction:InvokeClient": {
+      "simple": "Server asks one player's device a question and waits for the reply. Rarely a good idea.",
+      "example": "-- Script in ServerScriptService (use with care!)\nlocal Players = game:GetService(\"Players\")\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal askSetting = ReplicatedStorage:WaitForChild(\"AskSetting\")\n\nPlayers.PlayerAdded:Connect(function(player)\n\t-- pcall catches the error if the player leaves mid-question\n\tlocal ok, answer = pcall(function()\n\t\treturn askSetting:InvokeClient(player)\n\tend)\n\tprint(ok, answer)\nend)",
+      "gotcha": "A cheater's client can simply never answer, and your server code waits forever. If the player leaves, it errors. Prefer RemoteEvents for server-to-client messages."
+    },
+    "RemoteFunction:InvokeServer": {
+      "simple": "A LocalScript asks the server a question and waits for the answer. Returns whatever the server's `OnServerInvoke` returns.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal canEnter = ReplicatedStorage:WaitForChild(\"CanEnterVIP\")\n\nif canEnter:InvokeServer() then\n\tprint(\"Welcome to the VIP room!\")\nelse\n\tprint(\"Sorry, VIP only.\")\nend"
+    },
+    "RemoteFunction.OnClientInvoke": {
+      "simple": "The function a LocalScript sets to answer when the server calls `InvokeClient`. Whatever it returns goes back to the server.",
+      "example": "-- LocalScript in StarterPlayerScripts\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal askSetting = ReplicatedStorage:WaitForChild(\"AskSetting\")\n\naskSetting.OnClientInvoke = function()\n\treturn \"dark mode\"\nend",
+      "gotcha": "The server should not believe this answer for anything important; the client can lie."
+    },
+    "RemoteFunction.OnServerInvoke": {
+      "simple": "The function the server sets to answer when a client calls `InvokeServer`. Roblox gives you the player first, then the client's values. Whatever you return goes back to the client.",
+      "example": "-- Script in ServerScriptService\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal getPrice = ReplicatedStorage:WaitForChild(\"GetPrice\")\n\nlocal PRICES = { Sword = 50, Shield = 30 }\n\ngetPrice.OnServerInvoke = function(player, itemName)\n\tif typeof(itemName) ~= \"string\" then\n\t\treturn nil -- bad request, answer nothing\n\tend\n\treturn PRICES[itemName]\nend",
+      "gotcha": "Only one function can be set. Setting it again replaces the old one."
+    }
+  }
+}

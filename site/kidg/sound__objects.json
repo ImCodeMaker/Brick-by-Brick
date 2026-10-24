@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/sound/objects.md",
+  "simple": "This page explains the `Sound` object, the older way to play audio in Roblox. Where you put the `Sound` decides how it is heard: inside a big part it surrounds you, inside a small attachment it comes from one point, and in SoundService it plays everywhere. You also learn the main settings, like volume, how fast sound fades with distance, speed, and looping. Finally, it shows how to start sounds from scripts, including a click sound for a button.",
+  "analogy": "A `Sound` in a huge part is like rain falling on a whole town: you are surrounded by it. A `Sound` on an attachment is like a phone ringing on one desk: it comes from one exact spot.",
+  "keyPoints": [
+    "A `Sound` inside a block, sphere, or cylinder part sends sound out from the whole surface (volumetric audio); turn on `VolumetricAudio` in SoundService for this.",
+    "A `Sound` inside an `Attachment`, `MeshPart`, `TrussPart`, `WedgePart`, or `CornerWedgePart` plays from one point (point source).",
+    "A `Sound` in SoundService or Workspace is background audio: same volume for everyone, everywhere.",
+    "Set `SoundId` to an audio asset ID, and turn on `Playing` to start it when the game begins.",
+    "`Volume` goes from 0 (silent) to 10, and it multiplies, so 4 is four times as loud as 1.",
+    "`RollOffMinDistance` is where the sound starts to fade, and `RollOffMaxDistance` is where you stop hearing it; `RollOffMode` picks the fade shape.",
+    "`PlaybackSpeed` of 2 plays twice as fast and higher; 0.5 plays half as fast and lower. `TimePosition` tells you how many seconds into the sound you are.",
+    "`Looped` makes a sound start over when it ends, and `:Play()` starts a sound from a script."
+  ],
+  "terms": {
+    "volumetric audio": "Sound that comes from a whole part's surface. Inside the part you hear it all around you; outside, it fades and comes from one direction.",
+    "point source": "Sound that comes from one tiny spot, good for explosions, beeps, or a character talking.",
+    "listener": "The invisible ear that hears sound for a player, usually at their camera.",
+    "pan": "How much of a sound is in your left speaker versus your right speaker.",
+    "multiplicative": "The number multiplies the loudness. Volume 2 is twice as loud as volume 1, and volume 4 is four times as loud.",
+    "RollOffMinDistance / RollOffMaxDistance": "Distances in studs measured from the sound's part or point. With min 10 and max 100, the sound is full volume up to 10 studs away, fades between 10 and 100, and is silent past 100.",
+    "RollOffMode": "The shape of the fade. `Inverse` (the default) drops fast at first then slowly; `Linear` drops at an even rate.",
+    "octave": "A musical step where the pitch doubles or halves. Doubling playback speed raises the sound one octave.",
+    "TimePosition": "How far into the audio it is playing, in seconds. 5 means 5 seconds in.",
+    "stud": "Roblox's unit of distance. A default character is about 5 studs tall.",
+    "LocalScript": "A script that runs on one player's device, used for things only that player should see or hear."
+  },
+  "example": {
+    "title": "Play a click sound when a button is pressed",
+    "place": "LocalScript inside a TextButton (the button is inside a ScreenGui in StarterGui). Put a Sound named ClickSound in SoundService.",
+    "code": "local SoundService = game:GetService(\"SoundService\")\n\nlocal button = script.Parent\nlocal sound = SoundService:WaitForChild(\"ClickSound\")\n\n-- Make sure the sound file has finished loading\nif not sound.IsLoaded then\n\tsound.Loaded:Wait()\nend\n\nlocal function onButtonActivated()\n\tsound:Play()\nend\n\nbutton.Activated:Connect(onButtonActivated)",
+    "explain": [
+      "We find SoundService and wait for the `Sound` named ClickSound inside it.",
+      "If the sound has not finished loading, we wait for its `Loaded` event.",
+      "We write a function that plays the sound.",
+      "We connect that function to the button's `Activated` event, so every press plays the click."
+    ]
+  },
+  "watchOut": [
+    "Setting `Volume` above 2 on an already-loud file can blast players' ears. Keep it low and test.",
+    "With a small `RollOffMaxDistance`, sound can cut off suddenly. Use a bigger value for a smooth fade.",
+    "`PlaybackSpeed` changes pitch too. If you only want higher or lower without speeding up, use a pitch shift effect instead.",
+    "Button sounds belong in a `LocalScript` (client) so only the player who clicked hears them and it responds instantly."
+  ]
+}

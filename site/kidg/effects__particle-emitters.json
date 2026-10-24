@@ -1,0 +1,49 @@
+{
+  "path": "content/en-us/effects/particle-emitters.md",
+  "simple": "A `ParticleEmitter` shoots out lots of tiny flat pictures called particles to make effects like fire, smoke, sparks, magic dust, and even rain. You put it inside a part or attachment and it starts right away. Then you change properties like color, size, speed, and how long each particle lasts. Learning these lets you make your game feel alive without building every spark by hand.",
+  "analogy": "It is like a bubble machine: it keeps blowing bubbles out of one spot, and you can change how many it blows, how big they are, how fast they fly, and how long they last before popping.",
+  "keyPoints": [
+    "Put a `ParticleEmitter` inside a part (particles appear anywhere in the part's box or shape) or an attachment (particles come from that one point).",
+    "`EmissionDirection` picks which face of the part particles shoot out of. Rotating the part or attachment also turns the direction.",
+    "Looks: `Texture` sets the picture, `Color` tints it, `Size` and `Transparency` set how big and see-through particles are. These can change over each particle's life.",
+    "Movement: `Speed` is how fast they leave, `SpreadAngle` is how widely they scatter, `Acceleration` and `Drag` change their speed over time.",
+    "`Lifetime` is how many seconds each particle lasts (max 20). `Rate` is how many appear each second (up to 400, or 100 on mobile).",
+    "Fading particles in and out with `Transparency` stops them from popping in and out, which looks much nicer.",
+    "Flipbooks let a particle play a little animation using a grid of frames (2x2, 4x4, 8x8, or custom).",
+    "Big or many overlapping particles can slow the game. Keep `Rate` low and test on low graphics quality."
+  ],
+  "terms": {
+    "particle": "One small 2D image, like a single spark or smoke puff, that the emitter creates and then removes.",
+    "emit": "To shoot out or give off. An emitter emits particles.",
+    "bounding box": "The invisible box that fits exactly around a part. Particles from a part can appear anywhere inside it.",
+    "texture": "The picture each particle shows. A `.png` with a see-through background works best.",
+    "ColorSequence / NumberSequence": "A list of values over time. For example, size could start at 1 and grow to 3 by the end of each particle's life.",
+    "keypoint": "One point on a sequence graph that sets the value at a moment in the particle's life.",
+    "lifetime": "How long, in seconds, each particle exists. A lifetime of 2 means each spark vanishes after 2 seconds.",
+    "rate": "How many particles are made each second. Rate 20 means 20 new particles every second.",
+    "spread angle": "How far from straight out particles can fly. (45, 0) lets them tilt up to 45 degrees along the X direction.",
+    "LightEmission": "How particles blend with what is behind them. 0 is normal; 1 adds their light so they glow.",
+    "drag": "How quickly particles slow down. It is the number of seconds for a particle to lose half its speed.",
+    "squash": "Stretches particles tall and thin (positive values) or wide and flat (negative values). Great for rain streaks.",
+    "flipbook": "A texture made of a grid of small frames that play one after another, like a flip-book cartoon.",
+    "overdraw / fill-rate": "The extra work your graphics card does when lots of see-through particles stack up or cover the screen. Too much makes the game lag."
+  },
+  "example": {
+    "title": "Make a burst of sparks when a part is touched",
+    "place": "Script inside a Part in Workspace",
+    "code": "local part = script.Parent\n\nlocal emitter = Instance.new(\"ParticleEmitter\")\nemitter.Enabled = false -- do not emit nonstop; we will burst instead\nemitter.Color = ColorSequence.new(Color3.fromRGB(255, 200, 50))\nemitter.Lifetime = NumberRange.new(0.5, 1) -- each spark lasts 0.5 to 1 second\nemitter.Speed = NumberRange.new(10, 20) -- studs per second\nemitter.SpreadAngle = Vector2.new(45, 45)\nemitter.LightEmission = 1 -- make the sparks glow\nemitter.Transparency = NumberSequence.new(0, 1) -- fade out over their life\nemitter.Parent = part\n\nlocal cooldown = false\npart.Touched:Connect(function()\n\tif cooldown then\n\t\treturn\n\tend\n\tcooldown = true\n\temitter:Emit(30) -- shoot out 30 sparks at once\n\ttask.wait(1)\n\tcooldown = false\nend)",
+    "explain": [
+      "We make a `ParticleEmitter` but set `Enabled = false` so it only fires when we tell it to.",
+      "`Lifetime` and `Speed` use `NumberRange` so each spark gets a random value between the two numbers.",
+      "`NumberSequence.new(0, 1)` makes each spark start solid and fade to invisible.",
+      "When the part is touched, `Emit(30)` sends out 30 sparks in one burst.",
+      "The cooldown stops it from bursting dozens of times while something is still touching it."
+    ]
+  },
+  "watchOut": [
+    "Setting `Lifetime` higher than 20 does nothing extra; it is capped at 20 seconds.",
+    "Changing `Speed` only affects new particles. Ones already flying keep their speed.",
+    "Sphere and Cylinder shapes do not show correctly when the emitter is inside an attachment. Use a part for those.",
+    "Very high `Rate` or huge particles can lag phones. For heavy rain, use several emitters with lower rates."
+  ]
+}

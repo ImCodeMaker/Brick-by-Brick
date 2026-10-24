@@ -1,0 +1,45 @@
+{
+  "path": "content/en-us/physics/constraints/vector-force.md",
+  "simple": "This page is about `VectorForce`, a constraint that keeps pushing a part with the same amount of force all the time. You choose the push's direction and strength with a `Vector3`. Because the push never stops, the part keeps speeding up unless something slows it down. It is perfect for rockets, jet packs, or wind.",
+  "analogy": "It is like a rocket engine that is always on full blast: it does not care how fast you are already going, it just keeps pushing.",
+  "keyPoints": [
+    "`VectorForce` applies a constant force to an assembly, so the part keeps accelerating.",
+    "The `Force` property is a `Vector3` that sets both direction and strength.",
+    "Since it never stops pushing, parts can reach very high speeds. Use `LinearVelocity` if you want a steady speed instead.",
+    "For just a starting push, set `AssemblyLinearVelocity` once instead.",
+    "Force is applied at `Attachment0`'s spot by default, which can also make the part spin. Turn on `ApplyAtCenterOfMass` to push from the middle.",
+    "`RelativeTo = Attachment0` (default): the push turns with the part, like a rocket thruster always pushing the rocket forward.",
+    "`RelativeTo = World`: the push always goes the same world direction, like wind.",
+    "`RelativeTo = Attachment1`: the push follows the rotation of the other attachment."
+  ],
+  "terms": {
+    "constraint": "An object that controls how parts move, like an invisible motor, rope, or hand pushing them. Mover constraints push or spin parts for you.",
+    "assembly": "A group of parts that are welded or joined together so physics moves them as one piece. A car body plus its welded seats is one assembly.",
+    "attachment": "A small invisible point you put inside a part. Constraints hook onto attachments, the same way a rope ties onto a hook.",
+    "Attachment0 / Attachment1": "The two attachment slots a constraint uses. Attachment0 is usually the one that gets pushed; Attachment1 is the other end or the reference point.",
+    "force": "A push or pull. More force on the same part means it speeds up faster.",
+    "constant force": "A push that stays the same size the whole time.",
+    "acceleration": "How quickly speed changes. Constant force means the speed keeps going up and up.",
+    "center of mass": "The balance point of an object. Pushing anywhere else can make it spin as well as move.",
+    "world coordinates": "Directions based on the world's fixed X, Y, and Z axes. (0, 100, 0) always means straight up.",
+    "relative to Attachment0": "Directions are measured from the attachment's own facing. (0, 100, 0) means 'up' from the attachment's point of view, which changes if the part tips over.",
+    "gravity": "The pull downward on every unanchored part. To float a part, the upward force must equal its mass times `workspace.Gravity`."
+  },
+  "example": {
+    "title": "Make a part float by cancelling gravity",
+    "place": "Script inside a Part in Workspace (part not Anchored)",
+    "code": "local part = script.Parent\n\nlocal attachment = Instance.new(\"Attachment\")\nattachment.Parent = part\n\nlocal force = Instance.new(\"VectorForce\")\nforce.Attachment0 = attachment\nforce.RelativeTo = Enum.ActuatorRelativeTo.World\nforce.ApplyAtCenterOfMass = true\n\n-- Push up exactly as hard as gravity pulls down\nlocal mass = part.AssemblyMass\nforce.Force = Vector3.new(0, mass * workspace.Gravity, 0)\nforce.Parent = part",
+    "explain": [
+      "We add an attachment and create a `VectorForce` linked to it.",
+      "`RelativeTo = World` so 'up' always means world up, even if the part tilts.",
+      "`ApplyAtCenterOfMass = true` so the push does not make the part spin.",
+      "Gravity pulls with a force of mass times `workspace.Gravity`, so we push up with exactly that much.",
+      "The forces cancel out, so the part floats. Add a little more force and it slowly rises faster and faster."
+    ]
+  },
+  "watchOut": [
+    "A push even a little bigger than gravity makes the part speed up forever and fly away. Use `LinearVelocity` for steady speed.",
+    "If the part spins unexpectedly, the force is off-center. Turn on `ApplyAtCenterOfMass`.",
+    "With the default `RelativeTo = Attachment0`, if the part flips over, 'up' becomes 'down'. Use `World` for wind-like pushes."
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "path": "content/en-us/projects/client-server.md",
+  "simple": "Every Roblox game runs in two kinds of places at once: one Roblox server in the cloud and each player's device, called a client. The server is the boss that keeps the official version of the game, and it keeps every client in sync through something called replication. This page explains how data, physics, and chat get passed back and forth. Once you get this, you understand why some scripts run on the server and others on the player's device.",
+  "analogy": "It is like a teacher with a whiteboard and a class of students with notebooks. The teacher's whiteboard is the official version. Students copy what is on the board, and if a student wants something changed on the board, they have to raise their hand and ask the teacher.",
+  "keyPoints": [
+    "Roblox games are multiplayer by default, and the server is the final authority on what is true in the game.",
+    "When a game starts, Roblox copies the place you built in Studio (the edit data model) onto the server as the runtime data model. Each client gets its own copy too.",
+    "With `Workspace.StreamingEnabled` on, the server first sends each client only the parts of the world closest to them.",
+    "Replication is how the server keeps clients up to date. It syncs the data model, physics, and chat.",
+    "Messages can go client to server, server to one client, or server to all clients. For example, the server can show the same race countdown to everyone.",
+    "Physics works on assemblies, which are groups of connected parts treated as one solid object. A player's character is 1 assembly made of 18 parts.",
+    "The server or a client can be the owner of an assembly and do its physics math. Others then get its position from the owner.",
+    "Most players have about 100 to 300 milliseconds of delay. Studio tests with no delay by default, so set Network Simulation to at least 50 to 150 ms to test realistically."
+  ],
+  "terms": {
+    "server": "A Roblox computer in the cloud that runs the official copy of your game for everyone in that server.",
+    "client": "A single player's device running the game, like their phone or PC.",
+    "authority": "Who gets the final say. The server has authority, so if the server and a client disagree, the server wins.",
+    "in sync": "Matching. If a door opens on the server, it should look open on every client too.",
+    "edit data model": "The version of your place you build in Studio.",
+    "runtime data model": "The live copy of your place while the game is running, which changes as players play.",
+    "replication": "The server copying changes to clients (and some changes from clients to the server) so everyone sees the same thing.",
+    "StreamingEnabled": "A Workspace setting. When on, a client only loads the part of the world near the player instead of the whole map at once.",
+    "rigid body": "A solid object that moves and bumps as one piece and does not bend.",
+    "assembly": "One or more parts stuck together that physics treats as a single rigid body. A pirate ship of 179 parts welded together is 1 assembly.",
+    "network ownership": "Which computer (the server or one client) calculates the physics for an assembly. A player usually owns their own character so it moves smoothly for them.",
+    "latency": "The delay for a message to travel between a device and the server. 200 milliseconds is one fifth of a second.",
+    "filtering": "The server checking chat messages and hiding words that are not allowed before other players see them."
+  },
+  "example": {
+    "title": "Press P to drink an invisibility potion",
+    "place": "Server part: Script in ServerScriptService. Client part: LocalScript in StarterPlayerScripts.",
+    "code": "-- ===== Script in ServerScriptService =====\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n\n-- A RemoteEvent lets the client send a message to the server\nlocal drinkPotion = Instance.new(\"RemoteEvent\")\ndrinkPotion.Name = \"DrinkPotion\"\ndrinkPotion.Parent = ReplicatedStorage\n\ndrinkPotion.OnServerEvent:Connect(function(player)\n\tlocal character = player.Character\n\tif not character then\n\t\treturn\n\tend\n\t-- The server makes the change, so it replicates to ALL players\n\tfor _, item in character:GetDescendants() do\n\t\tif item:IsA(\"BasePart\") or item:IsA(\"Decal\") then\n\t\t\titem.Transparency = 1\n\t\tend\n\tend\nend)\n\n-- ===== LocalScript in StarterPlayerScripts =====\nlocal ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\nlocal UserInputService = game:GetService(\"UserInputService\")\n\nlocal drinkPotion = ReplicatedStorage:WaitForChild(\"DrinkPotion\")\n\nUserInputService.InputBegan:Connect(function(input, gameProcessed)\n\t-- Skip keys typed into chat or menus\n\tif gameProcessed then\n\t\treturn\n\tend\n\tif input.KeyCode == Enum.KeyCode.P then\n\t\tdrinkPotion:FireServer() -- ask the server to do it\n\tend\nend)",
+    "explain": [
+      "The server script makes a RemoteEvent and puts it in ReplicatedStorage, so both sides can find it.",
+      "The LocalScript runs on the player's device and listens for the P key.",
+      "When P is pressed, the client calls `FireServer()`. This is the client to server message.",
+      "The server gets the message along with which player sent it, and makes that player's character parts and face see-through.",
+      "Because the server made the change, it replicates to every client, so all players see the character vanish. If the LocalScript changed the transparency itself, only that one player would see it."
+    ]
+  },
+  "watchOut": [
+    "Changing something in a LocalScript and expecting other players to see it. Client changes usually stay on that client. Ask the server with a RemoteEvent instead.",
+    "Testing only with zero delay in Studio. Your game may feel laggy for real players. Turn on Network Simulation with 50 to 150 ms.",
+    "Trusting whatever the client says. The server is the authority, so it should check requests before acting on them."
+  ]
+}

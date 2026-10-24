@@ -1,0 +1,29 @@
+{
+  "path": "content/en-us/physics/adaptive-timestepping.md",
+  "simple": "Physics in Roblox is calculated in lots of tiny steps every second. Adaptive timestepping lets the engine use fewer steps for easy objects and more steps for tricky ones. This can make physics run up to 2.5 times faster. You turn it on with one setting on Workspace, but some games, like racing games, should keep the fixed mode.",
+  "analogy": "It is like a flip-book animation: a calm scene only needs a few pages per second, but a fast car crash needs many more pages so it looks right. Adaptive timestepping gives each object just as many pages as it needs.",
+  "keyPoints": [
+    "By default Roblox calculates physics 240 times per second, which is about 4 physics steps for each 60-frames-per-second frame.",
+    "Adaptive timestepping sorts parts into three groups ('solver islands'): 60, 120, or 240 steps per second.",
+    "Most parts go to 60 Hz for speed. Fast-moving, quickly speeding up, or complicated mechanisms go to 240 Hz to stay stable.",
+    "To turn it on: select Workspace in the Explorer, then in Properties set `PhysicsSteppingMethod` to Adaptive.",
+    "To see which rate each part uses: open Studio Settings, go to the Physics tab, and turn on Are Timesteps Shown. Parts get colored outlines.",
+    "You can also check it in the Microprofiler (Ctrl+F6 or Cmd+F6), where worldStep will read worldStep - Adaptive.",
+    "Use Fixed mode (always 240 Hz) for games needing very accurate physics, like racing, destruction, or tanks, or when most parts end up in the 240 Hz group anyway."
+  ],
+  "terms": {
+    "timestep": "The small slice of time between two physics calculations. At 240 Hz each step is 1/240 of a second.",
+    "worldstep": "One full physics update of the world, done once per timestep.",
+    "Hz (hertz)": "Times per second. 240 Hz means 240 times every second; 60 Hz means 60 times.",
+    "frame": "One picture drawn on your screen. Games usually draw about 60 frames each second.",
+    "solver island": "A group of parts that the physics engine solves together at the same step rate.",
+    "Newton's second law": "The rule that force equals mass times acceleration. Roblox uses it to figure out how hard pushes change how things move.",
+    "Microprofiler": "A Studio tool that shows how long each part of the game's work takes, frame by frame.",
+    "overhead": "Extra work the computer has to do. Mixing 240 Hz parts with slower ones adds overhead that can cancel out the speed boost."
+  },
+  "watchOut": [
+    "Do not turn on Adaptive for a game that needs super precise physics, like a racing game. Things may feel less stable.",
+    "If almost every part shows red (240 Hz) outlines, adaptive mode is not helping. Switch back to Fixed.",
+    "Parts that stop being outlined are not broken; they may just be asleep or owned by another player's computer."
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "path": "content/en-us/characters/adaptive-animation.md",
+  "simple": "Roblox has tons of animations made for the normal R15 body. Adaptive Animation lets a custom character, like a cartoon snowman or a tall alien, play those same animations. You tell Studio which bone in your character matches which bone in the standard Roblox skeleton, then set up a T-pose. After that, your character can play any R15 animation.",
+  "analogy": "It is like a dance teacher teaching a class of kids, teens, and adults. The moves are the same, but each dancer first figures out which of their own arms and legs match the teacher's, so everyone can follow along.",
+  "keyPoints": [
+    "Import your rigged character with the 3D Importer (`.fbx` or `.gltf`) and set Rig Type to Custom.",
+    "In the Avatar tab, click Adaptive Animation, then Create in the Remap Rig panel. Studio adds a `HumanoidRigDescription` and a `DigitsRigDescription` for each hand.",
+    "You must match at least 15 of your character's joints to Roblox's standard 15-joint skeleton.",
+    "Select the `HumanoidRigDescription` and click a joint in the viewport, then the matching joint in the visual picker. Assigned joints turn orange.",
+    "Filled gray circles are required joints. Empty circles are optional extra joints, like fingers, that improve quality.",
+    "Use T-pose mode and Enforce T-pose to put your character in a standard T shape. Adjust arms with the Rotate tool, and use symmetry to move both sides at once.",
+    "Test by choosing an animation from the dropdown and pressing play. If it looks wrong, fix the joint mapping or T-pose."
+  ],
+  "terms": {
+    "rig": "The hidden skeleton of joints inside a character that lets it move.",
+    "joint": "A point where body parts bend, like a shoulder or knee.",
+    "R15": "The standard Roblox body with 15 parts and a matching set of joints.",
+    "HumanoidRigDescription": "An object that records which of your character's joints match the standard Roblox joints.",
+    "DigitsRigDescription": "Like `HumanoidRigDescription`, but for the fingers of one hand.",
+    "remap": "Match each of your joints to the standard joint with the same job, like your character's \"arm_up_L\" to Roblox's LeftUpperArm.",
+    "T-pose": "Standing straight with arms stretched out sideways like the letter T. It is the starting pose animations are measured from.",
+    "viewport": "The main 3D view in Studio where you see and edit your world.",
+    "symmetry": "Changing the left and right sides the same way at once.",
+    "proportions": "How big body parts are compared to each other, like long legs and a short body."
+  },
+  "watchOut": [
+    "Importing with the wrong rig type. Set Rig Type to Custom so Studio sets it up as a custom humanoid.",
+    "Leaving required joints unassigned. All 15 standard joints must be mapped or animations will not play correctly.",
+    "Skipping the T-pose step. Animations can look twisted if the starting pose is off.",
+    "Not testing. Always play a few animations before using the character in your game."
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "path": "content/en-us/projects/data-model.md",
+  "simple": "The data model is the big tree of objects you see in Studio's Explorer window. It holds everything in your place: parts, terrain, lighting, sounds, scripts, and UI. Where you put an object in this tree changes what it does, for example whether a script runs on the server or on a player's device, or whether players can see something at all. Learning the main containers saves you from the classic \"why is my script not running?\" problem.",
+  "analogy": "The data model is like a school building. Workspace is the playground everyone can see, ServerStorage is the locked teachers' storage room, ReplicatedStorage is the shared library that teachers and students can both use, and StarterGui is the stack of worksheets handed to each student when they arrive.",
+  "keyPoints": [
+    "Every object comes from the `Instance` class, so they all share basics like `Name`, `Parent`, and `:Destroy()`.",
+    "Parts (`Part`, `MeshPart`, `TrussPart`) are the physical 3D building blocks. They all come from `BasePart`, which gives them position, size, and orientation.",
+    "A `Script` runs on the server, a `LocalScript` runs on the player's device (client), and a `ModuleScript` holds reusable code that other scripts load with `require()`.",
+    "Players only see what is inside `Workspace`. It starts with a `Terrain` and a `Camera` object.",
+    "`ReplicatedStorage` is shared by the server and every client, which makes it great for ModuleScripts both sides use and for objects you clone later.",
+    "`ServerScriptService` and `ServerStorage` are server-only and never sent to players, so your secret logic stays safe there. Scripts do not run inside ServerStorage.",
+    "When a player joins, the contents of StarterPack, StarterGui, StarterPlayerScripts, and StarterCharacterScripts are copied into that player's Backpack, PlayerGui, PlayerScripts, and Character.",
+    "Use Folders to group areas of your world, like a lobby, and Models to group objects that belong together, like a desk, chair, and lamp. Give everything clear names."
+  ],
+  "terms": {
+    "data model": "The whole tree of objects that describes a place. In scripts, `game` is the top of this tree.",
+    "hierarchy": "A tree where objects sit inside other objects, like files inside folders. The object something sits inside is its parent.",
+    "Instance": "The base type every Roblox object comes from. Anything in the Explorer is an Instance.",
+    "class": "The type of an object, like `Part` or `Script`. It decides which properties, methods, and events the object has.",
+    "inherit": "Get features from a more general class. `Part` inherits from `BasePart`, so a Part has a `Position` because every BasePart does.",
+    "runtime": "While the game is actually running, as opposed to while you are editing in Studio.",
+    "server": "The Roblox computer that runs the official copy of the game for everyone in that server.",
+    "client": "One player's device (phone, PC, console) running its own copy of the game.",
+    "replicate": "Copy changes from one side to the other. When the server moves a part in Workspace, that change is copied to every client.",
+    "container service": "A top-level object like Workspace or ServerStorage that gives special behavior to whatever you put inside it.",
+    "network boundary": "The line between the server and the clients. Things only cross it through replication or remote events.",
+    "remote events": "Objects that let scripts send messages across the network boundary, client to server or server to client.",
+    "non-persistent": "Not kept. PlayerGui is emptied each respawn, and anything copied from StarterGui is copied fresh.",
+    "Folder vs Model": "A Folder only organizes and has no behavior. A Model groups parts into one object you can move or clone together."
+  },
+  "example": {
+    "title": "Bring a map out of storage when it is needed",
+    "place": "Script in ServerScriptService (with a Model named \"DesertMap\" inside ServerStorage)",
+    "code": "local ServerStorage = game:GetService(\"ServerStorage\")\n\n-- The map waits in ServerStorage, so players do not download it on join\nlocal mapTemplate = ServerStorage:WaitForChild(\"DesertMap\")\n\nlocal function loadMap()\n\t-- Make a copy and put it in Workspace so players can see it\n\tlocal map = mapTemplate:Clone()\n\tmap.Parent = workspace\n\treturn map\nend\n\ntask.wait(10) -- pretend the lobby lasts 10 seconds\nlocal currentMap = loadMap()\nprint(\"Map loaded:\", currentMap.Name)\n\ntask.wait(60) -- the round lasts 60 seconds\ncurrentMap:Destroy() -- remove the map when the round ends\nprint(\"Map removed\")",
+    "explain": [
+      "The map is stored in ServerStorage. Players never receive anything in there, so their join is faster.",
+      "This is a `Script` in ServerScriptService, which is where server code runs.",
+      "`:Clone()` makes a copy, and setting `Parent` to `workspace` makes it appear in the 3D world for everyone.",
+      "After the round, `:Destroy()` removes the copy. The original stays safe in ServerStorage for next time."
+    ]
+  },
+  "watchOut": [
+    "Putting a `Script` in ServerStorage or a `LocalScript` in Workspace and wondering why it does nothing. Scripts go in ServerScriptService, LocalScripts in StarterPlayerScripts, StarterGui, StarterCharacterScripts, or ReplicatedFirst.",
+    "Storing secret logic, like reward amounts, in ReplicatedStorage. Players' devices can see everything there. Keep it in ServerScriptService or ServerStorage.",
+    "Trying to add Player objects to the Players service yourself. Roblox creates them automatically when people join.",
+    "Leaving everything named Part, Part, Part. Clear names make objects easy to find in scripts and in the Explorer."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "path": "content/en-us/ui/animation.md",
+  "simple": "This page shows how to animate UI smoothly using tweens. A tween slides a property from where it is now to a new value over time, so a menu can glide in, a button can grow, or a health bar can shrink gently instead of jumping. You use `TweenService` with a `TweenInfo` that says how long and in what style. It also shows how to chain tweens and how to make text appear letter by letter like a typewriter.",
+  "analogy": "A tween is like a flipbook. You draw the first and last pictures, and the computer draws all the in-between pages so the motion looks smooth.",
+  "keyPoints": [
+    "Tweening fills in the in-between steps so a UI change looks smooth instead of instant.",
+    "The pattern is: make a `TweenInfo`, call `TweenService:Create(object, tweenInfo, { Property = target })`, then call `:Play()`.",
+    "You can tween `Position`, `Size`, `Rotation`, transparency, and color properties; set `AnchorPoint` first so it moves or spins around the right spot.",
+    "Use scale values in `UDim2` targets so the result looks right on every screen size.",
+    "Put UI in a `CanvasGroup` and tween `GroupTransparency` or `GroupColor3` to fade or tint everything at once.",
+    "Put several properties in the same table to tween them together, like position and rotation.",
+    "Start the next tween when the previous one's `Completed` event fires to make a sequence.",
+    "`EasingStyle` (like Linear, Quad, Back, Bounce, Elastic) sets the feel; `EasingDirection` (In, Out, InOut) sets where the easing happens. The defaults are Quad and Out."
+  ],
+  "terms": {
+    "tween": "Short for \"in-between\". An animation that smoothly changes a value from start to finish.",
+    "TweenService": "The Roblox service that creates tweens.",
+    "TweenInfo": "Settings for a tween, like how long it takes. `TweenInfo.new(2)` means 2 seconds.",
+    "interpolation": "Calculating the values in between. Going from 0 to 10, halfway would be 5.",
+    "easing": "How the speed changes during the tween. Out starts fast and slows down at the end.",
+    "Back / Bounce / Elastic": "Fun easing styles that overshoot and settle, bounce at the end, or wobble like a rubber band.",
+    "CanvasGroup": "A frame that can fade or tint everything inside it as one.",
+    "Completed": "An event that fires when a tween finishes.",
+    "MaxVisibleGraphemes": "How many characters of a text label are shown. Raising it by 1 each step makes a typewriter effect.",
+    "grapheme": "One visible character, like a letter or an emoji."
+  },
+  "example": {
+    "title": "Slide a menu in from the left, then wiggle it",
+    "place": "LocalScript inside a Frame named Menu (inside a ScreenGui in StarterGui)",
+    "code": "local TweenService = game:GetService(\"TweenService\")\n\nlocal menu = script.Parent\n\n-- Start off-screen to the left\nmenu.AnchorPoint = Vector2.new(0.5, 0.5)\nmenu.Position = UDim2.fromScale(-0.5, 0.5)\n\n-- 0.6 seconds, overshoot a little then settle\nlocal slideInfo = TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out)\nlocal slideIn = TweenService:Create(menu, slideInfo, { Position = UDim2.fromScale(0.5, 0.5) })\n\n-- A short tilt after it arrives\nlocal tiltInfo = TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 1, true)\nlocal tilt = TweenService:Create(menu, tiltInfo, { Rotation = 5 })\n\nslideIn.Completed:Connect(function()\n\ttilt:Play() -- start the wiggle when the slide finishes\nend)\n\ntask.wait(1)\nslideIn:Play()",
+    "explain": [
+      "We set the menu's `AnchorPoint` to its center and put it off-screen to the left (X scale -0.5).",
+      "We make a tween that moves it to the screen center in 0.6 seconds with `Back` easing, so it overshoots a bit and settles.",
+      "We make a second tween that tilts it 5 degrees, repeats once, and reverses, so it tilts and comes back.",
+      "When the slide's `Completed` event fires, we play the tilt.",
+      "After waiting 1 second, we start the slide."
+    ]
+  },
+  "watchOut": [
+    "Creating a tween does nothing until you call `:Play()`.",
+    "Tweening `Position` with pixel offsets can end up off-center on other screens. Use scale values.",
+    "If an object spins around its corner instead of its middle, set `AnchorPoint` to (0.5, 0.5).",
+    "Do not tween the `Thickness` of a `UIStroke` on text; it can cause lag and flicker.",
+    "Two tweens changing the same property at the same time will fight. Chain them with `Completed` instead."
+  ]
+}

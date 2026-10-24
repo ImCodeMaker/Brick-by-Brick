@@ -1,0 +1,86 @@
+{
+  "name": "Constraint",
+  "simple": "Constraint is the family name for all the physics connectors in Roblox: hinges, ropes, springs, pushers and more. You never make a plain `Constraint` yourself; you make one of its children, like a `RopeConstraint` or a `VectorForce`. Every constraint shares a few settings: which two attachments it connects, whether it is turned on, and whether you can see it.",
+  "analogy": "Constraint is like the word 'tool' in a toolbox. You never pick up 'a tool'; you pick up a hammer or a screwdriver. But every tool has a handle, and every constraint has Attachment0, Attachment1 and Enabled.",
+  "whenToUse": [
+    "Check `Active` to see if a constraint is really working right now",
+    "Turn any constraint on or off with `Enabled`",
+    "Hook any constraint up to parts using `Attachment0` and `Attachment1`",
+    "Write code that works on every kind of constraint with `obj:IsA(\"Constraint\")`"
+  ],
+  "where": "Works on the server and the client. You cannot create it directly; create a child class such as Instance.new(\"HingeConstraint\"). It only works when it and its attachments are inside workspace.",
+  "terms": {
+    "constraint": "An invisible rule or connector that the physics engine follows, like 'these two parts must stay stuck together' or 'push this part upward'.",
+    "physics engine": "The part of Roblox that moves unanchored parts around every frame: makes them fall, bounce, slide and spin.",
+    "attachment": "A tiny invisible point you put inside a part. It has a position AND a direction (its own X, Y and Z arrows). Constraints grab parts by their attachments.",
+    "Attachment0 / Attachment1": "The two attachments a constraint connects. Attachment0 is usually the one that gets pushed or moved; Attachment1 is the other end or the goal.",
+    "anchored": "An anchored part is frozen in place. Physics and constraint forces cannot move it. Set `part.Anchored = false` if you want a constraint to move it.",
+    "property": "A setting on an object, like `Color` or `Enabled`, that you can read or change.",
+    "deprecated": "Old and replaced by something better. It may still work, but you should not use it in new games.",
+    "Instance.new": "The function that creates a brand-new object from a script, like Instance.new(\"Attachment\").",
+    "IsA": "A check that asks 'is this object this kind of thing (or a child kind of it)?'. A RopeConstraint IsA Constraint, so `rope:IsA(\"Constraint\")` is true.",
+    "BrickColor": "Roblox's list of named colors, like BrickColor.new(\"Bright red\")."
+  },
+  "examples": [
+    {
+      "title": "Turn off every constraint in a model",
+      "place": "Script inside a Model in Workspace",
+      "code": "local model = script.Parent\n\n-- Look at everything inside the model, even things nested deep inside\nfor _, thing in model:GetDescendants() do\n\t-- Is it any kind of constraint? (rope, hinge, spring...)\n\tif thing:IsA(\"Constraint\") then\n\t\tthing.Enabled = false -- switch it off\n\tend\nend",
+      "explain": [
+        "`script.Parent` is the model this script sits inside.",
+        "`GetDescendants()` gives a list of every object inside the model, including things inside things.",
+        "`IsA(\"Constraint\")` is true for every constraint type, so this one check catches ropes, hinges, springs and all the others.",
+        "Setting `Enabled = false` switches the constraint off, so the parts are no longer held or pushed by it."
+      ]
+    },
+    {
+      "title": "Hook a rope between two parts",
+      "place": "Script in ServerScriptService",
+      "code": "-- Two parts already in the workspace\nlocal top = workspace:WaitForChild(\"Ceiling\")   -- anchored part\nlocal ball = workspace:WaitForChild(\"Ball\")     -- unanchored part\n\n-- Every constraint grabs parts through attachments\nlocal a0 = Instance.new(\"Attachment\")\na0.Parent = top\nlocal a1 = Instance.new(\"Attachment\")\na1.Parent = ball\n\nlocal rope = Instance.new(\"RopeConstraint\")\nrope.Attachment0 = a0\nrope.Attachment1 = a1\nrope.Length = 8          -- 8 studs long\nrope.Visible = true      -- draw it so players can see it\nrope.Parent = top\n\ntask.wait(1)\nprint(\"Is the rope working?\", rope.Active)",
+      "explain": [
+        "Constraints never connect parts directly. They connect attachments, and each attachment lives inside a part.",
+        "We make one attachment in the ceiling and one in the ball.",
+        "`Attachment0` and `Attachment1` are the two ends of the rope.",
+        "`Active` becomes true once the rope and both parts are in the workspace and Enabled is on."
+      ]
+    }
+  ],
+  "gotchas": [
+    "A constraint does nothing until BOTH Attachment0 and Attachment1 are set (except a few that only need Attachment0, like VectorForce and Torque).",
+    "Forces cannot move anchored parts. If nothing happens, check that the part you want to move has Anchored = false.",
+    "Constraints only work inside workspace. One sitting in ReplicatedStorage or ServerStorage does nothing."
+  ],
+  "members": {
+    "Constraint.Active": {
+      "simple": "Read-only true/false that tells you if the constraint is really working right now. It is true only when the constraint and both of its parts are in workspace AND Enabled is true.",
+      "example": "local rope = workspace.Ceiling.RopeConstraint\nif not rope.Active then\n\twarn(\"Rope is not working - check its attachments!\")\nend",
+      "gotcha": "You cannot set Active yourself. To switch a constraint on or off, change Enabled instead."
+    },
+    "Constraint.Attachment0": {
+      "simple": "The first attachment (connection point) the constraint grabs. For pushing constraints like VectorForce, this is the one that gets pushed.",
+      "example": "local attachment = Instance.new(\"Attachment\")\nattachment.Parent = workspace.Box\n\nlocal force = Instance.new(\"VectorForce\")\nforce.Attachment0 = attachment -- push the Box through this point\nforce.Parent = workspace.Box"
+    },
+    "Constraint.Attachment1": {
+      "simple": "The second attachment the constraint connects to. For things like ropes and hinges it is the other end; for Align constraints it is the goal to move toward.",
+      "example": "local rope = Instance.new(\"RopeConstraint\")\nrope.Attachment0 = workspace.Ceiling.Attachment\nrope.Attachment1 = workspace.Ball.Attachment -- other end of the rope\nrope.Parent = workspace.Ceiling"
+    },
+    "Constraint.Color": {
+      "simple": "The color used when the constraint is drawn (for example the color of a visible rope or spring). It is a BrickColor.",
+      "example": "local rope = workspace.Ceiling.RopeConstraint\nrope.Visible = true\nrope.Color = BrickColor.new(\"Bright red\") -- red rope"
+    },
+    "Constraint.Enabled": {
+      "simple": "The on/off switch. true means the constraint works; false means it is ignored, as if it was not there.",
+      "example": "local spring = workspace.Car.SpringConstraint\nspring.Enabled = false -- turn the spring off\ntask.wait(3)\nspring.Enabled = true  -- and back on after 3 seconds"
+    },
+    "Constraint.Visible": {
+      "simple": "Whether the constraint is drawn so you can see it. Handy for ropes, rods and springs that players should see, or for debugging while you build.",
+      "example": "local rope = workspace.Ceiling.RopeConstraint\nrope.Visible = true -- show the rope as a line"
+    },
+    "Constraint:GetDebugAppliedForce": {
+      "simple": "Old — use other ways to measure motion, like reading BasePart.AssemblyLinearVelocity instead."
+    },
+    "Constraint:GetDebugAppliedTorque": {
+      "simple": "Old — use other ways to measure motion, like reading BasePart.AssemblyAngularVelocity instead."
+    }
+  }
+}

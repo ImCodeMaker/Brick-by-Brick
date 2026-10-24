@@ -1,0 +1,83 @@
+{
+  "name": "Font",
+  "simple": "A Font describes the lettering style for text on the screen. It has three parts: the font family (the overall design, like Fredoka One or Bangers), the weight (how thick the letters are, like Regular or Bold), and the style (Normal or Italic). You use it on the FontFace property of TextLabels, TextButtons, and TextBoxes.",
+  "analogy": "Picking a Font is like picking a marker: first the kind of marker (family), then how thick the tip is (weight), and whether you write slanted (italic).",
+  "whenToUse": [
+    "Changing the lettering of a TextLabel, TextButton, or TextBox with FontFace",
+    "Making text bold or italic",
+    "Using a font from Roblox's built-in list by name, like \"Bangers\""
+  ],
+  "where": "Works in any script. Make one with Font.new, Font.fromName, Font.fromEnum, or Font.fromId. Text UI is usually changed in a LocalScript.",
+  "terms": {
+    "font family": "A whole set of matching letter designs. One family, like Roboto, has thin, normal, bold, and italic versions.",
+    "weight": "How thick the letters are, from Thin up through Regular, SemiBold, Bold, and Heavy (an Enum.FontWeight).",
+    "style": "Normal (straight up) or Italic (slanted), an Enum.FontStyle.",
+    "asset ID": "A link that points to a file Roblox stores, like rbxasset://fonts/families/Bangers.json for built-in fonts, or rbxassetid://12345 for uploaded ones.",
+    "Enum.Font": "The older list of fonts. Some properties and functions still need it. Font.fromEnum turns it into the newer Font.",
+    "FontFace": "The property on text objects that takes a Font."
+  },
+  "examples": [
+    {
+      "title": "A bold, fun title",
+      "place": "LocalScript in StarterPlayerScripts",
+      "code": "local Players = game:GetService(\"Players\")\nlocal player = Players.LocalPlayer\n\nlocal screenGui = Instance.new(\"ScreenGui\")\nscreenGui.Parent = player:WaitForChild(\"PlayerGui\")\n\nlocal title = Instance.new(\"TextLabel\")\ntitle.Size = UDim2.fromScale(0.6, 0.15)\ntitle.Position = UDim2.fromScale(0.2, 0.05)\ntitle.BackgroundTransparency = 1\ntitle.TextScaled = true\ntitle.Text = \"Welcome to My Obby!\"\n-- Built-in font \"FredokaOne\", bold weight, normal style\ntitle.FontFace = Font.fromName(\"FredokaOne\", Enum.FontWeight.Bold)\ntitle.Parent = screenGui",
+      "explain": [
+        "We make a TextLabel near the top of the screen.",
+        "Font.fromName(\"FredokaOne\") turns the name into the asset rbxasset://fonts/families/FredokaOne.json.",
+        "Enum.FontWeight.Bold makes the letters thick.",
+        "Setting FontFace applies the font to the label."
+      ]
+    },
+    {
+      "title": "Make existing text italic",
+      "place": "LocalScript in StarterGui (with a ScreenGui that has a TextLabel named Info)",
+      "code": "local Players = game:GetService(\"Players\")\nlocal playerGui = Players.LocalPlayer:WaitForChild(\"PlayerGui\")\nlocal label = playerGui:WaitForChild(\"ScreenGui\"):WaitForChild(\"Info\")\n\nlocal font = label.FontFace          -- get a copy of the current font\nfont.Style = Enum.FontStyle.Italic   -- change the copy\nlabel.FontFace = font                -- put it back so the label updates",
+      "explain": [
+        "label.FontFace gives you a copy of the Font.",
+        "Changing the copy does not change the label yet.",
+        "Setting label.FontFace = font again makes the label use the italic version."
+      ]
+    }
+  ],
+  "gotchas": [
+    "Changing label.FontFace.Weight directly does nothing visible. Copy the Font, change the copy, then set FontFace again.",
+    "Font.fromName names have no spaces: use \"FredokaOne\", not \"Fredoka One\".",
+    "Font.fromEnum(Enum.Font.Unknown) throws an error."
+  ],
+  "members": {
+    "Font.new": {
+      "simple": "Makes a Font from a family asset ID (starting with rbxasset:// or rbxassetid://), plus an optional weight (default Regular) and style (default Normal).",
+      "example": "local font = Font.new(\n\t\"rbxasset://fonts/families/Bangers.json\",\n\tEnum.FontWeight.Regular,\n\tEnum.FontStyle.Normal\n)"
+    },
+    "Font.fromEnum": {
+      "simple": "Turns an old-style Enum.Font value, like Enum.Font.Arcade, into a new Font. Useful when you have old code or need to match an Enum.Font.",
+      "example": "local arcade = Font.fromEnum(Enum.Font.Arcade)\nprint(arcade.Family)",
+      "gotcha": "Enum.Font.Unknown causes an error."
+    },
+    "Font.fromName": {
+      "simple": "Makes a Font from a built-in font's name, like \"Bangers\" or \"BuilderSans\", plus optional weight and style. The name is turned into an asset like rbxasset://fonts/families/BuilderSans.json.",
+      "example": "local font = Font.fromName(\"Bangers\")\nlocal boldItalic = Font.fromName(\"Roboto\", Enum.FontWeight.Bold, Enum.FontStyle.Italic)",
+      "gotcha": "Names can only have letters, numbers, _ and -. No spaces."
+    },
+    "Font.fromId": {
+      "simple": "Makes a Font from a font's asset ID number, like one from the Creator Store, plus optional weight and style.",
+      "example": "local FONT_ID = 0 -- replace 0 with a real font asset ID number\nlocal font = Font.fromId(FONT_ID, Enum.FontWeight.Medium)"
+    },
+    "Font.Family": {
+      "simple": "The asset ID of the font family, like rbxasset://fonts/families/Bangers.json. It says which overall letter design to use.",
+      "example": "local font = Font.fromName(\"Bangers\")\nprint(font.Family) -- the Bangers family asset"
+    },
+    "Font.Weight": {
+      "simple": "How thick the letters are, as an Enum.FontWeight like Regular or Bold. Default is Regular. Setting it also updates Bold: Bold becomes true for SemiBold or thicker.",
+      "example": "local font = Font.fromName(\"Roboto\")\nfont.Weight = Enum.FontWeight.Heavy\nprint(font.Bold) --> true"
+    },
+    "Font.Style": {
+      "simple": "Whether the letters are Normal (straight) or Italic (slanted), as an Enum.FontStyle. Default is Normal.",
+      "example": "local font = Font.fromName(\"Roboto\")\nfont.Style = Enum.FontStyle.Italic"
+    },
+    "Font.Bold": {
+      "simple": "A quick true/false switch for bold. Setting it to true sets Weight to Bold. Setting it to false sets Weight to Regular.",
+      "example": "local font = Font.fromName(\"Roboto\")\nfont.Bold = true\nprint(font.Weight) --> Enum.FontWeight.Bold"
+    }
+  }
+}
